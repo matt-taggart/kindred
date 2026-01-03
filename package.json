@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
     "expo": "~50.0.17",
+    "expo-contacts": "^15.0.11",
     "expo-font": "~11.10.3",
     "expo-linking": "~6.2.2",
     "expo-router": "~3.4.10",
