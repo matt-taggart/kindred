@@ -4,11 +4,10 @@ import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import '../global.css';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { runMigrations } from '@/db/migrations';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -36,6 +35,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
+  const [dbReady, setDbReady] = useState(false);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -49,10 +49,34 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    runMigrations();
-  }, []);
+    if (!loaded) return;
 
-  if (!loaded) {
+    let cancelled = false;
+
+    const bootstrap = async () => {
+      try {
+        const { runMigrations } = require('@/db/migrations');
+        runMigrations();
+
+        const { ensureDemoContacts } = require('@/services/demoSeed');
+        await ensureDemoContacts();
+      } catch (e) {
+        console.error('Bootstrap failed:', e);
+      } finally {
+        if (!cancelled) {
+          setDbReady(true);
+        }
+      }
+    };
+
+    bootstrap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loaded]);
+
+  if (!loaded || !dbReady) {
     return null;
   }
 

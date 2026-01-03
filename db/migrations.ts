@@ -1,6 +1,11 @@
-import { sqlite } from './client';
+import { getSqlite } from './client';
+
+let hasRunMigrations = false;
 
 export const runMigrations = () => {
+  if (hasRunMigrations) return;
+
+  const sqlite = getSqlite();
   sqlite.execSync(`
     PRAGMA foreign_keys = ON;
     CREATE TABLE IF NOT EXISTS contacts (
@@ -23,4 +28,6 @@ export const runMigrations = () => {
     );
     CREATE INDEX IF NOT EXISTS idx_interactions_contactId ON interactions (contactId);
   `);
+
+  hasRunMigrations = true;
 };

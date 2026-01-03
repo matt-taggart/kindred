@@ -1,6 +1,6 @@
 import { and, asc, count, eq, isNull, lte, or } from 'drizzle-orm';
 
-import { db } from '../db/client';
+import { getDb } from '../db/client';
 import { Contact, NewContact, NewInteraction, contacts, interactions } from '../db/schema';
 import { useUserStore } from '../lib/userStore';
 import { getNextContactDate } from '../utils/scheduler';
@@ -27,6 +27,7 @@ type InteractionType = NewInteraction['type'];
 type InsertableContact = Omit<NewContact, 'id'> & { id?: string };
 
 export const addContact = async (contact: InsertableContact): Promise<Contact> => {
+  const db = getDb();
   const isPro = useUserStore.getState().isPro;
 
   if (!isPro) {
@@ -67,16 +68,28 @@ export const addContact = async (contact: InsertableContact): Promise<Contact> =
   return inserted;
 };
 
-export const getContacts = (): Contact[] => {
-  return db
-    .select()
-    .from(contacts)
-    .where(eq(contacts.isArchived, false))
-    .orderBy(asc(contacts.nextContactDate))
-    .all();
+type GetContactsOptions = {
+  includeArchived?: boolean;
+  onlyArchived?: boolean;
+};
+
+export const getContacts = (options: GetContactsOptions = {}): Contact[] => {
+  const db = getDb();
+  const { includeArchived = false, onlyArchived = false } = options;
+
+  let query = db.select().from(contacts);
+
+  if (onlyArchived) {
+    query = query.where(eq(contacts.isArchived, true));
+  } else if (!includeArchived) {
+    query = query.where(eq(contacts.isArchived, false));
+  }
+
+  return query.orderBy(asc(contacts.nextContactDate)).all();
 };
 
 export const getDueContacts = (): Contact[] => {
+  const db = getDb();
   const now = Date.now();
 
   return db
@@ -97,6 +110,7 @@ export const updateInteraction = async (
   type: InteractionType,
   notes?: string,
 ): Promise<Contact> => {
+  const db = getDb();
   const [contact] = db
     .select()
     .from(contacts)

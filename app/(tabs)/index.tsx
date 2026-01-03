@@ -91,6 +91,8 @@ export default function HomeScreen() {
     try {
       const results = getDueContacts();
       setContacts(results);
+    } catch (e) {
+      console.warn('Failed to load contacts:', e);
     } finally {
       setLoading(false);
       setRefreshing(false);
