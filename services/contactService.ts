@@ -3,6 +3,7 @@ import { and, asc, eq, isNull, lte, or } from 'drizzle-orm';
 import { db } from '../db/client';
 import { Contact, NewContact, NewInteraction, contacts, interactions } from '../db/schema';
 import { getNextContactDate } from '../utils/scheduler';
+import { scheduleReminder } from './notificationService';
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -64,11 +65,11 @@ export const getDueContacts = (): Contact[] => {
     .all();
 };
 
-export const updateInteraction = (
+export const updateInteraction = async (
   contactId: Contact['id'],
   type: InteractionType,
   notes?: string,
-): Contact => {
+): Promise<Contact> => {
   const [contact] = db
     .select()
     .from(contacts)
@@ -113,6 +114,12 @@ export const updateInteraction = (
 
   if (!updated) {
     throw new Error('Failed to update contact after interaction');
+  }
+
+  try {
+    await scheduleReminder(updated);
+  } catch (error) {
+    console.warn('Failed to schedule reminder', error);
   }
 
   return updated;

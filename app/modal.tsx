@@ -16,7 +16,7 @@ export default function LogInteractionModal() {
     return getContacts().find((item) => item.id === contactId);
   }, [contactId]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!contactId || Array.isArray(contactId)) {
       Alert.alert('Missing contact', 'No contact was selected.');
       return;
@@ -24,7 +24,7 @@ export default function LogInteractionModal() {
 
     try {
       setSaving(true);
-      updateInteraction(contactId, 'call', note.trim() || undefined);
+      await updateInteraction(contactId, 'call', note.trim() || undefined);
       router.back();
     } catch (error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save interaction.');
