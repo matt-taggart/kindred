@@ -1,35 +1,73 @@
-import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Alert, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+import { Contact } from '@/db/schema';
+import { getContacts, updateInteraction } from '@/services/contactService';
 
-export default function ModalScreen() {
+export default function LogInteractionModal() {
+  const router = useRouter();
+  const { contactId } = useLocalSearchParams<{ contactId?: string | string[] }>();
+  const [note, setNote] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const contact: Contact | undefined = useMemo(() => {
+    if (!contactId || Array.isArray(contactId)) return undefined;
+    return getContacts().find((item) => item.id === contactId);
+  }, [contactId]);
+
+  const handleSave = () => {
+    if (!contactId || Array.isArray(contactId)) {
+      Alert.alert('Missing contact', 'No contact was selected.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      updateInteraction(contactId, 'call', note.trim() || undefined);
+      router.back();
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save interaction.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Modal</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/modal.tsx" />
+    <SafeAreaView className="flex-1 bg-white px-4 pt-6">
+      <Text className="text-2xl font-bold text-gray-900">Log Interaction</Text>
+      <Text className="mt-2 text-base text-gray-700">
+        {contact ? `Add a note for ${contact.name}` : 'Add a quick note for this interaction.'}
+      </Text>
 
-      {/* Use a light status bar on iOS to account for the black space above the modal */}
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-    </View>
+      <TextInput
+        className="mt-4 min-h-[140px] rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3 text-base text-gray-900"
+        multiline
+        placeholder="What did you talk about? (optional)"
+        value={note}
+        onChangeText={setNote}
+        autoFocus
+      />
+
+      <View className="mt-6 flex-row gap-2">
+        <TouchableOpacity
+          className="flex-1 items-center rounded-xl bg-gray-200 py-3"
+          onPress={() => router.back()}
+          activeOpacity={0.85}
+          disabled={saving}
+        >
+          <Text className="font-semibold text-gray-800">Cancel</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className="flex-1 items-center rounded-xl bg-green-600 py-3"
+          onPress={handleSave}
+          activeOpacity={0.85}
+          disabled={saving}
+        >
+          <Text className="font-semibold text-white">{saving ? 'Saving...' : 'Save'}</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});

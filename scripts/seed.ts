@@ -14,7 +14,7 @@ const seedData = [
 const main = async () => {
   runMigrations();
 
-  const [{ count }] = db.select({ count: sql<number>`count(*)` }).from(contacts);
+  const [{ count }] = db.select({ count: sql<number>`count(*)` }).from(contacts).all();
   const existingCount = Number(count ?? 0);
 
   if (existingCount > 0) {
