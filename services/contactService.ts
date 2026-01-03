@@ -1,9 +1,19 @@
-import { and, asc, eq, isNull, lte, or } from 'drizzle-orm';
+import { and, asc, count, eq, isNull, lte, or } from 'drizzle-orm';
 
 import { db } from '../db/client';
 import { Contact, NewContact, NewInteraction, contacts, interactions } from '../db/schema';
+import { useUserStore } from '../lib/userStore';
 import { getNextContactDate } from '../utils/scheduler';
 import { scheduleReminder } from './notificationService';
+
+export const CONTACT_LIMIT = 5;
+
+export class LimitReachedError extends Error {
+  constructor(message = 'Contact limit reached') {
+    super(message);
+    this.name = 'LimitReached';
+  }
+}
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -17,6 +27,23 @@ type InteractionType = NewInteraction['type'];
 type InsertableContact = Omit<NewContact, 'id'> & { id?: string };
 
 export const addContact = async (contact: InsertableContact): Promise<Contact> => {
+  const isPro = useUserStore.getState().isPro;
+
+  if (!isPro) {
+    const [row] = db
+      .select({ total: count() })
+      .from(contacts)
+      .where(eq(contacts.isArchived, false))
+      .limit(1)
+      .all();
+
+    const total = row?.total ?? 0;
+
+    if (total >= CONTACT_LIMIT) {
+      throw new LimitReachedError('Free plan allows up to 5 contacts.');
+    }
+  }
+
   const id = contact.id ?? generateId();
   const lastContactedAt = contact.lastContactedAt ?? undefined;
   const nextContactDate =

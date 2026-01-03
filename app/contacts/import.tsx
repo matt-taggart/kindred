@@ -3,6 +3,7 @@ import * as Contacts from 'expo-contacts';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   SafeAreaView,
@@ -11,7 +12,8 @@ import {
   View,
 } from 'react-native';
 
-import { addContact } from '@/services/contactService';
+import { PaywallModal } from '@/components/PaywallModal';
+import { LimitReachedError, addContact } from '@/services/contactService';
 
 type ImportableContact = {
   id: string;
@@ -88,6 +90,7 @@ export default function ImportContactsScreen() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {
@@ -146,6 +149,13 @@ export default function ImportContactsScreen() {
       }
 
       router.replace('/');
+    } catch (error) {
+      if (error instanceof LimitReachedError || (error as Error)?.name === 'LimitReached') {
+        setShowPaywall(true);
+        return;
+      }
+
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to import contacts.');
     } finally {
       setSaving(false);
     }
@@ -212,6 +222,8 @@ export default function ImportContactsScreen() {
           {saving ? 'Importing...' : `Import Selected (${selected.size})`}
         </Text>
       </TouchableOpacity>
+
+      <PaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
     </SafeAreaView>
   );
 }
