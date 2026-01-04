@@ -14,7 +14,9 @@ import {
 } from 'react-native';
 
 import { Contact } from '@/db/schema';
-import { archiveContact, getContacts, unarchiveContact } from '@/services/contactService';
+import { archiveContact, getContacts, resetDatabase, unarchiveContact } from '@/services/contactService';
+import { isDevelopment } from '@/utils/env';
+import { ensureDemoContacts } from '@/services/demoSeed';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -264,6 +266,30 @@ export default function ContactsScreen() {
     [router],
   );
 
+  const handleResetDatabase = useCallback(async () => {
+    Alert.alert(
+      'Reset Database',
+      'This will delete all contacts and interactions. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await resetDatabase();
+              await ensureDemoContacts();
+              loadContacts();
+              Alert.alert('Success', 'Database has been reset with demo contacts restored.');
+            } catch (error) {
+              Alert.alert('Error', error instanceof Error ? error.message : 'Failed to reset database.');
+            }
+          },
+        },
+      ],
+    );
+  }, [loadContacts]);
+
   const emptyState = useMemo(() => {
     const hasSearchQuery = searchQuery.trim().length > 0;
     const hasZeroContacts = contacts.length === 0;
@@ -393,7 +419,24 @@ export default function ContactsScreen() {
               ))}
             </View>
 
-
+            {isDevelopment() && (
+              <>
+                <View className="mt-6 border-t border-dashed border-gray-300 pt-6">
+                  <Text className="text-xs font-bold uppercase text-gray-400 tracking-wide">
+                    Development Tools
+                  </Text>
+                  <View className="mt-3 flex-row gap-3">
+                    <TouchableOpacity
+                      className="flex-1 items-center rounded-xl border border-red-300 bg-red-50 px-4 py-3"
+                      onPress={handleResetDatabase}
+                      activeOpacity={0.7}
+                    >
+                      <Text className="text-sm font-semibold text-red-600">Reset Database</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </>
+            )}
           </View>
         }
         ListEmptyComponent={

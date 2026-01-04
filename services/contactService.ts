@@ -284,3 +284,10 @@ export const updateInteractionNote = async (
     .where(eq(interactions.id, interactionId))
     .run();
 };
+
+export const resetDatabase = async (): Promise<void> => {
+  const db = getDb();
+
+  db.delete(interactions).run();
+  db.delete(contacts).run();
+};
