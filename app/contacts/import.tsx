@@ -55,15 +55,15 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className="mb-2 flex-row items-center rounded-xl border border-gray-200 bg-white p-3"
+      className="mb-3 flex-row items-center rounded-xl border border-gray-200 bg-white p-4"
       onPress={onToggle}
       activeOpacity={0.85}
     >
       {contact.avatarUri ? (
         <Image source={{ uri: contact.avatarUri }} className="h-10 w-10 rounded-full" />
       ) : (
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-sage-100">
-          <Text className="text-sm font-semibold text-sage">{initial}</Text>
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-sage">
+          <Text className="text-sm font-semibold text-white">{initial}</Text>
         </View>
       )}
 
@@ -193,7 +193,7 @@ export default function ImportContactsScreen() {
             )}
             ListHeaderComponent={
               <View className="pb-3">
-                <View className="mb-3 rounded-2xl border border-sage-100 bg-white p-4 shadow-sm">
+                <View className="mb-3 rounded-2xl border border-sage-100 bg-white p-5 shadow-sm">
                   <Text className="text-xs font-semibold uppercase tracking-wide text-sage">Import</Text>
                   <Text className="mt-1 text-xl font-bold text-gray-900">Bring your people to Kindred</Text>
                   <Text className="mt-2 text-sm text-gray-600">
@@ -202,7 +202,7 @@ export default function ImportContactsScreen() {
                   </Text>
 
                   <TouchableOpacity
-                    className="mt-4 items-center rounded-xl bg-sage py-3"
+                    className="mt-4 items-center rounded-xl bg-sage py-4"
                     onPress={handleImportPress}
                     activeOpacity={0.9}
                   >
@@ -211,7 +211,7 @@ export default function ImportContactsScreen() {
                 </View>
 
                 {permissionDenied ? (
-                  <View className="rounded-2xl border border-red-200 bg-red-50 p-3">
+                  <View className="rounded-2xl border border-red-200 bg-red-50 p-4">
                     <Text className="text-sm font-semibold text-red-700">Permission denied</Text>
                     <Text className="mt-1 text-sm text-red-600">
                       Enable contact access in Settings to import from your address book.

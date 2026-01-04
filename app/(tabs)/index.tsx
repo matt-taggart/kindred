@@ -49,8 +49,8 @@ const ContactCard = ({ contact, onMarkDone, onSnooze }: ContactCardProps) => {
             resizeMode="cover"
           />
         ) : (
-          <View className="h-12 w-12 items-center justify-center rounded-full bg-sage-100">
-            <Text className="text-base font-semibold text-sage">{initial}</Text>
+          <View className="h-12 w-12 items-center justify-center rounded-full bg-sage">
+            <Text className="text-base font-semibold text-white">{initial}</Text>
           </View>
         )}
 

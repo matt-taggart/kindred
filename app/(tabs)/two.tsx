@@ -65,7 +65,7 @@ const FilterChip = ({
   onPress: () => void;
 }) => (
   <TouchableOpacity
-    className={`rounded-full border px-4 py-2 ${
+    className={`rounded-full border px-4 py-2.5 ${
       active ? 'border-sage bg-sage' : 'border-gray-200 bg-white'
     }`}
     onPress={onPress}
@@ -99,18 +99,21 @@ const ContactRow = ({
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <View className="flex-row items-start justify-between">
+      <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-3">
           <Text className="text-lg font-semibold text-gray-900">{contact.name}</Text>
           <Text className="text-sm text-gray-500">{bucketLabels[contact.bucket]}</Text>
         </View>
 
-        <View
-          className={`rounded-full px-3 py-1 ${due ? 'bg-terracotta-100' : 'bg-sage-100'}`}
-        >
-          <Text className={`text-xs font-semibold ${due ? 'text-terracotta' : 'text-sage'}`}>
-            {due ? 'Due' : 'Upcoming'}
-          </Text>
+        <View className="flex-row items-center gap-2">
+          <View
+            className={`rounded-full px-3 py-1 ${due ? 'bg-terracotta-100' : 'bg-sage'}`}
+          >
+            <Text className={`text-xs font-semibold ${due ? 'text-terracotta' : 'text-white'}`}>
+              {due ? 'Due' : 'Upcoming'}
+            </Text>
+          </View>
+          <Text className="text-2xl text-gray-400 -mt-0.5">›</Text>
         </View>
       </View>
 
@@ -133,7 +136,7 @@ const ContactRow = ({
       {contact.isArchived ? (
         <View className="mt-3 items-end">
           <TouchableOpacity
-            className="rounded-lg border border-sage px-3 py-1.5"
+            className="rounded-lg border border-sage px-4 py-2.5"
             onPress={(e) => {
               e.stopPropagation();
               onUnarchive?.();
@@ -147,7 +150,7 @@ const ContactRow = ({
 
       {!contact.isArchived && onArchive ? (
         <TouchableOpacity
-          className="mt-3 rounded-lg border border-gray-300 px-3 py-1.5 self-end"
+          className="mt-3 rounded-lg border border-gray-300 px-4 py-2.5 self-end"
           onPress={(e) => {
             e.stopPropagation();
             onArchive?.();
@@ -352,21 +355,21 @@ export default function ContactsScreen() {
           flexGrow: filteredContacts.length === 0 ? 1 : undefined,
         }}
         ListHeaderComponent={
-          <View className="pb-2">
+          <View className="pb-4">
             <Text className="text-2xl font-bold text-gray-900">Contacts</Text>
             <Text className="mt-1 text-sm text-gray-500">
               See who is due next and manage your circle.
             </Text>
 
             <TouchableOpacity
-              className="mt-4 w-full items-center rounded-2xl bg-sage py-3"
+              className="mt-4 w-full items-center rounded-2xl bg-sage py-4"
               onPress={handleImportPress}
               activeOpacity={0.9}
             >
               <Text className="text-base font-semibold text-white">Import from Phone</Text>
             </TouchableOpacity>
 
-            <View className="mt-4">
+            <View className="mt-6">
               <TextInput
                 className="w-full rounded-2xl border border-gray-200 bg-white text-base text-gray-900 shadow-sm"
                 placeholder="Search by name or number"
@@ -378,7 +381,7 @@ export default function ContactsScreen() {
               />
             </View>
 
-            <View className="mt-3 flex-row flex-wrap gap-2">
+            <View className="mt-5 flex-row flex-wrap gap-2">
               {filterOptions.map((option) => (
                 <FilterChip
                   key={option.value}
@@ -404,7 +407,7 @@ export default function ContactsScreen() {
 
             {emptyState.showCTA && (
               <TouchableOpacity
-                className="mt-5 rounded-2xl bg-sage px-6 py-3"
+                className="mt-5 rounded-2xl bg-sage px-6 py-4"
                 onPress={handleImportPress}
                 activeOpacity={0.9}
               >

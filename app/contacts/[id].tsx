@@ -220,8 +220,8 @@ export default function ContactDetailScreen() {
                   />
                 </View>
               ) : (
-                <View className="h-16 w-16 items-center justify-center rounded-full bg-sage-100">
-                  <Text className="text-2xl font-semibold text-sage">{initial}</Text>
+                <View className="h-16 w-16 items-center justify-center rounded-full bg-sage">
+                  <Text className="text-2xl font-semibold text-white">{initial}</Text>
                 </View>
               )}
 
