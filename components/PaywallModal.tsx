@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Modal, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 
 import { useUserStore } from '@/lib/userStore';
@@ -9,21 +9,25 @@ type PaywallModalProps = {
 };
 
 export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
-  const { isPro, restorePurchase } = useUserStore();
-  const [restoring, setRestoring] = useState(false);
+  const { isPro, purchasePro, restorePurchase, purchaseState, clearError } = useUserStore();
 
   const headline = useMemo(() => (isPro ? 'Pro Unlocked' : 'Upgrade to Kindred Pro'), [isPro]);
+  const isLoading = purchaseState.isPurchasing || purchaseState.isRestoring;
+
+  useEffect(() => {
+    if (isPro) {
+      setTimeout(onClose, 500);
+    }
+  }, [isPro, onClose]);
+
+  const handlePurchase = async () => {
+    clearError();
+    await purchasePro();
+  };
 
   const handleRestore = async () => {
-    if (restoring || isPro) return;
-
-    setRestoring(true);
-
-    try {
-      await restorePurchase();
-    } finally {
-      setRestoring(false);
-    }
+    clearError();
+    await restorePurchase();
   };
 
   return (
@@ -47,24 +51,57 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
             </View>
           </View>
 
-          <TouchableOpacity
-            className={`mt-6 items-center rounded-xl py-3 ${isPro ? 'bg-sage' : 'bg-terracotta'}`}
-            onPress={handleRestore}
-            activeOpacity={0.9}
-            disabled={restoring || isPro}
-          >
-            <Text className="text-base font-semibold text-white">
-              {isPro ? 'Restored' : restoring ? 'Restoring...' : 'Restore Purchase'}
-            </Text>
-          </TouchableOpacity>
+          {!isPro && (
+            <>
+              <TouchableOpacity
+                className={`mt-6 items-center rounded-xl py-3 ${purchaseState.isPurchasing ? 'bg-gray-400' : 'bg-terracotta'}`}
+                onPress={handlePurchase}
+                activeOpacity={0.9}
+                disabled={isLoading}
+              >
+                <Text className="text-base font-semibold text-white">
+                  {purchaseState.isPurchasing ? 'Processing...' : 'Purchase Pro'}
+                </Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            className="mt-3 items-center rounded-xl bg-gray-200 py-3"
-            onPress={onClose}
-            activeOpacity={0.9}
-          >
-            <Text className="text-base font-semibold text-gray-800">Close</Text>
-          </TouchableOpacity>
+              <TouchableOpacity
+                className={`mt-3 items-center rounded-xl bg-gray-200 py-3 ${purchaseState.isRestoring ? 'opacity-50' : ''}`}
+                onPress={handleRestore}
+                activeOpacity={0.9}
+                disabled={isLoading}
+              >
+                <Text className="text-base font-semibold text-gray-800">
+                  {purchaseState.isRestoring ? 'Restoring...' : 'Restore Purchase'}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {isPro && (
+            <TouchableOpacity
+              className="mt-6 items-center rounded-xl bg-sage py-3"
+              onPress={onClose}
+              activeOpacity={0.9}
+            >
+              <Text className="text-base font-semibold text-white">Continue</Text>
+            </TouchableOpacity>
+          )}
+
+          {!isPro && (
+            <TouchableOpacity
+              className="mt-3 items-center rounded-xl border border-gray-300 py-3"
+              onPress={onClose}
+              activeOpacity={0.9}
+            >
+              <Text className="text-base font-semibold text-gray-600">Not Now</Text>
+            </TouchableOpacity>
+          )}
+
+          {purchaseState.error && (
+            <View className="mt-4 rounded-lg bg-red-50 p-3">
+              <Text className="text-sm text-red-600">{purchaseState.error}</Text>
+            </View>
+          )}
         </SafeAreaView>
       </View>
     </Modal>

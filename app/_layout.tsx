@@ -55,11 +55,14 @@ export default function RootLayout() {
 
     const bootstrap = async () => {
       try {
-        const { runMigrations } = require('@/db/migrations');
+        const { runMigrations } = await import('@/db/migrations');
         runMigrations();
 
-        const { ensureDemoContacts } = require('@/services/demoSeed');
+        const { ensureDemoContacts } = await import('@/services/demoSeed');
         await ensureDemoContacts();
+
+        const { IAPService } = await import('@/services/iapService');
+        await IAPService.initialize();
       } catch (e) {
         console.error('Bootstrap failed:', e);
       } finally {

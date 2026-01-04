@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import { PaywallModal } from '@/components/PaywallModal';
+import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
 import { LimitReachedError, addContact } from '@/services/contactService';
 
 type ImportableContact = {
@@ -251,7 +251,7 @@ export default function ImportContactsScreen() {
         </TouchableOpacity>
       </View>
 
-      <PaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
+      <EnhancedPaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
     </SafeAreaView>
   );
 }

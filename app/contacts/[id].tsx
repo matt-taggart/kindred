@@ -1,10 +1,12 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { Image, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, deleteInteraction } from '@/services/contactService';
+import { getContacts, getInteractionHistory, deleteInteraction, updateContactCadence } from '@/services/contactService';
+import EditContactModal from '@/components/EditContactModal';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -71,6 +73,8 @@ export default function ContactDetailScreen() {
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [savingCadence, setSavingCadence] = useState(false);
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -94,9 +98,11 @@ export default function ContactDetailScreen() {
     }
   }, [id]);
 
-  useEffect(() => {
-    loadContactData();
-  }, [loadContactData]);
+  useFocusEffect(
+    useCallback(() => {
+      loadContactData();
+    }, [loadContactData]),
+  );
 
   const handleCall = useCallback(() => {
     if (!contact?.phone) {
@@ -170,6 +176,32 @@ export default function ContactDetailScreen() {
     [router, id],
   );
 
+  const handleEditContact = useCallback(() => {
+    setShowEditModal(true);
+  }, []);
+
+  const handleAddNote = useCallback(() => {
+    router.push({ pathname: '/modal', params: { contactId: id } });
+  }, [router, id]);
+
+  const handleSaveCadence = useCallback(
+    async (newBucket: Contact['bucket']) => {
+      if (!contact) return;
+
+      setSavingCadence(true);
+      try {
+        const updated = await updateContactCadence(contact.id, newBucket);
+        setContact(updated);
+        loadContactData();
+      } catch (error) {
+        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update contact cadence.');
+      } finally {
+        setSavingCadence(false);
+      }
+    },
+    [contact, loadContactData],
+  );
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     loadContactData();
@@ -200,6 +232,11 @@ export default function ContactDetailScreen() {
           title: contact.name,
           headerBackTitle: 'Back',
           headerShown: true,
+          headerRight: () => (
+            <TouchableOpacity onPress={handleEditContact} className="mr-2">
+              <Ionicons name="settings-outline" size={24} color="#475569" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <SafeAreaView className="flex-1 bg-cream">
@@ -271,6 +308,16 @@ export default function ContactDetailScreen() {
             </View>
           )}
 
+          {/* Add Note Button */}
+          <TouchableOpacity
+            className="mb-6 flex-row items-center justify-center gap-2 rounded-xl bg-white border-2 border-sage py-3"
+            onPress={handleAddNote}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="pencil-outline" size={20} color="#9CA986" />
+            <Text className="font-semibold text-sage">Add Note</Text>
+          </TouchableOpacity>
+
           {/* Interaction History */}
           <View>
             <Text className="mb-3 text-lg font-bold text-slate">History</Text>
@@ -284,7 +331,7 @@ export default function ContactDetailScreen() {
                 </Text>
               </View>
             ) : (
-              <View className="space-y-3">
+              <View className="flex flex-col gap-4">
                 {interactions.map((interaction) => (
                   <InteractionCard
                     key={interaction.id}
@@ -298,6 +345,15 @@ export default function ContactDetailScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      {contact && (
+        <EditContactModal
+          visible={showEditModal}
+          contact={contact}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleSaveCadence}
+        />
+      )}
     </>
   );
 }

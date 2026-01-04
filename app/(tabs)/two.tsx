@@ -15,6 +15,7 @@ import {
 
 import { Contact } from '@/db/schema';
 import { archiveContact, getContacts, resetDatabase, unarchiveContact } from '@/services/contactService';
+import { sendTestNotification } from '@/services/notificationService';
 import { isDevelopment } from '@/utils/env';
 import { ensureDemoContacts } from '@/services/demoSeed';
 
@@ -290,6 +291,22 @@ export default function ContactsScreen() {
     );
   }, [loadContacts]);
 
+  const handleTestNotification = useCallback(async () => {
+    try {
+      const result = await sendTestNotification();
+      if (result.success) {
+        Alert.alert(
+          'Test Notification Sent',
+          'A test notification will appear in 2 seconds. If you do not see it, please check your notification permissions.',
+        );
+      } else {
+        Alert.alert('Error', result.error || 'Failed to send test notification.');
+      }
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to send test notification.');
+    }
+  }, []);
+
   const emptyState = useMemo(() => {
     const hasSearchQuery = searchQuery.trim().length > 0;
     const hasZeroContacts = contacts.length === 0;
@@ -426,6 +443,13 @@ export default function ContactsScreen() {
                     Development Tools
                   </Text>
                   <View className="mt-3 flex-row gap-3">
+                    <TouchableOpacity
+                      className="flex-1 items-center rounded-xl border border-blue-300 bg-blue-50 px-4 py-3"
+                      onPress={handleTestNotification}
+                      activeOpacity={0.7}
+                    >
+                      <Text className="text-sm font-semibold text-blue-600">Test Notification</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                       className="flex-1 items-center rounded-xl border border-red-300 bg-red-50 px-4 py-3"
                       onPress={handleResetDatabase}

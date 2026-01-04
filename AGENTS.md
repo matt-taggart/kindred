@@ -1,8 +1,8 @@
-# Tend (Kindred) - Project Context
+# Kindred - Project Context
 
 ## Project Overview
 
-**Tend** (referred to as "Kindred" in architectural docs) is a local-first Personal Relationship Management (PRM) application designed to help users track and maintain contact with friends. It prioritizes privacy and longevity by being offline-only and having zero maintenance costs.
+**Kindred** is a local-first Personal Relationship Management (PRM) application designed to help users track and maintain contact with friends. It prioritizes privacy and longevity by being offline-only and having zero maintenance costs.
 
 The application follows a "Freemium" model (limit on contacts) with a lifetime In-App Purchase (IAP) unlock.
 

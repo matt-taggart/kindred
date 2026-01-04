@@ -285,6 +285,96 @@ export const updateInteractionNote = async (
     .run();
 };
 
+export const snoozeContact = async (
+  contactId: Contact['id'],
+  untilDate: number,
+): Promise<Contact> => {
+  const db = getDb();
+
+  const [contact] = db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.id, contactId))
+    .limit(1)
+    .all();
+
+  if (!contact) {
+    throw new Error(`Contact not found: ${contactId}`);
+  }
+
+  db.update(contacts)
+    .set({ nextContactDate: untilDate })
+    .where(eq(contacts.id, contactId))
+    .run();
+
+  const [updated] = db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.id, contactId))
+    .limit(1)
+    .all();
+
+  if (!updated) {
+    throw new Error('Failed to snooze contact');
+  }
+
+  try {
+    await scheduleReminder(updated);
+  } catch (error) {
+    console.warn('Failed to schedule reminder', error);
+  }
+
+  return updated;
+};
+
+export const updateContactCadence = async (
+  contactId: Contact['id'],
+  newBucket: Contact['bucket'],
+): Promise<Contact> => {
+  const db = getDb();
+
+  const [contact] = db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.id, contactId))
+    .limit(1)
+    .all();
+
+  if (!contact) {
+    throw new Error(`Contact not found: ${contactId}`);
+  }
+
+  const lastContactedAt = contact.lastContactedAt || Date.now();
+  const nextContactDate = getNextContactDate(newBucket, lastContactedAt);
+
+  db.update(contacts)
+    .set({
+      bucket: newBucket,
+      nextContactDate,
+    })
+    .where(eq(contacts.id, contactId))
+    .run();
+
+  const [updated] = db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.id, contactId))
+    .limit(1)
+    .all();
+
+  if (!updated) {
+    throw new Error('Failed to update contact cadence');
+  }
+
+  try {
+    await scheduleReminder(updated);
+  } catch (error) {
+    console.warn('Failed to schedule reminder', error);
+  }
+
+  return updated;
+};
+
 export const resetDatabase = async (): Promise<void> => {
   const db = getDb();
 

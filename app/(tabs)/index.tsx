@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   RefreshControl,
@@ -13,7 +14,7 @@ import {
 } from 'react-native';
 
 import { Contact } from '@/db/schema';
-import { getDueContacts } from '@/services/contactService';
+import { getDueContacts, snoozeContact } from '@/services/contactService';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -34,9 +35,10 @@ type ContactCardProps = {
   contact: Contact;
   onMarkDone: () => void;
   onSnooze: () => void;
+  isSnoozing?: boolean;
 };
 
-const ContactCard = ({ contact, onMarkDone, onSnooze }: ContactCardProps) => {
+const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false }: ContactCardProps) => {
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
 
   return (
@@ -70,11 +72,14 @@ const ContactCard = ({ contact, onMarkDone, onSnooze }: ContactCardProps) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="flex-1 items-center rounded-lg bg-gray-200 py-4"
+          className={`flex-1 items-center rounded-lg py-4 ${isSnoozing ? 'bg-gray-300' : 'bg-gray-200'}`}
           onPress={onSnooze}
           activeOpacity={0.85}
+          disabled={isSnoozing}
         >
-          <Text className="font-semibold text-gray-800">Snooze</Text>
+          <Text className={`font-semibold ${isSnoozing ? 'text-gray-600' : 'text-gray-800'}`}>
+            {isSnoozing ? 'Snoozing...' : 'Snooze'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -86,6 +91,7 @@ export default function HomeScreen() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [snoozingContactId, setSnoozingContactId] = useState<string | null>(null);
 
   const loadContacts = useCallback(() => {
     try {
@@ -113,15 +119,57 @@ export default function HomeScreen() {
     [router],
   );
 
+  const handleSnooze = useCallback(
+    async (contact: Contact) => {
+      const now = Date.now();
+      const options = [
+        { text: '1 hour', value: now + 60 * 60 * 1000 },
+        { text: 'Tomorrow', value: now + DAY_IN_MS },
+        { text: '3 days', value: now + 3 * DAY_IN_MS },
+        { text: '1 week', value: now + 7 * DAY_IN_MS },
+        { text: 'Cancel', style: 'cancel' as const },
+      ];
+
+      Alert.alert(
+        'Snooze Reminder',
+        'When would you like to be reminded?',
+        [
+          { text: '1 hour', onPress: () => handleSnoozeContact(contact.id, now + 60 * 60 * 1000) },
+          { text: 'Tomorrow', onPress: () => handleSnoozeContact(contact.id, now + DAY_IN_MS) },
+          { text: '3 days', onPress: () => handleSnoozeContact(contact.id, now + 3 * DAY_IN_MS) },
+          { text: '1 week', onPress: () => handleSnoozeContact(contact.id, now + 7 * DAY_IN_MS) },
+          { text: 'Cancel', style: 'cancel' },
+        ],
+      );
+    },
+    [],
+  );
+
+  const handleSnoozeContact = useCallback(
+    async (contactId: string, untilDate: number) => {
+      setSnoozingContactId(contactId);
+      try {
+        await snoozeContact(contactId, untilDate);
+        loadContacts();
+      } catch (error) {
+        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to snooze contact.');
+      } finally {
+        setSnoozingContactId(null);
+      }
+    },
+    [loadContacts],
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: Contact }) => (
       <ContactCard
         contact={item}
         onMarkDone={() => handleMarkDone(item.id)}
-        onSnooze={() => {}}
+        onSnooze={() => handleSnooze(item)}
+        isSnoozing={snoozingContactId === item.id}
       />
     ),
-    [handleMarkDone],
+    [handleMarkDone, handleSnooze, snoozingContactId],
   );
 
   const onRefresh = useCallback(() => {
