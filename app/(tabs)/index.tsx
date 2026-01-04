@@ -49,8 +49,8 @@ const ContactCard = ({ contact, onMarkDone, onSnooze }: ContactCardProps) => {
             resizeMode="cover"
           />
         ) : (
-          <View className="h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
-            <Text className="text-base font-semibold text-indigo-700">{initial}</Text>
+          <View className="h-12 w-12 items-center justify-center rounded-full bg-sage-100">
+            <Text className="text-base font-semibold text-sage">{initial}</Text>
           </View>
         )}
 
@@ -62,7 +62,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze }: ContactCardProps) => {
 
       <View className="mt-4 flex-row gap-2">
         <TouchableOpacity
-          className="flex-1 items-center rounded-lg bg-green-600 py-2"
+          className="flex-1 items-center rounded-lg bg-sage py-4"
           onPress={onMarkDone}
           activeOpacity={0.85}
         >
@@ -70,7 +70,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze }: ContactCardProps) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="flex-1 items-center rounded-lg bg-gray-200 py-2"
+          className="flex-1 items-center rounded-lg bg-gray-200 py-4"
           onPress={onSnooze}
           activeOpacity={0.85}
         >
@@ -131,28 +131,33 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#16a34a" />
+      <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+        <ActivityIndicator size="large" color="#9CA986" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 px-4 pt-4">
-      <Text className="mb-4 text-2xl font-bold text-gray-900">Today</Text>
+    <SafeAreaView className="flex-1 bg-cream">
+      <View className="flex-1 px-4 pt-4">
+        <Text className="mb-4 text-2xl font-bold text-gray-900">Today</Text>
 
-      <FlatList
-        data={contacts}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        contentContainerStyle={{ paddingBottom: 24, flexGrow: contacts.length === 0 ? 1 : undefined }}
-        ListEmptyComponent={
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-base text-gray-500">You&apos;re all caught up for today.</Text>
-          </View>
-        }
-      />
+        <FlatList
+          data={contacts}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          contentContainerStyle={{
+            paddingBottom: 24,
+            flexGrow: contacts.length === 0 ? 1 : undefined,
+          }}
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-base text-gray-500">You&apos;re all caught up for today.</Text>
+            </View>
+          }
+        />
+      </View>
     </SafeAreaView>
   );
 }

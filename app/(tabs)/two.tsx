@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   RefreshControl,
   SafeAreaView,
@@ -13,7 +14,7 @@ import {
 } from 'react-native';
 
 import { Contact } from '@/db/schema';
-import { getContacts } from '@/services/contactService';
+import { archiveContact, getContacts, unarchiveContact } from '@/services/contactService';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -65,7 +66,7 @@ const FilterChip = ({
 }) => (
   <TouchableOpacity
     className={`rounded-full border px-4 py-2 ${
-      active ? 'border-indigo-600 bg-indigo-600' : 'border-gray-200 bg-white'
+      active ? 'border-sage bg-sage' : 'border-gray-200 bg-white'
     }`}
     onPress={onPress}
     activeOpacity={0.85}
@@ -77,18 +78,27 @@ const FilterChip = ({
   </TouchableOpacity>
 );
 
-const StatCard = ({ label, value }: { label: string; value: number }) => (
-  <View className="min-w-[30%] flex-1 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-    <Text className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</Text>
-    <Text className="mt-2 text-2xl font-bold text-gray-900">{value}</Text>
-  </View>
-);
 
-const ContactRow = ({ contact }: { contact: Contact }) => {
+
+const ContactRow = ({
+  contact,
+  onArchive,
+  onUnarchive,
+  onPress,
+}: {
+  contact: Contact;
+  onArchive?: () => void;
+  onUnarchive?: () => void;
+  onPress?: () => void;
+}) => {
   const due = isContactDue(contact);
 
   return (
-    <View className="mb-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+    <TouchableOpacity
+      className="mb-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
       <View className="flex-row items-start justify-between">
         <View className="flex-1 pr-3">
           <Text className="text-lg font-semibold text-gray-900">{contact.name}</Text>
@@ -96,9 +106,9 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
         </View>
 
         <View
-          className={`rounded-full px-3 py-1 ${due ? 'bg-amber-100' : 'bg-emerald-50'}`}
+          className={`rounded-full px-3 py-1 ${due ? 'bg-terracotta-100' : 'bg-sage-100'}`}
         >
-          <Text className={`text-xs font-semibold ${due ? 'text-amber-700' : 'text-emerald-700'}`}>
+          <Text className={`text-xs font-semibold ${due ? 'text-terracotta' : 'text-sage'}`}>
             {due ? 'Due' : 'Upcoming'}
           </Text>
         </View>
@@ -121,11 +131,33 @@ const ContactRow = ({ contact }: { contact: Contact }) => {
       ) : null}
 
       {contact.isArchived ? (
-        <Text className="mt-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          Archived
-        </Text>
+        <View className="mt-3 items-end">
+          <TouchableOpacity
+            className="rounded-lg border border-sage px-3 py-1.5"
+            onPress={(e) => {
+              e.stopPropagation();
+              onUnarchive?.();
+            }}
+            activeOpacity={0.85}
+          >
+            <Text className="text-sm font-semibold text-sage">Unarchive</Text>
+          </TouchableOpacity>
+        </View>
       ) : null}
-    </View>
+
+      {!contact.isArchived && onArchive ? (
+        <TouchableOpacity
+          className="mt-3 rounded-lg border border-gray-300 px-3 py-1.5 self-end"
+          onPress={(e) => {
+            e.stopPropagation();
+            onArchive?.();
+          }}
+          activeOpacity={0.85}
+        >
+          <Text className="text-sm font-semibold text-gray-600">Archive</Text>
+        </TouchableOpacity>
+      ) : null}
+    </TouchableOpacity>
   );
 };
 
@@ -198,6 +230,94 @@ export default function ContactsScreen() {
     router.push('/contacts/import');
   }, [router]);
 
+  const handleArchive = useCallback(
+    async (contactId: string) => {
+      try {
+        await archiveContact(contactId);
+        loadContacts();
+      } catch (error) {
+        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to archive contact.');
+      }
+    },
+    [loadContacts],
+  );
+
+  const handleUnarchive = useCallback(
+    async (contactId: string) => {
+      try {
+        await unarchiveContact(contactId);
+        loadContacts();
+      } catch (error) {
+        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to unarchive contact.');
+      }
+    },
+    [loadContacts],
+  );
+
+  const handleContactPress = useCallback(
+    (contactId: string) => {
+      router.push(`/contacts/${contactId}`);
+    },
+    [router],
+  );
+
+  const emptyState = useMemo(() => {
+    const hasSearchQuery = searchQuery.trim().length > 0;
+    const hasZeroContacts = contacts.length === 0;
+
+    if (hasZeroContacts) {
+      return {
+        type: 'first-time' as const,
+        title: 'No contacts yet.',
+        subtitle: 'Import from your phone to start building your circle.',
+        showCTA: true,
+      };
+    }
+
+    if (hasSearchQuery) {
+      return {
+        type: 'search' as const,
+        title: `No contacts match '${searchQuery}'.`,
+        subtitle: 'Try a different search term.',
+        showCTA: false,
+      };
+    }
+
+    if (filter === 'due' && stats.due === 0) {
+      return {
+        type: 'no-due' as const,
+        title: 'No contacts are due right now.',
+        subtitle: "Great job staying on top of things!",
+        showCTA: false,
+      };
+    }
+
+    if (filter === 'archived' && stats.archived === 0) {
+      return {
+        type: 'no-archived' as const,
+        title: 'No archived contacts.',
+        subtitle: null,
+        showCTA: false,
+      };
+    }
+
+    if (filter === 'all' && stats.active === 0 && contacts.length > 0) {
+      return {
+        type: 'all-archived' as const,
+        title: 'All your contacts are archived.',
+        subtitle: null,
+        showCTA: false,
+      };
+    }
+
+    return {
+      type: 'default' as const,
+      title: 'No contacts found.',
+      subtitle: null,
+      showCTA: false,
+    };
+  }, [searchQuery, contacts.length, filter, stats.due, stats.archived, stats.active]);
+
   const filterOptions: { label: string; value: ContactFilter; count: number }[] = [
     { label: 'All', value: 'all', count: stats.active },
     { label: 'Due', value: 'due', count: stats.due },
@@ -206,20 +326,28 @@ export default function ContactsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#4f46e5" />
+      <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+        <ActivityIndicator size="large" color="#9CA986" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 px-4 pt-4">
+    <SafeAreaView className="flex-1 bg-cream px-4 pt-4">
       <FlatList
         data={filteredContacts}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ContactRow contact={item} />}
+        renderItem={({ item }) => (
+          <ContactRow
+            contact={item}
+            onArchive={item.isArchived ? undefined : () => handleArchive(item.id)}
+            onUnarchive={item.isArchived ? () => handleUnarchive(item.id) : undefined}
+            onPress={() => handleContactPress(item.id)}
+          />
+        )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={{
+          paddingHorizontal: 16,
           paddingBottom: 24,
           flexGrow: filteredContacts.length === 0 ? 1 : undefined,
         }}
@@ -227,26 +355,27 @@ export default function ContactsScreen() {
           <View className="pb-2">
             <Text className="text-2xl font-bold text-gray-900">Contacts</Text>
             <Text className="mt-1 text-sm text-gray-500">
-              Import friends from your phone and see who is due next.
+              See who is due next and manage your circle.
             </Text>
 
-            <View className="mt-4 flex-row gap-3">
+            <TouchableOpacity
+              className="mt-4 w-full items-center rounded-2xl bg-sage py-3"
+              onPress={handleImportPress}
+              activeOpacity={0.9}
+            >
+              <Text className="text-base font-semibold text-white">Import from Phone</Text>
+            </TouchableOpacity>
+
+            <View className="mt-4">
               <TextInput
-                className="flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900"
+                className="w-full rounded-2xl border border-gray-200 bg-white text-base text-gray-900 shadow-sm"
                 placeholder="Search by name or number"
                 placeholderTextColor="#9ca3af"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 returnKeyType="search"
+                style={{ height: 48, paddingHorizontal: 14, paddingVertical: 0, lineHeight: 20, textAlignVertical: 'center' }}
               />
-
-              <TouchableOpacity
-                className="items-center justify-center rounded-2xl bg-indigo-600 px-4"
-                onPress={handleImportPress}
-                activeOpacity={0.9}
-              >
-                <Text className="text-base font-semibold text-white">Import</Text>
-              </TouchableOpacity>
             </View>
 
             <View className="mt-3 flex-row flex-wrap gap-2">
@@ -261,27 +390,27 @@ export default function ContactsScreen() {
               ))}
             </View>
 
-            <View className="mt-4 flex-row flex-wrap gap-3">
-              <StatCard label="Active" value={stats.active} />
-              <StatCard label="Due" value={stats.due} />
-              <StatCard label="Archived" value={stats.archived} />
-            </View>
+
           </View>
         }
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center py-16">
-            <Text className="text-base text-gray-500">No contacts yet.</Text>
-            <Text className="mt-1 text-sm text-gray-400 text-center">
-              Import from your phone to start building your circle.
-            </Text>
+            <Text className="text-base text-gray-500">{emptyState.title}</Text>
+            {emptyState.subtitle && (
+              <Text className="mt-1 text-sm text-gray-400 text-center">
+                {emptyState.subtitle}
+              </Text>
+            )}
 
-            <TouchableOpacity
-              className="mt-5 rounded-2xl bg-indigo-600 px-6 py-3"
-              onPress={handleImportPress}
-              activeOpacity={0.9}
-            >
-              <Text className="text-base font-semibold text-white">Import from Phone</Text>
-            </TouchableOpacity>
+            {emptyState.showCTA && (
+              <TouchableOpacity
+                className="mt-5 rounded-2xl bg-sage px-6 py-3"
+                onPress={handleImportPress}
+                activeOpacity={0.9}
+              >
+                <Text className="text-base font-semibold text-white">Import from Phone</Text>
+              </TouchableOpacity>
+            )}
           </View>
         }
       />

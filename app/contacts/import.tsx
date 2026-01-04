@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as Contacts from 'expo-contacts';
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -62,8 +62,8 @@ const ContactRow = ({
       {contact.avatarUri ? (
         <Image source={{ uri: contact.avatarUri }} className="h-10 w-10 rounded-full" />
       ) : (
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-indigo-100">
-          <Text className="text-sm font-semibold text-indigo-700">{initial}</Text>
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-sage-100">
+          <Text className="text-sm font-semibold text-sage">{initial}</Text>
         </View>
       )}
 
@@ -72,12 +72,14 @@ const ContactRow = ({
         <Text className="text-sm text-gray-500">{contact.phone}</Text>
       </View>
 
-      <View
-        className={`h-5 w-5 items-center justify-center rounded border ${
-          selected ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300 bg-white'
-        }`}
-      >
-        {selected ? <Text className="text-xs font-bold text-white">✓</Text> : null}
+      <View className="h-6 w-6 items-center justify-center rounded border bg-white border-gray-300">
+        <View
+          className={`h-5 w-5 items-center justify-center rounded ${
+            selected ? 'bg-sage' : 'bg-white'
+          }`}
+        >
+          {selected ? <Text className="text-xs font-bold text-white">✓</Text> : null}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -162,66 +164,92 @@ export default function ImportContactsScreen() {
   }, [contacts, router, selected, saving]);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 px-4 pt-4">
-      <Text className="mb-3 text-2xl font-bold text-gray-900">Import Contacts</Text>
-      <Text className="mb-4 text-sm text-gray-600">
-        Grant permission to read your phone contacts, pick who you want to bring in, and save them
-        to your Kindred list.
-      </Text>
-
-      <TouchableOpacity
-        className="mb-4 items-center rounded-xl bg-indigo-600 py-3"
-        onPress={handleImportPress}
-        activeOpacity={0.9}
-      >
-        <Text className="text-base font-semibold text-white">Import from Phone</Text>
-      </TouchableOpacity>
-
-      {permissionDenied ? (
-        <View className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3">
-          <Text className="text-sm text-red-700">
-            Permission denied. Please enable contact access in your device settings to import.
-          </Text>
-        </View>
-      ) : null}
+    <SafeAreaView className="flex-1 bg-cream">
+      <Stack.Screen
+        options={{
+          title: 'Import Contacts',
+          headerBackTitle: 'Contacts',
+          headerShadowVisible: false,
+          headerTitleStyle: { fontSize: 18, fontWeight: '700' },
+        }}
+      />
 
       {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#4f46e5" />
+        <View className="flex-1 items-center justify-center px-4">
+          <ActivityIndicator size="large" color="#9CA986" />
+          <Text className="mt-3 text-sm font-semibold text-gray-700">Fetching contacts...</Text>
         </View>
       ) : (
-        <FlatList
-          data={contacts}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ContactRow
-              contact={item}
-              selected={selected.has(item.id)}
-              onToggle={() => toggleSelect(item.id)}
-            />
-          )}
-          ListEmptyComponent={
-            <View className="flex-1 items-center justify-center py-12">
-              <Text className="text-base text-gray-500">No contacts loaded yet.</Text>
-              <Text className="text-sm text-gray-400">Tap "Import from Phone" to begin.</Text>
-            </View>
-          }
-          contentContainerStyle={{ paddingBottom: 24, flexGrow: contacts.length === 0 ? 1 : undefined }}
-        />
+        <View className="flex-1 px-4 pt-4">
+          <FlatList
+            data={contacts}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ContactRow
+                contact={item}
+                selected={selected.has(item.id)}
+                onToggle={() => toggleSelect(item.id)}
+              />
+            )}
+            ListHeaderComponent={
+              <View className="pb-3">
+                <View className="mb-3 rounded-2xl border border-sage-100 bg-white p-4 shadow-sm">
+                  <Text className="text-xs font-semibold uppercase tracking-wide text-sage">Import</Text>
+                  <Text className="mt-1 text-xl font-bold text-gray-900">Bring your people to Kindred</Text>
+                  <Text className="mt-2 text-sm text-gray-600">
+                    Grant permission to read your phone contacts, pick who you want to bring in, and save them to
+                    your Kindred list.
+                  </Text>
+
+                  <TouchableOpacity
+                    className="mt-4 items-center rounded-xl bg-sage py-3"
+                    onPress={handleImportPress}
+                    activeOpacity={0.9}
+                  >
+                    <Text className="text-base font-semibold text-white">Import from Phone</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {permissionDenied ? (
+                  <View className="rounded-2xl border border-red-200 bg-red-50 p-3">
+                    <Text className="text-sm font-semibold text-red-700">Permission denied</Text>
+                    <Text className="mt-1 text-sm text-red-600">
+                      Enable contact access in Settings to import from your address book.
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            }
+            ListEmptyComponent={
+              <View className="flex-1 items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-12">
+                <Text className="text-base font-semibold text-gray-900">No contacts loaded yet.</Text>
+                <Text className="mt-2 text-sm text-center text-gray-500">
+                  Tap "Import from Phone" to begin and pick people to bring into Kindred.
+                </Text>
+              </View>
+            }
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 140,
+              paddingTop: 4,
+              flexGrow: contacts.length === 0 ? 1 : undefined,
+            }}
+          />
+        </View>
       )}
 
-      <TouchableOpacity
-        className={`mb-4 items-center rounded-xl py-3 ${
-          selected.size > 0 && !saving ? 'bg-green-600' : 'bg-gray-300'
-        }`}
-        onPress={handleSave}
-        activeOpacity={0.9}
-        disabled={selected.size === 0 || saving}
-      >
-        <Text className={`text-base font-semibold ${selected.size > 0 && !saving ? 'text-white' : 'text-gray-600'}`}>
-          {saving ? 'Importing...' : `Import Selected (${selected.size})`}
-        </Text>
-      </TouchableOpacity>
+      <View className="border-t border-gray-200 bg-white px-4 pb-4 pt-3">
+        <TouchableOpacity
+          className={`items-center rounded-xl py-4 ${selected.size > 0 && !saving ? 'bg-sage' : 'bg-gray-200'}`}
+          onPress={handleSave}
+          activeOpacity={0.9}
+          disabled={selected.size === 0 || saving}
+        >
+          <Text className={`text-base font-semibold ${selected.size > 0 && !saving ? 'text-white' : 'text-gray-600'}`}>
+            {saving ? 'Importing...' : `Import Selected (${selected.size})`}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <PaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
     </SafeAreaView>

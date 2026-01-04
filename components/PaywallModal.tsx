@@ -38,7 +38,7 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
             never miss a check-in.
           </Text>
 
-          <View className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <View className="mt-4 rounded-xl border border-sage-100 bg-sage-100 p-4">
             <Text className="text-sm font-semibold text-gray-900">Pro unlocks:</Text>
             <View className="mt-2 gap-1">
               <Text className="text-sm text-gray-700">• Unlimited contacts</Text>
@@ -48,7 +48,7 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
           </View>
 
           <TouchableOpacity
-            className={`mt-6 items-center rounded-xl py-3 ${isPro ? 'bg-emerald-600' : 'bg-indigo-600'}`}
+            className={`mt-6 items-center rounded-xl py-3 ${isPro ? 'bg-sage' : 'bg-terracotta'}`}
             onPress={handleRestore}
             activeOpacity={0.9}
             disabled={restoring || isPro}
