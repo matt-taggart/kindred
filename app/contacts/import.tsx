@@ -16,7 +16,7 @@ import {
 
 import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
 import FrequencyBadge from '@/components/FrequencyBadge';
-import FrequencyGuide from '@/components/FrequencyGuide';
+
 import { Contact as DbContact } from '@/db/schema';
 import { LimitReachedError, addContact as importContact } from '@/services/contactService';
 
@@ -105,7 +105,7 @@ const ContactRow = ({
           <Text className="text-sm text-gray-500">{contact.phone}</Text>
         </View>
 
-        <FrequencyBadge bucket={frequency} onPress={() => {}} />
+        <FrequencyBadge bucket={frequency} onPress={() => onFrequencyChange(frequency)} />
 
         <TouchableOpacity
           className="h-6 w-6 items-center justify-center rounded border bg-white border-gray-300"
@@ -121,17 +121,7 @@ const ContactRow = ({
           </View>
         </TouchableOpacity>
       </View>
-      <View className="mt-2 flex-row items-center justify-end gap-2">
-        <Text className="text-xs text-gray-500">Tap to change:</Text>
-        <TouchableOpacity
-          onPress={() => onFrequencyChange}
-          className="flex-row items-center rounded-lg bg-gray-50 px-3 py-1"
-          activeOpacity={0.7}
-        >
-          <Text className="text-sm font-semibold text-sage">{bucketLabels[frequency]}</Text>
-          <Text className="ml-1 text-xs text-gray-500">({bucketDescriptions[frequency]})</Text>
-        </TouchableOpacity>
-      </View>
+
     </TouchableOpacity>
   );
 };
@@ -147,7 +137,7 @@ export default function ImportContactsScreen() {
   const [contactFrequencies, setContactFrequencies] = useState<Record<string, Bucket>>({});
   const [showFrequencySelector, setShowFrequencySelector] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
-  const [showFrequencyGuide, setShowFrequencyGuide] = useState(false);
+
 
   const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {
@@ -160,6 +150,14 @@ export default function ImportContactsScreen() {
       return next;
     });
   }, []);
+
+  const handleSelectAll = useCallback(() => {
+    if (selected.size === contacts.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(contacts.map((c) => c.id)));
+    }
+  }, [contacts, selected]);
 
   const handleFrequencyChange = useCallback((contactId: string) => {
     setEditingContactId(contactId);
@@ -222,7 +220,7 @@ export default function ImportContactsScreen() {
 
       const initialFrequencies = withPhones.reduce(
         (acc, contact) => {
-          acc[contact.id] = 'monthly';
+          acc[contact.id] = 'weekly';
           return acc;
         },
         {} as Record<string, Bucket>,
@@ -247,7 +245,7 @@ export default function ImportContactsScreen() {
         await importContact({
           name: contact.name,
           phone: contact.phone,
-          bucket: contactFrequencies[contact.id] || 'monthly',
+          bucket: contactFrequencies[contact.id] || 'weekly',
           avatarUri: contact.avatarUri,
         });
       }
@@ -291,13 +289,13 @@ export default function ImportContactsScreen() {
                 contact={item}
                 selected={selected.has(item.id)}
                 onToggle={() => toggleSelect(item.id)}
-                frequency={contactFrequencies[item.id] || 'monthly'}
+                frequency={contactFrequencies[item.id] || 'weekly'}
                 onFrequencyChange={() => handleFrequencyChange(item.id)}
               />
             )}
             ListHeaderComponent={
               <View className="pb-3">
-                <View className="mb-3 rounded-2xl border border-sage-100 bg-white p-5 shadow-sm">
+                <View className="mb-6 rounded-2xl border border-sage-100 bg-white p-5 shadow-sm">
                   <Text className="text-xs font-semibold uppercase tracking-wide text-sage">Import</Text>
                   <Text className="mt-1 text-xl font-bold text-gray-900">Bring your people to Kindred</Text>
                   <Text className="mt-2 text-sm text-gray-600">
@@ -315,38 +313,26 @@ export default function ImportContactsScreen() {
                 </View>
 
                 {contacts.length > 0 && (
-                  <View className="mb-3 rounded-2xl border border-sage-100 bg-white p-4 shadow-sm">
-                    <View className="flex-row items-center justify-between">
-                      <Text className="text-sm font-semibold text-slate">Set reminders for all:</Text>
-                      <TouchableOpacity onPress={() => setShowFrequencyGuide(true)} activeOpacity={0.7}>
-                        <Text className="text-sm font-semibold text-sage">How often should you check in?</Text>
-                      </TouchableOpacity>
+                  <TouchableOpacity
+                    className="mb-2 flex-row items-center justify-between rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+                    onPress={handleSelectAll}
+                    activeOpacity={0.7}
+                  >
+                    <Text className="text-base font-semibold text-gray-900">Select All</Text>
+                    <View
+                      className={`h-6 w-6 items-center justify-center rounded border border-gray-300 ${
+                        selected.size === contacts.length ? 'bg-sage border-sage' : 'bg-white'
+                      }`}
+                    >
+                      <View
+                        className={`h-5 w-5 items-center justify-center rounded ${
+                          selected.size === contacts.length ? 'bg-sage' : 'bg-white'
+                        }`}
+                      >
+                        {selected.size === contacts.length ? <Text className="text-xs font-bold text-white">✓</Text> : null}
+                      </View>
                     </View>
-                    <View className="mt-3 flex-row flex-wrap gap-2">
-                      {(['daily', 'weekly', 'monthly', 'yearly'] as Bucket[]).map((bucket) => (
-                        <TouchableOpacity
-                          key={bucket}
-                          className={`rounded-full border-2 px-4 py-2 ${
-                            Object.values(contactFrequencies).every((f) => f === bucket)
-                              ? 'border-sage bg-sage'
-                              : 'border-gray-200 bg-white'
-                          }`}
-                          onPress={() => handleSetAllFrequency(bucket)}
-                          activeOpacity={0.7}
-                        >
-                          <Text
-                            className={`text-sm font-semibold ${
-                              Object.values(contactFrequencies).every((f) => f === bucket)
-                                ? 'text-white'
-                                : 'text-slate-700'
-                            }`}
-                          >
-                            {bucketLabels[bucket]}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
+                  </TouchableOpacity>
                 )}
 
                 {permissionDenied ? (
@@ -453,7 +439,7 @@ export default function ImportContactsScreen() {
         </View>
       </Modal>
 
-      <FrequencyGuide visible={showFrequencyGuide} onClose={() => setShowFrequencyGuide(false)} />
+
       <EnhancedPaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
     </SafeAreaView>
   );
