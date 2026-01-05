@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { openDatabaseSync } from 'expo-sqlite';
 
 let sqlite: any = null;
 let dbInstance: any = null;
@@ -17,8 +18,6 @@ export function getDb(): any {
   if (Platform.OS === 'web') {
     throw new Error('SQLite is not supported on web');
   }
-
-  const { openDatabaseSync } = require('expo-sqlite/next');
 
   sqlite = openDatabaseSync('kindred.db');
   sqlite.execSync('PRAGMA foreign_keys = ON;');
