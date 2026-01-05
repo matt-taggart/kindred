@@ -85,7 +85,12 @@ export default function LogInteractionModal() {
   return (
     <SafeAreaView className="flex-1 bg-cream">
       <View className="flex-1 px-6 pb-8 pt-6">
-        <Text className="text-2xl font-bold text-slate">{isEditMode ? 'Edit Note' : 'Add a Note'}</Text>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-2xl font-bold text-slate">{isEditMode ? 'Edit Note' : 'Add a Note'}</Text>
+          <TouchableOpacity onPress={handleClose} activeOpacity={0.7} className="py-2 pl-4">
+            <Text className="text-base font-semibold text-slate-400">Cancel</Text>
+          </TouchableOpacity>
+        </View>
         <Text className="mt-2 text-base text-slate">
           What did you talk about with {contact?.name || 'this contact'}?
         </Text>
@@ -102,14 +107,14 @@ export default function LogInteractionModal() {
 
         <View className="mt-6 gap-4">
           <View className="flex-row gap-2">
-            {!isEditMode && (
+            {!isEditMode && noteOnly !== 'true' && (
               <TouchableOpacity
                 className="flex-1 items-center rounded-2xl bg-white py-4"
-                onPress={noteOnly === 'true' ? handleClose : handleSkip}
+                onPress={handleSkip}
                 activeOpacity={0.85}
                 disabled={saving}
               >
-                <Text className="font-semibold text-slate">{noteOnly === 'true' ? 'Cancel' : 'Skip'}</Text>
+                <Text className="font-semibold text-slate">Skip</Text>
               </TouchableOpacity>
             )}
 
@@ -122,16 +127,6 @@ export default function LogInteractionModal() {
               <Text className="font-semibold text-white">{saving ? 'Saving...' : 'Save'}</Text>
             </TouchableOpacity>
           </View>
-
-          {noteOnly !== 'true' && (
-            <TouchableOpacity
-              className="items-center py-2"
-              onPress={handleClose}
-              activeOpacity={0.7}
-            >
-              <Text className="font-semibold text-slate-400">Cancel</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </View>
     </SafeAreaView>
