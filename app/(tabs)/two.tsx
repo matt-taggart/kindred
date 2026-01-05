@@ -417,14 +417,15 @@ export default function ContactsScreen() {
             </TouchableOpacity>
 
             <View className="mt-6">
-              <View className="w-full h-12 rounded-2xl border border-gray-200 bg-white shadow-sm px-4 justify-center">
+              <View className="w-full min-h-14 rounded-2xl border border-gray-200 bg-white shadow-sm px-4 py-3 flex-row items-center">
                 <TextInput
-                  className="flex-1 text-base text-gray-900"
+                  className="flex-1 text-base leading-5 text-gray-900"
                   placeholder="Search by name or number"
                   placeholderTextColor="#9ca3af"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   returnKeyType="search"
+                  textAlignVertical="center"
                 />
               </View>
             </View>
