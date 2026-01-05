@@ -8,7 +8,6 @@ import { addContact } from '../services/contactService';
 const seedData = [
   { name: 'Alice Example', phone: '555-0100', bucket: 'weekly' as const },
   { name: 'Brian Example', phone: '555-0101', bucket: 'monthly' as const },
-  { name: 'Carmen Example', phone: '555-0102', bucket: 'yearly' as const },
 ];
 
 const main = async () => {
@@ -31,7 +30,7 @@ const main = async () => {
     await addContact({ ...contact, lastContactedAt: now });
   }
 
-  console.log('Inserted 3 dummy contacts.');
+  console.log('Inserted 2 dummy contacts.');
 };
 
 main().catch((error) => {

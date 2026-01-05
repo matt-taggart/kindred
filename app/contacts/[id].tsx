@@ -7,7 +7,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { Contact, Interaction } from '@/db/schema';
 import { getContacts, getInteractionHistory, deleteInteraction, updateContactCadence } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
-import { useColorScheme } from '@/components/useColorScheme';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -76,7 +75,6 @@ export default function ContactDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [savingCadence, setSavingCadence] = useState(false);
-  const colorScheme = useColorScheme();
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -235,8 +233,11 @@ export default function ContactDetailScreen() {
           headerBackTitle: 'Back',
           headerShown: true,
           headerRight: () => (
-            <TouchableOpacity onPress={handleEditContact} className="mr-2 items-center justify-center">
-              <Ionicons name="settings-outline" size={24} color={colorScheme === 'dark' ? '#fff' : '#475569'} />
+            <TouchableOpacity
+              onPress={handleEditContact}
+              className="items-center justify-center rounded-full bg-white px-4 py-2"
+            >
+              <Text className="text-base font-semibold text-sage">Edit</Text>
             </TouchableOpacity>
           ),
         }}

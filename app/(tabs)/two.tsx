@@ -400,7 +400,7 @@ export default function ContactsScreen() {
         ListHeaderComponent={
           <View className="pb-4">
             <Text className="text-2xl font-bold text-gray-900">Contacts</Text>
-            <Text className="mt-1 text-sm text-gray-500">
+            <Text className="mt-1 text-base text-gray-500">
               See who is due next and manage your circle.
             </Text>
 

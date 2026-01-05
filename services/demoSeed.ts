@@ -22,18 +22,6 @@ const demoContacts = () => {
       bucket: 'daily' as const,
       lastContactedAt: now - 2 * DAY_IN_MS,
     },
-    {
-      name: 'Priya Patel',
-      phone: '555-0110',
-      bucket: 'monthly' as const,
-      lastContactedAt: now - 34 * DAY_IN_MS,
-    },
-    {
-      name: 'Luca Fernandez',
-      phone: '555-0176',
-      bucket: 'yearly' as const,
-      lastContactedAt: now - 210 * DAY_IN_MS,
-    },
   ];
 };
 
