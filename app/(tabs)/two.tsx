@@ -132,37 +132,39 @@ const ContactRow = ({
         </Text>
       </View>
 
-      {contact.phone ? (
-        <Text className="mt-3 text-base text-gray-500">Phone · {contact.phone}</Text>
-      ) : null}
+      <View className="mt-3 flex-row items-center justify-between">
+        <View className="flex-1">
+          {contact.phone ? (
+            <Text className="text-base text-gray-500">Phone · {contact.phone}</Text>
+          ) : null}
+        </View>
 
-      {contact.isArchived ? (
-        <View className="mt-3 items-end">
+        {contact.isArchived ? (
           <TouchableOpacity
-            className="rounded-xl border border-sage px-4 py-3"
+            className="px-2"
             onPress={(e) => {
               e.stopPropagation();
               onUnarchive?.();
             }}
-            activeOpacity={0.85}
+            activeOpacity={0.7}
           >
             <Text className="text-sm font-semibold text-sage">Unarchive</Text>
           </TouchableOpacity>
-        </View>
-      ) : null}
+        ) : null}
 
-      {!contact.isArchived && onArchive ? (
-        <TouchableOpacity
-          className="mt-3 rounded-xl border border-gray-300 px-4 py-3 self-end"
-          onPress={(e) => {
-            e.stopPropagation();
-            onArchive?.();
-          }}
-          activeOpacity={0.85}
-        >
-          <Text className="text-sm font-semibold text-gray-600">Archive</Text>
-        </TouchableOpacity>
-      ) : null}
+        {!contact.isArchived && onArchive ? (
+          <TouchableOpacity
+            className="px-2"
+            onPress={(e) => {
+              e.stopPropagation();
+              onArchive?.();
+            }}
+            activeOpacity={0.7}
+          >
+            <Text className="text-sm font-semibold text-gray-400">Archive</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
     </TouchableOpacity>
   );
 };
