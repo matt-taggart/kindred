@@ -418,7 +418,7 @@ export default function ContactsScreen() {
 
             <View className="mt-6">
               <TextInput
-                className="w-full py-3 rounded-2xl border border-gray-200 bg-white text-base text-gray-900 shadow-sm px-4"
+                className="w-full pt-2 pb-4 rounded-2xl border border-gray-200 bg-white text-base text-gray-900 shadow-sm px-4"
                 placeholder="Search by name or number"
                 placeholderTextColor="#9ca3af"
                 value={searchQuery}
