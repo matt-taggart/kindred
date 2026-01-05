@@ -181,7 +181,7 @@ export default function ContactDetailScreen() {
   }, []);
 
   const handleAddNote = useCallback(() => {
-    router.push({ pathname: '/modal', params: { contactId: id } });
+    router.push({ pathname: '/modal', params: { contactId: id, noteOnly: 'true' } });
   }, [router, id]);
 
   const handleSaveCadence = useCallback(

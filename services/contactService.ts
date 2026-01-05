@@ -375,6 +375,49 @@ export const updateContactCadence = async (
   return updated;
 };
 
+export const addNoteOnly = async (
+  contactId: Contact['id'],
+  notes: string,
+): Promise<Interaction> => {
+  const db = getDb();
+  const [contact] = db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.id, contactId))
+    .limit(1)
+    .all();
+
+  if (!contact) {
+    throw new Error(`Contact not found: ${contactId}`);
+  }
+
+  const timestamp = Date.now();
+  const interactionId = generateId();
+
+  db.insert(interactions)
+    .values({
+      id: interactionId,
+      contactId,
+      date: timestamp,
+      type: 'call',
+      notes,
+    })
+    .run();
+
+  const [inserted] = db
+    .select()
+    .from(interactions)
+    .where(eq(interactions.id, interactionId))
+    .limit(1)
+    .all();
+
+  if (!inserted) {
+    throw new Error('Failed to insert interaction');
+  }
+
+  return inserted;
+};
+
 export const resetDatabase = async (): Promise<void> => {
   const db = getDb();
 

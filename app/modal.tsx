@@ -3,11 +3,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, updateInteraction, updateInteractionNote } from '@/services/contactService';
+import { addNoteOnly, getContacts, getInteractionHistory, updateInteraction, updateInteractionNote } from '@/services/contactService';
 
 export default function LogInteractionModal() {
   const router = useRouter();
-  const { contactId, interactionId } = useLocalSearchParams<{ contactId?: string | string[]; interactionId?: string }>();
+  const { contactId, interactionId, noteOnly } = useLocalSearchParams<{ contactId?: string | string[]; interactionId?: string; noteOnly?: string }>();
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -47,6 +47,8 @@ export default function LogInteractionModal() {
 
       if (isEditMode && interactionId) {
         await updateInteractionNote(interactionId, note.trim());
+      } else if (noteOnly === 'true') {
+        await addNoteOnly(contactId, note.trim());
       } else {
         await updateInteraction(contactId, 'call', note.trim() || undefined);
       }
