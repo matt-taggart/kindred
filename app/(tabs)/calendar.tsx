@@ -14,7 +14,7 @@ import {
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const formatLastSpoke = (lastContactedAt?: number | null) => {
+const formatLastContacted = (lastContactedAt?: number | null) => {
   if (!lastContactedAt) {
     return 'Never';
   }
@@ -57,7 +57,7 @@ const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => 
         <View className="flex-1">
           <Text className="text-lg font-semibold text-gray-900">{contact.name}</Text>
           <Text className="text-sm text-gray-500">
-            {bucketLabels[contact.bucket]} · {formatLastSpoke(contact.lastContactedAt)}
+            {bucketLabels[contact.bucket]} · {formatLastContacted(contact.lastContactedAt)}
           </Text>
         </View>
 

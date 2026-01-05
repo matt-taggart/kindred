@@ -28,7 +28,7 @@ const bucketLabels: Record<Contact['bucket'], string> = {
   yearly: 'Yearly cadence',
 };
 
-const formatLastSpoke = (lastContactedAt?: number | null) => {
+const formatLastContacted = (lastContactedAt?: number | null) => {
   if (!lastContactedAt) return 'Never';
 
   const diff = Math.max(0, Date.now() - lastContactedAt);
@@ -74,7 +74,7 @@ const FilterChip = ({
     onPress={onPress}
     activeOpacity={0.85}
   >
-    <Text className={`text-sm font-semibold ${active ? 'text-white' : 'text-gray-700'}`}>
+    <Text className={`text-base font-semibold ${active ? 'text-white' : 'text-gray-700'}`}>
       {label}
       <Text className={active ? 'text-white' : 'text-gray-400'}> · {count}</Text>
     </Text>
@@ -104,15 +104,15 @@ const ContactRow = ({
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-3">
-          <Text className="text-lg font-semibold text-gray-900">{contact.name}</Text>
-          <Text className="text-sm text-gray-500">{bucketLabels[contact.bucket]}</Text>
+          <Text className="text-xl font-semibold text-gray-900">{contact.name}</Text>
+          <Text className="text-base text-gray-500">{bucketLabels[contact.bucket]}</Text>
         </View>
 
         <View className="flex-row items-center gap-2">
           <View
-            className={`rounded-full px-3 py-1 ${due ? 'bg-terracotta-100' : 'bg-sage'}`}
+            className={`rounded-full px-4 py-2 ${due ? 'bg-terracotta-100' : 'bg-sage'}`}
           >
-            <Text className={`text-xs font-semibold ${due ? 'text-terracotta' : 'text-white'}`}>
+            <Text className={`text-sm font-semibold ${due ? 'text-terracotta' : 'text-white'}`}>
               {due ? 'Due' : 'Upcoming'}
             </Text>
           </View>
@@ -121,19 +121,19 @@ const ContactRow = ({
       </View>
 
       <View className="mt-4 rounded-2xl border border-dashed border-gray-200 p-3">
-        <Text className="text-xs font-semibold uppercase tracking-wide text-gray-500">Last spoke</Text>
-        <Text className="text-base font-semibold text-gray-900">{formatLastSpoke(contact.lastContactedAt)}</Text>
+        <Text className="text-sm font-semibold uppercase tracking-wide text-gray-500">Last contacted</Text>
+        <Text className="text-lg font-semibold text-gray-900">{formatLastContacted(contact.lastContactedAt)}</Text>
 
-        <Text className="mt-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <Text className="mt-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
           Next check-in
         </Text>
-        <Text className="text-base font-semibold text-gray-900">
+        <Text className="text-lg font-semibold text-gray-900">
           {formatNextCheckIn(contact.nextContactDate)}
         </Text>
       </View>
 
       {contact.phone ? (
-        <Text className="mt-3 text-sm text-gray-500">Phone · {contact.phone}</Text>
+        <Text className="mt-3 text-base text-gray-500">Phone · {contact.phone}</Text>
       ) : null}
 
       {contact.isArchived ? (

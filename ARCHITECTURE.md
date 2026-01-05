@@ -82,7 +82,7 @@ Build the Home Screen (`app/(tabs)/index.tsx`).
 1. Use NativeWind for styling.
 2. Fetch contacts where `nextContactDate` <= Today OR `lastContactedAt` is null.
 3. Render a FlatList of "Contact Cards".
-   - Card shows: Name, Avatar, "Last spoke: X days ago".
+   - Card shows: Name, Avatar, "Last contacted: X days ago".
    - Actions: Two buttons "Mark Done" (Green) and "Snooze" (Gray).
 4. Connect "Mark Done" to open a Modal (`presentation: 'modal'`) asking for a "Log Interaction" note.
 5. Saving the note should call `contactService.updateInteraction` and refresh the list.

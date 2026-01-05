@@ -30,7 +30,7 @@ const typeIcons: Record<Interaction['type'], keyof typeof Ionicons.glyphMap> = {
   meet: 'people-outline',
 };
 
-const formatLastSpoke = (lastContactedAt?: number | null) => {
+const formatLastContacted = (lastContactedAt?: number | null) => {
   if (!lastContactedAt) return 'Never';
 
   const diff = Math.max(0, Date.now() - lastContactedAt);
@@ -265,23 +265,23 @@ export default function ContactDetailScreen() {
               )}
 
               <View className="flex-1">
-                <Text className="text-xl font-bold text-slate">{contact.name}</Text>
+                <Text className="text-2xl font-bold text-slate">{contact.name}</Text>
                 {contact.phone && (
-                  <Text className="text-slate-600">{contact.phone}</Text>
+                  <Text className="text-lg text-slate-600">{contact.phone}</Text>
                 )}
-                <Text className="text-sm text-slate-500">{bucketLabels[contact.bucket]}</Text>
+                <Text className="text-base text-slate-500">{bucketLabels[contact.bucket]}</Text>
               </View>
             </View>
 
             <View className="mt-4 rounded-xl border border-sage-100 bg-cream p-3">
               <View className="flex-row justify-between">
                 <View>
-                  <Text className="text-xs text-gray-600">Last spoke</Text>
-                  <Text className="text-sm font-semibold text-slate">{formatLastSpoke(contact.lastContactedAt)}</Text>
+                  <Text className="text-sm text-gray-600">Last contacted</Text>
+                  <Text className="text-lg font-semibold text-slate">{formatLastContacted(contact.lastContactedAt)}</Text>
                 </View>
                 <View className="items-end">
-                  <Text className="text-xs text-gray-600">Next check-in</Text>
-                  <Text className="text-sm font-semibold text-slate">{formatNextCheckIn(contact.nextContactDate)}</Text>
+                  <Text className="text-sm text-gray-600">Next check-in</Text>
+                  <Text className="text-lg font-semibold text-slate">{formatNextCheckIn(contact.nextContactDate)}</Text>
                 </View>
               </View>
             </View>
@@ -295,8 +295,8 @@ export default function ContactDetailScreen() {
                 onPress={handleCall}
                 activeOpacity={0.85}
               >
-                <Ionicons name="call-outline" size={20} color="#fff" />
-                <Text className="font-semibold text-white">Call</Text>
+                <Ionicons name="call-outline" size={24} color="#fff" />
+                <Text className="text-lg font-semibold text-white">Call</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -304,8 +304,8 @@ export default function ContactDetailScreen() {
                 onPress={handleText}
                 activeOpacity={0.85}
               >
-                <Ionicons name="chatbubble-outline" size={20} color="#fff" />
-                <Text className="font-semibold text-white">Text</Text>
+                <Ionicons name="chatbubble-outline" size={24} color="#fff" />
+                <Text className="text-lg font-semibold text-white">Text</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -316,13 +316,13 @@ export default function ContactDetailScreen() {
             onPress={handleAddNote}
             activeOpacity={0.85}
           >
-            <Ionicons name="pencil-outline" size={20} color="#9CA986" />
-            <Text className="font-semibold text-sage">Add Note</Text>
+            <Ionicons name="pencil-outline" size={24} color="#9CA986" />
+            <Text className="text-lg font-semibold text-sage">Add Note</Text>
           </TouchableOpacity>
 
           {/* Interaction History */}
           <View>
-            <Text className="mb-3 text-lg font-bold text-slate">History</Text>
+            <Text className="mb-3 text-xl font-bold text-slate">History</Text>
 
             {interactions.length === 0 ? (
               <View className="items-center justify-center rounded-2xl bg-white p-8 shadow-sm">
@@ -377,22 +377,22 @@ function InteractionCard({ interaction, onEdit, onDelete }: InteractionCardProps
     >
       <View className="flex-row items-start gap-3">
         <View className="mt-1">
-          <Ionicons name={typeIcons[interaction.type]} size={20} color="#475569" />
+          <Ionicons name={typeIcons[interaction.type]} size={24} color="#475569" />
         </View>
 
         <View className="flex-1">
           <View className="flex-row items-center justify-between">
-            <Text className="font-semibold text-slate">{typeLabels[interaction.type]}</Text>
+            <Text className="text-lg font-semibold text-slate">{typeLabels[interaction.type]}</Text>
             <TouchableOpacity onPress={onDelete} activeOpacity={0.7}>
-              <Ionicons name="trash-outline" size={18} color="#94a3b8" />
+              <Ionicons name="trash-outline" size={20} color="#94a3b8" />
             </TouchableOpacity>
           </View>
 
-          <Text className="text-sm text-slate-500">{formatInteractionDate(interaction.date)}</Text>
+          <Text className="text-base text-slate-500">{formatInteractionDate(interaction.date)}</Text>
 
           {interaction.notes && (
             <View className="mt-2 rounded-lg border border-sage-100 bg-cream p-3">
-              <Text className="text-sm text-slate">{interaction.notes}</Text>
+              <Text className="text-base text-slate">{interaction.notes}</Text>
             </View>
           )}
         </View>
