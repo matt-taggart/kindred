@@ -97,13 +97,13 @@ export default function LogInteractionModal() {
           value={note}
           onChangeText={setNote}
           autoFocus
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor="#64748b"
         />
 
         <View className="mt-6 flex-row gap-2">
           {!isEditMode && (
             <TouchableOpacity
-              className="flex-1 items-center rounded-xl bg-white py-3"
+              className="flex-1 items-center rounded-2xl bg-white py-4"
               onPress={noteOnly === 'true' ? handleClose : handleSkip}
               activeOpacity={0.85}
               disabled={saving}
@@ -113,7 +113,7 @@ export default function LogInteractionModal() {
           )}
 
           <TouchableOpacity
-            className="flex-1 items-center rounded-xl bg-sage py-3"
+            className="flex-1 items-center rounded-2xl bg-sage py-4"
             onPress={handleSave}
             activeOpacity={0.85}
             disabled={saving}

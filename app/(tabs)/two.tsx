@@ -68,7 +68,7 @@ const FilterChip = ({
   onPress: () => void;
 }) => (
   <TouchableOpacity
-    className={`rounded-full border px-4 py-2.5 ${
+    className={`rounded-full border px-4 py-3 ${
       active ? 'border-sage bg-sage' : 'border-gray-200 bg-white'
     }`}
     onPress={onPress}
@@ -98,7 +98,7 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className="mb-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+      className="mb-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -139,7 +139,7 @@ const ContactRow = ({
       {contact.isArchived ? (
         <View className="mt-3 items-end">
           <TouchableOpacity
-            className="rounded-lg border border-sage px-4 py-2.5"
+            className="rounded-xl border border-sage px-4 py-3"
             onPress={(e) => {
               e.stopPropagation();
               onUnarchive?.();
@@ -153,7 +153,7 @@ const ContactRow = ({
 
       {!contact.isArchived && onArchive ? (
         <TouchableOpacity
-          className="mt-3 rounded-lg border border-gray-300 px-4 py-2.5 self-end"
+          className="mt-3 rounded-xl border border-gray-300 px-4 py-3 self-end"
           onPress={(e) => {
             e.stopPropagation();
             onArchive?.();
@@ -414,13 +414,12 @@ export default function ContactsScreen() {
 
             <View className="mt-6">
               <TextInput
-                className="w-full rounded-2xl border border-gray-200 bg-white text-base text-gray-900 shadow-sm"
+                className="w-full h-12 rounded-2xl border border-gray-200 bg-white text-base text-gray-900 shadow-sm px-4 justify-center"
                 placeholder="Search by name or number"
                 placeholderTextColor="#9ca3af"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 returnKeyType="search"
-                style={{ height: 48, paddingHorizontal: 14, paddingVertical: 0, lineHeight: 20, textAlignVertical: 'center' }}
               />
             </View>
 

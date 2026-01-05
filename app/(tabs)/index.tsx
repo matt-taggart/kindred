@@ -42,7 +42,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false }: Cont
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
 
   return (
-    <View className="mb-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+    <View className="mb-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <View className="flex-row items-center gap-3">
         {contact.avatarUri ? (
           <Image
@@ -64,7 +64,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false }: Cont
 
       <View className="mt-4 flex-row gap-2">
         <TouchableOpacity
-          className="flex-1 items-center rounded-lg bg-sage py-4"
+          className="flex-1 items-center rounded-2xl bg-sage py-4"
           onPress={onMarkDone}
           activeOpacity={0.85}
         >
@@ -72,12 +72,12 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false }: Cont
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`flex-1 items-center rounded-lg py-4 ${isSnoozing ? 'bg-gray-300' : 'bg-gray-200'}`}
+          className={`flex-1 items-center rounded-2xl py-4 border-2 ${isSnoozing ? 'bg-gray-100 border-gray-200' : 'bg-transparent border-sage'}`}
           onPress={onSnooze}
           activeOpacity={0.85}
           disabled={isSnoozing}
         >
-          <Text className={`font-semibold ${isSnoozing ? 'text-gray-600' : 'text-gray-800'}`}>
+          <Text className={`font-semibold ${isSnoozing ? 'text-gray-400' : 'text-sage'}`}>
             {isSnoozing ? 'Snoozing...' : 'Snooze'}
           </Text>
         </TouchableOpacity>

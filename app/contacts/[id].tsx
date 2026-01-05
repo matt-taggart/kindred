@@ -276,11 +276,11 @@ export default function ContactDetailScreen() {
             <View className="mt-4 rounded-xl border border-sage-100 bg-cream p-3">
               <View className="flex-row justify-between">
                 <View>
-                  <Text className="text-xs text-slate-500">Last spoke</Text>
+                  <Text className="text-xs text-gray-600">Last spoke</Text>
                   <Text className="text-sm font-semibold text-slate">{formatLastSpoke(contact.lastContactedAt)}</Text>
                 </View>
                 <View className="items-end">
-                  <Text className="text-xs text-slate-500">Next check-in</Text>
+                  <Text className="text-xs text-gray-600">Next check-in</Text>
                   <Text className="text-sm font-semibold text-slate">{formatNextCheckIn(contact.nextContactDate)}</Text>
                 </View>
               </View>
@@ -291,7 +291,7 @@ export default function ContactDetailScreen() {
           {contact.phone && (
             <View className="mb-6 flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-sage py-3"
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-sage py-4"
                 onPress={handleCall}
                 activeOpacity={0.85}
               >
@@ -300,7 +300,7 @@ export default function ContactDetailScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-sage py-3"
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-sage py-4"
                 onPress={handleText}
                 activeOpacity={0.85}
               >
@@ -312,7 +312,7 @@ export default function ContactDetailScreen() {
 
           {/* Add Note Button */}
           <TouchableOpacity
-            className="mb-6 flex-row items-center justify-center gap-2 rounded-xl bg-white border-2 border-sage py-3"
+            className="mb-6 flex-row items-center justify-center gap-2 rounded-2xl bg-white border-2 border-sage py-4"
             onPress={handleAddNote}
             activeOpacity={0.85}
           >
