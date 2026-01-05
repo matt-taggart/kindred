@@ -61,6 +61,10 @@ export default function LogInteractionModal() {
     }
   };
 
+  const handleClose = () => {
+    router.back();
+  };
+
   const handleSkip = async () => {
     if (!contactId || Array.isArray(contactId)) {
       Alert.alert('Missing contact', 'No contact was selected.');
@@ -100,11 +104,11 @@ export default function LogInteractionModal() {
           {!isEditMode && (
             <TouchableOpacity
               className="flex-1 items-center rounded-xl bg-white py-3"
-              onPress={handleSkip}
+              onPress={noteOnly === 'true' ? handleClose : handleSkip}
               activeOpacity={0.85}
               disabled={saving}
             >
-              <Text className="font-semibold text-slate">Skip</Text>
+              <Text className="font-semibold text-slate">{noteOnly === 'true' ? 'Cancel' : 'Skip'}</Text>
             </TouchableOpacity>
           )}
 
