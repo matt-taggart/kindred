@@ -120,7 +120,7 @@ const ContactRow = ({
         </View>
       </View>
 
-      <View className="mt-4 rounded-2xl border border-dashed border-gray-200 p-3">
+      <View className="mt-4">
         <Text className="text-sm font-semibold uppercase tracking-wide text-gray-500">Last contacted</Text>
         <Text className="text-lg font-semibold text-gray-900">{formatLastContacted(contact.lastContactedAt)}</Text>
 
@@ -409,7 +409,9 @@ export default function ContactsScreen() {
               onPress={handleImportPress}
               activeOpacity={0.9}
             >
-              <Text className="text-base font-semibold text-white">Import from Phone</Text>
+              <Text className="text-base font-semibold text-white">
+                {contacts.length === 0 ? 'Import from Phone' : 'Add More Contacts'}
+              </Text>
             </TouchableOpacity>
 
             <View className="mt-6">
