@@ -232,12 +232,11 @@ export default function ContactDetailScreen() {
           title: contact.name,
           headerBackTitle: 'Back',
           headerShown: true,
-          headerRight: () => (
+          headerRight: ({ tintColor }) => (
             <TouchableOpacity
               onPress={handleEditContact}
-              className="items-center justify-center rounded-full bg-white px-4 py-2"
             >
-              <Text className="text-base font-semibold text-sage">Edit</Text>
+              <Text className="text-lg font-semibold" style={{ color: tintColor }}>Edit</Text>
             </TouchableOpacity>
           ),
         }}
@@ -292,7 +291,7 @@ export default function ContactDetailScreen() {
           {contact.phone && (
             <View className="mb-6 flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-sage py-4"
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-sage py-3"
                 onPress={handleCall}
                 activeOpacity={0.85}
               >
@@ -301,7 +300,7 @@ export default function ContactDetailScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-sage py-4"
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-sage py-3"
                 onPress={handleText}
                 activeOpacity={0.85}
               >
@@ -313,7 +312,7 @@ export default function ContactDetailScreen() {
 
           {/* Add Note Button */}
           <TouchableOpacity
-            className="mb-6 flex-row items-center justify-center gap-2 rounded-2xl bg-white border-2 border-sage py-4"
+            className="mb-6 flex-row items-center justify-center gap-2 rounded-2xl bg-white border-2 border-sage py-3"
             onPress={handleAddNote}
             activeOpacity={0.85}
           >

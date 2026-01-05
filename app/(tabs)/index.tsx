@@ -64,7 +64,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false }: Cont
 
       <View className="mt-4 flex-row gap-2">
         <TouchableOpacity
-          className="flex-1 items-center rounded-2xl bg-sage py-4"
+          className="flex-1 items-center rounded-2xl bg-sage py-3 border-2 border-transparent"
           onPress={onMarkDone}
           activeOpacity={0.85}
         >
@@ -72,7 +72,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false }: Cont
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`flex-1 items-center rounded-2xl py-4 border-2 ${isSnoozing ? 'bg-gray-100 border-gray-200' : 'bg-transparent border-sage'}`}
+          className={`flex-1 items-center rounded-2xl py-3 border-2 ${isSnoozing ? 'bg-gray-100 border-gray-200' : 'bg-transparent border-sage'}`}
           onPress={onSnooze}
           activeOpacity={0.85}
           disabled={isSnoozing}

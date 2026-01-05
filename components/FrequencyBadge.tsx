@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity, Text } from 'react-native';
 
 import { Contact } from '@/db/schema';
@@ -10,17 +11,17 @@ const bucketLabels: Record<Contact['bucket'], string> = {
 };
 
 const bucketColors: Record<Contact['bucket'], string> = {
-  daily: 'bg-terracotta-100',
-  weekly: 'bg-sage-100',
-  monthly: 'bg-blue-100',
-  yearly: 'bg-purple-100',
+  daily: 'bg-purple-100',
+  weekly: 'bg-blue-100',
+  monthly: 'bg-teal-100',
+  yearly: 'bg-orange-100',
 };
 
 const bucketTextColors: Record<Contact['bucket'], string> = {
-  daily: 'text-terracotta',
-  weekly: 'text-sage',
-  monthly: 'text-blue-600',
-  yearly: 'text-purple-600',
+  daily: 'text-purple-700',
+  weekly: 'text-blue-700',
+  monthly: 'text-teal-700',
+  yearly: 'text-orange-700',
 };
 
 interface FrequencyBadgeProps {
@@ -32,11 +33,17 @@ export default function FrequencyBadge({ bucket, onPress }: FrequencyBadgeProps)
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`rounded-full px-3 py-1 ${bucketColors[bucket]}`}
+      className={`flex-row items-center rounded-full px-3 py-1 ${bucketColors[bucket]}`}
       activeOpacity={0.7}
       disabled={!onPress}
     >
       <Text className={`text-xs font-semibold ${bucketTextColors[bucket]}`}>{bucketLabels[bucket]}</Text>
+      <Ionicons
+        name="chevron-forward"
+        size={14}
+        color={bucketTextColors[bucket]?.replace('text-', '')}
+        style={{ marginLeft: 2 }}
+      />
     </TouchableOpacity>
   );
 }

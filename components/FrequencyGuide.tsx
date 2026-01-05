@@ -33,10 +33,10 @@ const bucketInfo: Record<
 };
 
 const bucketColors: Record<Contact['bucket'], string> = {
-  daily: 'bg-terracotta-100',
-  weekly: 'bg-sage-100',
-  monthly: 'bg-blue-100',
-  yearly: 'bg-purple-100',
+  daily: 'bg-purple-100',
+  weekly: 'bg-blue-100',
+  monthly: 'bg-teal-100',
+  yearly: 'bg-orange-100',
 };
 
 export default function FrequencyGuide({ visible, onClose }: FrequencyGuideProps) {
