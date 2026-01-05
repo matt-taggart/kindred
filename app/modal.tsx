@@ -100,26 +100,38 @@ export default function LogInteractionModal() {
           placeholderTextColor="#64748b"
         />
 
-        <View className="mt-6 flex-row gap-2">
-          {!isEditMode && (
+        <View className="mt-6 gap-4">
+          <View className="flex-row gap-2">
+            {!isEditMode && (
+              <TouchableOpacity
+                className="flex-1 items-center rounded-2xl bg-white py-4"
+                onPress={noteOnly === 'true' ? handleClose : handleSkip}
+                activeOpacity={0.85}
+                disabled={saving}
+              >
+                <Text className="font-semibold text-slate">{noteOnly === 'true' ? 'Cancel' : 'Skip'}</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
-              className="flex-1 items-center rounded-2xl bg-white py-4"
-              onPress={noteOnly === 'true' ? handleClose : handleSkip}
+              className="flex-1 items-center rounded-2xl bg-sage py-4"
+              onPress={handleSave}
               activeOpacity={0.85}
               disabled={saving}
             >
-              <Text className="font-semibold text-slate">{noteOnly === 'true' ? 'Cancel' : 'Skip'}</Text>
+              <Text className="font-semibold text-white">{saving ? 'Saving...' : 'Save'}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {noteOnly !== 'true' && (
+            <TouchableOpacity
+              className="items-center py-2"
+              onPress={handleClose}
+              activeOpacity={0.7}
+            >
+              <Text className="font-semibold text-slate-400">Cancel</Text>
             </TouchableOpacity>
           )}
-
-          <TouchableOpacity
-            className="flex-1 items-center rounded-2xl bg-sage py-4"
-            onPress={handleSave}
-            activeOpacity={0.85}
-            disabled={saving}
-          >
-            <Text className="font-semibold text-white">{saving ? 'Saving...' : 'Save'}</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
