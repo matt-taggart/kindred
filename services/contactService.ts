@@ -363,7 +363,7 @@ export const updateContactCadence = async (
     .all();
 
   if (!updated) {
-    throw new Error('Failed to update contact cadence');
+    throw new Error('Failed to update contact reminders');
   }
 
   try {

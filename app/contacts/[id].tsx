@@ -12,10 +12,10 @@ import { useColorScheme } from '@/components/useColorScheme';
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 const bucketLabels: Record<Contact['bucket'], string> = {
-  daily: 'Daily cadence',
-  weekly: 'Weekly cadence',
-  monthly: 'Monthly cadence',
-  yearly: 'Yearly cadence',
+  daily: 'Daily reminders',
+  weekly: 'Weekly reminders',
+  monthly: 'Monthly reminders',
+  yearly: 'Yearly reminders',
 };
 
 const typeLabels: Record<Interaction['type'], string> = {
@@ -196,7 +196,7 @@ export default function ContactDetailScreen() {
         setContact(updated);
         loadContactData();
       } catch (error) {
-        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update contact cadence.');
+        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update contact reminders.');
       } finally {
         setSavingCadence(false);
       }

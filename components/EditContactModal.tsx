@@ -50,7 +50,7 @@ export default function EditContactModal({ contact, visible, onClose, onSave }: 
           <Text className="mb-2 text-lg font-bold text-slate">{contact.name}</Text>
           <Text className="mb-6 text-base text-slate-500">How often would you like to check in with {contact.name}?</Text>
 
-          <Text className="mb-3 text-base font-semibold text-slate">Contact Cadence</Text>
+          <Text className="mb-3 text-base font-semibold text-slate">Contact Reminders</Text>
 
           <View className="mb-6 space-y-3">
             {(['daily', 'weekly', 'monthly', 'yearly'] as Contact['bucket'][]).map((bucket) => (

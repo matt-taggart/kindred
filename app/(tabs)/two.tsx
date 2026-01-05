@@ -22,10 +22,10 @@ import { ensureDemoContacts } from '@/services/demoSeed';
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 const bucketLabels: Record<Contact['bucket'], string> = {
-  daily: 'Daily cadence',
-  weekly: 'Weekly cadence',
-  monthly: 'Monthly cadence',
-  yearly: 'Yearly cadence',
+  daily: 'Daily reminders',
+  weekly: 'Weekly reminders',
+  monthly: 'Monthly reminders',
+  yearly: 'Yearly reminders',
 };
 
 const formatLastContacted = (lastContactedAt?: number | null) => {
