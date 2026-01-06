@@ -5,7 +5,7 @@ import { ActivityIndicator, Image, Alert, Linking, RefreshControl, SafeAreaView,
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, deleteInteraction, updateContactCadence, unarchiveContact } from '@/services/contactService';
+import { getContacts, getInteractionHistory, deleteInteraction, updateContactCadence, unarchiveContact, snoozeContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
 
@@ -77,6 +77,7 @@ export default function ContactDetailScreen() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [savingCadence, setSavingCadence] = useState(false);
   const [unarchiving, setUnarchiving] = useState(false);
+  const [snoozing, setSnoozing] = useState(false);
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -104,6 +105,46 @@ export default function ContactDetailScreen() {
     useCallback(() => {
       loadContactData();
     }, [loadContactData]),
+  );
+
+  const handleMarkDone = useCallback(() => {
+    if (!id) return;
+    router.push({ pathname: '/modal', params: { contactId: id } });
+  }, [router, id]);
+
+  const handleSnooze = useCallback(async () => {
+    if (!contact) return;
+
+    const now = Date.now();
+    
+    Alert.alert(
+      'Snooze Reminder',
+      'When would you like to be reminded?',
+      [
+        { text: '1 hour', onPress: () => handleSnoozeContact(now + 60 * 60 * 1000) },
+        { text: 'Tomorrow', onPress: () => handleSnoozeContact(now + DAY_IN_MS) },
+        { text: '3 days', onPress: () => handleSnoozeContact(now + 3 * DAY_IN_MS) },
+        { text: '1 week', onPress: () => handleSnoozeContact(now + 7 * DAY_IN_MS) },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+    );
+  }, [contact]);
+
+  const handleSnoozeContact = useCallback(
+    async (untilDate: number) => {
+      if (!contact) return;
+      
+      setSnoozing(true);
+      try {
+        await snoozeContact(contact.id, untilDate);
+        loadContactData();
+      } catch (error) {
+        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to snooze contact.');
+      } finally {
+        setSnoozing(false);
+      }
+    },
+    [contact, loadContactData],
   );
 
   const handleCall = useCallback(() => {
@@ -359,6 +400,32 @@ export default function ContactDetailScreen() {
                 <Ionicons name="chatbubble-outline" size={24} color={contact.isArchived ? '#6b7280' : '#fff'} />
                 <Text className={`text-lg font-semibold ${contact.isArchived ? 'text-gray-400' : 'text-white'}`}>
                   Text
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Mark Done / Snooze Actions */}
+          {!contact.isArchived && (
+            <View className="mb-6 flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-2 border-sage py-3"
+                onPress={handleMarkDone}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="checkmark-circle-outline" size={24} color="#9CA986" />
+                <Text className="text-lg font-semibold text-sage">Mark Done</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-2 border-sage py-3"
+                onPress={handleSnooze}
+                disabled={snoozing}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="alarm-outline" size={24} color="#9CA986" />
+                <Text className="text-lg font-semibold text-sage">
+                  {snoozing ? 'Snoozing...' : 'Snooze'}
                 </Text>
               </TouchableOpacity>
             </View>
