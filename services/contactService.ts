@@ -192,7 +192,7 @@ export const updateInteraction = async (
   const interactionId = generateId();
   const nextContactDate = getNextContactDate(contact.bucket, timestamp);
 
-  db.transaction((tx) => {
+  db.transaction((tx: any) => {
     tx.insert(interactions)
       .values({
         id: interactionId,

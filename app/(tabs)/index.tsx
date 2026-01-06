@@ -37,31 +37,34 @@ type ContactCardProps = {
   onMarkDone: () => void;
   onSnooze: () => void;
   isSnoozing?: boolean;
+  onPress: () => void;
 };
 
-const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false }: ContactCardProps) => {
+const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPress }: ContactCardProps) => {
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
 
   return (
     <View className="mb-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <View className="flex-row items-center gap-3">
-        {contact.avatarUri ? (
-          <Image
-            source={{ uri: contact.avatarUri }}
-            className="h-12 w-12 rounded-full"
-            resizeMode="cover"
-          />
-        ) : (
-          <View className="h-12 w-12 items-center justify-center rounded-full bg-sage">
-            <Text className="text-base font-semibold text-white">{initial}</Text>
-          </View>
-        )}
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+        <View className="flex-row items-center gap-3">
+          {contact.avatarUri ? (
+            <Image
+              source={{ uri: contact.avatarUri }}
+              className="h-12 w-12 rounded-full"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-sage">
+              <Text className="text-base font-semibold text-white">{initial}</Text>
+            </View>
+          )}
 
-        <View className="flex-1">
-          <Text className="text-xl font-semibold text-gray-900">{contact.name}</Text>
-          <Text className="text-base text-gray-500">Last contacted: {formatLastContacted(contact.lastContactedAt)}</Text>
+          <View className="flex-1">
+            <Text className="text-xl font-semibold text-gray-900">{contact.name}</Text>
+            <Text className="text-base text-gray-500">Last contacted: {formatLastContacted(contact.lastContactedAt)}</Text>
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View className="mt-4 flex-row gap-2">
         <TouchableOpacity
@@ -121,6 +124,13 @@ export default function HomeScreen() {
     [router],
   );
 
+  const handleContactPress = useCallback(
+    (contactId: string) => {
+      router.push(`/contacts/${contactId}`);
+    },
+    [router],
+  );
+
   const handleSnooze = useCallback(
     async (contact: Contact) => {
       const now = Date.now();
@@ -169,9 +179,10 @@ export default function HomeScreen() {
         onMarkDone={() => handleMarkDone(item.id)}
         onSnooze={() => handleSnooze(item)}
         isSnoozing={snoozingContactId === item.id}
+        onPress={() => handleContactPress(item.id)}
       />
     ),
-    [handleMarkDone, handleSnooze, snoozingContactId],
+    [handleMarkDone, handleSnooze, snoozingContactId, handleContactPress],
   );
 
   const onRefresh = useCallback(() => {

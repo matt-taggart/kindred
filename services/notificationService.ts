@@ -46,7 +46,7 @@ export const scheduleReminder = async (contact: Contact): Promise<string | null>
       body: "It's been a while.",
       data: { contactId: contact.id },
     },
-    trigger: new Date(contact.nextContactDate),
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: new Date(contact.nextContactDate) },
   });
 
   return identifier;
