@@ -39,7 +39,7 @@ export default function FrequencyBadge({ bucket, onPress }: FrequencyBadgeProps)
     >
       <Text className={`text-xs font-semibold ${bucketTextColors[bucket]}`}>{bucketLabels[bucket]}</Text>
       <Ionicons
-        name="chevron-forward"
+        name="chevron-down"
         size={14}
         color={bucketTextColors[bucket]?.replace('text-', '')}
         style={{ marginLeft: 2 }}

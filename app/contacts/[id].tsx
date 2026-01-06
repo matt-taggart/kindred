@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Contact, Interaction } from '@/db/schema';
 import { getContacts, getInteractionHistory, deleteInteraction, updateContactCadence, unarchiveContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
+import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -118,7 +119,7 @@ export default function ContactDetailScreen() {
         {
           text: 'Call',
           onPress: () => {
-            Linking.openURL(`tel:${contact.phone}`);
+            Linking.openURL(`tel:${formatPhoneUrl(contact.phone)}`);
           },
         },
       ],
@@ -138,7 +139,7 @@ export default function ContactDetailScreen() {
         {
           text: 'Text',
           onPress: () => {
-            Linking.openURL(`sms:${contact.phone}`);
+            Linking.openURL(`sms:${formatPhoneUrl(contact.phone)}`);
           },
         },
       ],
@@ -310,7 +311,7 @@ export default function ContactDetailScreen() {
               <View className="flex-1">
                 <Text className="text-2xl font-bold text-slate">{contact.name}</Text>
                 {contact.phone && (
-                  <Text className="text-lg text-slate-600">{contact.phone}</Text>
+                  <Text className="text-lg text-slate-600">{formatPhoneNumber(contact.phone)}</Text>
                 )}
                 <Text className="text-base text-slate-500">{bucketLabels[contact.bucket]}</Text>
               </View>

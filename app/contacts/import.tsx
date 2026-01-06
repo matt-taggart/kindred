@@ -21,6 +21,7 @@ import FrequencyBadge from '@/components/FrequencyBadge';
 
 import { Contact as DbContact } from '@/db/schema';
 import { LimitReachedError, addContact as importContact } from '@/services/contactService';
+import { formatPhoneNumber } from '@/utils/phone';
 
 type Bucket = DbContact['bucket'];
 
@@ -104,7 +105,7 @@ const ContactRow = ({
 
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-900">{contact.name}</Text>
-          <Text className="text-sm text-gray-500">{contact.phone}</Text>
+          <Text className="text-sm text-gray-500">{formatPhoneNumber(contact.phone)}</Text>
         </View>
 
         <FrequencyBadge bucket={frequency} onPress={() => onFrequencyChange(frequency)} />

@@ -1,5 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -15,6 +16,7 @@ import {
 
 import { Contact } from '@/db/schema';
 import { archiveContact, getContacts, resetDatabase, unarchiveContact } from '@/services/contactService';
+import { formatPhoneNumber } from '@/utils/phone';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -132,33 +134,35 @@ const ContactRow = ({
       <View className="mt-3 flex-row items-center justify-between">
         <View className="flex-1">
           {contact.phone ? (
-            <Text className="text-base text-gray-500">Phone · {contact.phone}</Text>
+            <Text className="text-base text-gray-500">Phone · {formatPhoneNumber(contact.phone)}</Text>
           ) : null}
         </View>
 
         {contact.isArchived ? (
           <TouchableOpacity
-            className="px-2"
+            className="ml-2 flex-row items-center rounded-full bg-sage px-4 py-2"
             onPress={(e) => {
               e.stopPropagation();
               onUnarchive?.();
             }}
             activeOpacity={0.7}
           >
-            <Text className="text-sm font-semibold text-sage">Unarchive</Text>
+            <Ionicons name="refresh-outline" size={16} color="white" />
+            <Text className="ml-1.5 text-sm font-semibold text-white">Unarchive</Text>
           </TouchableOpacity>
         ) : null}
 
         {!contact.isArchived && onArchive ? (
           <TouchableOpacity
-            className="px-2"
+            className="ml-2 flex-row items-center rounded-full bg-gray-100 px-4 py-2"
             onPress={(e) => {
               e.stopPropagation();
               onArchive?.();
             }}
             activeOpacity={0.7}
           >
-            <Text className="text-sm font-semibold text-gray-400">Archive</Text>
+            <Ionicons name="archive-outline" size={16} color="#374151" />
+            <Text className="ml-1.5 text-sm font-semibold text-gray-700">Archive</Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -237,14 +241,28 @@ export default function ContactsScreen() {
 
   const handleArchive = useCallback(
     async (contactId: string) => {
-      try {
-        await archiveContact(contactId);
-        loadContacts();
-      } catch (error) {
-        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to archive contact.');
-      }
+      const contact = contacts.find(c => c.id === contactId);
+      Alert.alert(
+        'Archive Contact',
+        `Are you sure you want to archive ${contact?.name}? They won't appear in your main list, but you can restore them anytime.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Archive',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await archiveContact(contactId);
+                loadContacts();
+              } catch (error) {
+                Alert.alert('Error', error instanceof Error ? error.message : 'Failed to archive contact.');
+              }
+            },
+          },
+        ],
+      );
     },
-    [loadContacts],
+    [contacts, loadContacts],
   );
 
   const handleUnarchive = useCallback(
