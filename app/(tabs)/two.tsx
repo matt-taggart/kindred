@@ -15,9 +15,6 @@ import {
 
 import { Contact } from '@/db/schema';
 import { archiveContact, getContacts, resetDatabase, unarchiveContact } from '@/services/contactService';
-import { sendTestNotification } from '@/services/notificationService';
-import { isDevelopment } from '@/utils/env';
-import { ensureDemoContacts } from '@/services/demoSeed';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -281,9 +278,8 @@ export default function ContactsScreen() {
           onPress: async () => {
             try {
               await resetDatabase();
-              await ensureDemoContacts();
               loadContacts();
-              Alert.alert('Success', 'Database has been reset with demo contacts restored.');
+              Alert.alert('Success', 'Database has been reset.');
             } catch (error) {
               Alert.alert('Error', error instanceof Error ? error.message : 'Failed to reset database.');
             }
@@ -292,22 +288,6 @@ export default function ContactsScreen() {
       ],
     );
   }, [loadContacts]);
-
-  const handleTestNotification = useCallback(async () => {
-    try {
-      const result = await sendTestNotification();
-      if (result.success) {
-        Alert.alert(
-          'Test Notification Sent',
-          'A test notification will appear in 2 seconds. If you do not see it, please check your notification permissions.',
-        );
-      } else {
-        Alert.alert('Error', result.error || 'Failed to send test notification.');
-      }
-    } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to send test notification.');
-    }
-  }, []);
 
   const emptyState = useMemo(() => {
     const hasSearchQuery = searchQuery.trim().length > 0;
@@ -353,8 +333,8 @@ export default function ContactsScreen() {
       return {
         type: 'all-archived' as const,
         title: 'All your contacts are archived',
-        subtitle: null,
-        showCTA: false,
+        subtitle: `You have ${stats.archived} archived contact${stats.archived > 1 ? 's' : ''}`,
+        showCTA: true,
       };
     }
 
@@ -443,32 +423,6 @@ export default function ContactsScreen() {
                 </View>
               </>
             )}
-
-            {isDevelopment() && (
-              <>
-                <View className="mt-6 border-t border-dashed border-gray-300 pt-6">
-                  <Text className="text-xs font-bold uppercase text-gray-400 tracking-wide">
-                    Development Tools
-                  </Text>
-                  <View className="mt-3 flex-row gap-3">
-                    <TouchableOpacity
-                      className="flex-1 items-center rounded-xl border border-blue-300 bg-blue-50 px-4 py-3"
-                      onPress={handleTestNotification}
-                      activeOpacity={0.7}
-                    >
-                      <Text className="text-sm font-semibold text-blue-600">Test Notification</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className="flex-1 items-center rounded-xl border border-red-300 bg-red-50 px-4 py-3"
-                      onPress={handleResetDatabase}
-                      activeOpacity={0.7}
-                    >
-                      <Text className="text-sm font-semibold text-red-600">Reset Database</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </>
-            )}
           </View>
         }
         ListEmptyComponent={
@@ -483,10 +437,12 @@ export default function ContactsScreen() {
             {emptyState.showCTA && (
               <TouchableOpacity
                 className="mt-5 rounded-2xl bg-sage px-6 py-4"
-                onPress={handleImportPress}
+                onPress={emptyState.type === 'all-archived' ? () => setFilter('archived') : handleImportPress}
                 activeOpacity={0.9}
               >
-                <Text className="text-lg font-semibold text-white">Import from Phone</Text>
+                <Text className="text-lg font-semibold text-white">
+                  {emptyState.type === 'all-archived' ? 'View Archived' : 'Import from Phone'}
+                </Text>
               </TouchableOpacity>
             )}
           </View>

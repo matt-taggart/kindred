@@ -21,11 +21,6 @@ const ensureAndroidChannel = async () => {
     name: 'Reminders',
     importance: Notifications.AndroidImportance.DEFAULT,
   });
-
-  await Notifications.setNotificationChannelAsync('test-notifications', {
-    name: 'Test Notifications',
-    importance: Notifications.AndroidImportance.HIGH,
-  });
 };
 
 export const scheduleReminder = async (contact: Contact): Promise<string | null> => {
@@ -55,34 +50,4 @@ export const scheduleReminder = async (contact: Contact): Promise<string | null>
   });
 
   return identifier;
-};
-
-export const sendTestNotification = async (): Promise<{ success: boolean; error?: string }> => {
-  const hasPermission = await ensurePermissions();
-  if (!hasPermission) {
-    return { success: false, error: 'Notification permissions not granted' };
-  }
-
-  await ensureAndroidChannel();
-
-  try {
-    const testDate = new Date(Date.now() + 2000);
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: '📬 Test Notification',
-        body: 'This is a test notification from Kindred. Notifications are working!',
-        sound: true,
-        vibrate: [0, 250, 250, 250],
-      },
-      trigger: testDate,
-    });
-
-    return { success: true };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to schedule test notification',
-    };
-  }
 };

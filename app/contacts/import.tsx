@@ -388,7 +388,7 @@ export default function ImportContactsScreen() {
                   </Text>
                   <Text className="mt-2 text-sm text-gray-600">
                     {contacts.length > 0
-                      ? 'Choose which contacts you want to add to Kindred, then tap Import Selected.'
+                      ? 'Choose which contacts you want to add to Kindred.'
                       : 'Grant permission to read your phone contacts, pick who you want to bring in, and save them to your Kindred list.'}
                   </Text>
 

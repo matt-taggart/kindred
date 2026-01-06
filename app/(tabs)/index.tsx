@@ -93,6 +93,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [snoozingContactId, setSnoozingContactId] = useState<string | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const loadContacts = useCallback(() => {
     try {
@@ -189,7 +190,15 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-cream">
       <View className="flex-1 px-4 pt-4">
-        <Text className="mb-4 text-2xl font-bold text-gray-900">Today</Text>
+        <Text className="mb-1 text-2xl font-bold text-gray-900">Today</Text>
+        <Text className="mb-4 text-lg text-gray-500 font-medium">
+          {currentDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </Text>
 
         <FlatList
           data={contacts}
