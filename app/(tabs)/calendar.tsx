@@ -214,7 +214,7 @@ export default function CalendarScreen() {
       >
         <View className="mb-4">
           <Text className="text-2xl font-bold text-gray-900">Calendar</Text>
-          <Text className="mt-1 text-sm text-gray-500">
+          <Text className="mt-1 text-base text-gray-500">
             {monthDueCount} contact{monthDueCount !== 1 ? 's' : ''} due this month
           </Text>
         </View>
