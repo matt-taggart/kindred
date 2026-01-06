@@ -1,11 +1,13 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Contacts from 'expo-contacts';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   FlatList,
   Image,
+  Linking,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -128,6 +130,7 @@ const ContactRow = ({
 
 export default function ImportContactsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ autoRequest?: string }>();
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState<ImportableContact[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -138,6 +141,108 @@ export default function ImportContactsScreen() {
   const [showFrequencySelector, setShowFrequencySelector] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
 
+  const shouldAutoRequest = useMemo(() => {
+    const value = params.autoRequest;
+    if (Array.isArray(value)) {
+      return value.includes('1') || value.includes('true');
+    }
+    return value === '1' || value === 'true';
+  }, [params.autoRequest]);
+
+  const loadContacts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Image],
+        sort: Contacts.SortTypes.FirstName,
+      });
+
+      const withPhones: ImportableContact[] = data
+        .map(toImportable)
+        .filter((item): item is ImportableContact => Boolean(item));
+
+      setContacts(withPhones);
+      setSelected(new Set());
+
+      const initialFrequencies = withPhones.reduce(
+        (acc, contact) => {
+          acc[contact.id] = 'weekly';
+          return acc;
+        },
+        {} as Record<string, Bucket>,
+      );
+      setContactFrequencies(initialFrequencies);
+      setEditingContactId(null);
+      setShowFrequencySelector(false);
+      setPermissionDenied(false);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const requestPermissionAndLoad = useCallback(async () => {
+    setPermissionDenied(false);
+    setLoading(true);
+
+    try {
+      const permission = await Contacts.requestPermissionsAsync();
+
+      if (permission.status !== Contacts.PermissionStatus.GRANTED) {
+        setPermissionDenied(true);
+        setContacts([]);
+        setSelected(new Set());
+
+        if (!permission.canAskAgain) {
+          Alert.alert(
+            'Permission needed',
+            'Enable contact access in Settings to import from your address book.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Open Settings', onPress: () => Linking.openSettings?.() },
+            ],
+          );
+        }
+        return;
+      }
+
+      await loadContacts();
+    } finally {
+      setLoading(false);
+    }
+  }, [loadContacts]);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const permission = await Contacts.getPermissionsAsync();
+
+      if (permission.status === Contacts.PermissionStatus.GRANTED) {
+        await loadContacts();
+        return;
+      }
+
+      if (shouldAutoRequest) {
+        await requestPermissionAndLoad();
+      }
+    };
+
+    initialize();
+  }, [loadContacts, requestPermissionAndLoad, shouldAutoRequest]);
+
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        const permission = await Contacts.getPermissionsAsync();
+        if (permission.status === Contacts.PermissionStatus.GRANTED) {
+          await loadContacts();
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => subscription.remove();
+  }, [loadContacts]);
 
   const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {
@@ -193,42 +298,23 @@ export default function ImportContactsScreen() {
   );
 
   const handleImportPress = useCallback(async () => {
-    setPermissionDenied(false);
-    setLoading(true);
+    await requestPermissionAndLoad();
+  }, [requestPermissionAndLoad]);
 
-    try {
-      const { status } = await Contacts.requestPermissionsAsync();
-
-      if (status !== Contacts.PermissionStatus.GRANTED) {
-        setPermissionDenied(true);
-        setContacts([]);
-        setSelected(new Set());
-        return;
-      }
-
-      const { data } = await Contacts.getContactsAsync({
-        fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Image],
-        sort: Contacts.SortTypes.FirstName,
-      });
-
-      const withPhones: ImportableContact[] = data
-        .map(toImportable)
-        .filter((item): item is ImportableContact => Boolean(item));
-
-      setContacts(withPhones);
-      setSelected(new Set());
-
-      const initialFrequencies = withPhones.reduce(
-        (acc, contact) => {
-          acc[contact.id] = 'weekly';
-          return acc;
+  const handleAddMoreContacts = useCallback(() => {
+    Alert.alert(
+      'Add More Contacts',
+      'To share more contacts with Kindred, update your contact access in Settings.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Open Settings',
+          onPress: async () => {
+            await Linking.openSettings();
+          },
         },
-        {} as Record<string, Bucket>,
-      );
-      setContactFrequencies(initialFrequencies);
-    } finally {
-      setLoading(false);
-    }
+      ],
+    );
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -297,19 +383,32 @@ export default function ImportContactsScreen() {
               <View className="pb-3">
                 <View className="mb-6 rounded-2xl border border-sage-100 bg-white p-5 shadow-sm">
                   <Text className="text-xs font-semibold uppercase tracking-wide text-sage">Import</Text>
-                  <Text className="mt-1 text-xl font-bold text-gray-900">Bring your people to Kindred</Text>
+                  <Text className="mt-1 text-xl font-bold text-gray-900">
+                    {contacts.length > 0 ? 'Select contacts to import' : 'Bring your people to Kindred'}
+                  </Text>
                   <Text className="mt-2 text-sm text-gray-600">
-                    Grant permission to read your phone contacts, pick who you want to bring in, and save them to
-                    your Kindred list.
+                    {contacts.length > 0
+                      ? 'Choose which contacts you want to add to Kindred, then tap Import Selected.'
+                      : 'Grant permission to read your phone contacts, pick who you want to bring in, and save them to your Kindred list.'}
                   </Text>
 
-                  <TouchableOpacity
-                    className="mt-4 items-center rounded-xl bg-sage py-4"
-                    onPress={handleImportPress}
-                    activeOpacity={0.9}
-                  >
-                    <Text className="text-base font-semibold text-white">Import from Phone</Text>
-                  </TouchableOpacity>
+                  {contacts.length === 0 ? (
+                    <TouchableOpacity
+                      className="mt-4 items-center rounded-xl bg-sage py-4"
+                      onPress={handleImportPress}
+                      activeOpacity={0.9}
+                    >
+                      <Text className="text-base font-semibold text-white">Import from Phone</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      className="mt-4 items-center rounded-xl border-2 border-sage bg-transparent py-4"
+                      onPress={handleAddMoreContacts}
+                      activeOpacity={0.9}
+                    >
+                      <Text className="text-base font-semibold text-sage">Add More Contacts</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
 
                 {contacts.length > 0 && (

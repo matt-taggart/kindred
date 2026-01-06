@@ -15,6 +15,7 @@ import {
 
 import { Contact } from '@/db/schema';
 import { getDueContacts, snoozeContact } from '@/services/contactService';
+import CelebrationStatus from '@/components/CelebrationStatus';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -199,11 +200,7 @@ export default function HomeScreen() {
             paddingBottom: 24,
             flexGrow: contacts.length === 0 ? 1 : undefined,
           }}
-          ListEmptyComponent={
-            <View className="flex-1 items-center justify-center">
-              <Text className="text-base text-gray-500">You&apos;re all caught up for today.</Text>
-            </View>
-          }
+          ListEmptyComponent={<CelebrationStatus />}
         />
       </View>
     </SafeAreaView>

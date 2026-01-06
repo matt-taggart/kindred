@@ -58,8 +58,9 @@ export default function RootLayout() {
         const { runMigrations } = await import('@/db/migrations');
         runMigrations();
 
-        const { ensureDemoContacts } = await import('@/services/demoSeed');
-        await ensureDemoContacts();
+        // Demo data seeding disabled for blank slate
+        // const { ensureDemoContacts } = await import('@/services/demoSeed');
+        // await ensureDemoContacts();
 
         const { IAPService } = await import('@/services/iapService');
         await IAPService.initialize();

@@ -235,7 +235,7 @@ export default function ContactsScreen() {
   }, [loadContacts]);
 
   const handleImportPress = useCallback(() => {
-    router.push('/contacts/import');
+    router.push({ pathname: '/contacts/import', params: { autoRequest: '1' } });
   }, [router]);
 
   const handleArchive = useCallback(
@@ -316,7 +316,7 @@ export default function ContactsScreen() {
     if (hasZeroContacts) {
       return {
         type: 'first-time' as const,
-        title: 'No contacts yet.',
+        title: 'No contacts yet',
         subtitle: 'Import from your phone to start building your circle.',
         showCTA: true,
       };
@@ -325,7 +325,7 @@ export default function ContactsScreen() {
     if (hasSearchQuery) {
       return {
         type: 'search' as const,
-        title: `No contacts match '${searchQuery}'.`,
+        title: `No contacts match '${searchQuery}'`,
         subtitle: 'Try a different search term.',
         showCTA: false,
       };
@@ -334,7 +334,7 @@ export default function ContactsScreen() {
     if (filter === 'due' && stats.due === 0) {
       return {
         type: 'no-due' as const,
-        title: 'No contacts are due right now.',
+        title: 'No contacts are due right now',
         subtitle: "Great job staying on top of things!",
         showCTA: false,
       };
@@ -343,7 +343,7 @@ export default function ContactsScreen() {
     if (filter === 'archived' && stats.archived === 0) {
       return {
         type: 'no-archived' as const,
-        title: 'No archived contacts.',
+        title: 'No archived contacts',
         subtitle: null,
         showCTA: false,
       };
@@ -352,7 +352,7 @@ export default function ContactsScreen() {
     if (filter === 'all' && stats.active === 0 && contacts.length > 0) {
       return {
         type: 'all-archived' as const,
-        title: 'All your contacts are archived.',
+        title: 'All your contacts are archived',
         subtitle: null,
         showCTA: false,
       };
@@ -360,7 +360,7 @@ export default function ContactsScreen() {
 
     return {
       type: 'default' as const,
-      title: 'No contacts found.',
+      title: 'No contacts found',
       subtitle: null,
       showCTA: false,
     };
@@ -406,41 +406,43 @@ export default function ContactsScreen() {
               See who is due next and manage your circle.
             </Text>
 
-            <TouchableOpacity
-              className="mt-4 w-full items-center rounded-2xl bg-sage py-4"
-              onPress={handleImportPress}
-              activeOpacity={0.9}
-            >
-              <Text className="text-base font-semibold text-white">
-                {contacts.length === 0 ? 'Import from Phone' : 'Add More Contacts'}
-              </Text>
-            </TouchableOpacity>
+            {contacts.length > 0 && (
+              <>
+                <TouchableOpacity
+                  className="mt-4 w-full items-center rounded-2xl bg-sage py-4"
+                  onPress={handleImportPress}
+                  activeOpacity={0.9}
+                >
+                  <Text className="text-base font-semibold text-white">Add More Contacts</Text>
+                </TouchableOpacity>
 
-            <View className="mt-6">
-              <View className="w-full min-h-14 rounded-2xl border border-gray-200 bg-white shadow-sm px-4 py-3 flex-row items-center">
-                <TextInput
-                  className="flex-1 text-base leading-5 text-gray-900"
-                  placeholder="Search by name or number"
-                  placeholderTextColor="#9ca3af"
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  returnKeyType="search"
-                  textAlignVertical="center"
-                />
-              </View>
-            </View>
+                <View className="mt-6">
+                  <View className="w-full min-h-14 rounded-2xl border border-gray-200 bg-white shadow-sm px-4 py-3 flex-row items-center">
+                    <TextInput
+                      className="flex-1 text-base leading-5 text-gray-900"
+                      placeholder="Search by name or number"
+                      placeholderTextColor="#9ca3af"
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                      returnKeyType="search"
+                      textAlignVertical="center"
+                    />
+                  </View>
+                </View>
 
-            <View className="mt-5 flex-row flex-wrap gap-2">
-              {filterOptions.map((option) => (
-                <FilterChip
-                  key={option.value}
-                  active={filter === option.value}
-                  label={option.label}
-                  count={option.count}
-                  onPress={() => setFilter(option.value)}
-                />
-              ))}
-            </View>
+                <View className="mt-5 flex-row flex-wrap gap-2">
+                  {filterOptions.map((option) => (
+                    <FilterChip
+                      key={option.value}
+                      active={filter === option.value}
+                      label={option.label}
+                      count={option.count}
+                      onPress={() => setFilter(option.value)}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
 
             {isDevelopment() && (
               <>
@@ -471,9 +473,9 @@ export default function ContactsScreen() {
         }
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center py-16">
-            <Text className="text-base text-gray-500">{emptyState.title}</Text>
+            <Text className="text-2xl font-bold text-gray-900">{emptyState.title}</Text>
             {emptyState.subtitle && (
-              <Text className="mt-1 text-sm text-gray-400 text-center">
+              <Text className="mt-1 text-base text-gray-600 text-center">
                 {emptyState.subtitle}
               </Text>
             )}
@@ -484,7 +486,7 @@ export default function ContactsScreen() {
                 onPress={handleImportPress}
                 activeOpacity={0.9}
               >
-                <Text className="text-base font-semibold text-white">Import from Phone</Text>
+                <Text className="text-lg font-semibold text-white">Import from Phone</Text>
               </TouchableOpacity>
             )}
           </View>

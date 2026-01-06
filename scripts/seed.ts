@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
 
 import { getDb } from '../db/client';
-import { runMigrations } from '../db/migrations';
+// import { runMigrations } from '../db/migrations';
 import { contacts } from '../db/schema';
 import { addContact } from '../services/contactService';
 
@@ -13,7 +13,7 @@ const seedData = [
 const main = async () => {
   // Note: getDb() and runMigrations() might fail in Node environment if they depend on expo-sqlite native modules.
   // For seeding in Node, a different adapter (like better-sqlite3) is typically needed.
-  runMigrations();
+  // runMigrations();
 
   const db = getDb();
   const [{ count }] = db.select({ count: sql<number>`count(*)` }).from(contacts).all();

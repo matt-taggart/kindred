@@ -190,7 +190,7 @@ export default function CalendarScreen() {
     });
 
     return {
-      title: `No contacts scheduled for ${isToday ? 'today' : 'this day'}.`,
+      title: `No contacts scheduled for ${isToday ? 'today' : 'this day'}`,
       subtitle: isToday ? 'You\'re all caught up!' : formattedDate,
     };
   }, [selectedDate, todayDate]);

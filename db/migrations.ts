@@ -30,4 +30,16 @@ export const runMigrations = () => {
   `);
 
   hasRunMigrations = true;
+  console.log('Migrations completed successfully');
+};
+
+// Clear all existing tables for blank slate
+export const clearDatabase = () => {
+  const sqlite = getSqlite();
+  sqlite.execSync(`
+    PRAGMA foreign_keys = OFF;
+    DROP TABLE IF EXISTS interactions;
+    DROP TABLE IF EXISTS contacts;
+  `);
+  console.log('Database cleared - working with blank slate');
 };

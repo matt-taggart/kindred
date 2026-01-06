@@ -1,5 +1,5 @@
-Implement the Paywall logic.
-1. In `contactService.ts`, check the count of existing contacts before adding a new one.
-2. If count >= 5 AND `user.isPro` is false, throw a "LimitReached" error.
-3. Create a `components/PaywallModal.tsx` that explains the limit.
-4. (Mock IAP for now): Add a "Restore Purchase" button that simply sets a boolean `isPro` in Zustand/AsyncStorage to true for testing purposes.
+# Task
+Please ensure that the flow for importing contacts is as follows:
+1) If you haven't added any contacts yet, then show the "Import from Phone" view.
+2) If we've already provided contacts (via selection for permissions and making them available to the app), then immediately show them on the "import Contacts" page.
+3) Clicking on "Add more contacts" should pull up the menu where I give the app permission to access more contacts
