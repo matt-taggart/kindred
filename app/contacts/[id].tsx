@@ -11,11 +11,37 @@ import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const bucketLabels: Record<Contact['bucket'], string> = {
+const bucketLabelMap: Record<Contact['bucket'], string> = {
   daily: 'Daily reminders',
   weekly: 'Weekly reminders',
+  'bi-weekly': 'Bi-weekly reminders',
+  'every-three-weeks': 'Every three weeks reminders',
   monthly: 'Monthly reminders',
+  'every-six-months': 'Every six months reminders',
   yearly: 'Yearly reminders',
+  custom: 'Custom reminders',
+};
+
+const formatCustomLabel = (customIntervalDays?: number | null) => {
+  if (!customIntervalDays || customIntervalDays < 1) return 'Custom reminders';
+
+  if (customIntervalDays % 30 === 0) {
+    const months = customIntervalDays / 30;
+    return months === 1 ? 'Every month' : `Every ${months} months`;
+  }
+
+  if (customIntervalDays % 7 === 0) {
+    const weeks = customIntervalDays / 7;
+    return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
+  }
+
+  if (customIntervalDays === 1) return 'Daily reminders';
+  return `Every ${customIntervalDays} days`;
+};
+
+const getBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
+  if (bucket === 'custom') return formatCustomLabel(customIntervalDays);
+  return bucketLabelMap[bucket];
 };
 
 const typeLabels: Record<Interaction['type'], string> = {
@@ -243,12 +269,12 @@ export default function ContactDetailScreen() {
   }, [contact, loadContactData]);
 
   const handleSaveCadence = useCallback(
-    async (newBucket: Contact['bucket']) => {
+    async (newBucket: Contact['bucket'], customIntervalDays?: number | null) => {
       if (!contact) return;
 
       setSavingCadence(true);
       try {
-        const updated = await updateContactCadence(contact.id, newBucket);
+        const updated = await updateContactCadence(contact.id, newBucket, customIntervalDays);
         setContact(updated);
         loadContactData();
       } catch (error) {
@@ -354,7 +380,7 @@ export default function ContactDetailScreen() {
                 {contact.phone && (
                   <Text className="text-lg text-slate-600">{formatPhoneNumber(contact.phone)}</Text>
                 )}
-                <Text className="text-base text-slate-500">{bucketLabels[contact.bucket]}</Text>
+                <Text className="text-base text-slate-500">{getBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
               </View>
             </View>
 

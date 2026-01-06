@@ -6,22 +6,34 @@ import { Contact } from '@/db/schema';
 const bucketLabels: Record<Contact['bucket'], string> = {
   daily: 'Daily',
   weekly: 'Weekly',
+  'bi-weekly': 'Bi-weekly',
+  'every-three-weeks': 'Every three weeks',
   monthly: 'Monthly',
+  'every-six-months': 'Every six months',
   yearly: 'Yearly',
+  custom: 'Custom',
 };
 
 const bucketColors: Record<Contact['bucket'], string> = {
   daily: 'bg-purple-100',
   weekly: 'bg-blue-100',
+  'bi-weekly': 'bg-indigo-100',
+  'every-three-weeks': 'bg-indigo-100',
   monthly: 'bg-teal-100',
+  'every-six-months': 'bg-amber-100',
   yearly: 'bg-orange-100',
+  custom: 'bg-sage-100',
 };
 
 const bucketTextColors: Record<Contact['bucket'], string> = {
   daily: 'text-purple-700',
   weekly: 'text-blue-700',
+  'bi-weekly': 'text-indigo-700',
+  'every-three-weeks': 'text-indigo-700',
   monthly: 'text-teal-700',
+  'every-six-months': 'text-amber-700',
   yearly: 'text-orange-700',
+  custom: 'text-sage',
 };
 
 interface FrequencyBadgeProps {

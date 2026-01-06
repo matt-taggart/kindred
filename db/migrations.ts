@@ -1,11 +1,87 @@
 import { getSqlite } from './client';
 
+const MIGRATION_VERSION = '2';
+
 let hasRunMigrations = false;
+
+const CONTACT_TABLE_SQL = `
+  CREATE TABLE contacts (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    phone TEXT,
+    avatarUri TEXT,
+    bucket TEXT NOT NULL CHECK (bucket IN ('daily','weekly','bi-weekly','every-three-weeks','monthly','every-six-months','yearly','custom')),
+    customIntervalDays INTEGER,
+    lastContactedAt INTEGER,
+    nextContactDate INTEGER,
+    isArchived INTEGER NOT NULL DEFAULT 0
+  );
+`;
+
+const recreateContactsTableIfNeeded = () => {
+  const sqlite = getSqlite();
+
+  try {
+    const result = sqlite.getAllSync('SELECT sql FROM sqlite_master WHERE type="table" AND name="contacts";');
+
+    if (result && result.length > 0) {
+      const tableSql = result[0].sql || '';
+
+      const hasCustomColumn = tableSql.includes('customIntervalDays');
+      const allowsCustomBucket = tableSql.includes("'custom'");
+      const hasExpandedBuckets = tableSql.includes('bi-weekly') && tableSql.includes('every-three-weeks') && tableSql.includes('every-six-months');
+      const needsMigration = !hasCustomColumn || !allowsCustomBucket || !hasExpandedBuckets;
+
+      if (needsMigration) {
+        console.log('Migrating contacts table to support custom reminders...');
+
+        sqlite.execSync('BEGIN TRANSACTION;');
+
+        try {
+          const contactsData = sqlite.getAllSync('SELECT * FROM contacts;');
+
+          sqlite.execSync('DROP TABLE IF EXISTS contacts;');
+          sqlite.execSync(CONTACT_TABLE_SQL);
+
+          if (contactsData && contactsData.length > 0) {
+            for (const row of contactsData) {
+              const id = (row.id || '').replace(/'/g, "''");
+              const name = (row.name || '').replace(/'/g, "''");
+              const phone = (row.phone || '').replace(/'/g, "''");
+              const avatarUri = (row.avatarUri || '').replace(/'/g, "''");
+              const bucket = (row.bucket || '').replace(/'/g, "''");
+              const customIntervalDays = row.customIntervalDays ?? null;
+              const lastContactedAt = row.lastContactedAt ?? 'NULL';
+              const nextContactDate = row.nextContactDate ?? 'NULL';
+              const isArchived = row.isArchived ?? 0;
+
+              sqlite.execSync(
+                `INSERT INTO contacts (id, name, phone, avatarUri, bucket, customIntervalDays, lastContactedAt, nextContactDate, isArchived) VALUES ('${id}', '${name}', '${phone}', '${avatarUri}', '${bucket}', ${customIntervalDays ?? 'NULL'}, ${lastContactedAt}, ${nextContactDate}, ${isArchived});`
+              );
+            }
+          }
+
+          sqlite.execSync('COMMIT;');
+          console.log('Contact table migration completed successfully');
+        } catch (error) {
+          sqlite.execSync('ROLLBACK;');
+          console.error('Migration failed, rolling back:', error);
+          throw error;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error during migration:', error);
+  }
+};
 
 export const runMigrations = () => {
   if (hasRunMigrations) return;
 
   const sqlite = getSqlite();
+
+  recreateContactsTableIfNeeded();
+
   sqlite.execSync(`
     PRAGMA foreign_keys = ON;
     CREATE TABLE IF NOT EXISTS contacts (
@@ -13,7 +89,8 @@ export const runMigrations = () => {
       name TEXT NOT NULL,
       phone TEXT,
       avatarUri TEXT,
-      bucket TEXT NOT NULL CHECK (bucket IN ('daily','weekly','monthly','yearly')),
+      bucket TEXT NOT NULL CHECK (bucket IN ('daily','weekly','bi-weekly','every-three-weeks','monthly','every-six-months','yearly','custom')),
+      customIntervalDays INTEGER,
       lastContactedAt INTEGER,
       nextContactDate INTEGER,
       isArchived INTEGER NOT NULL DEFAULT 0

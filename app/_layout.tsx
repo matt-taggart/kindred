@@ -31,7 +31,9 @@ export const unstable_settings = {
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {
+  /* reloading the app might trigger some race conditions, ignore them */
+});
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -46,10 +48,12 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    if (loaded && dbReady) {
+      SplashScreen.hideAsync().catch(() => {
+        // Ignore errors if the splash screen is already hidden
+      });
     }
-  }, [loaded]);
+  }, [loaded, dbReady]);
 
   useEffect(() => {
     if (!loaded) return;

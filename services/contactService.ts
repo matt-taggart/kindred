@@ -26,6 +26,14 @@ const generateId = () => {
 type InteractionType = NewInteraction['type'];
 type InsertableContact = Omit<NewContact, 'id'> & { id?: string };
 
+const normalizeCustomInterval = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
+  if (bucket !== 'custom') return null;
+  if (!customIntervalDays || customIntervalDays < 1 || customIntervalDays > 365) {
+    throw new Error('Custom reminders require a valid interval');
+  }
+  return customIntervalDays;
+};
+
 export const addContact = async (contact: InsertableContact): Promise<Contact> => {
   const db = getDb();
   const isPro = useUserStore.getState().isPro;
@@ -47,11 +55,12 @@ export const addContact = async (contact: InsertableContact): Promise<Contact> =
 
   const id = contact.id ?? generateId();
   const lastContactedAt = contact.lastContactedAt ?? undefined;
+  const customIntervalDays = normalizeCustomInterval(contact.bucket, contact.customIntervalDays);
   const nextContactDate =
-    contact.nextContactDate ?? getNextContactDate(contact.bucket, lastContactedAt ?? Date.now());
+    contact.nextContactDate ?? getNextContactDate(contact.bucket, lastContactedAt ?? Date.now(), customIntervalDays);
 
   db.insert(contacts)
-    .values({ ...contact, id, lastContactedAt, nextContactDate })
+    .values({ ...contact, id, lastContactedAt, nextContactDate, customIntervalDays })
     .run();
 
   const [inserted] = db
@@ -190,7 +199,7 @@ export const updateInteraction = async (
 
   const timestamp = Date.now();
   const interactionId = generateId();
-  const nextContactDate = getNextContactDate(contact.bucket, timestamp);
+  const nextContactDate = getNextContactDate(contact.bucket, timestamp, contact.customIntervalDays);
 
   db.transaction((tx: any) => {
     tx.insert(interactions)
@@ -330,6 +339,7 @@ export const snoozeContact = async (
 export const updateContactCadence = async (
   contactId: Contact['id'],
   newBucket: Contact['bucket'],
+  customIntervalDays?: number | null,
 ): Promise<Contact> => {
   const db = getDb();
 
@@ -344,12 +354,14 @@ export const updateContactCadence = async (
     throw new Error(`Contact not found: ${contactId}`);
   }
 
+  const normalizedCustomDays = normalizeCustomInterval(newBucket, customIntervalDays ?? contact.customIntervalDays);
   const lastContactedAt = contact.lastContactedAt || Date.now();
-  const nextContactDate = getNextContactDate(newBucket, lastContactedAt);
+  const nextContactDate = getNextContactDate(newBucket, lastContactedAt, normalizedCustomDays);
 
   db.update(contacts)
     .set({
       bucket: newBucket,
+      customIntervalDays: newBucket === 'custom' ? normalizedCustomDays : null,
       nextContactDate,
     })
     .where(eq(contacts.id, contactId))

@@ -20,11 +20,38 @@ import { formatPhoneNumber } from '@/utils/phone';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const bucketLabels: Record<Contact['bucket'], string> = {
-  daily: 'Daily reminders',
-  weekly: 'Weekly reminders',
-  monthly: 'Monthly reminders',
-  yearly: 'Yearly reminders',
+const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
+  switch (bucket) {
+    case 'daily':
+      return 'Daily reminders';
+    case 'weekly':
+      return 'Weekly reminders';
+    case 'bi-weekly':
+      return 'Every two weeks';
+    case 'every-three-weeks':
+      return 'Every three weeks';
+    case 'monthly':
+      return 'Monthly reminders';
+    case 'every-six-months':
+      return 'Every six months';
+    case 'yearly':
+      return 'Yearly reminders';
+    case 'custom': {
+      if (!customIntervalDays || customIntervalDays < 1) return 'Custom reminders';
+      if (customIntervalDays % 30 === 0) {
+        const months = customIntervalDays / 30;
+        return months === 1 ? 'Every month' : `Every ${months} months`;
+      }
+      if (customIntervalDays % 7 === 0) {
+        const weeks = customIntervalDays / 7;
+        return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
+      }
+      if (customIntervalDays === 1) return 'Daily reminders';
+      return `Every ${customIntervalDays} days`;
+    }
+    default:
+      return 'Custom reminders';
+  }
 };
 
 const formatLastContacted = (lastContactedAt?: number | null) => {
@@ -104,7 +131,7 @@ const ContactRow = ({
       <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-3">
           <Text className="text-xl font-semibold text-gray-900">{contact.name}</Text>
-          <Text className="text-base text-gray-500">{bucketLabels[contact.bucket]}</Text>
+          <Text className="text-base text-gray-500">{formatBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
         </View>
 
         <View className="flex-row items-center gap-2">

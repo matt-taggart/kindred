@@ -28,11 +28,38 @@ const formatLastContacted = (lastContactedAt?: number | null) => {
   return `${days} days ago`;
 };
 
-const bucketLabels: Record<Contact['bucket'], string> = {
-  daily: 'Daily',
-  weekly: 'Weekly',
-  monthly: 'Monthly',
-  yearly: 'Yearly',
+const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
+  switch (bucket) {
+    case 'daily':
+      return 'Daily';
+    case 'weekly':
+      return 'Weekly';
+    case 'bi-weekly':
+      return 'Every two weeks';
+    case 'every-three-weeks':
+      return 'Every three weeks';
+    case 'monthly':
+      return 'Monthly';
+    case 'every-six-months':
+      return 'Every six months';
+    case 'yearly':
+      return 'Yearly';
+    case 'custom': {
+      if (!customIntervalDays || customIntervalDays < 1) return 'Custom';
+      if (customIntervalDays % 30 === 0) {
+        const months = customIntervalDays / 30;
+        return months === 1 ? 'Every month' : `Every ${months} months`;
+      }
+      if (customIntervalDays % 7 === 0) {
+        const weeks = customIntervalDays / 7;
+        return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
+      }
+      if (customIntervalDays === 1) return 'Daily';
+      return `Every ${customIntervalDays} days`;
+    }
+    default:
+      return 'Custom';
+  }
 };
 
 type CalendarContactCardProps = {
@@ -58,7 +85,7 @@ const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => 
         <View className="flex-1">
           <Text className="text-lg font-semibold text-gray-900">{contact.name}</Text>
           <Text className="text-sm text-gray-500">
-            {bucketLabels[contact.bucket]} · {formatLastContacted(contact.lastContactedAt)}
+            {formatBucketLabel(contact.bucket, contact.customIntervalDays)} · {formatLastContacted(contact.lastContactedAt)}
           </Text>
         </View>
 

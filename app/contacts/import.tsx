@@ -19,11 +19,10 @@ import {
 import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
 import FrequencyBadge from '@/components/FrequencyBadge';
 
-import { Contact as DbContact } from '@/db/schema';
 import { LimitReachedError, addContact as importContact } from '@/services/contactService';
 import { formatPhoneNumber } from '@/utils/phone';
 
-type Bucket = DbContact['bucket'];
+type Bucket = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 const bucketLabels: Record<Bucket, string> = {
   daily: 'Daily',

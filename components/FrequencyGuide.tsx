@@ -30,13 +30,37 @@ const bucketInfo: Record<
     description: 'For long-distance or seasonal connections',
     example: 'Old friends, holiday contacts, people you reach out to occasionally',
   },
+  'bi-weekly': {
+    label: 'Bi-weekly',
+    description: 'Every two weeks',
+    example: 'Not typically shown here',
+  },
+  'every-three-weeks': {
+    label: 'Every three weeks',
+    description: 'Legacy cadence',
+    example: 'Existing contacts only',
+  },
+  'every-six-months': {
+    label: 'Every six months',
+    description: 'Legacy cadence',
+    example: 'Existing contacts only',
+  },
+  custom: {
+    label: 'Custom',
+    description: 'Your own cadence',
+    example: 'Configured per contact',
+  },
 };
 
 const bucketColors: Record<Contact['bucket'], string> = {
   daily: 'bg-purple-100',
   weekly: 'bg-blue-100',
+  'bi-weekly': 'bg-indigo-100',
+  'every-three-weeks': 'bg-indigo-100',
   monthly: 'bg-teal-100',
+  'every-six-months': 'bg-amber-100',
   yearly: 'bg-orange-100',
+  custom: 'bg-sage-100',
 };
 
 export default function FrequencyGuide({ visible, onClose }: FrequencyGuideProps) {
