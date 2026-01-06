@@ -41,19 +41,11 @@ const unitMultipliers: Record<CustomUnit, number> = {
   months: 30,
 };
 
-const DEFAULT_CUSTOM_DAYS = 30;
+const DEFAULT_CUSTOM_DAYS = 5;
 
 const deriveCustomUnitAndValue = (days?: number | null): { unit: CustomUnit; value: string } => {
   if (!days || days < 1) {
     return { unit: 'days', value: String(DEFAULT_CUSTOM_DAYS) };
-  }
-
-  if (days % 30 === 0) {
-    return { unit: 'months', value: String(days / 30) };
-  }
-
-  if (days % 7 === 0) {
-    return { unit: 'weeks', value: String(days / 7) };
   }
 
   return { unit: 'days', value: String(days) };
@@ -80,7 +72,8 @@ export default function EditContactModal({ contact, visible, onClose, onSave }: 
   useEffect(() => {
     if (visible) {
       setSelectedBucket(contact.bucket);
-      setCustomState(deriveCustomUnitAndValue(contact.customIntervalDays));
+      const derived = deriveCustomUnitAndValue(contact.customIntervalDays);
+      setCustomState({ ...derived, customUnit: 'days' });
     }
   }, [visible, contact.bucket, contact.customIntervalDays]);
 
@@ -172,8 +165,8 @@ export default function EditContactModal({ contact, visible, onClose, onSave }: 
 
                   {bucket === 'custom' && selectedBucket === 'custom' && (
                     <View className="rounded-b-2xl border-x-2 border-b-2 border-sage bg-white px-4 pb-4 pt-2">
-                      <View className="mt-2 flex-row items-center gap-3">
-                        <View className="flex-1">
+                      <View className="mt-2 flex-col gap-3">
+                        <View>
                           <Text className="text-xs font-medium text-slate-500 mb-1">Frequency</Text>
                           <TextInput
                             value={customValue}
@@ -183,14 +176,14 @@ export default function EditContactModal({ contact, visible, onClose, onSave }: 
                             placeholder="e.g., 30"
                           />
                         </View>
-                        <View className="flex-1">
+                        <View>
                           <Text className="text-xs font-medium text-slate-500 mb-1">Unit</Text>
-                          <View className="flex-col gap-1 bg-gray-100 p-1 rounded-xl">
+                          <View className="flex-row gap-1 bg-gray-100 p-1 rounded-xl">
                             {(['days', 'weeks', 'months'] as CustomUnit[]).map((unit) => (
                               <Pressable
                                 key={unit}
                                 onPress={() => setCustomState({ customUnit: unit, customValue })}
-                                className={`items-center justify-center rounded-lg py-1.5 ${
+                                className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
                                   customUnit === unit ? 'bg-white' : ''
                                 }`}
                                 style={customUnit === unit ? {
