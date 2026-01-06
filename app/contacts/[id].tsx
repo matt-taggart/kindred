@@ -1,11 +1,11 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Image, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, deleteInteraction, updateContactCadence } from '@/services/contactService';
+import { getContacts, getInteractionHistory, deleteInteraction, updateContactCadence, unarchiveContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -75,12 +75,13 @@ export default function ContactDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [savingCadence, setSavingCadence] = useState(false);
+  const [unarchiving, setUnarchiving] = useState(false);
 
   const loadContactData = useCallback(() => {
     if (!id) return;
 
     try {
-      const contactsList = getContacts();
+      const contactsList = getContacts({ includeArchived: true });
       const foundContact = contactsList.find((c) => c.id === id);
       setContact(foundContact || null);
 
@@ -184,6 +185,21 @@ export default function ContactDetailScreen() {
     router.push({ pathname: '/modal', params: { contactId: id, noteOnly: 'true' } });
   }, [router, id]);
 
+  const handleUnarchive = useCallback(async () => {
+    if (!contact) return;
+
+    setUnarchiving(true);
+    try {
+      await unarchiveContact(contact.id);
+      loadContactData();
+      Alert.alert('Success', 'Contact has been restored.');
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to unarchive contact.');
+    } finally {
+      setUnarchiving(false);
+    }
+  }, [contact, loadContactData]);
+
   const handleSaveCadence = useCallback(
     async (newBucket: Contact['bucket']) => {
       if (!contact) return;
@@ -247,6 +263,33 @@ export default function ContactDetailScreen() {
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
+          {contact.isArchived && (
+            <View className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <View className="flex-row items-center mb-3">
+                <Ionicons name="archive-outline" size={20} color="#d97706" />
+                <Text className="ml-2 text-base font-semibold text-amber-800">Archived Contact</Text>
+              </View>
+              <Text className="text-sm text-amber-700 mb-3">
+                This contact is archived and won't appear in your regular lists. Restore it to receive reminders again.
+              </Text>
+              <TouchableOpacity
+                className="flex-row items-center justify-center gap-2 rounded-xl bg-amber-600 py-3"
+                onPress={handleUnarchive}
+                disabled={unarchiving}
+                activeOpacity={0.85}
+              >
+                {unarchiving ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Ionicons name="refresh-outline" size={20} color="#fff" />
+                )}
+                <Text className="text-base font-semibold text-white">
+                  {unarchiving ? 'Restoring...' : 'Unarchive Contact'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Contact Info Header */}
           <View className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
             <View className="flex-row items-center gap-4">
@@ -291,21 +334,31 @@ export default function ContactDetailScreen() {
           {contact.phone && (
             <View className="mb-6 flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-sage py-3"
+                className={`flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3 ${
+                  contact.isArchived ? 'bg-gray-200 border border-gray-300' : 'bg-sage'
+                }`}
                 onPress={handleCall}
-                activeOpacity={0.85}
+                disabled={contact.isArchived}
+                activeOpacity={contact.isArchived ? 1 : 0.85}
               >
-                <Ionicons name="call-outline" size={24} color="#fff" />
-                <Text className="text-lg font-semibold text-white">Call</Text>
+                <Ionicons name="call-outline" size={24} color={contact.isArchived ? '#6b7280' : '#fff'} />
+                <Text className={`text-lg font-semibold ${contact.isArchived ? 'text-gray-400' : 'text-white'}`}>
+                  Call
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-sage py-3"
+                className={`flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3 ${
+                  contact.isArchived ? 'bg-gray-200 border border-gray-300' : 'bg-sage'
+                }`}
                 onPress={handleText}
-                activeOpacity={0.85}
+                disabled={contact.isArchived}
+                activeOpacity={contact.isArchived ? 1 : 0.85}
               >
-                <Ionicons name="chatbubble-outline" size={24} color="#fff" />
-                <Text className="text-lg font-semibold text-white">Text</Text>
+                <Ionicons name="chatbubble-outline" size={24} color={contact.isArchived ? '#6b7280' : '#fff'} />
+                <Text className={`text-lg font-semibold ${contact.isArchived ? 'text-gray-400' : 'text-white'}`}>
+                  Text
+                </Text>
               </TouchableOpacity>
             </View>
           )}
