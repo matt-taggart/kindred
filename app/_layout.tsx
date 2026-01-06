@@ -5,6 +5,7 @@ import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import '../global.css';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -79,7 +80,7 @@ export default function RootLayout() {
   }, [loaded]);
 
   if (!loaded || !dbReady) {
-    return null;
+    return <View style={{ flex: 1, backgroundColor: '#F3F0E6' }} />;
   }
 
   return <RootLayoutNav />;

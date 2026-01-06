@@ -25,13 +25,13 @@ export function formatPhoneNumber(
   const phoneNumber = parse(phone, defaultCountry);
 
   // If valid, format in international format
-  if (phoneNumber && phoneNumber.isValid()) {
+  if (phoneNumber) {
     return format(phoneNumber, 'NATIONAL');
   }
 
   // Fallback: try parsing with international format (no default country)
   const internationalNumber = parse(phone);
-  if (internationalNumber && internationalNumber.isValid()) {
+  if (internationalNumber) {
     // For international numbers, show with country code
     return format(internationalNumber, 'INTERNATIONAL');
   }
@@ -83,13 +83,13 @@ export function formatPhoneUrl(
   // Try to parse and format as E.164
   const phoneNumber = parse(phone, defaultCountry);
 
-  if (phoneNumber && phoneNumber.isValid()) {
+  if (phoneNumber) {
     return format(phoneNumber, 'E.164');
   }
 
   // Fallback: try parsing with international format (no default country)
   const internationalNumber = parse(phone);
-  if (internationalNumber && internationalNumber.isValid()) {
+  if (internationalNumber) {
     return format(internationalNumber, 'E.164');
   }
 
@@ -109,13 +109,13 @@ export function isValidPhoneNumber(
   }
 
   const phoneNumber = parse(phone, defaultCountry);
-  if (phoneNumber && phoneNumber.isValid()) {
+  if (phoneNumber) {
     return true;
   }
 
   // Try parsing without default country
   const internationalNumber = parse(phone);
-  return internationalNumber ? internationalNumber.isValid() : false;
+  return !!internationalNumber;
 }
 
 /**
@@ -130,12 +130,12 @@ export function getPhoneNumberCountry(
   }
 
   const phoneNumber = parse(phone, defaultCountry);
-  if (phoneNumber && phoneNumber.isValid()) {
+  if (phoneNumber) {
     return phoneNumber.country;
   }
 
   const internationalNumber = parse(phone);
-  if (internationalNumber && internationalNumber.isValid()) {
+  if (internationalNumber) {
     return internationalNumber.country;
   }
 

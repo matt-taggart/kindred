@@ -2,7 +2,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Calendar, DateData } from 'react-native-calendars';
-import { RefreshControl, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Contact } from '@/db/schema';
 import {
@@ -190,20 +191,27 @@ export default function CalendarScreen() {
     });
 
     return {
-      title: `No contacts scheduled for ${isToday ? 'today' : 'this day'}`,
-      subtitle: isToday ? 'You\'re all caught up!' : formattedDate,
+      title: isToday ? "You're all caught up!" : "No contacts scheduled",
+      subtitle: isToday ? "No contacts scheduled for today" : formattedDate,
+      icon: isToday ? "checkmark-circle" : "calendar-outline" as const,
     };
   }, [selectedDate, todayDate]);
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-cream" />
+      <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+        <ActivityIndicator size="large" color="#9CA986" />
+      </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView className="flex-1 bg-cream">
-      <View className="flex-1 px-4 pt-4">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View className="mb-4">
           <Text className="text-2xl font-bold text-gray-900">Calendar</Text>
           <Text className="mt-1 text-sm text-gray-500">
@@ -211,7 +219,7 @@ export default function CalendarScreen() {
           </Text>
         </View>
 
-        <View className="mb-6 overflow-hidden rounded-2xl bg-white">
+        <View className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
           <Calendar
             markingType="multi-dot"
             markedDates={markedDates}
@@ -223,16 +231,15 @@ export default function CalendarScreen() {
           />
         </View>
 
-        <Text className="mb-2 text-lg font-semibold text-gray-900">
-          {selectedDate === todayDate ? 'Today' : 'Selected Date'}
-        </Text>
-
         <View>
           {contactsForDate.length === 0 ? (
-            <View className="items-center py-8">
-              <Text className="text-base font-semibold text-gray-700">{emptyState.title}</Text>
+            <View className="items-center py-12 px-6">
+              <Ionicons name={emptyState.icon} size={80} color="#9CA986" />
+              <Text className="mt-6 text-3xl font-bold text-gray-900 text-center leading-tight">
+                {emptyState.title}
+              </Text>
               {emptyState.subtitle && (
-                <Text className="mt-2 text-sm text-center text-gray-500">
+                <Text className="mt-4 text-xl text-center text-gray-600">
                   {emptyState.subtitle}
                 </Text>
               )}
@@ -247,7 +254,7 @@ export default function CalendarScreen() {
             ))
           )}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
