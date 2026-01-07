@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Modal,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -265,64 +264,46 @@ export default function ReviewScheduleScreen() {
         </TouchableOpacity>
       </View>
 
-      {Platform.OS === 'ios' ? (
-        <Modal
-          visible={showDatePicker}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowDatePicker(false)}
-        >
-          <View className="flex-1 items-center justify-center bg-black/50 px-6">
-            <View className="w-full rounded-2xl bg-white p-6 shadow-lg">
-              <Text className="mb-2 text-lg font-bold text-slate">Adjust Start Date</Text>
-              {editingContact && (
-                <Text className="mb-4 text-base text-slate-600">
-                  When should {editingContact.name}'s first reminder appear?
-                </Text>
-              )}
-
-              <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                display="spinner"
-                minimumDate={new Date()}
-                maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
-                onChange={(_e, date) => date && setSelectedDate(date)}
-              />
-
-              <View className="flex-row gap-3 mt-4">
-                <TouchableOpacity
-                  className="flex-1 items-center rounded-xl bg-gray-100 py-3"
-                  onPress={() => {
-                    setShowDatePicker(false);
-                    setEditingContactId(null);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text className="font-semibold text-slate-600">Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="flex-1 items-center rounded-xl bg-sage py-3"
-                  onPress={handleConfirmDate}
-                  activeOpacity={0.7}
-                >
-                  <Text className="font-semibold text-white">Confirm</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+      {/* iOS Date Picker - Bottom Sheet */}
+      {Platform.OS === 'ios' && showDatePicker && (
+        <View className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-4 pb-8 pt-4">
+          <View className="mb-2 flex-row items-center justify-between">
+            <TouchableOpacity
+              onPress={() => {
+                setShowDatePicker(false);
+                setEditingContactId(null);
+              }}
+            >
+              <Text className="text-base font-semibold text-gray-500">Cancel</Text>
+            </TouchableOpacity>
+            <Text className="text-base font-bold text-gray-900">
+              {editingContact ? `${editingContact.name}'s Start Date` : 'Adjust Start Date'}
+            </Text>
+            <TouchableOpacity onPress={handleConfirmDate}>
+              <Text className="text-base font-semibold text-sage">Done</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      ) : (
-        showDatePicker && (
           <DateTimePicker
             value={selectedDate}
             mode="date"
-            display="default"
+            display="spinner"
             minimumDate={new Date()}
             maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
-            onChange={handleDateChange}
+            onChange={(_e, date) => date && setSelectedDate(date)}
           />
-        )
+        </View>
+      )}
+
+      {/* Android Date Picker */}
+      {Platform.OS === 'android' && showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          minimumDate={new Date()}
+          maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
+          onChange={handleDateChange}
+        />
       )}
 
       <EnhancedPaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
