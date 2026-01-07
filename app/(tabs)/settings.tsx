@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View, Modal } from 'react-native';
 
 import { useUserStore } from '@/lib/userStore';
+import { resetDatabase } from '@/services/contactService';
 
 type SettingsRowProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -46,6 +48,9 @@ function Divider() {
 export default function SettingsScreen() {
   const router = useRouter();
   const { isPro, restorePurchase, purchaseState } = useUserStore();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleNotifications = () => {
     router.push('/settings/notifications');
@@ -59,6 +64,27 @@ export default function SettingsScreen() {
     await restorePurchase();
     if (useUserStore.getState().isPro) {
       Alert.alert('Success', 'Your purchase has been restored.');
+    }
+  };
+
+  const handleDeleteAllData = () => {
+    setDeleteConfirmText('');
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteAllData = async () => {
+    if (deleteConfirmText !== 'DELETE') return;
+    
+    setIsDeleting(true);
+    try {
+      await resetDatabase();
+      setShowDeleteModal(false);
+      setDeleteConfirmText('');
+      Alert.alert('Done', 'All your data has been deleted.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to delete data. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -110,7 +136,88 @@ export default function SettingsScreen() {
             </>
           )}
         </SettingsSection>
+
+        <SettingsSection title="Data Management">
+          <TouchableOpacity
+            className="flex-row items-center justify-between bg-white px-4 py-4"
+            onPress={handleDeleteAllData}
+            activeOpacity={0.7}
+          >
+            <View className="flex-row items-center gap-3">
+              <Ionicons name="trash-outline" size={22} color="#ef4444" />
+              <Text className="text-base text-red-500">Delete All Data</Text>
+            </View>
+          </TouchableOpacity>
+        </SettingsSection>
       </ScrollView>
+
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/50 px-6">
+          <View className="w-full rounded-2xl bg-white p-6 shadow-lg">
+            <View className="mb-4 items-center">
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <Ionicons name="warning" size={24} color="#ef4444" />
+              </View>
+            </View>
+            
+            <Text className="mb-2 text-center text-lg font-bold text-gray-900">
+              Delete All Data?
+            </Text>
+            <Text className="mb-4 text-center text-sm text-gray-600">
+              This will permanently delete all your contacts and interaction history. This action cannot be undone.
+            </Text>
+
+            <Text className="mb-2 text-sm font-medium text-gray-700">
+              Type DELETE to confirm:
+            </Text>
+            <View className="mb-4 min-h-12 rounded-xl border border-gray-300 bg-gray-50 px-4 flex-row items-center">
+              <TextInput
+                className="flex-1 text-base leading-5 text-gray-900"
+                style={{ marginTop: -2 }}
+                placeholderTextColor="#9ca3af"
+                value={deleteConfirmText}
+                onChangeText={setDeleteConfirmText}
+                placeholder="DELETE"
+                autoCapitalize="characters"
+                autoCorrect={false}
+                textAlignVertical="center"
+              />
+            </View>
+
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 items-center rounded-xl bg-gray-100 py-3"
+                onPress={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmText('');
+                }}
+                activeOpacity={0.7}
+              >
+                <Text className="font-semibold text-gray-600">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`flex-1 items-center rounded-xl py-3 ${
+                  deleteConfirmText === 'DELETE' && !isDeleting ? 'bg-red-500' : 'bg-red-200'
+                }`}
+                onPress={confirmDeleteAllData}
+                activeOpacity={0.7}
+                disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+              >
+                <Text className={`font-semibold ${
+                  deleteConfirmText === 'DELETE' && !isDeleting ? 'text-white' : 'text-red-300'
+                }`}>
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

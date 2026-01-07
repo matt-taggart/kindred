@@ -18,8 +18,6 @@ import {
 
 import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
 import FrequencyBadge from '@/components/FrequencyBadge';
-
-import { LimitReachedError, addContact as importContact } from '@/services/contactService';
 import { formatPhoneNumber } from '@/utils/phone';
 
 type Bucket = 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -135,7 +133,6 @@ export default function ImportContactsScreen() {
   const [contacts, setContacts] = useState<ImportableContact[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [permissionDenied, setPermissionDenied] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [contactFrequencies, setContactFrequencies] = useState<Record<string, Bucket>>({});
   const [showFrequencySelector, setShowFrequencySelector] = useState(false);
@@ -317,37 +314,25 @@ export default function ImportContactsScreen() {
     );
   }, []);
 
-  const handleSave = useCallback(async () => {
-    if (saving || selected.size === 0) {
+  const handleSave = useCallback(() => {
+    if (selected.size === 0) {
       return;
     }
 
-    setSaving(true);
+    const chosen = contacts.filter((contact) => selected.has(contact.id));
+    const contactsToImport = chosen.map((contact) => ({
+      id: contact.id,
+      name: contact.name,
+      phone: contact.phone,
+      avatarUri: contact.avatarUri,
+      bucket: contactFrequencies[contact.id] || 'weekly',
+    }));
 
-    try {
-      const chosen = contacts.filter((contact) => selected.has(contact.id));
-
-      for (const contact of chosen) {
-        await importContact({
-          name: contact.name,
-          phone: contact.phone,
-          bucket: contactFrequencies[contact.id] || 'weekly',
-          avatarUri: contact.avatarUri,
-        });
-      }
-
-      router.replace('/');
-    } catch (error) {
-      if (error instanceof LimitReachedError || (error as Error)?.name === 'LimitReached') {
-        setShowPaywall(true);
-        return;
-      }
-
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to import contacts.');
-    } finally {
-      setSaving(false);
-    }
-  }, [contacts, router, selected, saving, contactFrequencies]);
+    router.push({
+      pathname: '/contacts/review-schedule',
+      params: { contacts: JSON.stringify(contactsToImport) },
+    });
+  }, [contacts, router, selected, contactFrequencies]);
 
   return (
     <SafeAreaView className="flex-1 bg-cream">
@@ -464,13 +449,13 @@ export default function ImportContactsScreen() {
 
       <View className="border-t border-gray-200 bg-white px-4 pb-4 pt-3">
         <TouchableOpacity
-          className={`items-center rounded-xl py-4 ${selected.size > 0 && !saving ? 'bg-sage' : 'bg-gray-200'}`}
+          className={`items-center rounded-xl py-4 ${selected.size > 0 ? 'bg-sage' : 'bg-gray-200'}`}
           onPress={handleSave}
           activeOpacity={0.9}
-          disabled={selected.size === 0 || saving}
+          disabled={selected.size === 0}
         >
-          <Text className={`text-base font-semibold ${selected.size > 0 && !saving ? 'text-white' : 'text-gray-600'}`}>
-            {saving ? 'Importing...' : `Import Selected (${selected.size})`}
+          <Text className={`text-base font-semibold ${selected.size > 0 ? 'text-white' : 'text-gray-600'}`}>
+            {`Review Schedule (${selected.size})`}
           </Text>
         </TouchableOpacity>
       </View>
