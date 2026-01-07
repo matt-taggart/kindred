@@ -51,9 +51,10 @@ export const EnhancedPaywallModal = ({ visible, onClose }: PaywallModalProps) =>
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/60">
-        <SafeAreaView className="mt-auto max-h-[85%] rounded-t-3xl bg-white px-6 py-6">
+        <SafeAreaView className="mt-auto max-h-[85%] rounded-t-3xl bg-white">
           <ScrollView showsVerticalScrollIndicator={false}>
-            <View className="mb-4 h-1 w-12 self-center rounded-full bg-gray-200" />
+            <View className="px-6 py-6">
+              <View className="mb-4 h-1 w-12 self-center rounded-full bg-gray-200" />
 
             <Text className="text-center text-2xl font-bold text-gray-900">
               {headline}
@@ -189,6 +190,7 @@ export const EnhancedPaywallModal = ({ visible, onClose }: PaywallModalProps) =>
                 <Text className="text-sm text-red-600">{purchaseState.error}</Text>
               </View>
             )}
+            </View>
           </ScrollView>
         </SafeAreaView>
       </View>

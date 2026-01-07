@@ -72,6 +72,26 @@ export default function SettingsScreen() {
     setShowDeleteModal(true);
   };
 
+  const resetProStatus = __DEV__
+    ? () => {
+        Alert.alert(
+          'Reset Pro Status',
+          'Are you sure you want to reset your Pro status? This will make the app behave as if you never upgraded.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Reset',
+              style: 'destructive',
+              onPress: () => {
+                useUserStore.getState().setIsPro(false);
+                Alert.alert('Done', 'Pro status has been reset.');
+              },
+            },
+          ],
+        );
+      }
+    : undefined;
+
   const confirmDeleteAllData = async () => {
     if (deleteConfirmText !== 'DELETE') return;
     
@@ -138,6 +158,16 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         <SettingsSection title="Data Management">
+          {__DEV__ && resetProStatus && (
+            <>
+              <SettingsRow
+                icon="refresh-circle-outline"
+                label="Reset Pro Status"
+                onPress={resetProStatus}
+              />
+              <Divider />
+            </>
+          )}
           <TouchableOpacity
             className="flex-row items-center justify-between bg-white px-4 py-4"
             onPress={handleDeleteAllData}
