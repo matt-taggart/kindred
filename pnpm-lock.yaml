@@ -20,6 +20,9 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: ~2.2.0
         version: 2.2.0(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0))
+      '@react-native-community/datetimepicker':
+        specifier: ^8.6.0
+        version: 8.6.0(expo@54.0.30)(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       '@react-native-masked-view/masked-view':
         specifier: 0.3.2
         version: 0.3.2(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -1353,6 +1356,19 @@ packages:
     resolution: {integrity: sha512-647OSi6xBb8FbwFqX9zsJxOzu685AWtrOUWHfOkbKD+5LOpGORw+GQo0F9rWZnB68rLQyfKUZWJeaD00pGv5fw==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@react-native-community/datetimepicker@8.6.0':
+    resolution: {integrity: sha512-yxPSqNfxgpGaqHQIpatqe6ykeBdU/1pdsk/G3x01mY2bpTflLpmVTLqFSJYd3MiZzxNZcMs/j1dQakUczSjcYA==}
+    peerDependencies:
+      expo: '>=52.0.0'
+      react: '*'
+      react-native: '*'
+      react-native-windows: '*'
+    peerDependenciesMeta:
+      expo:
+        optional: true
+      react-native-windows:
+        optional: true
 
   '@react-native-masked-view/masked-view@0.3.2':
     resolution: {integrity: sha512-XwuQoW7/GEgWRMovOQtX3A4PrXhyaZm0lVUiY8qJDvdngjLms9Cpdck6SmGAUNqQwcj2EadHC1HwL0bEyoa/SQ==}
@@ -6562,6 +6578,14 @@ snapshots:
       - supports-color
       - utf-8-validate
     optional: true
+
+  '@react-native-community/datetimepicker@8.6.0(expo@54.0.30)(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      invariant: 2.2.4
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0)
+    optionalDependencies:
+      expo: 54.0.30(@babel/core@7.28.5)(@expo/metro-runtime@6.1.2)(expo-router@6.0.21)(graphql@15.8.0)(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
 
   '@react-native-masked-view/masked-view@0.3.2(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
     dependencies:

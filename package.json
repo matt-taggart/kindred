@@ -21,6 +21,7 @@
     "@expo/metro-runtime": "^6.1.2",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "~2.2.0",
+    "@react-native-community/datetimepicker": "^8.6.0",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/native": "^7.1.26",
     "app-store-server-api": "^0.17.3",

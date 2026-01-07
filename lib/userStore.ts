@@ -10,14 +10,26 @@ type PurchaseState = {
   error: string | null;
 };
 
+export type NotificationFrequency = 1 | 2 | 3;
+
+export type NotificationSettings = {
+  frequency: NotificationFrequency;
+  reminderTimes: string[]; // HH:mm format, e.g., ["09:00", "14:00", "19:00"]
+};
+
 type UserState = {
   isPro: boolean;
   purchaseState: PurchaseState;
+  notificationSettings: NotificationSettings;
   setIsPro: (value: boolean) => void;
   purchasePro: () => Promise<void>;
   restorePurchase: () => Promise<void>;
   clearError: () => void;
+  setNotificationFrequency: (frequency: NotificationFrequency) => void;
+  setReminderTime: (index: number, time: string) => void;
 };
+
+const DEFAULT_REMINDER_TIMES = ['09:00', '14:00', '19:00'];
 
 export const useUserStore = create<UserState>()(
   persist(
@@ -28,8 +40,21 @@ export const useUserStore = create<UserState>()(
         isRestoring: false,
         error: null,
       },
+      notificationSettings: {
+        frequency: 1,
+        reminderTimes: DEFAULT_REMINDER_TIMES,
+      },
       setIsPro: (value) => set({ isPro: value }),
       clearError: () => set({ purchaseState: { ...get().purchaseState, error: null } }),
+      setNotificationFrequency: (frequency) => set({
+        notificationSettings: { ...get().notificationSettings, frequency },
+      }),
+      setReminderTime: (index, time) => {
+        const { notificationSettings } = get();
+        const newTimes = [...notificationSettings.reminderTimes];
+        newTimes[index] = time;
+        set({ notificationSettings: { ...notificationSettings, reminderTimes: newTimes } });
+      },
       purchasePro: async () => {
         const { purchaseState } = get();
 
