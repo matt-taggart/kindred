@@ -15,6 +15,24 @@ export class LimitReachedError extends Error {
   }
 }
 
+export const getContactCount = (): number => {
+  const db = getDb();
+  const [row] = db
+    .select({ total: count() })
+    .from(contacts)
+    .where(eq(contacts.isArchived, false))
+    .limit(1)
+    .all();
+  return row?.total ?? 0;
+};
+
+export const getAvailableSlots = (): number => {
+  const isPro = useUserStore.getState().isPro;
+  if (isPro) return Infinity;
+  const currentCount = getContactCount();
+  return Math.max(0, CONTACT_LIMIT - currentCount);
+};
+
 const generateId = () => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID();

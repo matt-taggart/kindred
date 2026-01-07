@@ -13,23 +13,34 @@ import { useUserStore } from '@/lib/userStore';
 type PaywallModalProps = {
   visible: boolean;
   onClose: () => void;
+  importContext?: {
+    selectedCount: number;
+    availableSlots: number;
+    onImportPartial: () => void;
+  };
 };
 
-export const EnhancedPaywallModal = ({ visible, onClose }: PaywallModalProps) => {
+export const EnhancedPaywallModal = ({ visible, onClose, importContext }: PaywallModalProps) => {
   const { isPro, purchasePro, restorePurchase, purchaseState, clearError } =
     useUserStore();
 
-  const headline = useMemo(
-    () => (isPro ? 'Welcome to Pro!' : 'Never Lose Touch Again'),
-    [isPro],
-  );
-  const subheadline = useMemo(
-    () =>
-      isPro
-        ? 'You now have everything you need to stay connected.'
-        : 'Invest in your relationships forever.',
-    [isPro],
-  );
+  const headline = useMemo(() => {
+    if (isPro) return 'Welcome to Pro!';
+    if (importContext) return 'Contact Limit Reached';
+    return 'Never Lose Touch Again';
+  }, [isPro, importContext]);
+
+  const subheadline = useMemo(() => {
+    if (isPro) return 'You now have everything you need to stay connected.';
+    if (importContext) {
+      const { selectedCount, availableSlots } = importContext;
+      if (availableSlots === 0) {
+        return `You've selected ${selectedCount} contacts, but your free plan is full. Upgrade to import them all.`;
+      }
+      return `You've selected ${selectedCount} contacts, but the free plan only allows ${availableSlots} more. Upgrade to import them all.`;
+    }
+    return 'Invest in your relationships forever.';
+  }, [isPro, importContext]);
   const isLoading = purchaseState.isPurchasing || purchaseState.isRestoring;
 
   useEffect(() => {
@@ -163,11 +174,15 @@ export const EnhancedPaywallModal = ({ visible, onClose }: PaywallModalProps) =>
 
                 <TouchableOpacity
                   className="mt-3 items-center rounded-xl border border-gray-300 py-3"
-                  onPress={onClose}
+                  onPress={importContext ? importContext.onImportPartial : onClose}
                   activeOpacity={0.9}
                 >
                   <Text className="text-base font-semibold text-gray-600">
-                    Not Now
+                    {importContext
+                      ? importContext.availableSlots > 0
+                        ? `Import First ${importContext.availableSlots} Only`
+                        : 'Not Now'
+                      : 'Not Now'}
                   </Text>
                 </TouchableOpacity>
               </>

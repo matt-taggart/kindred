@@ -16,7 +16,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
 import FrequencyBadge from '@/components/FrequencyBadge';
 
-import { LimitReachedError, addContact } from '@/services/contactService';
+import { CONTACT_LIMIT, addContact, getAvailableSlots } from '@/services/contactService';
+import { useUserStore } from '@/lib/userStore';
 import {
   DAY_IN_MS,
   DistributionResult,
@@ -57,6 +58,8 @@ export default function ReviewScheduleScreen() {
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [availableSlots, setAvailableSlots] = useState<number>(0);
+  const isPro = useUserStore((s) => s.isPro);
 
   useEffect(() => {
     if (params.contacts) {
@@ -91,7 +94,8 @@ export default function ReviewScheduleScreen() {
   const stats = useMemo(() => {
     const totalDays = groupedByDate.length;
     const maxPerDay = Math.max(...groupedByDate.map(([, contacts]) => contacts.length), 0);
-    const avgPerDay = totalDays > 0 ? (distributedContacts.length / totalDays).toFixed(1) : '0';
+    const avgValue = totalDays > 0 ? distributedContacts.length / totalDays : 0;
+    const avgPerDay = Number.isInteger(avgValue) ? avgValue.toString() : avgValue.toFixed(1);
     return { totalDays, maxPerDay, avgPerDay };
   }, [groupedByDate, distributedContacts]);
 
@@ -133,36 +137,66 @@ export default function ReviewScheduleScreen() {
     setEditingContactId(null);
   }, [editingContactId, selectedDate]);
 
+  const importContacts = useCallback(async (contactsToImport: DistributionResult[]) => {
+    let importedCount = 0;
+    for (const distributed of contactsToImport) {
+      const original = contactsData.find((c) => c.id === distributed.id);
+      if (!original) continue;
+
+      await addContact({
+        name: original.name,
+        phone: original.phone,
+        bucket: original.bucket,
+        avatarUri: original.avatarUri,
+        customIntervalDays: original.customIntervalDays,
+        nextContactDate: distributed.nextContactDate,
+      });
+      importedCount++;
+    }
+    return importedCount;
+  }, [contactsData]);
+
   const handleImport = useCallback(async () => {
     if (saving) return;
     setSaving(true);
 
     try {
-      for (const distributed of distributedContacts) {
-        const original = contactsData.find((c) => c.id === distributed.id);
-        if (!original) continue;
+      const slots = getAvailableSlots();
+      setAvailableSlots(slots);
 
-        await addContact({
-          name: original.name,
-          phone: original.phone,
-          bucket: original.bucket,
-          avatarUri: original.avatarUri,
-          customIntervalDays: original.customIntervalDays,
-          nextContactDate: distributed.nextContactDate,
-        });
-      }
-
-      router.replace('/');
-    } catch (error) {
-      if (error instanceof LimitReachedError || (error as Error)?.name === 'LimitReached') {
+      if (!isPro && distributedContacts.length > slots) {
         setShowPaywall(true);
+        setSaving(false);
         return;
       }
+
+      await importContacts(distributedContacts);
+      router.replace('/');
+    } catch (error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to import contacts.');
-    } finally {
       setSaving(false);
     }
-  }, [distributedContacts, contactsData, router, saving]);
+  }, [distributedContacts, router, saving, isPro, importContacts]);
+
+  const handlePartialImport = useCallback(async () => {
+    setShowPaywall(false);
+    setSaving(true);
+
+    try {
+      const contactsToImport = distributedContacts.slice(0, availableSlots);
+      const importedCount = await importContacts(contactsToImport);
+      const skippedCount = distributedContacts.length - importedCount;
+      
+      Alert.alert(
+        'Import Complete',
+        `${importedCount} contact${importedCount !== 1 ? 's' : ''} imported successfully.${skippedCount > 0 ? ` ${skippedCount} skipped (limit reached).` : ''}`,
+        [{ text: 'OK', onPress: () => router.replace('/') }]
+      );
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to import contacts.');
+      setSaving(false);
+    }
+  }, [distributedContacts, availableSlots, importContacts, router]);
 
   const editingContact = useMemo(
     () => distributedContacts.find((c) => c.id === editingContactId),
@@ -306,7 +340,15 @@ export default function ReviewScheduleScreen() {
         />
       )}
 
-      <EnhancedPaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
+      <EnhancedPaywallModal
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        importContext={{
+          selectedCount: distributedContacts.length,
+          availableSlots,
+          onImportPartial: handlePartialImport,
+        }}
+      />
     </SafeAreaView>
   );
 }
