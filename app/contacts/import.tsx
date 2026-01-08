@@ -1,6 +1,6 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import * as Contacts from 'expo-contacts';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import * as Contacts from "expo-contacts";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,33 +14,33 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
-import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
-import FrequencyBadge from '@/components/FrequencyBadge';
-import { formatPhoneNumber } from '@/utils/phone';
+import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
+import FrequencyBadge from "@/components/FrequencyBadge";
+import { formatPhoneNumber } from "@/utils/phone";
 
-type Bucket = 'daily' | 'weekly' | 'monthly' | 'yearly';
+type Bucket = "daily" | "weekly" | "monthly" | "yearly";
 
 const bucketLabels: Record<Bucket, string> = {
-  daily: 'Daily',
-  weekly: 'Weekly',
-  monthly: 'Monthly',
-  yearly: 'Yearly',
+  daily: "Daily",
+  weekly: "Weekly",
+  monthly: "Monthly",
+  yearly: "Yearly",
 };
 
 const bucketColors: Record<Bucket, string> = {
-  daily: 'bg-terracotta-100',
-  weekly: 'bg-sage-100',
-  monthly: 'bg-blue-100',
-  yearly: 'bg-purple-100',
+  daily: "bg-terracotta-100",
+  weekly: "bg-sage-100",
+  monthly: "bg-blue-100",
+  yearly: "bg-purple-100",
 };
 
 const bucketDescriptions: Record<Bucket, string> = {
-  daily: 'Every day',
-  weekly: 'Every 7 days',
-  monthly: 'Every 30 days',
-  yearly: 'Every 365 days',
+  daily: "Every day",
+  weekly: "Every 7 days",
+  monthly: "Every 30 days",
+  yearly: "Every 365 days",
 };
 
 type ImportableContact = {
@@ -51,12 +51,17 @@ type ImportableContact = {
 };
 
 const getName = (contact: any) => {
-  const parts = [contact.firstName, contact.lastName].filter(Boolean).join(' ').trim();
-  return (contact.name ?? parts).trim() || 'Unnamed Contact';
+  const parts = [contact.firstName, contact.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  return (contact.name ?? parts).trim() || "Unnamed Contact";
 };
 
 const toImportable = (contact: any): ImportableContact | null => {
-  const phoneNumber = contact.phoneNumbers?.find((entry: any) => entry.number?.trim());
+  const phoneNumber = contact.phoneNumbers?.find((entry: any) =>
+    entry.number?.trim(),
+  );
 
   if (!phoneNumber?.number) {
     return null;
@@ -66,7 +71,9 @@ const toImportable = (contact: any): ImportableContact | null => {
     id: contact.id,
     name: getName(contact),
     phone: phoneNumber.number.trim(),
-    avatarUri: contact.imageAvailable ? contact.image?.uri ?? undefined : undefined,
+    avatarUri: contact.imageAvailable
+      ? (contact.image?.uri ?? undefined)
+      : undefined,
   };
 };
 
@@ -83,7 +90,10 @@ const ContactRow = ({
   frequency: Bucket;
   onFrequencyChange: (bucket: Bucket) => void;
 }) => {
-  const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
+  const initial = useMemo(
+    () => contact.name.charAt(0).toUpperCase(),
+    [contact.name],
+  );
 
   return (
     <TouchableOpacity
@@ -93,7 +103,10 @@ const ContactRow = ({
     >
       <View className="flex-row items-center gap-3">
         {contact.avatarUri ? (
-          <Image source={{ uri: contact.avatarUri }} className="h-10 w-10 rounded-full" />
+          <Image
+            source={{ uri: contact.avatarUri }}
+            className="h-10 w-10 rounded-full"
+          />
         ) : (
           <View className="h-10 w-10 items-center justify-center rounded-full bg-sage">
             <Text className="text-sm font-semibold text-white">{initial}</Text>
@@ -101,11 +114,18 @@ const ContactRow = ({
         )}
 
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{contact.name}</Text>
-          <Text className="text-sm text-gray-500">{formatPhoneNumber(contact.phone)}</Text>
+          <Text className="text-base font-semibold text-gray-900">
+            {contact.name}
+          </Text>
+          <Text className="text-sm text-gray-500">
+            {formatPhoneNumber(contact.phone)}
+          </Text>
         </View>
 
-        <FrequencyBadge bucket={frequency} onPress={() => onFrequencyChange(frequency)} />
+        <FrequencyBadge
+          bucket={frequency}
+          onPress={() => onFrequencyChange(frequency)}
+        />
 
         <TouchableOpacity
           className="h-6 w-6 items-center justify-center rounded border bg-white border-gray-300"
@@ -114,14 +134,15 @@ const ContactRow = ({
         >
           <View
             className={`h-5 w-5 items-center justify-center rounded ${
-              selected ? 'bg-sage' : 'bg-white'
+              selected ? "bg-sage" : "bg-white"
             }`}
           >
-            {selected ? <Text className="text-xs font-bold text-white">✓</Text> : null}
+            {selected ? (
+              <Text className="text-xs font-bold text-white">✓</Text>
+            ) : null}
           </View>
         </TouchableOpacity>
       </View>
-
     </TouchableOpacity>
   );
 };
@@ -134,16 +155,18 @@ export default function ImportContactsScreen() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
-  const [contactFrequencies, setContactFrequencies] = useState<Record<string, Bucket>>({});
+  const [contactFrequencies, setContactFrequencies] = useState<
+    Record<string, Bucket>
+  >({});
   const [showFrequencySelector, setShowFrequencySelector] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
 
   const shouldAutoRequest = useMemo(() => {
     const value = params.autoRequest;
     if (Array.isArray(value)) {
-      return value.includes('1') || value.includes('true');
+      return value.includes("1") || value.includes("true");
     }
-    return value === '1' || value === 'true';
+    return value === "1" || value === "true";
   }, [params.autoRequest]);
 
   const loadContacts = useCallback(async () => {
@@ -163,7 +186,7 @@ export default function ImportContactsScreen() {
 
       const initialFrequencies = withPhones.reduce(
         (acc, contact) => {
-          acc[contact.id] = 'weekly';
+          acc[contact.id] = "weekly";
           return acc;
         },
         {} as Record<string, Bucket>,
@@ -191,11 +214,14 @@ export default function ImportContactsScreen() {
 
         if (!permission.canAskAgain) {
           Alert.alert(
-            'Permission needed',
-            'Enable contact access in Settings to import from your address book.',
+            "Permission needed",
+            "Enable contact access in Settings to import from your address book.",
             [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Open Settings', onPress: () => Linking.openSettings?.() },
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Open Settings",
+                onPress: () => Linking.openSettings?.(),
+              },
             ],
           );
         }
@@ -228,15 +254,21 @@ export default function ImportContactsScreen() {
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', async (nextAppState) => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        const permission = await Contacts.getPermissionsAsync();
-        if (permission.status === Contacts.PermissionStatus.GRANTED) {
-          await loadContacts();
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          const permission = await Contacts.getPermissionsAsync();
+          if (permission.status === Contacts.PermissionStatus.GRANTED) {
+            await loadContacts();
+          }
         }
-      }
-      appState.current = nextAppState;
-    });
+        appState.current = nextAppState;
+      },
+    );
 
     return () => subscription.remove();
   }, [loadContacts]);
@@ -300,12 +332,12 @@ export default function ImportContactsScreen() {
 
   const handleAddMoreContacts = useCallback(() => {
     Alert.alert(
-      'Add More Contacts',
-      'To share more contacts with Kindred, update your contact access in Settings.',
+      "Add More Contacts",
+      "To share more contacts with Kindred, update your contact access in Settings.",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Open Settings',
+          text: "Open Settings",
           onPress: async () => {
             await Linking.openSettings();
           },
@@ -325,11 +357,11 @@ export default function ImportContactsScreen() {
       name: contact.name,
       phone: contact.phone,
       avatarUri: contact.avatarUri,
-      bucket: contactFrequencies[contact.id] || 'weekly',
+      bucket: contactFrequencies[contact.id] || "weekly",
     }));
 
     router.push({
-      pathname: '/contacts/review-schedule',
+      pathname: "/contacts/review-schedule",
       params: { contacts: JSON.stringify(contactsToImport) },
     });
   }, [contacts, router, selected, contactFrequencies]);
@@ -338,17 +370,19 @@ export default function ImportContactsScreen() {
     <SafeAreaView className="flex-1 bg-cream">
       <Stack.Screen
         options={{
-          title: 'Import Contacts',
-          headerBackTitle: 'Contacts',
+          title: "Import Contacts",
+          headerBackTitle: "Contacts",
           headerShadowVisible: false,
-          headerTitleStyle: { fontSize: 18, fontWeight: '700' },
+          headerTitleStyle: { fontSize: 18, fontWeight: "700" },
         }}
       />
 
       {loading ? (
         <View className="flex-1 items-center justify-center px-4">
           <ActivityIndicator size="large" color="#9CA986" />
-          <Text className="mt-3 text-sm font-semibold text-gray-700">Fetching contacts...</Text>
+          <Text className="mt-3 text-sm font-semibold text-gray-700">
+            Fetching contacts...
+          </Text>
         </View>
       ) : (
         <View className="flex-1 px-4 pt-4">
@@ -360,21 +394,25 @@ export default function ImportContactsScreen() {
                 contact={item}
                 selected={selected.has(item.id)}
                 onToggle={() => toggleSelect(item.id)}
-                frequency={contactFrequencies[item.id] || 'weekly'}
+                frequency={contactFrequencies[item.id] || "weekly"}
                 onFrequencyChange={() => handleFrequencyChange(item.id)}
               />
             )}
             ListHeaderComponent={
               <View className="pb-3">
                 <View className="mb-6 rounded-2xl border border-sage-100 bg-white p-5 shadow-sm">
-                  <Text className="text-xs font-semibold uppercase tracking-wide text-sage">Import</Text>
+                  <Text className="text-xs font-semibold uppercase tracking-wide text-sage">
+                    Import
+                  </Text>
                   <Text className="mt-1 text-xl font-bold text-gray-900">
-                    {contacts.length > 0 ? 'Select contacts to import' : 'Bring your people to Kindred'}
+                    {contacts.length > 0
+                      ? "Select contacts to import"
+                      : "Bring your people to Kindred"}
                   </Text>
                   <Text className="mt-2 text-sm text-gray-600">
                     {contacts.length > 0
-                      ? 'Choose which contacts you want to add to Kindred.'
-                      : 'Grant permission to read your phone contacts, pick who you want to bring in, and save them to your Kindred list.'}
+                      ? "Choose which contacts you want to add to Kindred."
+                      : "Grant permission to read your phone contacts, pick who you want to bring in, and save them to your Kindred list."}
                   </Text>
 
                   {contacts.length === 0 ? (
@@ -383,7 +421,9 @@ export default function ImportContactsScreen() {
                       onPress={handleImportPress}
                       activeOpacity={0.9}
                     >
-                      <Text className="text-base font-semibold text-white">Import from Phone</Text>
+                      <Text className="text-base font-semibold text-white">
+                        Import from Phone
+                      </Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
@@ -391,7 +431,9 @@ export default function ImportContactsScreen() {
                       onPress={handleAddMoreContacts}
                       activeOpacity={0.9}
                     >
-                      <Text className="text-base font-semibold text-sage">Add More Contacts</Text>
+                      <Text className="text-base font-semibold text-sage">
+                        Add More Contacts
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -402,18 +444,28 @@ export default function ImportContactsScreen() {
                     onPress={handleSelectAll}
                     activeOpacity={0.7}
                   >
-                    <Text className="text-base font-semibold text-gray-900">Select All</Text>
+                    <Text className="text-base font-semibold text-gray-900">
+                      Select All
+                    </Text>
                     <View
                       className={`h-6 w-6 items-center justify-center rounded border border-gray-300 ${
-                        selected.size === contacts.length ? 'bg-sage border-sage' : 'bg-white'
+                        selected.size === contacts.length
+                          ? "bg-sage border-sage"
+                          : "bg-white"
                       }`}
                     >
                       <View
                         className={`h-5 w-5 items-center justify-center rounded ${
-                          selected.size === contacts.length ? 'bg-sage' : 'bg-white'
+                          selected.size === contacts.length
+                            ? "bg-sage"
+                            : "bg-white"
                         }`}
                       >
-                        {selected.size === contacts.length ? <Text className="text-xs font-bold text-white">✓</Text> : null}
+                        {selected.size === contacts.length ? (
+                          <Text className="text-xs font-bold text-white">
+                            ✓
+                          </Text>
+                        ) : null}
                       </View>
                     </View>
                   </TouchableOpacity>
@@ -421,9 +473,12 @@ export default function ImportContactsScreen() {
 
                 {permissionDenied ? (
                   <View className="rounded-2xl border border-red-200 bg-red-50 p-4">
-                    <Text className="text-sm font-semibold text-red-700">Permission denied</Text>
+                    <Text className="text-sm font-semibold text-red-700">
+                      Permission denied
+                    </Text>
                     <Text className="mt-1 text-sm text-red-600">
-                      Enable contact access in Settings to import from your address book.
+                      Enable contact access in Settings to import from your
+                      address book.
                     </Text>
                   </View>
                 ) : null}
@@ -431,9 +486,12 @@ export default function ImportContactsScreen() {
             }
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-12">
-                <Text className="text-base font-semibold text-gray-900">No contacts loaded yet.</Text>
+                <Text className="text-base font-semibold text-gray-900">
+                  No contacts loaded yet.
+                </Text>
                 <Text className="mt-2 text-sm text-center text-gray-500">
-                  Tap "Import from Phone" to begin and pick people to bring into Kindred.
+                  Tap "Import from Phone" to begin and pick people to bring into
+                  Kindred.
                 </Text>
               </View>
             }
@@ -449,13 +507,15 @@ export default function ImportContactsScreen() {
 
       <View className="border-t border-gray-200 bg-white px-4 pb-4 pt-3">
         <TouchableOpacity
-          className={`items-center rounded-xl py-4 ${selected.size > 0 ? 'bg-sage' : 'bg-gray-200'}`}
+          className={`items-center rounded-xl py-4 ${selected.size > 0 ? "bg-sage" : "bg-gray-200"}`}
           onPress={handleSave}
           activeOpacity={0.9}
           disabled={selected.size === 0}
         >
-          <Text className={`text-base font-semibold ${selected.size > 0 ? 'text-white' : 'text-gray-600'}`}>
-            {`Review Schedule (${selected.size})`}
+          <Text
+            className={`text-base font-semibold ${selected.size > 0 ? "text-white" : "text-gray-600"}`}
+          >
+            {`Import and Review (${selected.size})`}
           </Text>
         </TouchableOpacity>
       </View>
@@ -468,48 +528,56 @@ export default function ImportContactsScreen() {
       >
         <View className="flex-1 items-center justify-center bg-black/50 px-6">
           <View className="w-full rounded-2xl bg-white p-6 shadow-lg">
-            <Text className="mb-2 text-lg font-bold text-slate">Check-in frequency</Text>
+            <Text className="mb-2 text-lg font-bold text-slate">
+              Check-in frequency
+            </Text>
             {editingContactId && (
               <Text className="mb-4 text-base text-slate-600">
-                How often should you check in with {contacts.find((c) => c.id === editingContactId)?.name}?
+                How often should you check in with{" "}
+                {contacts.find((c) => c.id === editingContactId)?.name}?
               </Text>
             )}
 
             <ScrollView>
-              {(['daily', 'weekly', 'monthly', 'yearly'] as Bucket[]).map((bucket) => (
-                <TouchableOpacity
-                  key={bucket}
-                  className={`mb-3 rounded-2xl border-2 p-4 ${
-                    contactFrequencies[editingContactId || ''] === bucket
-                      ? 'border-sage bg-sage-10'
-                      : 'border-gray-200 bg-white'
-                  }`}
-                  onPress={() => handleSelectFrequency(bucket)}
-                  activeOpacity={0.7}
-                >
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-1">
-                      <Text
-                        className={`text-base font-semibold ${
-                          contactFrequencies[editingContactId || ''] === bucket
-                            ? 'text-slate'
-                            : 'text-slate-700'
+              {(["daily", "weekly", "monthly", "yearly"] as Bucket[]).map(
+                (bucket) => (
+                  <TouchableOpacity
+                    key={bucket}
+                    className={`mb-3 rounded-2xl border-2 p-4 ${
+                      contactFrequencies[editingContactId || ""] === bucket
+                        ? "border-sage bg-sage-10"
+                        : "border-gray-200 bg-white"
+                    }`}
+                    onPress={() => handleSelectFrequency(bucket)}
+                    activeOpacity={0.7}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-1">
+                        <Text
+                          className={`text-base font-semibold ${
+                            contactFrequencies[editingContactId || ""] ===
+                            bucket
+                              ? "text-slate"
+                              : "text-slate-700"
+                          }`}
+                        >
+                          {bucketLabels[bucket]}
+                        </Text>
+                        <Text className="mt-1 text-sm text-slate-500">
+                          {bucketDescriptions[bucket]}
+                        </Text>
+                      </View>
+                      <View
+                        className={`h-6 w-6 rounded-full border-2 ${
+                          contactFrequencies[editingContactId || ""] === bucket
+                            ? "border-sage bg-sage"
+                            : "border-gray-300"
                         }`}
-                      >
-                        {bucketLabels[bucket]}
-                      </Text>
-                      <Text className="mt-1 text-sm text-slate-500">{bucketDescriptions[bucket]}</Text>
+                      />
                     </View>
-                    <View
-                      className={`h-6 w-6 rounded-full border-2 ${
-                        contactFrequencies[editingContactId || ''] === bucket
-                          ? 'border-sage bg-sage'
-                          : 'border-gray-300'
-                      }`}
-                    />
-                  </View>
-                </TouchableOpacity>
-              ))}
+                  </TouchableOpacity>
+                ),
+              )}
             </ScrollView>
 
             <TouchableOpacity
@@ -523,8 +591,10 @@ export default function ImportContactsScreen() {
         </View>
       </Modal>
 
-
-      <EnhancedPaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
+      <EnhancedPaywallModal
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+      />
     </SafeAreaView>
   );
 }
