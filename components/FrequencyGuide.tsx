@@ -60,7 +60,7 @@ const bucketColors: Record<Contact['bucket'], string> = {
   monthly: 'bg-teal-100',
   'every-six-months': 'bg-amber-100',
   yearly: 'bg-orange-100',
-  custom: 'bg-sage-100',
+  custom: 'bg-gray-200',
 };
 
 export default function FrequencyGuide({ visible, onClose }: FrequencyGuideProps) {

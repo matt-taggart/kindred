@@ -31,14 +31,6 @@ const bucketLabels: Record<Bucket, string> = {
   custom: "Custom",
 };
 
-const bucketColors: Record<Bucket, string> = {
-  daily: "bg-terracotta-100",
-  weekly: "bg-sage-100",
-  monthly: "bg-blue-100",
-  yearly: "bg-purple-100",
-  custom: "bg-sage-100",
-};
-
 const bucketDescriptions: Record<Bucket, string> = {
   daily: "Every day",
   weekly: "Every 7 days",

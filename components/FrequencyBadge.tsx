@@ -22,7 +22,7 @@ const bucketColors: Record<Contact['bucket'], string> = {
   monthly: 'bg-teal-100',
   'every-six-months': 'bg-amber-100',
   yearly: 'bg-orange-100',
-  custom: 'bg-sage-100',
+  custom: 'bg-gray-200',
 };
 
 const bucketTextColors: Record<Contact['bucket'], string> = {
@@ -33,7 +33,7 @@ const bucketTextColors: Record<Contact['bucket'], string> = {
   monthly: 'text-teal-700',
   'every-six-months': 'text-amber-700',
   yearly: 'text-orange-700',
-  custom: 'text-sage',
+  custom: 'text-gray-800',
 };
 
 interface FrequencyBadgeProps {
