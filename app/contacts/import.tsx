@@ -12,6 +12,7 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -20,13 +21,14 @@ import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import FrequencyBadge from "@/components/FrequencyBadge";
 import { formatPhoneNumber } from "@/utils/phone";
 
-type Bucket = "daily" | "weekly" | "monthly" | "yearly";
+type Bucket = "daily" | "weekly" | "monthly" | "yearly" | "custom";
 
 const bucketLabels: Record<Bucket, string> = {
   daily: "Daily",
   weekly: "Weekly",
   monthly: "Monthly",
   yearly: "Yearly",
+  custom: "Custom",
 };
 
 const bucketColors: Record<Bucket, string> = {
@@ -34,6 +36,7 @@ const bucketColors: Record<Bucket, string> = {
   weekly: "bg-sage-100",
   monthly: "bg-blue-100",
   yearly: "bg-purple-100",
+  custom: "bg-sage-100",
 };
 
 const bucketDescriptions: Record<Bucket, string> = {
@@ -41,6 +44,41 @@ const bucketDescriptions: Record<Bucket, string> = {
   weekly: "Every 7 days",
   monthly: "Every 30 days",
   yearly: "Every 365 days",
+  custom: "Choose your own cadence",
+};
+
+type CustomUnit = "days" | "weeks" | "months";
+
+const unitMultipliers: Record<CustomUnit, number> = {
+  days: 1,
+  weeks: 7,
+  months: 30,
+};
+
+const DEFAULT_CUSTOM_DAYS = 5;
+
+const deriveCustomUnitAndValue = (
+  days?: number | null,
+): { customUnit: CustomUnit; customValue: string } => {
+  if (!days || days < 1) {
+    return { customUnit: "days", customValue: String(DEFAULT_CUSTOM_DAYS) };
+  }
+
+  return { customUnit: "days", customValue: String(days) };
+};
+
+const formatCustomSummary = (days?: number | null) => {
+  if (!days || days < 1) return "Set a custom frequency";
+  if (days === 1) return "Every day";
+  if (days % 30 === 0) {
+    const months = days / 30;
+    return months === 1 ? "Every month" : `Every ${months} months`;
+  }
+  if (days % 7 === 0) {
+    const weeks = days / 7;
+    return weeks === 1 ? "Every week" : `Every ${weeks} weeks`;
+  }
+  return `Every ${days} days`;
 };
 
 type ImportableContact = {
@@ -160,6 +198,11 @@ export default function ImportContactsScreen() {
   >({});
   const [showFrequencySelector, setShowFrequencySelector] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
+  const [customIntervals, setCustomIntervals] = useState<
+    Record<string, number>
+  >({});
+  const [customValue, setCustomValue] = useState("");
+  const [customUnit, setCustomUnit] = useState<CustomUnit>("days");
 
   const shouldAutoRequest = useMemo(() => {
     const value = params.autoRequest;
@@ -293,10 +336,18 @@ export default function ImportContactsScreen() {
     }
   }, [contacts, selected]);
 
-  const handleFrequencyChange = useCallback((contactId: string) => {
-    setEditingContactId(contactId);
-    setShowFrequencySelector(true);
-  }, []);
+  const handleFrequencyChange = useCallback(
+    (contactId: string) => {
+      setEditingContactId(contactId);
+      const existingDays = customIntervals[contactId];
+      const { customUnit: u, customValue: v } =
+        deriveCustomUnitAndValue(existingDays);
+      setCustomUnit(u);
+      setCustomValue(v);
+      setShowFrequencySelector(true);
+    },
+    [customIntervals],
+  );
 
   const handleSelectFrequency = useCallback(
     (bucket: Bucket) => {
@@ -306,11 +357,39 @@ export default function ImportContactsScreen() {
           [editingContactId]: bucket,
         }));
       }
+
+      if (bucket === "custom") {
+        return;
+      }
+
       setShowFrequencySelector(false);
       setEditingContactId(null);
     },
     [editingContactId],
   );
+
+  const handleConfirmCustom = useCallback(() => {
+    const numericValue = parseInt(customValue, 10);
+    if (isNaN(numericValue) || numericValue <= 0) {
+      Alert.alert("Invalid Input", "Please enter a valid number.");
+      return;
+    }
+
+    const days = numericValue * unitMultipliers[customUnit];
+
+    if (editingContactId) {
+      setCustomIntervals((prev) => ({
+        ...prev,
+        [editingContactId]: days,
+      }));
+      setContactFrequencies((prev) => ({
+        ...prev,
+        [editingContactId]: "custom",
+      }));
+    }
+    setShowFrequencySelector(false);
+    setEditingContactId(null);
+  }, [customValue, customUnit, editingContactId]);
 
   const handleSetAllFrequency = useCallback(
     (bucket: Bucket) => {
@@ -358,13 +437,17 @@ export default function ImportContactsScreen() {
       phone: contact.phone,
       avatarUri: contact.avatarUri,
       bucket: contactFrequencies[contact.id] || "weekly",
+      customIntervalDays:
+        contactFrequencies[contact.id] === "custom"
+          ? customIntervals[contact.id]
+          : undefined,
     }));
 
     router.push({
       pathname: "/contacts/review-schedule",
       params: { contacts: JSON.stringify(contactsToImport) },
     });
-  }, [contacts, router, selected, contactFrequencies]);
+  }, [contacts, router, selected, contactFrequencies, customIntervals]);
 
   return (
     <SafeAreaView className="flex-1 bg-cream">
@@ -539,11 +622,18 @@ export default function ImportContactsScreen() {
             )}
 
             <ScrollView>
-              {(["daily", "weekly", "monthly", "yearly"] as Bucket[]).map(
-                (bucket) => (
+              {(
+                [
+                  "daily",
+                  "weekly",
+                  "monthly",
+                  "yearly",
+                  "custom",
+                ] as Bucket[]
+              ).map((bucket) => (
+                <View key={bucket} className="mb-3">
                   <TouchableOpacity
-                    key={bucket}
-                    className={`mb-3 rounded-2xl border-2 p-4 ${
+                    className={`rounded-2xl border-2 p-4 ${
                       contactFrequencies[editingContactId || ""] === bucket
                         ? "border-sage bg-sage-10"
                         : "border-gray-200 bg-white"
@@ -564,7 +654,12 @@ export default function ImportContactsScreen() {
                           {bucketLabels[bucket]}
                         </Text>
                         <Text className="mt-1 text-sm text-slate-500">
-                          {bucketDescriptions[bucket]}
+                          {bucket === "custom" &&
+                          customIntervals[editingContactId || ""]
+                            ? formatCustomSummary(
+                                customIntervals[editingContactId || ""],
+                              )
+                            : bucketDescriptions[bucket]}
                         </Text>
                       </View>
                       <View
@@ -576,8 +671,79 @@ export default function ImportContactsScreen() {
                       />
                     </View>
                   </TouchableOpacity>
-                ),
-              )}
+
+                  {bucket === "custom" &&
+                    contactFrequencies[editingContactId || ""] === "custom" && (
+                      <View className="mt-2 rounded-xl border border-sage-200 bg-white px-4 pb-4 pt-2">
+                        <View className="mt-2 flex-col gap-3">
+                          <View>
+                            <Text className="mb-1 text-xs font-medium text-slate-500">
+                              Frequency
+                            </Text>
+                            <TextInput
+                              value={customValue}
+                              onChangeText={(text) =>
+                                setCustomValue(text.replace(/[^0-9]/g, ""))
+                              }
+                              keyboardType="number-pad"
+                              className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-base text-slate-900"
+                              placeholder="e.g., 30"
+                              placeholderTextColor="#94a3b8"
+                              autoFocus
+                            />
+                          </View>
+                          <View>
+                            <Text className="mb-1 text-xs font-medium text-slate-500">
+                              Unit
+                            </Text>
+                            <View className="flex-row gap-1 rounded-xl bg-gray-100 p-1">
+                              {(
+                                ["days", "weeks", "months"] as CustomUnit[]
+                              ).map((unit) => (
+                                <TouchableOpacity
+                                  key={unit}
+                                  onPress={() => setCustomUnit(unit)}
+                                  className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
+                                    customUnit === unit ? "bg-white" : ""
+                                  }`}
+                                  style={
+                                    customUnit === unit
+                                      ? {
+                                          shadowColor: "#000",
+                                          shadowOffset: { width: 0, height: 1 },
+                                          shadowOpacity: 0.05,
+                                          shadowRadius: 2,
+                                          elevation: 1,
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  <Text
+                                    className={`text-sm font-medium ${
+                                      customUnit === unit
+                                        ? "text-slate-900"
+                                        : "text-slate-500"
+                                    }`}
+                                  >
+                                    {unit.charAt(0).toUpperCase() +
+                                      unit.slice(1)}
+                                  </Text>
+                                </TouchableOpacity>
+                              ))}
+                            </View>
+                          </View>
+                        </View>
+
+                        <TouchableOpacity
+                          className="mt-4 items-center justify-center rounded-xl bg-sage px-6 py-3"
+                          onPress={handleConfirmCustom}
+                        >
+                          <Text className="font-semibold text-white">Set</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                </View>
+              ))}
             </ScrollView>
 
             <TouchableOpacity
