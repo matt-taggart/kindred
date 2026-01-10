@@ -13,7 +13,7 @@
   "jest": {
     "preset": "jest-expo",
     "transformIgnorePatterns": [
-      "node_modules/(?!(\\.pnpm|@react-native|react-native|@expo|expo.*|nativewind|react-native-css-interop|react-native-calendars|@react-navigation)/)"
+      "node_modules/(?!(\\.pnpm|@react-native|react-native|@expo|expo.*|nativewind|react-native-css-interop|react-native-calendars|@react-navigation|@react-native-community)/)"
     ]
   },
   "dependencies": {

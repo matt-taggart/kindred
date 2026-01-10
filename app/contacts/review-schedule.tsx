@@ -72,8 +72,12 @@ export default function ReviewScheduleScreen() {
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [availableSlots, setAvailableSlots] = useState<number>(0);
+  const [availableSlots, setAvailableSlots] = useState<number>(5);
   const isPro = useUserStore((s) => s.isPro);
+
+  useEffect(() => {
+    setAvailableSlots(getAvailableSlots());
+  }, []);
 
   useEffect(() => {
     if (params.contacts) {
@@ -267,6 +271,22 @@ export default function ReviewScheduleScreen() {
         }}
         ListHeaderComponent={
           <View className="mb-4">
+            {!isPro && distributedContacts.length > availableSlots && (
+              <View className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <Text className="text-base font-bold text-amber-800">
+                  Contact Limit Reached
+                </Text>
+                <Text className="mt-1 text-sm text-amber-700">
+                  You've selected {distributedContacts.length} contacts, but
+                  your free plan only includes {availableSlots} imports.
+                </Text>
+                <Text className="mt-2 text-sm font-medium text-amber-800">
+                  Only the first {availableSlots} contacts will be imported unless
+                  you upgrade.
+                </Text>
+              </View>
+            )}
+
             <View className="rounded-2xl border border-sage-100 bg-white p-5 shadow-sm mb-4">
               <Text className="text-xs font-semibold uppercase tracking-wide text-sage">
                 Schedule Preview
