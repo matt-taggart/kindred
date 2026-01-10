@@ -215,18 +215,22 @@ export default function EditContactModal({
                           <Text className="text-xs font-medium text-slate-500 mb-1">
                             Frequency
                           </Text>
-                          <TextInput
-                            value={customValue}
-                            onChangeText={(text) =>
-                              setCustomState({
-                                customUnit,
-                                customValue: text.replace(/[^0-9]/g, ""),
-                              })
-                            }
-                            keyboardType="number-pad"
-                            className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-base text-slate"
-                            placeholder="e.g., 30"
-                          />
+                          <View className="h-12 flex-row items-center rounded-xl border border-gray-200 bg-gray-50 px-3">
+                            <TextInput
+                              value={customValue}
+                              onChangeText={(text) =>
+                                setCustomState({
+                                  customUnit,
+                                  customValue: text.replace(/[^0-9]/g, ""),
+                                })
+                              }
+                              keyboardType="number-pad"
+                              className="flex-1 text-base leading-5 text-slate"
+                              placeholder="e.g., 30"
+                              placeholderTextColor="#94a3b8"
+                              style={{ marginTop: -2 }}
+                            />
+                          </View>
                         </View>
                         <View>
                           <Text className="text-xs font-medium text-slate-500 mb-1">
