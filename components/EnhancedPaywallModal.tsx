@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   Modal,
   SafeAreaView,
@@ -6,9 +6,14 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Animated,
+  PanResponder,
+  TouchableWithoutFeedback,
 } from 'react-native';
 
 import { useUserStore } from '@/lib/userStore';
+
+const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
 
 type PaywallModalProps = {
   visible: boolean;
@@ -23,6 +28,37 @@ type PaywallModalProps = {
 export const EnhancedPaywallModal = ({ visible, onClose, importContext }: PaywallModalProps) => {
   const { isPro, purchasePro, restorePurchase, purchaseState, clearError } =
     useUserStore();
+  
+  const panY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      panY.setValue(0);
+    }
+  }, [visible, panY]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return gestureState.dy > 0;
+      },
+      onPanResponderMove: Animated.event([null, { dy: panY }], {
+        useNativeDriver: false,
+      }),
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+          onClose();
+        } else {
+          Animated.spring(panY, {
+            toValue: 0,
+            useNativeDriver: true,
+            bounciness: 8,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   const headline = useMemo(() => {
     if (isPro) return 'Welcome to Pro!';
@@ -61,15 +97,25 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View className="flex-1 bg-black/60">
-        <SafeAreaView className="mt-auto max-h-[85%] rounded-t-3xl bg-white">
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View className="px-6 py-6">
-              <View className="mb-4 h-1 w-12 self-center rounded-full bg-gray-200" />
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View className="flex-1 bg-black/60">
+          <TouchableWithoutFeedback onPress={() => {}}>
+            <AnimatedSafeAreaView 
+              style={{ transform: [{ translateY: panY }] }}
+              className="mt-auto max-h-[85%] rounded-t-3xl bg-white overflow-hidden"
+            >
+              <View 
+                {...panResponder.panHandlers} 
+                className="w-full items-center pt-4 pb-2 bg-white"
+              >
+                <View className="h-1 w-12 rounded-full bg-gray-200" />
+              </View>
 
-            <Text className="text-center text-2xl font-bold text-gray-900">
-              {headline}
-            </Text>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View className="px-6 pb-6 pt-2">
+                  <Text className="text-center text-2xl font-bold text-gray-900">
+                    {headline}
+                  </Text>
             <Text className="mt-2 text-center text-base text-gray-600">
               {subheadline}
             </Text>
@@ -207,8 +253,10 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
             )}
             </View>
           </ScrollView>
-        </SafeAreaView>
+        </AnimatedSafeAreaView>
+        </TouchableWithoutFeedback>
       </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
