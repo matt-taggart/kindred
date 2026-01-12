@@ -421,6 +421,7 @@ export const updateContactCadence = async (
 export const addNoteOnly = async (
   contactId: Contact['id'],
   notes: string,
+  type: InteractionType = 'call',
 ): Promise<Interaction> => {
   const db = getDb();
   const [contact] = db
@@ -442,7 +443,7 @@ export const addNoteOnly = async (
       id: interactionId,
       contactId,
       date: timestamp,
-      type: 'call',
+      type,
       notes,
     })
     .run();

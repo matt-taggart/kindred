@@ -19,6 +19,67 @@ const CONTACT_TABLE_SQL = `
   );
 `;
 
+const INTERACTIONS_TABLE_SQL = `
+  CREATE TABLE interactions (
+    id TEXT PRIMARY KEY,
+    contactId TEXT NOT NULL,
+    date INTEGER NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('call','text','meet','email')),
+    notes TEXT,
+    FOREIGN KEY (contactId) REFERENCES contacts(id) ON DELETE CASCADE
+  );
+`;
+
+const recreateInteractionsTableIfNeeded = () => {
+  const sqlite = getSqlite();
+
+  try {
+    const result = sqlite.getAllSync('SELECT sql FROM sqlite_master WHERE type="table" AND name="interactions";');
+
+    if (result && result.length > 0) {
+      const tableSql = result[0].sql || '';
+      const hasEmailType = tableSql.includes("'email'");
+
+      if (!hasEmailType) {
+        console.log('Migrating interactions table to support email type...');
+
+        sqlite.execSync('BEGIN TRANSACTION;');
+
+        try {
+          const interactionsData = sqlite.getAllSync('SELECT * FROM interactions;');
+
+          sqlite.execSync('DROP TABLE IF EXISTS interactions;');
+          sqlite.execSync(INTERACTIONS_TABLE_SQL);
+          sqlite.execSync('CREATE INDEX IF NOT EXISTS idx_interactions_contactId ON interactions (contactId);');
+
+          if (interactionsData && interactionsData.length > 0) {
+            for (const row of interactionsData) {
+              const id = (row.id || '').replace(/'/g, "''");
+              const contactId = (row.contactId || '').replace(/'/g, "''");
+              const date = row.date;
+              const type = (row.type || '').replace(/'/g, "''");
+              const notes = row.notes ? `'${row.notes.replace(/'/g, "''")}'` : 'NULL';
+
+              sqlite.execSync(
+                `INSERT INTO interactions (id, contactId, date, type, notes) VALUES ('${id}', '${contactId}', ${date}, '${type}', ${notes});`
+              );
+            }
+          }
+
+          sqlite.execSync('COMMIT;');
+          console.log('Interactions table migration completed successfully');
+        } catch (error) {
+          sqlite.execSync('ROLLBACK;');
+          console.error('Migration failed, rolling back:', error);
+          throw error;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error during interactions migration:', error);
+  }
+};
+
 const recreateContactsTableIfNeeded = () => {
   const sqlite = getSqlite();
 
@@ -84,6 +145,7 @@ export const runMigrations = () => {
   const sqlite = getSqlite();
 
   recreateContactsTableIfNeeded();
+  recreateInteractionsTableIfNeeded();
 
   sqlite.execSync(`
     PRAGMA foreign_keys = ON;
@@ -99,14 +161,7 @@ export const runMigrations = () => {
       birthday TEXT,
       isArchived INTEGER NOT NULL DEFAULT 0
     );
-    CREATE TABLE IF NOT EXISTS interactions (
-      id TEXT PRIMARY KEY,
-      contactId TEXT NOT NULL,
-      date INTEGER NOT NULL,
-      type TEXT NOT NULL CHECK (type IN ('call','text','meet')),
-      notes TEXT,
-      FOREIGN KEY (contactId) REFERENCES contacts(id) ON DELETE CASCADE
-    );
+    ${INTERACTIONS_TABLE_SQL.replace('CREATE TABLE interactions', 'CREATE TABLE IF NOT EXISTS interactions')}
     CREATE INDEX IF NOT EXISTS idx_interactions_contactId ON interactions (contactId);
   `);
 

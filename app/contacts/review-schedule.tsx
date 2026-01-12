@@ -276,11 +276,7 @@ export default function ReviewScheduleScreen() {
                 <Text className="text-base font-bold text-amber-800">
                   Contact Limit Reached
                 </Text>
-                <Text className="mt-1 text-sm text-amber-700">
-                  You've selected {distributedContacts.length} contacts, but
-                  your free plan only includes {availableSlots} imports.
-                </Text>
-                <Text className="mt-2 text-sm font-medium text-amber-800">
+                <Text className="mt-1 text-sm text-amber-800">
                   Only the first {availableSlots} contacts will be imported unless
                   you upgrade.
                 </Text>

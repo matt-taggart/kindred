@@ -48,12 +48,14 @@ const typeLabels: Record<Interaction['type'], string> = {
   call: 'Call',
   text: 'Text',
   meet: 'Meet',
+  email: 'Email',
 };
 
 const typeIcons: Record<Interaction['type'], keyof typeof Ionicons.glyphMap> = {
   call: 'call-outline',
   text: 'chatbubble-outline',
   meet: 'people-outline',
+  email: 'mail-outline',
 };
 
 const formatLastContacted = (lastContactedAt?: number | null) => {
