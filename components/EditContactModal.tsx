@@ -218,7 +218,6 @@ export default function EditContactModal({
             </View>
 
             <View className="mb-3 flex-row items-center gap-2">
-              <View className="h-1 w-1 rounded-full bg-sage" />
               <Text className="text-base font-semibold text-slate">
                 Check-in Frequency
               </Text>
