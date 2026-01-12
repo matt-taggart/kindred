@@ -201,7 +201,7 @@ export default function EditContactModal({
                   </Text>
                 </Pressable>
               ) : (
-                <View className="flex-row items-center justify-between rounded-xl bg-white p-3 border border-gray-100">
+                <View className="flex-row items-center justify-between bg-white py-2">
                   <DateTimePicker
                     value={parseDate(birthday)}
                     mode="date"
