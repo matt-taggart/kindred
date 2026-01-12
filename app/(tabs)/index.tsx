@@ -45,7 +45,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
   const isBirthday = isBirthdayToday(contact);
 
   return (
-    <View className={`mb-3 rounded-2xl border p-5 shadow-sm ${isBirthday ? 'bg-indigo-600 border-indigo-500' : 'bg-white border-gray-100'}`}>
+    <View className={`mb-3 rounded-2xl border p-5 shadow-sm ${isBirthday ? 'bg-terracotta border-terracotta' : 'bg-white border-gray-100'}`}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
         <View className="flex-row items-center gap-3">
           {contact.avatarUri ? (
@@ -67,7 +67,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
             </View>
             
             {isBirthday ? (
-              <Text className="text-base text-indigo-100 font-medium">It's their birthday today!</Text>
+              <Text className="text-base text-terracotta-100 font-medium">It's their birthday today!</Text>
             ) : (
               <Text className="text-base text-gray-500">Last contacted: {formatLastContacted(contact.lastContactedAt)}</Text>
             )}
@@ -81,14 +81,14 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
           onPress={onMarkDone}
           activeOpacity={0.85}
         >
-          <Text className={`text-lg font-semibold ${isBirthday ? 'text-indigo-600' : 'text-white'}`}>Mark Done</Text>
+          <Text className={`text-lg font-semibold ${isBirthday ? 'text-terracotta' : 'text-white'}`}>Mark Done</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className={`flex-1 items-center rounded-2xl py-3 border-2 ${
             isSnoozing 
-              ? (isBirthday ? 'bg-indigo-700 border-indigo-800' : 'bg-gray-100 border-gray-200') 
-              : (isBirthday ? 'bg-transparent border-indigo-300' : 'bg-transparent border-sage')
+              ? (isBirthday ? 'bg-terracotta border-terracotta' : 'bg-gray-100 border-gray-200') 
+              : (isBirthday ? 'bg-transparent border-terracotta-100/50' : 'bg-transparent border-sage')
           }`}
           onPress={onSnooze}
           activeOpacity={0.85}
@@ -96,8 +96,8 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
         >
           <Text className={`text-lg font-semibold ${
             isSnoozing 
-              ? (isBirthday ? 'text-indigo-300' : 'text-gray-400') 
-              : (isBirthday ? 'text-indigo-100' : 'text-sage')
+              ? (isBirthday ? 'text-terracotta-100' : 'text-gray-400') 
+              : (isBirthday ? 'text-terracotta-100' : 'text-sage')
           }`}>
             {isSnoozing ? 'Snoozing...' : 'Snooze'}
           </Text>

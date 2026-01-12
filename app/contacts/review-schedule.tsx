@@ -395,6 +395,8 @@ export default function ReviewScheduleScreen() {
             minimumDate={new Date()}
             maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
             onChange={(_e, date) => date && setSelectedDate(date)}
+            accentColor="#9CA986"
+            themeVariant="light"
           />
         </View>
       )}
@@ -408,6 +410,7 @@ export default function ReviewScheduleScreen() {
           minimumDate={new Date()}
           maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
           onChange={handleDateChange}
+          accentColor="#9CA986"
         />
       )}
 

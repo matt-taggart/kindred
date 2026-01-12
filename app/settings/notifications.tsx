@@ -180,6 +180,8 @@ export default function NotificationSettingsScreen() {
               mode="time"
               display="spinner"
               onChange={handleTimeChange}
+              accentColor="#9CA986"
+              themeVariant="light"
             />
           </View>
         )}
@@ -191,6 +193,7 @@ export default function NotificationSettingsScreen() {
             mode="time"
             display="default"
             onChange={handleTimeChange}
+            accentColor="#9CA986"
           />
         )}
       </SafeAreaView>

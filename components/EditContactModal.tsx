@@ -93,8 +93,8 @@ export default function EditContactModal({
   const [selectedBucket, setSelectedBucket] = useState<Contact["bucket"]>(
     contact.bucket,
   );
-  const [{ customUnit, customValue }, setCustomState] = useState(
-    () => deriveCustomUnitAndValue(contact.customIntervalDays),
+  const [{ customUnit, customValue }, setCustomState] = useState(() =>
+    deriveCustomUnitAndValue(contact.customIntervalDays),
   );
   const [birthday, setBirthday] = useState<string>(contact.birthday || "");
 
@@ -124,7 +124,7 @@ export default function EditContactModal({
     (isCustom && derivedCustomDays !== contact.customIntervalDays) ||
     (!isCustom && contact.bucket === "custom") ||
     birthday !== (contact.birthday || "");
-    
+
   const saveDisabled = !isCustomValid || !hasChanges;
 
   const handleSave = () => {
@@ -170,46 +170,51 @@ export default function EditContactModal({
             </Text>
 
             <View className="mb-8 rounded-2xl bg-white p-4 shadow-sm border border-gray-100">
-              <View className="flex-row items-center justify-between mb-4">
+              <View className="flex-row items-center justify-between mb-2.5">
                 <View className="flex-row items-center gap-2">
-                  <View className="h-8 w-8 items-center justify-center rounded-full bg-indigo-50">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
                     <Text className="text-lg">🎂</Text>
                   </View>
-                  <Text className="text-base font-semibold text-slate">Birthday</Text>
+                  <Text className="text-base font-semibold text-slate">
+                    Birthday
+                  </Text>
                 </View>
                 {birthday ? (
                   <Pressable
                     onPress={() => setBirthday("")}
                     className="active:opacity-60"
                   >
-                    <Text className="text-sm font-medium text-rose-500">Remove</Text>
+                    <Text className="text-sm font-medium text-rose-500">
+                      Remove
+                    </Text>
                   </Pressable>
                 ) : null}
               </View>
-              
+
               {!birthday ? (
                 <Pressable
                   onPress={() => setBirthday(formatDate(new Date()))}
-                  className="flex-row items-center justify-center rounded-xl border border-dashed border-indigo-200 bg-indigo-50/30 py-4 active:bg-indigo-50"
+                  className="flex-row items-center justify-center rounded-xl border border-dashed border-sage-100 bg-sage-100 py-4 active:bg-sage-100/80"
                 >
-                  <Text className="text-base font-medium text-indigo-600">
+                  <Text className="text-base font-semibold text-sage">
                     + Add Birthday Reminder
                   </Text>
                 </Pressable>
               ) : (
-                <View className="flex-row items-center justify-between rounded-xl bg-slate-50 p-3">
-                  <Text className="text-sm font-medium text-slate-500 ml-1">Reminder Date</Text>
+                <View className="flex-row items-center justify-between rounded-xl bg-white p-3 border border-gray-100">
                   <DateTimePicker
                     value={parseDate(birthday)}
                     mode="date"
                     display="compact"
                     onChange={handleDateChange}
-                    accentColor="#4f46e5" // Indigo-600
+                    accentColor="#9CA986" // Sage
+                    themeVariant="light"
                   />
                 </View>
               )}
               <Text className="mt-3 text-xs text-slate-400 text-center">
-                We'll prioritize this over regular check-ins on their special day.
+                We'll prioritize this over regular check-ins on their special
+                day.
               </Text>
             </View>
 
@@ -245,7 +250,9 @@ export default function EditContactModal({
                     onPress={() => {
                       setSelectedBucket(bucket);
                       if (bucket === "custom") {
-                        const derived = deriveCustomUnitAndValue(contact.customIntervalDays);
+                        const derived = deriveCustomUnitAndValue(
+                          contact.customIntervalDays,
+                        );
                         setCustomState(derived);
                       }
                     }}
@@ -392,3 +399,4 @@ export default function EditContactModal({
     </Modal>
   );
 }
+
