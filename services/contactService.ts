@@ -44,6 +44,14 @@ const generateId = () => {
 type InteractionType = NewInteraction['type'];
 type InsertableContact = Omit<NewContact, 'id'> & { id?: string };
 
+const isSameDay = (date1: Date, date2: Date) => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+};
+
 const normalizeCustomInterval = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   if (bucket !== 'custom') return null;
   if (!customIntervalDays || customIntervalDays < 1 || customIntervalDays > 365) {
@@ -129,6 +137,10 @@ export const getDueContacts = (): Contact[] => {
 
   return allContacts
     .filter((contact: Contact) => {
+      if (contact.lastContactedAt && isSameDay(new Date(contact.lastContactedAt), now)) {
+        return false;
+      }
+
       const isDue = !contact.lastContactedAt || (contact.nextContactDate !== null && contact.nextContactDate <= nowMs);
       const isBirthday = isBirthdayToday(contact, now);
       return isDue || isBirthday;
