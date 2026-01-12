@@ -479,7 +479,7 @@ export default function ContactDetailScreen() {
             {interactions.length === 0 ? (
               <View className="items-center justify-center rounded-2xl bg-white p-8 shadow-sm">
                 <Ionicons name="time-outline" size={48} color="#94a3b8" />
-                <Text className="mt-3 text-base text-slate-600">No interactions yet</Text>
+                <Text className="mt-3 text-base text-slate-600">No history yet</Text>
                 <Text className="mt-1 text-sm text-slate-500">
                   Your conversation history will appear here once you start logging interactions.
                 </Text>
