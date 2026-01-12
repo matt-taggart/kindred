@@ -1,6 +1,7 @@
-import { Modal, Pressable } from "react-native";
+import { Modal, Pressable, Platform } from "react-native";
 import { SafeAreaView, ScrollView, Text, TextInput, View } from "react-native";
 import { useEffect, useMemo, useState } from "react";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { Contact } from "@/db/schema";
 
@@ -71,6 +72,18 @@ const formatCustomSummary = (days?: number | null) => {
   return `Every ${days} days`;
 };
 
+const formatDate = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const parseDate = (dateString: string) => {
+  const [y, m, d] = dateString.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 export default function EditContactModal({
   contact,
   visible,
@@ -123,6 +136,12 @@ export default function EditContactModal({
     onClose();
   };
 
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    if (selectedDate) {
+      setBirthday(formatDate(selectedDate));
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -146,29 +165,44 @@ export default function EditContactModal({
             <Text className="mb-2 text-lg font-bold text-slate">
               {contact.name}
             </Text>
-            <Text className="mb-2 text-base text-slate-500">
+            <Text className="mb-6 text-base text-slate-500">
               How often would you like to check in with {contact.name}?
-            </Text>
-
-            <Text className="mb-3 text-base font-semibold text-slate">
-              Contact Reminders
             </Text>
 
             <View className="mb-6">
               <Text className="text-sm font-medium text-slate-500 mb-2">Birthday (Optional)</Text>
-              <View className="h-12 flex-row items-center rounded-xl border border-gray-200 bg-white px-3">
-                <TextInput
-                  value={birthday}
-                  onChangeText={setBirthday}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#94a3b8"
-                  className="flex-1 text-base leading-5 text-slate"
-                />
-              </View>
-              <Text className="mt-1 text-xs text-slate-400">
-                Format: YYYY-MM-DD (e.g. 1990-01-25)
-              </Text>
+              
+              {!birthday ? (
+                <Pressable
+                  onPress={() => setBirthday(formatDate(new Date()))}
+                  className="flex-row items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 py-3"
+                >
+                  <Text className="text-base font-medium text-slate-500">
+                    + Add Birthday
+                  </Text>
+                </Pressable>
+              ) : (
+                <View className="flex-row items-center gap-3">
+                  <DateTimePicker
+                    value={parseDate(birthday)}
+                    mode="date"
+                    display="compact"
+                    onChange={handleDateChange}
+                    style={{ alignSelf: "flex-start" }}
+                  />
+                  <Pressable
+                    onPress={() => setBirthday("")}
+                    className="rounded-full bg-gray-200 px-3 py-1.5"
+                  >
+                    <Text className="text-xs font-semibold text-slate-600">Remove</Text>
+                  </Pressable>
+                </View>
+              )}
             </View>
+
+            <Text className="mb-3 text-base font-semibold text-slate">
+              Contact Reminders
+            </Text>
 
             <View className="mb-4 flex gap-2">
               {(

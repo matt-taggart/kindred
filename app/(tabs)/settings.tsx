@@ -5,6 +5,7 @@ import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, Vie
 
 import { useUserStore } from '@/lib/userStore';
 import { resetDatabase } from '@/services/contactService';
+import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
 
 type SettingsRowProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -49,6 +50,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { isPro, restorePurchase, purchaseState } = useUserStore();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -57,7 +59,7 @@ export default function SettingsScreen() {
   };
 
   const handleUpgrade = () => {
-    router.push('/modal?paywall=1');
+    setShowPaywall(true);
   };
 
   const handleRestorePurchase = async () => {
@@ -180,6 +182,8 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </SettingsSection>
       </ScrollView>
+
+      <EnhancedPaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
 
       <Modal
         visible={showDeleteModal}
