@@ -519,8 +519,6 @@ interface InteractionCardProps {
 }
 
 function InteractionCard({ interaction, onEdit, onDelete }: InteractionCardProps) {
-  const router = useRouter();
-
   return (
     <TouchableOpacity
       className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
