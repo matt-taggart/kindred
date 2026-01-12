@@ -169,40 +169,56 @@ export default function EditContactModal({
               How often would you like to check in with {contact.name}?
             </Text>
 
-            <View className="mb-6">
-              <Text className="text-sm font-medium text-slate-500 mb-2">Birthday (Optional)</Text>
+            <View className="mb-8 rounded-2xl bg-white p-4 shadow-sm border border-gray-100">
+              <View className="flex-row items-center justify-between mb-4">
+                <View className="flex-row items-center gap-2">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-indigo-50">
+                    <Text className="text-lg">🎂</Text>
+                  </View>
+                  <Text className="text-base font-semibold text-slate">Birthday</Text>
+                </View>
+                {birthday ? (
+                  <Pressable
+                    onPress={() => setBirthday("")}
+                    className="active:opacity-60"
+                  >
+                    <Text className="text-sm font-medium text-rose-500">Remove</Text>
+                  </Pressable>
+                ) : null}
+              </View>
               
               {!birthday ? (
                 <Pressable
                   onPress={() => setBirthday(formatDate(new Date()))}
-                  className="flex-row items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 py-3"
+                  className="flex-row items-center justify-center rounded-xl border border-dashed border-indigo-200 bg-indigo-50/30 py-4 active:bg-indigo-50"
                 >
-                  <Text className="text-base font-medium text-slate-500">
-                    + Add Birthday
+                  <Text className="text-base font-medium text-indigo-600">
+                    + Add Birthday Reminder
                   </Text>
                 </Pressable>
               ) : (
-                <View className="flex-row items-center gap-3">
+                <View className="flex-row items-center justify-between rounded-xl bg-slate-50 p-3">
+                  <Text className="text-sm font-medium text-slate-500 ml-1">Reminder Date</Text>
                   <DateTimePicker
                     value={parseDate(birthday)}
                     mode="date"
                     display="compact"
                     onChange={handleDateChange}
-                    style={{ alignSelf: "flex-start" }}
+                    accentColor="#4f46e5" // Indigo-600
                   />
-                  <Pressable
-                    onPress={() => setBirthday("")}
-                    className="rounded-full bg-gray-200 px-3 py-1.5"
-                  >
-                    <Text className="text-xs font-semibold text-slate-600">Remove</Text>
-                  </Pressable>
                 </View>
               )}
+              <Text className="mt-3 text-xs text-slate-400 text-center">
+                We'll prioritize this over regular check-ins on their special day.
+              </Text>
             </View>
 
-            <Text className="mb-3 text-base font-semibold text-slate">
-              Contact Reminders
-            </Text>
+            <View className="mb-3 flex-row items-center gap-2">
+              <View className="h-1 w-1 rounded-full bg-sage" />
+              <Text className="text-base font-semibold text-slate">
+                Check-in Frequency
+              </Text>
+            </View>
 
             <View className="mb-4 flex gap-2">
               {(
