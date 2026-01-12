@@ -118,7 +118,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
       if (availableSlots === 0) {
         return 'Your free plan is full.';
       }
-      return `You have ${availableSlots} spots remaining in your free plan.`;
+      return `You have ${availableSlots} contacts remaining in your free plan.`;
     }
     return 'Invest in your relationships forever.';
   }, [isPro, importContext]);
@@ -156,14 +156,13 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
         <Animated.View 
           style={{ 
             transform: [{ translateY: panY }],
-            paddingTop: insets.top,
           }}
           className="mt-auto h-[90%] rounded-t-3xl bg-cream overflow-hidden flex flex-col shadow-2xl"
         >
           {/* Drag Handle */}
           <View 
             {...panResponder.panHandlers} 
-            className="w-full items-center pt-3 pb-2 bg-cream z-10"
+            className="w-full items-center pt-5 pb-6 bg-cream z-10"
           >
             <View className="h-1.5 w-12 rounded-full bg-gray-200" />
           </View>
@@ -198,7 +197,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                     <Text className="text-4xl font-extrabold text-gray-900">$14.99</Text>
                     <Text className="text-lg font-medium text-gray-500 ml-1">/ lifetime</Text>
                   </View>
-                  <Text className="text-sm text-gray-500 mt-1">Invest in your relationships once, keep it forever.</Text>
+                  <Text className="text-sm text-gray-500 mt-1">One payment. A lifetime of connection.</Text>
                 </View>
               )}
 
@@ -246,8 +245,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                       detail="Track every call, text, and meetup"
                     />
                       <FeatureItem
-                      icon="✨"
-                      iconColor="text-magic-600"
+                      icon={<Ionicons name="sparkles" size={18} color="#4f46e5" />}
                       iconBg="bg-magic-100"
                       text="Future Updates"
                       detail="All new features included forever"
@@ -286,7 +284,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
             >
               <TouchableOpacity
                 className={`w-full items-center justify-center rounded-2xl py-4 shadow-sm ${
-                  purchaseState.isPurchasing ? 'bg-terracotta/60' : 'bg-terracotta'
+                  purchaseState.isPurchasing ? 'bg-magic-600/60' : 'bg-magic-600'
                 }`}
                 onPress={handlePurchase}
                 activeOpacity={0.9}
@@ -304,7 +302,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                   hitSlop={15}
                 >
                   <Text className={`text-[10px] font-bold uppercase tracking-widest ${purchaseState.isRestoring ? 'text-gray-300' : 'text-gray-400'}`}>
-                    {purchaseState.isRestoring ? 'Restoring...' : 'Restore'}
+                    {purchaseState.isRestoring ? 'Restoring...' : 'Restore Purchase'}
                   </Text>
                 </TouchableOpacity>
 
@@ -333,8 +331,8 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
 };
 
 type FeatureItemProps = {
-  icon: string;
-  iconColor: string;
+  icon: string | React.ReactNode;
+  iconColor?: string;
   iconBg: string;
   text: string;
   detail: string;
@@ -344,7 +342,11 @@ function FeatureItem({ icon, iconColor, iconBg, text, detail }: FeatureItemProps
   return (
     <View className="flex-row items-center gap-4 bg-white p-3 rounded-xl border border-gray-100">
       <View className={`w-10 h-10 ${iconBg} rounded-full items-center justify-center`}>
-        <Text className={`text-lg font-bold ${iconColor}`}>{icon}</Text>
+        {typeof icon === 'string' ? (
+          <Text className={`text-lg font-bold ${iconColor}`}>{icon}</Text>
+        ) : (
+          icon
+        )}
       </View>
       <View className="flex-1">
         <Text className="text-base font-semibold text-gray-900">{text}</Text>
