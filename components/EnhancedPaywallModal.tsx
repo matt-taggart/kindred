@@ -9,11 +9,13 @@ import {
   Animated,
   PanResponder,
   TouchableWithoutFeedback,
+  Dimensions,
 } from 'react-native';
 
 import { useUserStore } from '@/lib/userStore';
 
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 type PaywallModalProps = {
   visible: boolean;
@@ -29,13 +31,54 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
   const { isPro, purchasePro, restorePurchase, purchaseState, clearError } =
     useUserStore();
   
-  const panY = useRef(new Animated.Value(0)).current;
+  const panY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const animatedOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
-      panY.setValue(0);
+      panY.setValue(SCREEN_HEIGHT);
+      animatedOpacity.setValue(0);
+      
+      Animated.parallel([
+        Animated.spring(panY, {
+          toValue: 0,
+          useNativeDriver: true,
+          bounciness: 4,
+          speed: 12,
+        }),
+        Animated.timing(animatedOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
-  }, [visible, panY]);
+  }, [visible, panY, animatedOpacity]);
+
+  const animateOut = (callback: () => void) => {
+    Animated.parallel([
+      Animated.timing(panY, {
+        toValue: SCREEN_HEIGHT,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animatedOpacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(callback);
+  };
+
+  const handleClose = () => {
+    animateOut(onClose);
+  };
+
+  const handlePartialImport = () => {
+    if (importContext) {
+      animateOut(importContext.onImportPartial);
+    }
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -48,7 +91,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
       }),
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dy > 100 || gestureState.vy > 0.5) {
-          onClose();
+          handleClose();
         } else {
           Animated.spring(panY, {
             toValue: 0,
@@ -81,9 +124,9 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
 
   useEffect(() => {
     if (isPro && visible) {
-      setTimeout(onClose, 800);
+      setTimeout(handleClose, 800);
     }
-  }, [isPro, visible, onClose]);
+  }, [isPro, visible]);
 
   const handlePurchase = async () => {
     clearError();
@@ -96,9 +139,12 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View className="flex-1 bg-black/60">
+    <Modal visible={visible} animationType="none" transparent onRequestClose={handleClose}>
+      <TouchableWithoutFeedback onPress={handleClose}>
+        <Animated.View 
+          style={{ opacity: animatedOpacity }}
+          className="flex-1 bg-black/60"
+        >
           <TouchableWithoutFeedback onPress={() => {}}>
             <AnimatedSafeAreaView 
               style={{ transform: [{ translateY: panY }] }}
@@ -220,7 +266,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
 
                 <TouchableOpacity
                   className="mt-3 items-center rounded-xl border border-gray-300 py-3"
-                  onPress={importContext ? importContext.onImportPartial : onClose}
+                  onPress={importContext ? handlePartialImport : handleClose}
                   activeOpacity={0.9}
                 >
                   <Text className="text-base font-semibold text-gray-600">
@@ -237,7 +283,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
             {isPro && (
               <TouchableOpacity
                 className="mt-6 items-center rounded-xl bg-terracotta py-4"
-                onPress={onClose}
+                onPress={handleClose}
                 activeOpacity={0.9}
               >
                 <Text className="text-lg font-semibold text-white">
@@ -255,7 +301,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
           </ScrollView>
         </AnimatedSafeAreaView>
         </TouchableWithoutFeedback>
-      </View>
+      </Animated.View>
       </TouchableWithoutFeedback>
     </Modal>
   );
