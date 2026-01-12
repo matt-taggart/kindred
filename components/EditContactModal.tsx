@@ -213,8 +213,7 @@ export default function EditContactModal({
                 </View>
               )}
               <Text className="mt-3 text-xs text-slate-400 text-center">
-                We'll prioritize this over regular check-ins on their special
-                day.
+                We'll prioritize this over regular check-ins on their birthday.
               </Text>
             </View>
 
@@ -399,4 +398,3 @@ export default function EditContactModal({
     </Modal>
   );
 }
-
