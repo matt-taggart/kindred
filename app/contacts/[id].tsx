@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Contact, Interaction } from '@/db/schema';
 import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, unarchiveContact, snoozeContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
-import InteractionCard from '@/components/InteractionCard';
+import InteractionListItem from '@/components/InteractionListItem';
 import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -459,7 +459,7 @@ export default function ContactDetailScreen() {
             ) : (
               <View className="flex flex-col gap-4">
                 {interactions.map((interaction) => (
-                  <InteractionCard
+                  <InteractionListItem
                     key={interaction.id}
                     interaction={interaction}
                     onEdit={handleEditInteraction}
