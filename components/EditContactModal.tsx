@@ -11,6 +11,7 @@ interface EditContactModalProps {
   onSave: (
     newBucket: Contact["bucket"],
     customIntervalDays?: number | null,
+    birthday?: string | null,
   ) => void;
 }
 
@@ -82,14 +83,16 @@ export default function EditContactModal({
   const [{ customUnit, customValue }, setCustomState] = useState(
     () => deriveCustomUnitAndValue(contact.customIntervalDays),
   );
+  const [birthday, setBirthday] = useState<string>(contact.birthday || "");
 
   useEffect(() => {
     if (visible) {
       setSelectedBucket(contact.bucket);
       const derived = deriveCustomUnitAndValue(contact.customIntervalDays);
       setCustomState(derived);
+      setBirthday(contact.birthday || "");
     }
-  }, [visible, contact.bucket, contact.customIntervalDays]);
+  }, [visible, contact.bucket, contact.customIntervalDays, contact.birthday]);
 
   const derivedCustomDays = useMemo(() => {
     const numericValue = Number(customValue);
@@ -106,14 +109,16 @@ export default function EditContactModal({
   const hasChanges =
     selectedBucket !== contact.bucket ||
     (isCustom && derivedCustomDays !== contact.customIntervalDays) ||
-    (!isCustom && contact.bucket === "custom");
+    (!isCustom && contact.bucket === "custom") ||
+    birthday !== (contact.birthday || "");
+    
   const saveDisabled = !isCustomValid || !hasChanges;
 
   const handleSave = () => {
     if (!isCustomValid) return;
     const customDays = selectedBucket === "custom" ? derivedCustomDays : null;
     if (hasChanges) {
-      onSave(selectedBucket, customDays ?? null);
+      onSave(selectedBucket, customDays ?? null, birthday || null);
     }
     onClose();
   };
@@ -148,6 +153,22 @@ export default function EditContactModal({
             <Text className="mb-3 text-base font-semibold text-slate">
               Contact Reminders
             </Text>
+
+            <View className="mb-6">
+              <Text className="text-sm font-medium text-slate-500 mb-2">Birthday (Optional)</Text>
+              <View className="h-12 flex-row items-center rounded-xl border border-gray-200 bg-white px-3">
+                <TextInput
+                  value={birthday}
+                  onChangeText={setBirthday}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor="#94a3b8"
+                  className="flex-1 text-base leading-5 text-slate"
+                />
+              </View>
+              <Text className="mt-1 text-xs text-slate-400">
+                Format: YYYY-MM-DD (e.g. 1990-01-25)
+              </Text>
+            </View>
 
             <View className="mb-4 flex gap-2">
               {(

@@ -5,7 +5,7 @@ import { ActivityIndicator, Image, Alert, Linking, RefreshControl, SafeAreaView,
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, deleteInteraction, updateContactCadence, unarchiveContact, snoozeContact } from '@/services/contactService';
+import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, unarchiveContact, snoozeContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
 
@@ -269,11 +269,14 @@ export default function ContactDetailScreen() {
   }, [contact, loadContactData]);
 
   const handleSaveCadence = useCallback(
-    async (newBucket: Contact['bucket'], customIntervalDays?: number | null) => {
+    async (newBucket: Contact['bucket'], customIntervalDays?: number | null, birthday?: string | null) => {
       if (!contact) return;
 
       setSavingCadence(true);
       try {
+        if (birthday !== undefined) {
+          await updateContact(contact.id, { birthday });
+        }
         const updated = await updateContactCadence(contact.id, newBucket, customIntervalDays);
         setContact(updated);
         loadContactData();

@@ -13,6 +13,12 @@ module.exports = {
           DEFAULT: '#D48158',
           100: '#F6E6DE', // lighter tint
         },
+        magic: {
+          DEFAULT: '#6366f1', // Indigo 500
+          100: '#e0e7ff', // Indigo 100
+          200: '#c7d2fe', // Indigo 200
+          600: '#4f46e5', // Indigo 600
+        },
         cream: '#F3F0E6',
         slate: '#475569',
       },

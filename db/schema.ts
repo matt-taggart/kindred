@@ -9,6 +9,7 @@ export const contacts = sqliteTable('contacts', {
   customIntervalDays: integer('customIntervalDays', { mode: 'number' }),
   lastContactedAt: integer('lastContactedAt', { mode: 'number' }),
   nextContactDate: integer('nextContactDate', { mode: 'number' }),
+  birthday: text('birthday'), // Format: YYYY-MM-DD or MM-DD
   isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 });
 

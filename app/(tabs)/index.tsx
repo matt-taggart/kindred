@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 import { Contact } from '@/db/schema';
-import { getDueContacts, snoozeContact } from '@/services/contactService';
+import { getDueContacts, snoozeContact, isBirthdayToday } from '@/services/contactService';
 import CelebrationStatus from '@/components/CelebrationStatus';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -42,9 +42,10 @@ type ContactCardProps = {
 
 const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPress }: ContactCardProps) => {
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
+  const isBirthday = isBirthdayToday(contact);
 
   return (
-    <View className="mb-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <View className={`mb-3 rounded-2xl border p-5 shadow-sm ${isBirthday ? 'bg-indigo-600 border-indigo-500' : 'bg-white border-gray-100'}`}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
         <View className="flex-row items-center gap-3">
           {contact.avatarUri ? (
@@ -54,34 +55,50 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
               resizeMode="cover"
             />
           ) : (
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-sage">
+            <View className={`h-12 w-12 items-center justify-center rounded-full ${isBirthday ? 'bg-white/20' : 'bg-sage'}`}>
               <Text className="text-base font-semibold text-white">{initial}</Text>
             </View>
           )}
 
           <View className="flex-1">
-            <Text className="text-xl font-semibold text-gray-900">{contact.name}</Text>
-            <Text className="text-base text-gray-500">Last contacted: {formatLastContacted(contact.lastContactedAt)}</Text>
+            <View className="flex-row items-center gap-2">
+              <Text className={`text-xl font-semibold ${isBirthday ? 'text-white' : 'text-gray-900'}`}>{contact.name}</Text>
+              {isBirthday && <Text className="text-xl">🎂</Text>}
+            </View>
+            
+            {isBirthday ? (
+              <Text className="text-base text-indigo-100 font-medium">It's their birthday today!</Text>
+            ) : (
+              <Text className="text-base text-gray-500">Last contacted: {formatLastContacted(contact.lastContactedAt)}</Text>
+            )}
           </View>
         </View>
       </TouchableOpacity>
 
       <View className="mt-4 flex-row gap-2">
         <TouchableOpacity
-          className="flex-1 items-center rounded-2xl bg-sage py-3 border-2 border-transparent"
+          className={`flex-1 items-center rounded-2xl py-3 border-2 ${isBirthday ? 'bg-white border-white' : 'bg-sage border-transparent'}`}
           onPress={onMarkDone}
           activeOpacity={0.85}
         >
-          <Text className="text-lg font-semibold text-white">Mark Done</Text>
+          <Text className={`text-lg font-semibold ${isBirthday ? 'text-indigo-600' : 'text-white'}`}>Mark Done</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`flex-1 items-center rounded-2xl py-3 border-2 ${isSnoozing ? 'bg-gray-100 border-gray-200' : 'bg-transparent border-sage'}`}
+          className={`flex-1 items-center rounded-2xl py-3 border-2 ${
+            isSnoozing 
+              ? (isBirthday ? 'bg-indigo-700 border-indigo-800' : 'bg-gray-100 border-gray-200') 
+              : (isBirthday ? 'bg-transparent border-indigo-300' : 'bg-transparent border-sage')
+          }`}
           onPress={onSnooze}
           activeOpacity={0.85}
           disabled={isSnoozing}
         >
-          <Text className={`text-lg font-semibold ${isSnoozing ? 'text-gray-400' : 'text-sage'}`}>
+          <Text className={`text-lg font-semibold ${
+            isSnoozing 
+              ? (isBirthday ? 'text-indigo-300' : 'text-gray-400') 
+              : (isBirthday ? 'text-indigo-100' : 'text-sage')
+          }`}>
             {isSnoozing ? 'Snoozing...' : 'Snooze'}
           </Text>
         </TouchableOpacity>

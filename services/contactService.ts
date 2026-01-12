@@ -117,19 +117,32 @@ export const getContacts = (options: GetContactsOptions = {}): Contact[] => {
 
 export const getDueContacts = (): Contact[] => {
   const db = getDb();
-  const now = Date.now();
+  const now = new Date();
+  const nowMs = now.getTime();
 
-  return db
+  // Fetch all active contacts to check for birthdays and due dates in JS
+  const allContacts: Contact[] = db
     .select()
     .from(contacts)
-    .where(
-      and(
-        eq(contacts.isArchived, false),
-        or(isNull(contacts.lastContactedAt), lte(contacts.nextContactDate, now)),
-      ),
-    )
-    .orderBy(asc(contacts.nextContactDate))
+    .where(eq(contacts.isArchived, false))
     .all();
+
+  return allContacts
+    .filter((contact: Contact) => {
+      const isDue = !contact.lastContactedAt || (contact.nextContactDate !== null && contact.nextContactDate <= nowMs);
+      const isBirthday = isBirthdayToday(contact, now);
+      return isDue || isBirthday;
+    })
+    .sort((a: Contact, b: Contact) => {
+      // Priority: Birthday > Overdue/Due
+      const aBirthday = isBirthdayToday(a, now);
+      const bBirthday = isBirthdayToday(b, now);
+
+      if (aBirthday && !bBirthday) return -1;
+      if (!aBirthday && bBirthday) return 1;
+
+      return (a.nextContactDate || 0) - (b.nextContactDate || 0);
+    });
 };
 
 export const archiveContact = async (contactId: Contact['id']): Promise<Contact> => {
@@ -453,4 +466,77 @@ export const resetDatabase = async (): Promise<void> => {
 
   db.delete(interactions).run();
   db.delete(contacts).run();
+};
+
+export const updateContact = async (
+  contactId: Contact['id'],
+  updates: Partial<Pick<Contact, 'name' | 'phone' | 'birthday' | 'avatarUri'>>,
+): Promise<Contact> => {
+  const db = getDb();
+
+  const [contact] = db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.id, contactId))
+    .limit(1)
+    .all();
+
+  if (!contact) {
+    throw new Error(`Contact not found: ${contactId}`);
+  }
+
+  db.update(contacts)
+    .set(updates)
+    .where(eq(contacts.id, contactId))
+    .run();
+
+  const [updated] = db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.id, contactId))
+    .limit(1)
+    .all();
+
+  if (!updated) {
+    throw new Error('Failed to update contact');
+  }
+
+  return updated;
+};
+
+export const isBirthdayToday = (contact: Contact, today: Date = new Date()): boolean => {
+  if (!contact.birthday) return false;
+
+  try {
+    // Expected format: YYYY-MM-DD or MM-DD
+    const parts = contact.birthday.split('-');
+    let bMonth: number, bDay: number;
+
+    if (parts.length === 3) {
+      bMonth = parseInt(parts[1], 10);
+      bDay = parseInt(parts[2], 10);
+    } else if (parts.length === 2) {
+      bMonth = parseInt(parts[0], 10);
+      bDay = parseInt(parts[1], 10);
+    } else {
+      return false;
+    }
+
+    const tMonth = today.getMonth() + 1; // 0-indexed
+    const tDay = today.getDate();
+
+    return bMonth === tMonth && bDay === tDay;
+  } catch (e) {
+    console.warn('Error parsing birthday', e);
+    return false;
+  }
+};
+
+export type ReminderPriority = 'birthday' | 'standard';
+
+export const getReminderPriority = (contact: Contact, today: Date = new Date()): ReminderPriority => {
+  if (isBirthdayToday(contact, today)) {
+    return 'birthday';
+  }
+  return 'standard';
 };
