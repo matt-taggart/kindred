@@ -188,8 +188,8 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
               {/* Price Tag */}
               {!isPro && (
                 <View className="items-center mb-8">
-                    <View className="bg-magic/10 px-4 py-1.5 rounded-full mb-3 border border-magic/20">
-                    <Text className="text-magic-600 text-xs font-bold uppercase tracking-wider">
+                    <View className="bg-sage/10 px-4 py-1.5 rounded-full mb-3 border border-sage/20">
+                    <Text className="text-sage text-xs font-bold uppercase tracking-wider">
                       ✨ One-time payment
                     </Text>
                   </View>
@@ -210,9 +210,9 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                         <Text className="font-bold text-gray-400 uppercase tracking-widest text-[10px] mb-1">Free</Text>
                         <Text className="text-gray-400 text-sm font-medium">5 contacts</Text>
                       </View>
-                      <View className="flex-1 p-5 bg-magic/5 items-center justify-center">
-                        <Text className="font-bold text-magic-600 uppercase tracking-widest text-[10px] mb-1">PRO</Text>
-                        <Text className="font-bold text-magic-600 text-sm">unlimited contacts</Text>
+                      <View className="flex-1 p-5 bg-sage/5 items-center justify-center">
+                        <Text className="font-bold text-sage uppercase tracking-widest text-[10px] mb-1">PRO</Text>
+                        <Text className="font-bold text-sage text-sm">unlimited contacts</Text>
                       </View>
                     </View>
                   </View>
@@ -225,8 +225,8 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                   <View className="space-y-4">
                     <FeatureItem
                       icon="∞"
-                      iconColor="text-magic-600"
-                      iconBg="bg-magic-100"
+                      iconColor="text-sage"
+                      iconBg="bg-sage-100"
                       text="Unlimited Contacts"
                       detail="Add as many people as you want"
                     />
@@ -245,8 +245,8 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                       detail="Track every call, text, and meetup"
                     />
                       <FeatureItem
-                      icon={<Ionicons name="sparkles" size={18} color="#4f46e5" />}
-                      iconBg="bg-magic-100"
+                      icon={<Ionicons name="sparkles" size={18} color="#9CA986" />}
+                      iconBg="bg-sage-100"
                       text="Future Updates"
                       detail="All new features included forever"
                     />
@@ -284,7 +284,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
             >
               <TouchableOpacity
                 className={`w-full items-center justify-center rounded-2xl py-4 shadow-sm ${
-                  purchaseState.isPurchasing ? 'bg-magic-600/60' : 'bg-magic-600'
+                  purchaseState.isPurchasing ? 'bg-sage/60' : 'bg-sage'
                 }`}
                 onPress={handlePurchase}
                 activeOpacity={0.9}
