@@ -9,6 +9,7 @@ import { getContacts, getInteractionHistory, deleteInteraction, updateContact, u
 import EditContactModal from '@/components/EditContactModal';
 import InteractionListItem from '@/components/InteractionListItem';
 import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
+import { formatLastConnected, formatNextReminder } from '@/utils/timeFormatting';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -43,28 +44,6 @@ const formatCustomLabel = (customIntervalDays?: number | null) => {
 const getBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   if (bucket === 'custom') return formatCustomLabel(customIntervalDays);
   return bucketLabelMap[bucket];
-};
-
-const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) return 'Never';
-
-  const diff = Math.max(0, Date.now() - lastContactedAt);
-  const days = Math.floor(diff / DAY_IN_MS);
-
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  return `${days} days ago`;
-};
-
-const formatNextCheckIn = (nextContactDate?: number | null) => {
-  if (!nextContactDate) return 'Not scheduled';
-
-  const diff = nextContactDate - Date.now();
-  if (diff <= 0) return 'Due now';
-
-  const days = Math.ceil(diff / DAY_IN_MS);
-  if (days === 1) return 'Tomorrow';
-  return `In ${days} days`;
 };
 
 export default function ContactDetailScreen() {
@@ -345,10 +324,10 @@ export default function ContactDetailScreen() {
           )}
 
           {/* Contact Info Header */}
-          <View className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-            <View className="flex-row items-center gap-4">
+          <View className="mb-6 rounded-2xl bg-surface p-6 shadow-sm">
+            <View className="items-center">
               {contact.avatarUri ? (
-                <View className="h-16 w-16 overflow-hidden rounded-full">
+                <View className="h-20 w-20 overflow-hidden rounded-full">
                   <Image
                     source={{ uri: contact.avatarUri }}
                     className="h-full w-full"
@@ -356,30 +335,20 @@ export default function ContactDetailScreen() {
                   />
                 </View>
               ) : (
-                <View className="h-16 w-16 items-center justify-center rounded-full bg-sage">
-                  <Text className="text-2xl font-semibold text-white">{initial}</Text>
+                <View className="h-20 w-20 items-center justify-center rounded-full bg-sage">
+                  <Text className="text-3xl font-semibold text-white">{initial}</Text>
                 </View>
               )}
 
-              <View className="flex-1">
-                <Text className="text-2xl font-bold text-slate">{contact.name}</Text>
-                {contact.phone && (
-                  <Text className="text-lg text-slate-600">{formatPhoneNumber(contact.phone)}</Text>
-                )}
-                <Text className="text-base text-slate-500">{getBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
-              </View>
-            </View>
+              <Text className="mt-3 text-2xl font-semibold text-warmgray">{contact.name}</Text>
+              {contact.phone && (
+                <Text className="mt-1 text-base text-warmgray-muted">{formatPhoneNumber(contact.phone)}</Text>
+              )}
+              <Text className="mt-1 text-base text-warmgray-muted">{getBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
 
-            <View className="mt-4 rounded-xl border border-sage-100 bg-cream p-3">
-              <View className="flex-row justify-between">
-                <View>
-                  <Text className="text-sm text-gray-600">Last contacted</Text>
-                  <Text className="text-lg font-semibold text-slate">{formatLastContacted(contact.lastContactedAt)}</Text>
-                </View>
-                <View className="items-end">
-                  <Text className="text-sm text-gray-600">Next check-in</Text>
-                  <Text className="text-lg font-semibold text-slate">{formatNextCheckIn(contact.nextContactDate)}</Text>
-                </View>
+              <View className="mt-4 items-center">
+                <Text className="text-base text-warmgray-muted">{formatLastConnected(contact.lastContactedAt)}</Text>
+                <Text className="mt-1 text-base text-warmgray-muted">Next reminder {formatNextReminder(contact.nextContactDate).toLowerCase()}</Text>
               </View>
             </View>
           </View>
