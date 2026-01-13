@@ -22,6 +22,7 @@ import {
   unarchiveContact,
 } from "@/services/contactService";
 import { formatPhoneNumber } from "@/utils/phone";
+import { formatLastConnected } from "@/utils/timeFormatting";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -31,47 +32,36 @@ const formatBucketLabel = (
 ) => {
   switch (bucket) {
     case "daily":
-      return "Daily reminders";
+      return "Every day";
     case "weekly":
-      return "Weekly reminders";
+      return "Every week";
     case "bi-weekly":
-      return "Every two weeks";
+      return "Every couple weeks";
     case "every-three-weeks":
-      return "Every three weeks";
+      return "Every few weeks";
     case "monthly":
-      return "Monthly reminders";
+      return "Monthly";
     case "every-six-months":
-      return "Every six months";
+      return "Seasonally";
     case "yearly":
-      return "Yearly reminders";
+      return "Once a year";
     case "custom": {
       if (!customIntervalDays || customIntervalDays < 1)
-        return "Custom reminders";
+        return "Custom rhythm";
       if (customIntervalDays % 30 === 0) {
         const months = customIntervalDays / 30;
-        return months === 1 ? "Every month" : `Every ${months} months`;
+        return months === 1 ? "Monthly" : `Every ${months} months`;
       }
       if (customIntervalDays % 7 === 0) {
         const weeks = customIntervalDays / 7;
         return weeks === 1 ? "Every week" : `Every ${weeks} weeks`;
       }
-      if (customIntervalDays === 1) return "Daily reminders";
+      if (customIntervalDays === 1) return "Every day";
       return `Every ${customIntervalDays} days`;
     }
     default:
-      return "Custom reminders";
+      return "Custom rhythm";
   }
-};
-
-const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) return "Never";
-
-  const diff = Math.max(0, Date.now() - lastContactedAt);
-  const days = Math.floor(diff / DAY_IN_MS);
-
-  if (days === 0) return "Today";
-  if (days === 1) return "1 day ago";
-  return `${days} days ago`;
 };
 
 const formatNextCheckIn = (nextContactDate?: number | null) => {
@@ -104,16 +94,16 @@ const FilterChip = ({
 }) => (
   <TouchableOpacity
     className={`rounded-full border px-4 py-3 ${
-      active ? "border-sage bg-sage" : "border-gray-200 bg-white"
+      active ? "border-sage bg-sage" : "border-border bg-surface"
     }`}
     onPress={onPress}
     activeOpacity={0.85}
   >
     <Text
-      className={`text-base font-semibold ${active ? "text-white" : "text-gray-700"}`}
+      className={`text-base font-semibold ${active ? "text-white" : "text-warmgray"}`}
     >
       {label}
-      <Text className={active ? "text-white" : "text-gray-400"}>
+      <Text className={active ? "text-white" : "text-warmgray-muted"}>
         {" "}
         · {count}
       </Text>
@@ -136,16 +126,16 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className="mb-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+      className="mb-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-3">
-          <Text className="text-xl font-semibold text-gray-900">
+          <Text className="text-xl font-semibold text-warmgray">
             {contact.name}
           </Text>
-          <Text className="text-base text-gray-500">
+          <Text className="text-base text-warmgray-muted">
             {formatBucketLabel(contact.bucket, contact.customIntervalDays)}
           </Text>
         </View>
@@ -160,22 +150,22 @@ const ContactRow = ({
               {due ? "Due" : "Upcoming"}
             </Text>
           </View>
-          <Text className="text-2xl text-gray-400 -mt-0.5">›</Text>
+          <Text className="text-2xl text-warmgray-muted -mt-0.5">›</Text>
         </View>
       </View>
 
       <View className="mt-4">
-        <Text className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Last contacted
+        <Text className="text-sm font-semibold uppercase tracking-wide text-warmgray-muted">
+          Last connected
         </Text>
-        <Text className="text-lg font-semibold text-gray-900">
-          {formatLastContacted(contact.lastContactedAt)}
+        <Text className="text-lg font-semibold text-warmgray">
+          {formatLastConnected(contact.lastContactedAt)}
         </Text>
 
-        <Text className="mt-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <Text className="mt-3 text-sm font-semibold uppercase tracking-wide text-warmgray-muted">
           Next check-in
         </Text>
-        <Text className="text-lg font-semibold text-gray-900">
+        <Text className="text-lg font-semibold text-warmgray">
           {formatNextCheckIn(contact.nextContactDate)}
         </Text>
       </View>
@@ -183,7 +173,7 @@ const ContactRow = ({
       <View className="mt-3 flex-row items-center justify-between">
         <View className="flex-1">
           {contact.phone ? (
-            <Text className="text-base text-gray-500">
+            <Text className="text-base text-warmgray-muted">
               Phone · {formatPhoneNumber(contact.phone)}
             </Text>
           ) : null}
@@ -207,15 +197,15 @@ const ContactRow = ({
 
         {!contact.isArchived && onArchive ? (
           <TouchableOpacity
-            className="ml-2 flex-row items-center rounded-full bg-gray-100 px-4 py-2"
+            className="ml-2 flex-row items-center rounded-full bg-surface border border-border px-4 py-2"
             onPress={(e) => {
               e.stopPropagation();
               onArchive?.();
             }}
             activeOpacity={0.7}
           >
-            <Ionicons name="archive-outline" size={16} color="#374151" />
-            <Text className="ml-1.5 text-sm font-semibold text-gray-700">
+            <Ionicons name="archive-outline" size={16} color="#78716c" />
+            <Text className="ml-1.5 text-sm font-semibold text-warmgray">
               Archive
             </Text>
           </TouchableOpacity>
@@ -386,8 +376,8 @@ export default function ContactsScreen() {
     if (hasZeroContacts) {
       return {
         type: "first-time" as const,
-        title: "No contacts yet",
-        subtitle: "Import from your phone to start building your circle.",
+        title: "No connections yet",
+        subtitle: "Import from your phone to start nurturing your circle.",
         showCTA: true,
       };
     }
@@ -395,7 +385,7 @@ export default function ContactsScreen() {
     if (hasSearchQuery) {
       return {
         type: "search" as const,
-        title: `No contacts match '${searchQuery}'`,
+        title: `No connections match '${searchQuery}'`,
         subtitle: "Try a different search term.",
         showCTA: false,
       };
@@ -404,8 +394,8 @@ export default function ContactsScreen() {
     if (filter === "due" && stats.due === 0) {
       return {
         type: "no-due" as const,
-        title: "No contacts are due right now",
-        subtitle: "Great job staying on top of things!",
+        title: "Everyone's resting",
+        subtitle: "Enjoy the quiet.",
         showCTA: false,
       };
     }
@@ -413,7 +403,7 @@ export default function ContactsScreen() {
     if (filter === "archived" && stats.archived === 0) {
       return {
         type: "no-archived" as const,
-        title: "No archived contacts",
+        title: "No archived connections",
         subtitle: null,
         showCTA: false,
       };
@@ -422,15 +412,15 @@ export default function ContactsScreen() {
     if (filter === "all" && stats.active === 0 && contacts.length > 0) {
       return {
         type: "all-archived" as const,
-        title: "All your contacts are archived",
-        subtitle: `You have ${stats.archived} archived contact${stats.archived > 1 ? "s" : ""}`,
+        title: "All your connections are archived",
+        subtitle: `You have ${stats.archived} archived connection${stats.archived > 1 ? "s" : ""}`,
         showCTA: true,
       };
     }
 
     return {
       type: "default" as const,
-      title: "No contacts found",
+      title: "No connections found",
       subtitle: null,
       showCTA: false,
     };
@@ -487,10 +477,10 @@ export default function ContactsScreen() {
           flexGrow: filteredContacts.length === 0 ? 1 : undefined,
         }}
         ListHeaderComponent={
-          <View className="pb-4">
-            <Text className="text-2xl font-bold text-gray-900">Contacts</Text>
-            <Text className="mt-1 text-base text-gray-500">
-              See who's due for a check-in and manage your contacts.
+          <View className="pb-4 mb-8">
+            <Text className="text-3xl font-semibold text-warmgray">Contacts</Text>
+            <Text className="mt-1 text-base text-warmgray-muted">
+              See who's due for a check-in and manage your connections.
             </Text>
 
             {contacts.length > 0 && (
@@ -501,16 +491,16 @@ export default function ContactsScreen() {
                   activeOpacity={0.9}
                 >
                   <Text className="text-base font-semibold text-white">
-                    Add More Contacts
+                    Add Connection
                   </Text>
                 </TouchableOpacity>
 
                 <View className="mt-6">
-                  <View className="w-full min-h-14 rounded-2xl border border-gray-200 bg-white shadow-sm px-4 py-3 flex-row items-center">
+                  <View className="w-full min-h-14 rounded-2xl border border-border bg-surface shadow-sm px-4 py-3 flex-row items-center">
                     <TextInput
-                      className="flex-1 text-base leading-5 text-gray-900"
-                      placeholder="Search by name or number"
-                      placeholderTextColor="#9ca3af"
+                      className="flex-1 text-base leading-5 text-warmgray"
+                      placeholder="Search connections..."
+                      placeholderTextColor="#a8a29e"
                       value={searchQuery}
                       onChangeText={setSearchQuery}
                       returnKeyType="search"
@@ -536,11 +526,11 @@ export default function ContactsScreen() {
         }
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center py-16">
-            <Text className="text-2xl font-bold text-gray-900">
+            <Text className="text-2xl font-semibold text-warmgray">
               {emptyState.title}
             </Text>
             {emptyState.subtitle && (
-              <Text className="mt-1 text-base text-gray-600 text-center">
+              <Text className="mt-1 text-base text-warmgray-muted text-center">
                 {emptyState.subtitle}
               </Text>
             )}
