@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, Image, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -200,7 +200,10 @@ export default function ContactDetailScreen() {
             onPress: async () => {
               try {
                 await deleteInteraction(interactionId);
-                loadContactData();
+                // Defer to next frame to let navigation context stabilize
+                requestAnimationFrame(() => {
+                  loadContactData();
+                });
               } catch (error) {
                 Alert.alert('Error', error instanceof Error ? error.message : 'Failed to delete interaction.');
               }
@@ -270,38 +273,44 @@ export default function ContactDetailScreen() {
 
   const initial = contact?.name?.charAt(0).toUpperCase() || '?';
 
+  // Screen options must be memoized and Stack.Screen must render in all code paths
+  // to maintain navigation context consistency (fixes crash when deleting all notes)
+  const screenOptions = useMemo(() => ({
+    title: contact?.name || 'Contact',
+    headerBackTitle: 'Back',
+    headerShown: true,
+    headerRight: contact ? ({ tintColor }: { tintColor?: string }) => (
+      <TouchableOpacity onPress={handleEditContact}>
+        <Text className="text-lg font-semibold" style={{ color: tintColor }}>Edit</Text>
+      </TouchableOpacity>
+    ) : undefined,
+  }), [contact, handleEditContact]);
+
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-cream">
-        <Text className="text-slate">Loading...</Text>
-      </SafeAreaView>
+      <>
+        <Stack.Screen options={screenOptions} />
+        <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+          <Text className="text-slate">Loading...</Text>
+        </SafeAreaView>
+      </>
     );
   }
 
   if (!contact) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-cream">
-        <Text className="text-slate">Contact not found</Text>
-      </SafeAreaView>
+      <>
+        <Stack.Screen options={screenOptions} />
+        <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+          <Text className="text-slate">Contact not found</Text>
+        </SafeAreaView>
+      </>
     );
   }
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: contact.name,
-          headerBackTitle: 'Back',
-          headerShown: true,
-          headerRight: ({ tintColor }) => (
-            <TouchableOpacity
-              onPress={handleEditContact}
-            >
-              <Text className="text-lg font-semibold" style={{ color: tintColor }}>Edit</Text>
-            </TouchableOpacity>
-          ),
-        }}
-      />
+      <Stack.Screen options={screenOptions} />
       <SafeAreaView className="flex-1 bg-cream">
         <ScrollView
           className="flex-1"
@@ -448,26 +457,27 @@ export default function ContactDetailScreen() {
           <View>
             <Text className="mb-3 text-xl font-bold text-slate">History</Text>
 
-            {interactions.length === 0 ? (
-              <View className="items-center justify-center rounded-2xl bg-white p-8 shadow-sm">
-                <Ionicons name="time-outline" size={48} color="#94a3b8" />
-                <Text className="mt-3 text-base text-slate-600">No history yet</Text>
-                <Text className="mt-1 text-sm text-slate-500">
-                  Your conversation history will appear here once you start logging interactions.
-                </Text>
-              </View>
-            ) : (
-              <View className="flex flex-col gap-4">
-                {interactions.map((interaction) => (
+            {/* Stable outer View prevents full unmount/remount during list→empty transition */}
+            <View className="flex flex-col gap-4">
+              {interactions.length === 0 ? (
+                <View className="items-center justify-center rounded-2xl bg-white p-8 shadow-sm">
+                  <Ionicons name="time-outline" size={48} color="#94a3b8" />
+                  <Text className="mt-3 text-base text-slate-600">No history yet</Text>
+                  <Text className="mt-1 text-sm text-slate-500">
+                    Your conversation history will appear here once you start logging interactions.
+                  </Text>
+                </View>
+              ) : (
+                interactions.map((interaction) => (
                   <InteractionListItem
                     key={interaction.id}
                     interaction={interaction}
                     onEdit={handleEditInteraction}
                     onDelete={() => handleDeleteInteraction(interaction.id)}
                   />
-                ))}
-              </View>
-            )}
+                ))
+              )}
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>

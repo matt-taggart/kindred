@@ -194,14 +194,14 @@ export default function EditContactModal({
               {!birthday ? (
                 <Pressable
                   onPress={() => setBirthday(formatDate(new Date()))}
-                  className="flex-row items-center justify-center rounded-xl border border-dashed border-sage-100 bg-sage-100 py-4 active:bg-sage-100/80"
+                  className="flex-row items-center justify-center rounded-xl border-2 border-sage-100 bg-white py-4 active:bg-sage-50"
                 >
-                  <Text className="text-base font-semibold text-sage">
+                  <Text className="text-base font-bold text-sage">
                     + Add Birthday Reminder
                   </Text>
                 </Pressable>
               ) : (
-                <View className="flex-row items-center justify-between bg-white py-2">
+                <View className="flex-row items-center justify-between rounded-xl border border-sage-100 bg-white p-3">
                   <DateTimePicker
                     value={parseDate(birthday)}
                     mode="date"
