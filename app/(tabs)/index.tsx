@@ -16,21 +16,9 @@ import {
 import { Contact } from '@/db/schema';
 import { getDueContacts, snoozeContact, isBirthdayToday } from '@/services/contactService';
 import CelebrationStatus from '@/components/CelebrationStatus';
+import { formatLastConnected } from '@/utils/timeFormatting';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) {
-    return 'Never';
-  }
-
-  const diff = Math.max(0, Date.now() - lastContactedAt);
-  const days = Math.floor(diff / DAY_IN_MS);
-
-  if (days === 0) return 'Today';
-  if (days === 1) return '1 day ago';
-  return `${days} days ago`;
-};
 
 type ContactCardProps = {
   contact: Contact;
@@ -45,7 +33,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
   const isBirthday = isBirthdayToday(contact);
 
   return (
-    <View className={`mb-3 rounded-2xl border p-5 shadow-sm ${isBirthday ? 'bg-terracotta border-terracotta' : 'bg-white border-gray-100'}`}>
+    <View className={`mb-3 rounded-2xl border p-5 shadow-sm ${isBirthday ? 'bg-terracotta border-terracotta' : 'bg-surface border-border'}`}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
         <View className="flex-row items-center gap-3">
           {contact.avatarUri ? (
@@ -62,14 +50,14 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
 
           <View className="flex-1">
             <View className="flex-row items-center gap-2">
-              <Text className={`text-xl font-semibold ${isBirthday ? 'text-white' : 'text-gray-900'}`}>{contact.name}</Text>
+              <Text className={`text-xl font-semibold ${isBirthday ? 'text-white' : 'text-warmgray'}`}>{contact.name}</Text>
               {isBirthday && <Text className="text-xl">🎂</Text>}
             </View>
-            
+
             {isBirthday ? (
-              <Text className="text-base text-terracotta-100 font-medium">It's their birthday today!</Text>
+              <Text className="text-base text-terracotta-100 font-medium">It's {contact.name}'s birthday</Text>
             ) : (
-              <Text className="text-base text-gray-500">Last contacted: {formatLastContacted(contact.lastContactedAt)}</Text>
+              <Text className="text-base text-warmgray-muted">{formatLastConnected(contact.lastContactedAt)}</Text>
             )}
           </View>
         </View>
@@ -81,13 +69,13 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
           onPress={onMarkDone}
           activeOpacity={0.85}
         >
-          <Text className={`text-lg font-semibold ${isBirthday ? 'text-terracotta' : 'text-white'}`}>Mark Done</Text>
+          <Text className={`text-lg font-semibold ${isBirthday ? 'text-terracotta' : 'text-white'}`}>Reached out</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className={`flex-1 items-center rounded-2xl py-3 border-2 ${
-            isSnoozing 
-              ? (isBirthday ? 'bg-terracotta border-terracotta' : 'bg-gray-100 border-gray-200') 
+            isSnoozing
+              ? (isBirthday ? 'bg-terracotta border-terracotta' : 'bg-gray-100 border-gray-200')
               : (isBirthday ? 'bg-transparent border-terracotta-100/50' : 'bg-transparent border-sage')
           }`}
           onPress={onSnooze}
@@ -95,11 +83,11 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
           disabled={isSnoozing}
         >
           <Text className={`text-lg font-semibold ${
-            isSnoozing 
-              ? (isBirthday ? 'text-terracotta-100' : 'text-gray-400') 
+            isSnoozing
+              ? (isBirthday ? 'text-terracotta-100' : 'text-gray-400')
               : (isBirthday ? 'text-terracotta-100' : 'text-sage')
           }`}>
-            {isSnoozing ? 'Snoozing...' : 'Snooze'}
+            {isSnoozing ? 'Later...' : 'Later'}
           </Text>
         </TouchableOpacity>
       </View>
