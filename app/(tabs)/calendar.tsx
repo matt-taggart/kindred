@@ -72,31 +72,48 @@ const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => 
   const isOverdue = contact.nextContactDate && contact.nextContactDate <= Date.now();
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
 
+  // Determine card accent based on type
+  const isBirthday = contact.isBirthday;
+
+  // Generate warm, connection-focused copy
+  const getCardTitle = () => {
+    if (isBirthday) {
+      return `${contact.name}'s birthday`;
+    }
+    return `Connect with ${contact.name}`;
+  };
+
+  const getStatusLabel = () => {
+    if (isBirthday) return 'Celebrate';
+    if (isOverdue) return 'Overdue';
+    return 'Upcoming';
+  };
+
   return (
     <TouchableOpacity
-      className="mb-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+      className={`mb-3 rounded-2xl border bg-surface p-4 shadow-sm ${isBirthday ? 'border-terracotta/30' : 'border-border'}`}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View className="flex-row items-center gap-3">
-        <View className={`h-12 w-12 items-center justify-center rounded-full ${contact.isBirthday ? 'bg-[#B086A9]' : 'bg-sage'}`}>
-          {contact.isBirthday ? (
-            <Ionicons name="gift-outline" size={24} color="white" />
+        <View className={`h-12 w-12 items-center justify-center rounded-full ${isBirthday ? 'bg-terracotta' : 'bg-sage'}`}>
+          {isBirthday ? (
+            <Text className="text-lg">🎂</Text>
           ) : (
             <Text className="text-base font-semibold text-white">{initial}</Text>
           )}
         </View>
 
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-900">{contact.name}</Text>
-          <Text className="text-sm text-gray-500">
+          <Text className="text-lg font-semibold text-warmgray">{getCardTitle()}</Text>
+          <Text className="text-sm text-warmgray-muted">
             {formatBucketLabel(contact.bucket, contact.customIntervalDays)} · {formatLastContacted(contact.lastContactedAt)}
           </Text>
         </View>
 
-        <View className={`rounded-full px-3 py-1 ${contact.isBirthday ? 'bg-[#F3E6F0]' : (isOverdue ? 'bg-terracotta-100' : 'bg-sage')}`}>
-          <Text className={`text-xs font-semibold ${contact.isBirthday ? 'text-[#B086A9]' : (isOverdue ? 'text-terracotta' : 'text-white')}`}>
-            {contact.isBirthday ? 'Birthday Today!' : (isOverdue ? 'Overdue' : 'Upcoming')}
+        <View className={`rounded-full px-3 py-1 ${isBirthday ? 'bg-terracotta-100' : (isOverdue ? 'bg-terracotta-100' : 'bg-sage-100')}`}>
+          <Text className={`text-xs font-semibold ${isBirthday ? 'text-terracotta' : (isOverdue ? 'text-terracotta' : 'text-sage')}`}>
+            {getStatusLabel()}
           </Text>
         </View>
       </View>
@@ -223,8 +240,8 @@ export default function CalendarScreen() {
     });
 
     return {
-      title: isToday ? "You're all caught up!" : "No contacts scheduled",
-      subtitle: isToday ? "No contacts scheduled for today" : formattedDate,
+      title: isToday ? "You're all caught up!" : "No connections scheduled",
+      subtitle: isToday ? "Enjoy your day" : formattedDate,
       icon: isToday ? "checkmark-circle" as const : "calendar-outline" as const,
     };
   }, [selectedDate, todayDate]);
@@ -245,9 +262,9 @@ export default function CalendarScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View className="mb-4">
-          <Text className="text-2xl font-bold text-gray-900">Calendar</Text>
-          <Text className="mt-1 text-base text-gray-500">
-            {monthDueCount} contact{monthDueCount !== 1 ? 's' : ''} due this month
+          <Text className="text-2xl font-bold text-warmgray">Calendar</Text>
+          <Text className="mt-1 text-base text-warmgray-muted">
+            {monthDueCount} connection{monthDueCount !== 1 ? 's' : ''} this month
           </Text>
         </View>
 
@@ -267,11 +284,11 @@ export default function CalendarScreen() {
           {contactsForDate.length === 0 ? (
             <View className="items-center py-12 px-6">
               <Ionicons name={emptyState.icon} size={80} color="#9CA986" />
-              <Text className="mt-6 text-3xl font-bold text-gray-900 text-center leading-tight">
+              <Text className="mt-6 text-3xl font-bold text-warmgray text-center leading-tight">
                 {emptyState.title}
               </Text>
               {emptyState.subtitle && (
-                <Text className="mt-4 text-xl text-center text-gray-600">
+                <Text className="mt-4 text-xl text-center text-warmgray-muted">
                   {emptyState.subtitle}
                 </Text>
               )}

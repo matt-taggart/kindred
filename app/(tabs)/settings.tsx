@@ -18,32 +18,35 @@ type SettingsRowProps = {
 function SettingsRow({ icon, label, onPress, showChevron = true, rightElement }: SettingsRowProps) {
   return (
     <TouchableOpacity
-      className="flex-row items-center justify-between bg-white px-4 py-4"
+      className="flex-row items-center justify-between bg-surface px-4 py-4"
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View className="flex-row items-center gap-3">
-        <Ionicons name={icon} size={22} color="#475569" />
-        <Text className="text-base text-gray-900">{label}</Text>
+        <Ionicons name={icon} size={22} color="#5C6356" />
+        <Text className="text-base text-warmgray">{label}</Text>
       </View>
-      {rightElement ?? (showChevron && <Ionicons name="chevron-forward" size={20} color="#9ca3af" />)}
+      {rightElement ?? (showChevron && <Ionicons name="chevron-forward" size={20} color="#8B9678" />)}
     </TouchableOpacity>
   );
 }
 
-function SettingsSection({ title, children }: { title: string; children: React.ReactNode }) {
+function SettingsSection({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
     <View className="mb-6">
-      <Text className="mb-2 px-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+      <Text className="mb-1 px-4 text-sm font-semibold uppercase tracking-wide text-warmgray-muted">
         {title}
       </Text>
-      <View className="overflow-hidden rounded-2xl border border-gray-100">{children}</View>
+      {description && (
+        <Text className="mb-2 px-4 text-sm text-warmgray-muted">{description}</Text>
+      )}
+      <View className="overflow-hidden rounded-2xl border border-border">{children}</View>
     </View>
   );
 }
 
 function Divider() {
-  return <View className="ml-12 h-px bg-gray-100" />;
+  return <View className="ml-12 h-px bg-border" />;
 }
 
 export default function SettingsScreen() {
@@ -113,12 +116,12 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-cream">
       <ScrollView className="flex-1 px-4 pt-4" contentContainerStyle={{ paddingBottom: 32 }}>
-        <Text className="mb-6 text-2xl font-bold text-gray-900">Settings</Text>
+        <Text className="mb-6 text-2xl font-bold text-warmgray">Settings</Text>
 
-        <SettingsSection title="Preferences">
+        <SettingsSection title="Reminders" description="Choose when Kindred gently nudges you">
           <SettingsRow
             icon="notifications-outline"
-            label="Notifications"
+            label="Reminder Schedule"
             onPress={handleNotifications}
           />
         </SettingsSection>
@@ -141,17 +144,17 @@ export default function SettingsScreen() {
             showChevron={false}
             rightElement={
               purchaseState.isRestoring ? (
-                <Text className="text-sm text-gray-500">Restoring...</Text>
+                <Text className="text-sm text-warmgray-muted">Restoring...</Text>
               ) : null
             }
           />
           {isPro && (
             <>
               <Divider />
-              <View className="flex-row items-center justify-between bg-white px-4 py-4">
+              <View className="flex-row items-center justify-between bg-surface px-4 py-4">
                 <View className="flex-row items-center gap-3">
                   <Ionicons name="checkmark-circle" size={22} color="#9CA986" />
-                  <Text className="text-base text-gray-900">Kindred Pro</Text>
+                  <Text className="text-base text-warmgray">Kindred Pro</Text>
                 </View>
                 <Text className="text-sm font-medium text-sage">Active</Text>
               </View>
@@ -171,13 +174,13 @@ export default function SettingsScreen() {
             </>
           )}
           <TouchableOpacity
-            className="flex-row items-center justify-between bg-white px-4 py-4"
+            className="flex-row items-center justify-between bg-surface px-4 py-4"
             onPress={handleDeleteAllData}
             activeOpacity={0.7}
           >
             <View className="flex-row items-center gap-3">
-              <Ionicons name="trash-outline" size={22} color="#ef4444" />
-              <Text className="text-base text-red-500">Delete All Data</Text>
+              <Ionicons name="trash-outline" size={22} color="#D4896A" />
+              <Text className="text-base text-terracotta">Delete All Data</Text>
             </View>
           </TouchableOpacity>
         </SettingsSection>
@@ -192,28 +195,28 @@ export default function SettingsScreen() {
         onRequestClose={() => setShowDeleteModal(false)}
       >
         <View className="flex-1 items-center justify-center bg-black/50 px-6">
-          <View className="w-full rounded-2xl bg-white p-6 shadow-lg">
+          <View className="w-full rounded-2xl bg-surface p-6 shadow-lg">
             <View className="mb-4 items-center">
-              <View className="h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                <Ionicons name="warning" size={24} color="#ef4444" />
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-terracotta-100">
+                <Ionicons name="warning" size={24} color="#D4896A" />
               </View>
             </View>
-            
-            <Text className="mb-2 text-center text-lg font-bold text-gray-900">
+
+            <Text className="mb-2 text-center text-lg font-bold text-warmgray">
               Delete All Data?
             </Text>
-            <Text className="mb-4 text-center text-sm text-gray-600">
+            <Text className="mb-4 text-center text-sm text-warmgray-muted">
               This will permanently delete all your contacts and interaction history. This action cannot be undone.
             </Text>
 
-            <Text className="mb-2 text-sm font-medium text-gray-700">
+            <Text className="mb-2 text-sm font-medium text-warmgray">
               Type DELETE to confirm:
             </Text>
-            <View className="mb-4 min-h-12 rounded-xl border border-gray-300 bg-gray-50 px-4 flex-row items-center">
+            <View className="mb-4 min-h-12 rounded-xl border border-border bg-cream px-4 flex-row items-center">
               <TextInput
-                className="flex-1 text-base leading-5 text-gray-900"
+                className="flex-1 text-base leading-5 text-warmgray"
                 style={{ marginTop: -2 }}
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor="#8B9678"
                 value={deleteConfirmText}
                 onChangeText={setDeleteConfirmText}
                 placeholder="DELETE"
@@ -225,25 +228,25 @@ export default function SettingsScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 items-center rounded-xl bg-gray-100 py-3"
+                className="flex-1 items-center rounded-xl bg-cream py-3"
                 onPress={() => {
                   setShowDeleteModal(false);
                   setDeleteConfirmText('');
                 }}
                 activeOpacity={0.7}
               >
-                <Text className="font-semibold text-gray-600">Cancel</Text>
+                <Text className="font-semibold text-warmgray-muted">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className={`flex-1 items-center rounded-xl py-3 ${
-                  deleteConfirmText === 'DELETE' && !isDeleting ? 'bg-red-500' : 'bg-red-200'
+                  deleteConfirmText === 'DELETE' && !isDeleting ? 'bg-terracotta' : 'bg-terracotta-100'
                 }`}
                 onPress={confirmDeleteAllData}
                 activeOpacity={0.7}
                 disabled={deleteConfirmText !== 'DELETE' || isDeleting}
               >
                 <Text className={`font-semibold ${
-                  deleteConfirmText === 'DELETE' && !isDeleting ? 'text-white' : 'text-red-300'
+                  deleteConfirmText === 'DELETE' && !isDeleting ? 'text-white' : 'text-terracotta/50'
                 }`}>
                   {isDeleting ? 'Deleting...' : 'Delete'}
                 </Text>
