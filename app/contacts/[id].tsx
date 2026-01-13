@@ -14,14 +14,14 @@ import { formatLastConnected, formatNextReminder } from '@/utils/timeFormatting'
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 const bucketLabelMap: Record<Contact['bucket'], string> = {
-  daily: 'Daily reminders',
-  weekly: 'Weekly reminders',
-  'bi-weekly': 'Bi-weekly reminders',
-  'every-three-weeks': 'Every three weeks reminders',
-  monthly: 'Monthly reminders',
-  'every-six-months': 'Every six months reminders',
-  yearly: 'Yearly reminders',
-  custom: 'Custom reminders',
+  daily: 'Every day',
+  weekly: 'Every week',
+  'bi-weekly': 'Every few weeks',
+  'every-three-weeks': 'Every few weeks',
+  monthly: 'Once a month',
+  'every-six-months': 'Seasonally',
+  yearly: 'Once a year',
+  custom: 'Custom rhythm',
 };
 
 const formatCustomLabel = (customIntervalDays?: number | null) => {
@@ -97,8 +97,8 @@ export default function ContactDetailScreen() {
     const now = Date.now();
     
     Alert.alert(
-      'Snooze Reminder',
-      'When would you like to be reminded?',
+      'Remind me later',
+      'When would you like a gentle reminder?',
       [
         { text: '1 hour', onPress: () => handleSnoozeContact(now + 60 * 60 * 1000) },
         { text: 'Tomorrow', onPress: () => handleSnoozeContact(now + DAY_IN_MS) },

@@ -49,14 +49,14 @@ type ContactToImport = {
 };
 
 const bucketLabels: Record<string, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  "bi-weekly": "Bi-weekly",
-  "every-three-weeks": "Every 3 weeks",
-  monthly: "Monthly",
-  "every-six-months": "Every 6 months",
-  yearly: "Yearly",
-  custom: "Custom",
+  daily: "Every day",
+  weekly: "Every week",
+  "bi-weekly": "Every few weeks",
+  "every-three-weeks": "Every few weeks",
+  monthly: "Once a month",
+  "every-six-months": "Seasonally",
+  yearly: "Once a year",
+  custom: "Custom rhythm",
 };
 
 export default function ReviewScheduleScreen() {

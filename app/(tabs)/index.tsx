@@ -163,8 +163,8 @@ export default function HomeScreen() {
       ];
 
       Alert.alert(
-        'Snooze Reminder',
-        'When would you like to be reminded?',
+        'Remind me later',
+        'When would you like a gentle reminder?',
         [
           { text: '1 hour', onPress: () => handleSnoozeContact(contact.id, now + 60 * 60 * 1000) },
           { text: 'Tomorrow', onPress: () => handleSnoozeContact(contact.id, now + DAY_IN_MS) },

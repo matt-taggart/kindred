@@ -4,13 +4,13 @@ import { TouchableOpacity, Text } from 'react-native';
 import { Contact } from '@/db/schema';
 
 const bucketLabels: Record<Contact['bucket'], string> = {
-  daily: 'Daily',
-  weekly: 'Weekly',
-  'bi-weekly': 'Bi-weekly',
-  'every-three-weeks': 'Every three weeks',
-  monthly: 'Monthly',
-  'every-six-months': 'Every six months',
-  yearly: 'Yearly',
+  daily: 'Every day',
+  weekly: 'Every week',
+  'bi-weekly': 'Every few weeks',
+  'every-three-weeks': 'Every few weeks',
+  monthly: 'Once a month',
+  'every-six-months': 'Seasonally',
+  yearly: 'Once a year',
   custom: 'Custom',
 };
 

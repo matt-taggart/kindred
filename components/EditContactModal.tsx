@@ -17,25 +17,25 @@ interface EditContactModalProps {
 }
 
 const bucketLabels: Record<Contact["bucket"], string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  "bi-weekly": "Bi-weekly",
-  "every-three-weeks": "Every three weeks",
-  monthly: "Monthly",
-  "every-six-months": "Every six months",
-  yearly: "Yearly",
-  custom: "Custom",
+  daily: "Every day",
+  weekly: "Every week",
+  "bi-weekly": "Every few weeks",
+  "every-three-weeks": "Every few weeks",
+  monthly: "Once a month",
+  "every-six-months": "Seasonally",
+  yearly: "Once a year",
+  custom: "Custom rhythm",
 };
 
 const bucketDescriptions: Record<Contact["bucket"], string> = {
-  daily: "Every day",
-  weekly: "Every 7 days",
+  daily: "For your closest relationships",
+  weekly: "For your inner circle",
   "bi-weekly": "Every 14 days",
   "every-three-weeks": "Every 21 days",
-  monthly: "Every 30 days",
-  "every-six-months": "Every 182 days",
-  yearly: "Every 365 days",
-  custom: "Choose your own cadence",
+  monthly: "For people you care about",
+  "every-six-months": "For seasonal connections",
+  yearly: "For long-distance friends",
+  custom: "Choose your own rhythm",
 };
 
 type CustomUnit = "days" | "weeks" | "months";

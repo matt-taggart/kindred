@@ -24,19 +24,19 @@ import { formatPhoneNumber } from "@/utils/phone";
 type Bucket = "daily" | "weekly" | "monthly" | "yearly" | "custom";
 
 const bucketLabels: Record<Bucket, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  monthly: "Monthly",
-  yearly: "Yearly",
-  custom: "Custom",
+  daily: "Every day",
+  weekly: "Every week",
+  monthly: "Once a month",
+  yearly: "Once a year",
+  custom: "Custom rhythm",
 };
 
 const bucketDescriptions: Record<Bucket, string> = {
-  daily: "Every day",
-  weekly: "Every 7 days",
-  monthly: "Every 30 days",
-  yearly: "Every 365 days",
-  custom: "Choose your own cadence",
+  daily: "For your closest relationships",
+  weekly: "For your inner circle",
+  monthly: "For people you care about",
+  yearly: "For long-distance friends",
+  custom: "Choose your own rhythm",
 };
 
 type CustomUnit = "days" | "weeks" | "months";

@@ -11,42 +11,42 @@ const bucketInfo: Record<
   { label: string; description: string; example: string }
 > = {
   daily: {
-    label: 'Daily',
+    label: 'Every day',
     description: 'For your closest relationships',
     example: 'Best friends, partner, immediate family you see every day',
   },
   weekly: {
-    label: 'Weekly',
+    label: 'Every week',
     description: 'For your inner circle',
     example: 'Close friends, best friends from school, family members',
   },
   monthly: {
-    label: 'Monthly',
+    label: 'Once a month',
     description: 'For people you care about',
     example: 'Good friends, cousins, colleagues you enjoy',
   },
   yearly: {
-    label: 'Yearly',
+    label: 'Once a year',
     description: 'For long-distance or seasonal connections',
     example: 'Old friends, holiday contacts, people you reach out to occasionally',
   },
   'bi-weekly': {
-    label: 'Bi-weekly',
+    label: 'Every few weeks',
     description: 'Every two weeks',
     example: 'Not typically shown here',
   },
   'every-three-weeks': {
-    label: 'Every three weeks',
+    label: 'Every few weeks',
     description: 'Legacy cadence',
     example: 'Existing contacts only',
   },
   'every-six-months': {
-    label: 'Every six months',
+    label: 'Seasonally',
     description: 'Legacy cadence',
     example: 'Existing contacts only',
   },
   custom: {
-    label: 'Custom',
+    label: 'Custom rhythm',
     description: 'Your own cadence',
     example: 'Configured per contact',
   },
