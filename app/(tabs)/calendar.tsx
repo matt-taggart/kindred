@@ -268,7 +268,7 @@ export default function CalendarScreen() {
           </Text>
         </View>
 
-        <View className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+        <View className="mb-6 overflow-hidden rounded-2xl bg-surface shadow-sm">
           <Calendar
             markingType="multi-dot"
             markedDates={markedDates}

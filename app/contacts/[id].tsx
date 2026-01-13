@@ -417,7 +417,7 @@ export default function ContactDetailScreen() {
               >
                 <Ionicons name="alarm-outline" size={24} color="#9CA986" />
                 <Text className="text-lg font-semibold text-sage">
-                  {snoozing ? 'Snoozing...' : 'Snooze'}
+                  {snoozing ? 'Later...' : 'Later'}
                 </Text>
               </TouchableOpacity>
             </View>
