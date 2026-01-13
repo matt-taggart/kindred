@@ -206,8 +206,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-cream">
       <View className="flex-1 px-4 pt-4">
-        <Text className="mb-1 text-2xl font-bold text-gray-900">Today</Text>
-        <Text className="mb-4 text-lg text-gray-500 font-medium">
+        <Text className="mb-1 text-3xl font-semibold text-warmgray">Today</Text>
+        <Text className="mb-8 text-lg text-warmgray-muted font-medium">
           {currentDate.toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
