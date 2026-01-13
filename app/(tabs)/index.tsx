@@ -14,8 +14,9 @@ import {
 } from 'react-native';
 
 import { Contact } from '@/db/schema';
-import { getDueContacts, snoozeContact, isBirthdayToday } from '@/services/contactService';
+import { getDueContacts, snoozeContact, isBirthdayToday, updateInteraction } from '@/services/contactService';
 import CelebrationStatus from '@/components/CelebrationStatus';
+import ReachedOutSheet from '@/components/ReachedOutSheet';
 import { formatLastConnected } from '@/utils/timeFormatting';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -102,6 +103,8 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [snoozingContactId, setSnoozingContactId] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
 
   const loadContacts = useCallback(() => {
     try {
@@ -122,12 +125,24 @@ export default function HomeScreen() {
     }, [loadContacts]),
   );
 
-  const handleMarkDone = useCallback(
-    (contactId: string) => {
-      router.push({ pathname: '/modal', params: { contactId } });
-    },
-    [router],
-  );
+  const handleMarkDone = useCallback((contact: Contact) => {
+    setSelectedContact(contact);
+    setShowReachedOutSheet(true);
+  }, []);
+
+  const handleReachedOutSubmit = useCallback(async (note: string) => {
+    if (!selectedContact) return;
+
+    try {
+      await updateInteraction(selectedContact.id, 'call', note || undefined);
+      loadContacts();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save. Please try again.');
+    } finally {
+      setShowReachedOutSheet(false);
+      setSelectedContact(null);
+    }
+  }, [selectedContact, loadContacts]);
 
   const handleContactPress = useCallback(
     (contactId: string) => {
@@ -181,7 +196,7 @@ export default function HomeScreen() {
     ({ item }: { item: Contact }) => (
       <ContactCard
         contact={item}
-        onMarkDone={() => handleMarkDone(item.id)}
+        onMarkDone={() => handleMarkDone(item)}
         onSnooze={() => handleSnooze(item)}
         isSnoozing={snoozingContactId === item.id}
         onPress={() => handleContactPress(item.id)}
@@ -228,6 +243,16 @@ export default function HomeScreen() {
           ListEmptyComponent={<CelebrationStatus />}
         />
       </View>
+
+      <ReachedOutSheet
+        visible={showReachedOutSheet}
+        contact={selectedContact}
+        onClose={() => {
+          setShowReachedOutSheet(false);
+          setSelectedContact(null);
+        }}
+        onSubmit={handleReachedOutSubmit}
+      />
     </SafeAreaView>
   );
 }
