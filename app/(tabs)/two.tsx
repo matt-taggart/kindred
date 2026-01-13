@@ -1,7 +1,7 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -12,67 +12,76 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
-import { Contact } from '@/db/schema';
-import { archiveContact, getContacts, resetDatabase, unarchiveContact } from '@/services/contactService';
-import { formatPhoneNumber } from '@/utils/phone';
+import { Contact } from "@/db/schema";
+import {
+  archiveContact,
+  getContacts,
+  resetDatabase,
+  unarchiveContact,
+} from "@/services/contactService";
+import { formatPhoneNumber } from "@/utils/phone";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
+const formatBucketLabel = (
+  bucket: Contact["bucket"],
+  customIntervalDays?: number | null,
+) => {
   switch (bucket) {
-    case 'daily':
-      return 'Daily reminders';
-    case 'weekly':
-      return 'Weekly reminders';
-    case 'bi-weekly':
-      return 'Every two weeks';
-    case 'every-three-weeks':
-      return 'Every three weeks';
-    case 'monthly':
-      return 'Monthly reminders';
-    case 'every-six-months':
-      return 'Every six months';
-    case 'yearly':
-      return 'Yearly reminders';
-    case 'custom': {
-      if (!customIntervalDays || customIntervalDays < 1) return 'Custom reminders';
+    case "daily":
+      return "Daily reminders";
+    case "weekly":
+      return "Weekly reminders";
+    case "bi-weekly":
+      return "Every two weeks";
+    case "every-three-weeks":
+      return "Every three weeks";
+    case "monthly":
+      return "Monthly reminders";
+    case "every-six-months":
+      return "Every six months";
+    case "yearly":
+      return "Yearly reminders";
+    case "custom": {
+      if (!customIntervalDays || customIntervalDays < 1)
+        return "Custom reminders";
       if (customIntervalDays % 30 === 0) {
         const months = customIntervalDays / 30;
-        return months === 1 ? 'Every month' : `Every ${months} months`;
+        return months === 1 ? "Every month" : `Every ${months} months`;
       }
       if (customIntervalDays % 7 === 0) {
         const weeks = customIntervalDays / 7;
-        return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
+        return weeks === 1 ? "Every week" : `Every ${weeks} weeks`;
       }
-      if (customIntervalDays === 1) return 'Daily reminders';
+      if (customIntervalDays === 1) return "Daily reminders";
       return `Every ${customIntervalDays} days`;
     }
     default:
-      return 'Custom reminders';
+      return "Custom reminders";
   }
 };
 
 const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) return 'Never';
+  if (!lastContactedAt) return "Never";
 
   const diff = Math.max(0, Date.now() - lastContactedAt);
   const days = Math.floor(diff / DAY_IN_MS);
 
-  if (days === 0) return 'Today';
-  if (days === 1) return '1 day ago';
+  if (days === 0) return "Today";
+  if (days === 1) return "1 day ago";
   return `${days} days ago`;
 };
 
 const formatNextCheckIn = (nextContactDate?: number | null) => {
-  if (!nextContactDate) return 'Not scheduled';
+  if (!nextContactDate) return "Not scheduled";
 
   const diff = nextContactDate - Date.now();
-  if (diff <= 0) return 'Due now';
+  if (diff <= 0) return "Due now";
 
   const days = Math.ceil(diff / DAY_IN_MS);
-  if (days === 1) return 'Tomorrow';
+  if (days === 1) return "Tomorrow";
   return `In ${days} days`;
 };
 
@@ -95,19 +104,22 @@ const FilterChip = ({
 }) => (
   <TouchableOpacity
     className={`rounded-full border px-4 py-3 ${
-      active ? 'border-sage bg-sage' : 'border-gray-200 bg-white'
+      active ? "border-sage bg-sage" : "border-gray-200 bg-white"
     }`}
     onPress={onPress}
     activeOpacity={0.85}
   >
-    <Text className={`text-base font-semibold ${active ? 'text-white' : 'text-gray-700'}`}>
+    <Text
+      className={`text-base font-semibold ${active ? "text-white" : "text-gray-700"}`}
+    >
       {label}
-      <Text className={active ? 'text-white' : 'text-gray-400'}> · {count}</Text>
+      <Text className={active ? "text-white" : "text-gray-400"}>
+        {" "}
+        · {count}
+      </Text>
     </Text>
   </TouchableOpacity>
 );
-
-
 
 const ContactRow = ({
   contact,
@@ -130,16 +142,22 @@ const ContactRow = ({
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-3">
-          <Text className="text-xl font-semibold text-gray-900">{contact.name}</Text>
-          <Text className="text-base text-gray-500">{formatBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
+          <Text className="text-xl font-semibold text-gray-900">
+            {contact.name}
+          </Text>
+          <Text className="text-base text-gray-500">
+            {formatBucketLabel(contact.bucket, contact.customIntervalDays)}
+          </Text>
         </View>
 
         <View className="flex-row items-center gap-2">
           <View
-            className={`rounded-full px-4 py-2 ${due ? 'bg-terracotta-100' : 'bg-sage'}`}
+            className={`rounded-full px-4 py-2 ${due ? "bg-terracotta-100" : "bg-sage"}`}
           >
-            <Text className={`text-sm font-semibold ${due ? 'text-terracotta' : 'text-white'}`}>
-              {due ? 'Due' : 'Upcoming'}
+            <Text
+              className={`text-sm font-semibold ${due ? "text-terracotta" : "text-white"}`}
+            >
+              {due ? "Due" : "Upcoming"}
             </Text>
           </View>
           <Text className="text-2xl text-gray-400 -mt-0.5">›</Text>
@@ -147,8 +165,12 @@ const ContactRow = ({
       </View>
 
       <View className="mt-4">
-        <Text className="text-sm font-semibold uppercase tracking-wide text-gray-500">Last contacted</Text>
-        <Text className="text-lg font-semibold text-gray-900">{formatLastContacted(contact.lastContactedAt)}</Text>
+        <Text className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+          Last contacted
+        </Text>
+        <Text className="text-lg font-semibold text-gray-900">
+          {formatLastContacted(contact.lastContactedAt)}
+        </Text>
 
         <Text className="mt-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
           Next check-in
@@ -161,7 +183,9 @@ const ContactRow = ({
       <View className="mt-3 flex-row items-center justify-between">
         <View className="flex-1">
           {contact.phone ? (
-            <Text className="text-base text-gray-500">Phone · {formatPhoneNumber(contact.phone)}</Text>
+            <Text className="text-base text-gray-500">
+              Phone · {formatPhoneNumber(contact.phone)}
+            </Text>
           ) : null}
         </View>
 
@@ -175,7 +199,9 @@ const ContactRow = ({
             activeOpacity={0.7}
           >
             <Ionicons name="refresh-outline" size={16} color="white" />
-            <Text className="ml-1.5 text-sm font-semibold text-white">Unarchive</Text>
+            <Text className="ml-1.5 text-sm font-semibold text-white">
+              Unarchive
+            </Text>
           </TouchableOpacity>
         ) : null}
 
@@ -189,7 +215,9 @@ const ContactRow = ({
             activeOpacity={0.7}
           >
             <Ionicons name="archive-outline" size={16} color="#374151" />
-            <Text className="ml-1.5 text-sm font-semibold text-gray-700">Archive</Text>
+            <Text className="ml-1.5 text-sm font-semibold text-gray-700">
+              Archive
+            </Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -197,22 +225,22 @@ const ContactRow = ({
   );
 };
 
-type ContactFilter = 'all' | 'due' | 'archived';
+type ContactFilter = "all" | "due" | "archived";
 
 export default function ContactsScreen() {
   const router = useRouter();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<ContactFilter>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<ContactFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadContacts = useCallback(() => {
     try {
       const results = getContacts({ includeArchived: true });
       setContacts(results);
     } catch (error) {
-      console.warn('Failed to load contacts:', error);
+      console.warn("Failed to load contacts:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -240,17 +268,19 @@ export default function ContactsScreen() {
       if (!normalizedQuery) return true;
       return (
         contact.name.toLowerCase().includes(normalizedQuery) ||
-        (contact.phone ?? '').toLowerCase().includes(normalizedQuery)
+        (contact.phone ?? "").toLowerCase().includes(normalizedQuery)
       );
     };
 
     return contacts.filter((contact) => {
-      if (filter === 'archived') {
+      if (filter === "archived") {
         return contact.isArchived && matchesQuery(contact);
       }
 
-      if (filter === 'due') {
-        return !contact.isArchived && isContactDue(contact) && matchesQuery(contact);
+      if (filter === "due") {
+        return (
+          !contact.isArchived && isContactDue(contact) && matchesQuery(contact)
+        );
       }
 
       return !contact.isArchived && matchesQuery(contact);
@@ -263,26 +293,31 @@ export default function ContactsScreen() {
   }, [loadContacts]);
 
   const handleImportPress = useCallback(() => {
-    router.push({ pathname: '/contacts/import', params: { autoRequest: '1' } });
+    router.push({ pathname: "/contacts/import", params: { autoRequest: "1" } });
   }, [router]);
 
   const handleArchive = useCallback(
     async (contactId: string) => {
-      const contact = contacts.find(c => c.id === contactId);
+      const contact = contacts.find((c) => c.id === contactId);
       Alert.alert(
-        'Archive Contact',
+        "Archive Contact",
         `Are you sure you want to archive ${contact?.name}? They won't appear in your main list, but you can restore them anytime.`,
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: "Cancel", style: "cancel" },
           {
-            text: 'Archive',
-            style: 'destructive',
+            text: "Archive",
+            style: "destructive",
             onPress: async () => {
               try {
                 await archiveContact(contactId);
                 loadContacts();
               } catch (error) {
-                Alert.alert('Error', error instanceof Error ? error.message : 'Failed to archive contact.');
+                Alert.alert(
+                  "Error",
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to archive contact.",
+                );
               }
             },
           },
@@ -298,7 +333,12 @@ export default function ContactsScreen() {
         await unarchiveContact(contactId);
         loadContacts();
       } catch (error) {
-        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to unarchive contact.');
+        Alert.alert(
+          "Error",
+          error instanceof Error
+            ? error.message
+            : "Failed to unarchive contact.",
+        );
       }
     },
     [loadContacts],
@@ -313,20 +353,25 @@ export default function ContactsScreen() {
 
   const handleResetDatabase = useCallback(async () => {
     Alert.alert(
-      'Reset Database',
-      'This will delete all contacts and interactions. This action cannot be undone.',
+      "Reset Database",
+      "This will delete all contacts and interactions. This action cannot be undone.",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Reset',
-          style: 'destructive',
+          text: "Reset",
+          style: "destructive",
           onPress: async () => {
             try {
               await resetDatabase();
               loadContacts();
-              Alert.alert('Success', 'Database has been reset.');
+              Alert.alert("Success", "Database has been reset.");
             } catch (error) {
-              Alert.alert('Error', error instanceof Error ? error.message : 'Failed to reset database.');
+              Alert.alert(
+                "Error",
+                error instanceof Error
+                  ? error.message
+                  : "Failed to reset database.",
+              );
             }
           },
         },
@@ -340,61 +385,72 @@ export default function ContactsScreen() {
 
     if (hasZeroContacts) {
       return {
-        type: 'first-time' as const,
-        title: 'No contacts yet',
-        subtitle: 'Import from your phone to start building your circle.',
+        type: "first-time" as const,
+        title: "No contacts yet",
+        subtitle: "Import from your phone to start building your circle.",
         showCTA: true,
       };
     }
 
     if (hasSearchQuery) {
       return {
-        type: 'search' as const,
+        type: "search" as const,
         title: `No contacts match '${searchQuery}'`,
-        subtitle: 'Try a different search term.',
+        subtitle: "Try a different search term.",
         showCTA: false,
       };
     }
 
-    if (filter === 'due' && stats.due === 0) {
+    if (filter === "due" && stats.due === 0) {
       return {
-        type: 'no-due' as const,
-        title: 'No contacts are due right now',
+        type: "no-due" as const,
+        title: "No contacts are due right now",
         subtitle: "Great job staying on top of things!",
         showCTA: false,
       };
     }
 
-    if (filter === 'archived' && stats.archived === 0) {
+    if (filter === "archived" && stats.archived === 0) {
       return {
-        type: 'no-archived' as const,
-        title: 'No archived contacts',
+        type: "no-archived" as const,
+        title: "No archived contacts",
         subtitle: null,
         showCTA: false,
       };
     }
 
-    if (filter === 'all' && stats.active === 0 && contacts.length > 0) {
+    if (filter === "all" && stats.active === 0 && contacts.length > 0) {
       return {
-        type: 'all-archived' as const,
-        title: 'All your contacts are archived',
-        subtitle: `You have ${stats.archived} archived contact${stats.archived > 1 ? 's' : ''}`,
+        type: "all-archived" as const,
+        title: "All your contacts are archived",
+        subtitle: `You have ${stats.archived} archived contact${stats.archived > 1 ? "s" : ""}`,
         showCTA: true,
       };
     }
 
     return {
-      type: 'default' as const,
-      title: 'No contacts found',
+      type: "default" as const,
+      title: "No contacts found",
       subtitle: null,
       showCTA: false,
     };
-  }, [searchQuery, contacts.length, filter, stats.due, stats.archived, stats.active]);
+  }, [
+    searchQuery,
+    contacts.length,
+    filter,
+    stats.due,
+    stats.archived,
+    stats.active,
+  ]);
 
-  const filterOptions: { label: string; value: ContactFilter; count: number }[] = [
-    { label: 'All', value: 'all', count: stats.active },
-    { label: 'Due', value: 'due', count: stats.due },
-    { label: 'Archived', value: 'archived', count: stats.archived },
+  const filterOptions: {
+    label: string;
+    value: ContactFilter;
+    count: number;
+  }[] = [
+    { label: "All", value: "all", count: stats.active },
+    { label: "Due", value: "due", count: stats.due },
+    { label: "Archived", value: "archived", count: stats.archived },
   ];
 
   if (loading) {
@@ -413,12 +469,18 @@ export default function ContactsScreen() {
         renderItem={({ item }) => (
           <ContactRow
             contact={item}
-            onArchive={item.isArchived ? undefined : () => handleArchive(item.id)}
-            onUnarchive={item.isArchived ? () => handleUnarchive(item.id) : undefined}
+            onArchive={
+              item.isArchived ? undefined : () => handleArchive(item.id)
+            }
+            onUnarchive={
+              item.isArchived ? () => handleUnarchive(item.id) : undefined
+            }
             onPress={() => handleContactPress(item.id)}
           />
         )}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: 24,
@@ -428,7 +490,7 @@ export default function ContactsScreen() {
           <View className="pb-4">
             <Text className="text-2xl font-bold text-gray-900">Contacts</Text>
             <Text className="mt-1 text-base text-gray-500">
-              See who is due next and manage your circle.
+              See who's due for a check-in and manage your contacts.
             </Text>
 
             {contacts.length > 0 && (
@@ -438,7 +500,9 @@ export default function ContactsScreen() {
                   onPress={handleImportPress}
                   activeOpacity={0.9}
                 >
-                  <Text className="text-base font-semibold text-white">Add More Contacts</Text>
+                  <Text className="text-base font-semibold text-white">
+                    Add More Contacts
+                  </Text>
                 </TouchableOpacity>
 
                 <View className="mt-6">
@@ -472,7 +536,9 @@ export default function ContactsScreen() {
         }
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center py-16">
-            <Text className="text-2xl font-bold text-gray-900">{emptyState.title}</Text>
+            <Text className="text-2xl font-bold text-gray-900">
+              {emptyState.title}
+            </Text>
             {emptyState.subtitle && (
               <Text className="mt-1 text-base text-gray-600 text-center">
                 {emptyState.subtitle}
@@ -482,11 +548,17 @@ export default function ContactsScreen() {
             {emptyState.showCTA && (
               <TouchableOpacity
                 className="mt-5 rounded-2xl bg-sage px-6 py-4"
-                onPress={emptyState.type === 'all-archived' ? () => setFilter('archived') : handleImportPress}
+                onPress={
+                  emptyState.type === "all-archived"
+                    ? () => setFilter("archived")
+                    : handleImportPress
+                }
                 activeOpacity={0.9}
               >
                 <Text className="text-lg font-semibold text-white">
-                  {emptyState.type === 'all-archived' ? 'View Archived' : 'Import from Phone'}
+                  {emptyState.type === "all-archived"
+                    ? "View Archived"
+                    : "Import from Phone"}
                 </Text>
               </TouchableOpacity>
             )}
