@@ -11,6 +11,7 @@ import {
   getCalendarData,
   getMonthsDueContacts,
   getTodayDateKey,
+  CalendarContact,
 } from '@/services/calendarService';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -63,7 +64,7 @@ const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: numbe
 };
 
 type CalendarContactCardProps = {
-  contact: Contact;
+  contact: CalendarContact;
   onPress: () => void;
 };
 
@@ -78,8 +79,12 @@ const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => 
       activeOpacity={0.7}
     >
       <View className="flex-row items-center gap-3">
-        <View className="h-12 w-12 items-center justify-center rounded-full bg-sage">
-          <Text className="text-base font-semibold text-white">{initial}</Text>
+        <View className={`h-12 w-12 items-center justify-center rounded-full ${contact.isBirthday ? 'bg-[#B086A9]' : 'bg-sage'}`}>
+          {contact.isBirthday ? (
+            <Ionicons name="gift-outline" size={24} color="white" />
+          ) : (
+            <Text className="text-base font-semibold text-white">{initial}</Text>
+          )}
         </View>
 
         <View className="flex-1">
@@ -89,9 +94,9 @@ const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => 
           </Text>
         </View>
 
-        <View className={`rounded-full px-3 py-1 ${isOverdue ? 'bg-terracotta-100' : 'bg-sage'}`}>
-          <Text className={`text-xs font-semibold ${isOverdue ? 'text-terracotta' : 'text-white'}`}>
-            {isOverdue ? 'Overdue' : 'Upcoming'}
+        <View className={`rounded-full px-3 py-1 ${contact.isBirthday ? 'bg-[#F3E6F0]' : (isOverdue ? 'bg-terracotta-100' : 'bg-sage')}`}>
+          <Text className={`text-xs font-semibold ${contact.isBirthday ? 'text-[#B086A9]' : (isOverdue ? 'text-terracotta' : 'text-white')}`}>
+            {contact.isBirthday ? 'Birthday Today!' : (isOverdue ? 'Overdue' : 'Upcoming')}
           </Text>
         </View>
       </View>
@@ -103,7 +108,7 @@ export default function CalendarScreen() {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateKey());
   const [calendarData, setCalendarData] = useState<Record<string, any>>({});
-  const [contactsForDate, setContactsForDate] = useState<Contact[]>([]);
+  const [contactsForDate, setContactsForDate] = useState<CalendarContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [currentMonth, setCurrentMonth] = useState({
@@ -220,7 +225,7 @@ export default function CalendarScreen() {
     return {
       title: isToday ? "You're all caught up!" : "No contacts scheduled",
       subtitle: isToday ? "No contacts scheduled for today" : formattedDate,
-      icon: isToday ? "checkmark-circle" : "calendar-outline" as const,
+      icon: isToday ? "checkmark-circle" as const : "calendar-outline" as const,
     };
   }, [selectedDate, todayDate]);
 
