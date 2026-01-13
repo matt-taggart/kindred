@@ -45,28 +45,28 @@ export interface InteractionListItemProps {
 export default function InteractionListItem({ interaction, onEdit, onDelete }: InteractionListItemProps) {
   return (
     <TouchableOpacity
-      className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+      className="rounded-2xl border border-border bg-surface p-4"
       onPress={() => onEdit(interaction)}
       activeOpacity={0.7}
     >
       <View className="flex-row items-start gap-3">
         <View className="mt-1">
-          <Ionicons name={typeIcons[interaction.type]} size={24} color="#475569" />
+          <Ionicons name={typeIcons[interaction.type]} size={24} color="#5C6356" />
         </View>
 
         <View className="flex-1">
           <View className="flex-row items-center justify-between">
-            <Text className="text-lg font-semibold text-slate">{typeLabels[interaction.type]}</Text>
+            <Text className="text-lg font-semibold text-warmgray">{typeLabels[interaction.type]}</Text>
             <TouchableOpacity onPress={onDelete} activeOpacity={0.7}>
-              <Ionicons name="trash-outline" size={20} color="#94a3b8" />
+              <Ionicons name="trash-outline" size={20} color="#8B9678" />
             </TouchableOpacity>
           </View>
 
-          <Text className="text-base text-slate-500">{formatInteractionDate(interaction.date)}</Text>
+          <Text className="text-base text-warmgray-muted">{formatInteractionDate(interaction.date)}</Text>
 
           {interaction.notes && (
-            <View className="mt-2 rounded-lg border border-sage-100 bg-cream p-3">
-              <Text className="text-base text-slate">{interaction.notes}</Text>
+            <View className="mt-2 rounded-lg border border-border bg-cream p-3">
+              <Text className="text-base text-warmgray">{interaction.notes}</Text>
             </View>
           )}
         </View>

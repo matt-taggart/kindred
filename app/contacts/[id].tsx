@@ -353,38 +353,49 @@ export default function ContactDetailScreen() {
             </View>
           </View>
 
-          {/* Call/Text Action Buttons */}
-          {contact.phone && (
-            <View className="mb-6 flex-row gap-3">
-              <TouchableOpacity
-                className={`flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3 ${
-                  contact.isArchived ? 'bg-gray-200 border border-gray-300' : 'bg-sage'
-                }`}
-                onPress={handleCall}
-                disabled={contact.isArchived}
-                activeOpacity={contact.isArchived ? 1 : 0.85}
-              >
-                <Ionicons name="call-outline" size={24} color={contact.isArchived ? '#6b7280' : '#fff'} />
-                <Text className={`text-lg font-semibold ${contact.isArchived ? 'text-gray-400' : 'text-white'}`}>
-                  Call
-                </Text>
-              </TouchableOpacity>
+          {/* Quick Actions Row */}
+          <View className="mb-6 flex-row gap-2">
+            {contact.phone && (
+              <>
+                <TouchableOpacity
+                  className={`flex-row items-center justify-center gap-1.5 rounded-full px-4 py-2 ${
+                    contact.isArchived ? 'bg-gray-100 border border-gray-300' : 'border border-sage bg-surface'
+                  }`}
+                  onPress={handleCall}
+                  disabled={contact.isArchived}
+                  activeOpacity={contact.isArchived ? 1 : 0.85}
+                >
+                  <Ionicons name="call-outline" size={18} color={contact.isArchived ? '#9ca3af' : '#9CA986'} />
+                  <Text className={`text-base font-medium ${contact.isArchived ? 'text-gray-400' : 'text-sage'}`}>
+                    Call
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                className={`flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3 ${
-                  contact.isArchived ? 'bg-gray-200 border border-gray-300' : 'bg-sage'
-                }`}
-                onPress={handleText}
-                disabled={contact.isArchived}
-                activeOpacity={contact.isArchived ? 1 : 0.85}
-              >
-                <Ionicons name="chatbubble-outline" size={24} color={contact.isArchived ? '#6b7280' : '#fff'} />
-                <Text className={`text-lg font-semibold ${contact.isArchived ? 'text-gray-400' : 'text-white'}`}>
-                  Text
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+                <TouchableOpacity
+                  className={`flex-row items-center justify-center gap-1.5 rounded-full px-4 py-2 ${
+                    contact.isArchived ? 'bg-gray-100 border border-gray-300' : 'border border-sage bg-surface'
+                  }`}
+                  onPress={handleText}
+                  disabled={contact.isArchived}
+                  activeOpacity={contact.isArchived ? 1 : 0.85}
+                >
+                  <Ionicons name="chatbubble-outline" size={18} color={contact.isArchived ? '#9ca3af' : '#9CA986'} />
+                  <Text className={`text-base font-medium ${contact.isArchived ? 'text-gray-400' : 'text-sage'}`}>
+                    Text
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            <TouchableOpacity
+              className="flex-row items-center justify-center gap-1.5 rounded-full border border-sage bg-surface px-4 py-2"
+              onPress={handleAddNote}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="pencil-outline" size={18} color="#9CA986" />
+              <Text className="text-base font-medium text-sage">Note</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Mark Done / Snooze Actions */}
           {!contact.isArchived && (
@@ -412,29 +423,16 @@ export default function ContactDetailScreen() {
             </View>
           )}
 
-          {/* Add Note Button */}
-          <TouchableOpacity
-            className="mb-6 flex-row items-center justify-center gap-2 rounded-2xl bg-white border-2 border-sage py-3"
-            onPress={handleAddNote}
-            activeOpacity={0.85}
-          >
-            <Ionicons name="pencil-outline" size={24} color="#9CA986" />
-            <Text className="text-lg font-semibold text-sage">Add Note</Text>
-          </TouchableOpacity>
-
-          {/* Interaction History */}
+          {/* Shared Moments */}
           <View>
-            <Text className="mb-3 text-xl font-bold text-slate">History</Text>
+            <Text className="mb-3 text-xl font-bold text-warmgray">Shared moments</Text>
 
             {/* Stable outer View prevents full unmount/remount during list→empty transition */}
             <View className="flex flex-col gap-4">
               {interactions.length === 0 ? (
-                <View className="items-center justify-center rounded-2xl bg-white p-8 shadow-sm">
-                  <Ionicons name="time-outline" size={48} color="#94a3b8" />
-                  <Text className="mt-3 text-base text-slate-600">No history yet</Text>
-                  <Text className="mt-1 text-sm text-slate-500">
-                    Your conversation history will appear here once you start logging interactions.
-                  </Text>
+                <View className="items-center justify-center rounded-2xl bg-surface border border-border p-8">
+                  <Ionicons name="heart-outline" size={48} color="#8B9678" />
+                  <Text className="mt-3 text-base text-warmgray">Your story together starts here.</Text>
                 </View>
               ) : (
                 interactions.map((interaction) => (
