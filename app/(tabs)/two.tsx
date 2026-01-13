@@ -290,7 +290,7 @@ export default function ContactsScreen() {
     async (contactId: string) => {
       const contact = contacts.find((c) => c.id === contactId);
       Alert.alert(
-        "Archive Contact",
+        "Archive Connection",
         `Are you sure you want to archive ${contact?.name}? They won't appear in your main list, but you can restore them anytime.`,
         [
           { text: "Cancel", style: "cancel" },
@@ -306,7 +306,7 @@ export default function ContactsScreen() {
                   "Error",
                   error instanceof Error
                     ? error.message
-                    : "Failed to archive contact.",
+                    : "Failed to archive connection.",
                 );
               }
             },
@@ -327,7 +327,7 @@ export default function ContactsScreen() {
           "Error",
           error instanceof Error
             ? error.message
-            : "Failed to unarchive contact.",
+            : "Failed to unarchive connection.",
         );
       }
     },
@@ -344,7 +344,7 @@ export default function ContactsScreen() {
   const handleResetDatabase = useCallback(async () => {
     Alert.alert(
       "Reset Database",
-      "This will delete all contacts and interactions. This action cannot be undone.",
+      "This will delete all connections and shared moments. This action cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -478,7 +478,7 @@ export default function ContactsScreen() {
         }}
         ListHeaderComponent={
           <View className="pb-4 mb-8">
-            <Text className="text-3xl font-semibold text-warmgray">Contacts</Text>
+            <Text className="text-3xl font-semibold text-warmgray">Connections</Text>
             <Text className="mt-1 text-base text-warmgray-muted">
               See who's due for a check-in and manage your connections.
             </Text>
