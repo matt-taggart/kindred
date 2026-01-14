@@ -160,6 +160,55 @@ export const getDueContacts = (): Contact[] => {
     });
 };
 
+export type GroupedDueContacts = {
+  birthdays: Contact[];
+  reconnect: Contact[];
+};
+
+export const getDueContactsGrouped = (): GroupedDueContacts => {
+  const db = getDb();
+  const now = new Date();
+  const nowMs = now.getTime();
+
+  const allContacts: Contact[] = db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.isArchived, false))
+    .all();
+
+  const dueContacts = allContacts.filter((contact: Contact) => {
+    if (contact.lastContactedAt && isSameDay(new Date(contact.lastContactedAt), now)) {
+      return false;
+    }
+    const isDue = contact.nextContactDate !== null && contact.nextContactDate <= nowMs;
+    const isBirthday = isBirthdayToday(contact, now);
+    return isDue || isBirthday;
+  });
+
+  const birthdays: Contact[] = [];
+  const reconnect: Contact[] = [];
+
+  for (const contact of dueContacts) {
+    if (isBirthdayToday(contact, now)) {
+      birthdays.push(contact);
+    } else {
+      reconnect.push(contact);
+    }
+  }
+
+  // Sort birthdays by name for consistent ordering
+  birthdays.sort((a, b) => a.name.localeCompare(b.name));
+
+  // Sort reconnect by longest gap (oldest lastContactedAt first)
+  reconnect.sort((a, b) => {
+    const aLast = a.lastContactedAt || 0;
+    const bLast = b.lastContactedAt || 0;
+    return aLast - bLast;
+  });
+
+  return { birthdays, reconnect };
+};
+
 export const archiveContact = async (contactId: Contact['id']): Promise<Contact> => {
   const db = getDb();
 
