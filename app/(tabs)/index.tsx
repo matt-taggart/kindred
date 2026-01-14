@@ -240,6 +240,7 @@ export default function HomeScreen() {
             paddingBottom: 24,
             flexGrow: contacts.length === 0 ? 1 : undefined,
           }}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={<CelebrationStatus />}
         />
       </View>

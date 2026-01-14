@@ -612,7 +612,7 @@ export default function ImportContactsScreen() {
               </Text>
             )}
 
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
               {(
                 [
                   "daily",

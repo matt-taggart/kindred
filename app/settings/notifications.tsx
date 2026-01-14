@@ -108,6 +108,7 @@ export default function NotificationSettingsScreen() {
         <ScrollView
           className="flex-1 px-4 pt-6"
           contentContainerStyle={{ paddingBottom: 32 }}
+          showsVerticalScrollIndicator={false}
         >
           {/* Frequency Section */}
           <View className="mb-8">

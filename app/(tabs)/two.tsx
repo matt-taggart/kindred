@@ -23,7 +23,10 @@ import {
   unarchiveContact,
 } from "@/services/contactService";
 import { formatPhoneNumber } from "@/utils/phone";
-import { formatLastConnected, formatNextReminder } from "@/utils/timeFormatting";
+import {
+  formatLastConnected,
+  formatNextReminder,
+} from "@/utils/timeFormatting";
 
 const formatBucketLabel = (
   bucket: Contact["bucket"],
@@ -45,7 +48,8 @@ const formatBucketLabel = (
     case "yearly":
       return "Once a year";
     case "custom": {
-      if (!customIntervalDays || customIntervalDays < 1) return "Only when I choose";
+      if (!customIntervalDays || customIntervalDays < 1)
+        return "Only when I choose";
       if (customIntervalDays % 30 === 0) {
         const months = customIntervalDays / 30;
         return months === 1 ? "Monthly" : `Every ${months} months`;
@@ -109,7 +113,11 @@ const ContactRow = ({
 }) => {
   const due = isContactDue(contact);
   const hasReminders = contact.nextContactDate !== null;
-  const statusLabel = hasReminders ? (due ? "Ready" : "Coming up") : "No reminders";
+  const statusLabel = hasReminders
+    ? due
+      ? "Ready"
+      : "Coming up"
+    : "No reminders";
 
   return (
     <TouchableOpacity
@@ -140,7 +148,9 @@ const ContactRow = ({
             </View>
           ) : (
             <View className="rounded-full border border-border bg-cream px-4 py-2">
-              <Text className="text-sm font-semibold text-warmgray-muted">{statusLabel}</Text>
+              <Text className="text-sm font-semibold text-warmgray-muted">
+                {statusLabel}
+              </Text>
             </View>
           )}
           <Text className="text-2xl text-warmgray-muted -mt-0.5">›</Text>
@@ -362,7 +372,7 @@ export default function ContactsScreen() {
     if (hasZeroContacts) {
       return {
         type: "first-time" as const,
-        title: "No connections yet",
+        title: "No connections yet.",
         subtitle: "Add your first connection to start keeping in touch.",
         showCTA: true,
       };
@@ -371,7 +381,7 @@ export default function ContactsScreen() {
     if (hasSearchQuery) {
       return {
         type: "search" as const,
-        title: `No connections match '${searchQuery}'`,
+        title: `No connections match '${searchQuery}.'`,
         subtitle: "Try a different search term.",
         showCTA: false,
       };
@@ -459,11 +469,14 @@ export default function ContactsScreen() {
           paddingBottom: 24,
           flexGrow: filteredContacts.length === 0 ? 1 : undefined,
         }}
+        showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View className="pt-4 pb-4 mb-8">
             <View className="flex-row items-center justify-between mb-2">
               <View className="flex-1">
-                <Text className="text-3xl font-semibold text-warmgray">Connections</Text>
+                <Text className="text-3xl font-semibold text-warmgray">
+                  Connections
+                </Text>
                 <Text className="mt-1 text-base text-warmgray-muted">
                   Stay close to the people who matter most.
                 </Text>
@@ -474,17 +487,13 @@ export default function ContactsScreen() {
                   className="h-10 w-10 items-center justify-center rounded-full bg-surface border border-border"
                   activeOpacity={0.7}
                 >
-                  <Ionicons
-                    name="search"
-                    size={24}
-                    color="#A8A29E"
-                  />
+                  <Ionicons name="search" size={24} color="#A8A29E" />
                 </TouchableOpacity>
               )}
             </View>
 
             <Animated.View
-              style={{ height: searchHeightAnim, overflow: 'hidden' }}
+              style={{ height: searchHeightAnim, overflow: "hidden" }}
             >
               <View className="w-full min-h-14 rounded-2xl border border-border bg-surface shadow-sm px-4 py-3 flex-row items-center gap-2">
                 <Ionicons name="search" size={20} color="#A8A29E" />

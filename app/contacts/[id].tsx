@@ -306,6 +306,7 @@ export default function ContactDetailScreen() {
           className="flex-1"
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          showsVerticalScrollIndicator={false}
         >
           {contact.isArchived && (
             <View className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-4">

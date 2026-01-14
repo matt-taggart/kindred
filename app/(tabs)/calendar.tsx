@@ -233,6 +233,7 @@ export default function CalendarScreen() {
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}
       >
         <View className="pt-2 mb-6">
           <Text className="text-3xl font-semibold text-warmgray mb-1">Calendar</Text>

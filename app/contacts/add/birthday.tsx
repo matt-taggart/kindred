@@ -29,7 +29,7 @@ const formatDate = (date: Date) => {
 export default function AddConnectionBirthdayScreen() {
   const router = useRouter();
   const { isPro } = useUserStore();
-  const params = useLocalSearchParams<{ name?: string; bucket?: string; manual?: string }>();
+  const params = useLocalSearchParams<{ name?: string; bucket?: string; customIntervalDays?: string }>();
 
   const name = useMemo(() => (typeof params.name === 'string' ? params.name.trim() : ''), [params.name]);
   const bucket = useMemo(() => {
@@ -37,7 +37,12 @@ export default function AddConnectionBirthdayScreen() {
     if (typeof raw !== 'string') return 'bi-weekly' as Contact['bucket'];
     return raw as Contact['bucket'];
   }, [params.bucket]);
-  const manual = params.manual === '1';
+  const customIntervalDays = useMemo(() => {
+    const raw = params.customIntervalDays;
+    if (!raw) return undefined;
+    const days = parseInt(raw, 10);
+    return isNaN(days) ? undefined : days;
+  }, [params.customIntervalDays]);
 
   const [birthdayEnabled, setBirthdayEnabled] = useState(false);
   const [birthdayDate, setBirthdayDate] = useState<Date>(new Date());
@@ -60,8 +65,8 @@ export default function AddConnectionBirthdayScreen() {
       const created = await addContact({
         name,
         bucket,
-        customIntervalDays: manual ? null : undefined,
-        nextContactDate: manual ? null : undefined,
+        customIntervalDays,
+        nextContactDate: customIntervalDays ? undefined : null,
         birthday: withBirthday ? formatDate(birthdayDate) : null,
       });
       router.replace(`/contacts/${created.id}`);
