@@ -309,12 +309,6 @@ export default function ReviewScheduleScreen() {
                 </Text>
                 <Text className="text-xs text-warmgray-muted">Avg per day</Text>
               </View>
-              <View className="flex-1 rounded-xl bg-surface border border-border p-3">
-                <Text className="text-2xl font-bold text-sage">
-                  {stats.maxPerDay}
-                </Text>
-                <Text className="text-xs text-warmgray-muted">Max per day</Text>
-              </View>
             </View>
           </View>
         }
