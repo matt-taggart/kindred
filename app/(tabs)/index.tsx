@@ -220,7 +220,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-cream">
-      <View className="flex-1 px-4 pt-4">
+      <View className="flex-1 px-4 pt-6">
         <Text className="mb-1 text-3xl font-semibold text-warmgray">Today</Text>
         <Text className="mb-8 text-lg text-warmgray-muted font-medium">
           {currentDate.toLocaleDateString('en-US', {

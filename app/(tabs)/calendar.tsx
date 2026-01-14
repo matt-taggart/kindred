@@ -261,9 +261,9 @@ export default function CalendarScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View className="mb-4">
-          <Text className="text-2xl font-bold text-warmgray">Calendar</Text>
-          <Text className="mt-1 text-base text-warmgray-muted">
+        <View className="pt-2 mb-6">
+          <Text className="text-3xl font-semibold text-warmgray mb-1">Calendar</Text>
+          <Text className="text-lg text-warmgray-muted">
             {monthDueCount} connection{monthDueCount !== 1 ? 's' : ''} this month
           </Text>
         </View>

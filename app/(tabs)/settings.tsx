@@ -115,8 +115,8 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-cream">
-      <ScrollView className="flex-1 px-4 pt-4" contentContainerStyle={{ paddingBottom: 32 }}>
-        <Text className="mb-6 text-2xl font-bold text-warmgray">Settings</Text>
+      <ScrollView className="flex-1 px-4 pt-6" contentContainerStyle={{ paddingBottom: 32 }}>
+        <Text className="mb-8 text-3xl font-semibold text-warmgray">Settings</Text>
 
         <SettingsSection title="Reminders" description="Choose when Kindred gently nudges you">
           <SettingsRow
