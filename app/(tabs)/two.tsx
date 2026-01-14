@@ -477,7 +477,7 @@ export default function ContactsScreen() {
           flexGrow: filteredContacts.length === 0 ? 1 : undefined,
         }}
         ListHeaderComponent={
-          <View className="pt-2 pb-4 mb-8">
+          <View className="pt-4 pb-4 mb-8">
             <Text className="text-3xl font-semibold text-warmgray">Connections</Text>
             <Text className="mt-1 text-base text-warmgray-muted">
               See who's due for a check-in and manage your connections.
