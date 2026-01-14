@@ -1,7 +1,8 @@
-import { Modal, Pressable, Platform } from "react-native";
-import { SafeAreaView, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, Platform, TouchableOpacity } from "react-native";
+import { SafeAreaView, ScrollView, Text, TextInput, View, Alert } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Ionicons } from "@expo/vector-icons";
 
 import { Contact } from "@/db/schema";
 
@@ -14,6 +15,7 @@ interface EditContactModalProps {
     customIntervalDays?: number | null,
     birthday?: string | null,
   ) => void;
+  onArchive?: () => void;
 }
 
 const bucketLabels: Record<Contact["bucket"], string> = {
@@ -89,6 +91,7 @@ export default function EditContactModal({
   visible,
   onClose,
   onSave,
+  onArchive,
 }: EditContactModalProps) {
   const [selectedBucket, setSelectedBucket] = useState<Contact["bucket"]>(
     contact.bucket,
@@ -140,6 +143,24 @@ export default function EditContactModal({
     if (selectedDate) {
       setBirthday(formatDate(selectedDate));
     }
+  };
+
+  const handleArchive = () => {
+    Alert.alert(
+      "Archive Connection",
+      `Are you sure you want to archive ${contact.name}? They won't appear in your main list, but you can restore them anytime.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Archive",
+          style: "destructive",
+          onPress: () => {
+            onArchive?.();
+            onClose();
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -376,6 +397,21 @@ export default function EditContactModal({
               ))}
             </View>
           </ScrollView>
+
+          {onArchive && !contact.isArchived && (
+            <View className="mb-3">
+              <TouchableOpacity
+                onPress={handleArchive}
+                className="flex-row items-center justify-center gap-2 rounded-2xl border-2 border-terracotta-200 bg-terracotta-50 py-3"
+                activeOpacity={0.85}
+              >
+                <Ionicons name="archive-outline" size={20} color="#EA580C" />
+                <Text className="text-base font-semibold text-terracotta">
+                  Archive connection
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <Pressable
             onPress={handleSave}

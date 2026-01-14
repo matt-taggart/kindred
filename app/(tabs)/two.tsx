@@ -1,22 +1,23 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   FlatList,
   RefreshControl,
   SafeAreaView,
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 
 import { Contact } from "@/db/schema";
 import {
-  archiveContact,
   getContacts,
   resetDatabase,
   unarchiveContact,
@@ -99,12 +100,10 @@ const FilterChip = ({
 
 const ContactRow = ({
   contact,
-  onArchive,
   onUnarchive,
   onPress,
 }: {
   contact: Contact;
-  onArchive?: () => void;
   onUnarchive?: () => void;
   onPress?: () => void;
 }) => {
@@ -188,22 +187,6 @@ const ContactRow = ({
             </Text>
           </TouchableOpacity>
         ) : null}
-
-        {!contact.isArchived && onArchive ? (
-          <TouchableOpacity
-            className="ml-2 flex-row items-center rounded-full bg-surface border border-border px-4 py-2"
-            onPress={(e) => {
-              e.stopPropagation();
-              onArchive?.();
-            }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="archive-outline" size={16} color="#78716c" />
-            <Text className="ml-1.5 text-sm font-semibold text-warmgray">
-              Archive
-            </Text>
-          </TouchableOpacity>
-        ) : null}
       </View>
     </TouchableOpacity>
   );
@@ -213,11 +196,19 @@ type ContactFilter = "all" | "due" | "archived";
 
 export default function ContactsScreen() {
   const router = useRouter();
+  const { width: windowWidth } = useWindowDimensions();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<ContactFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const searchInputRef = useRef<TextInput>(null);
+  const searchHeightAnim = useRef(new Animated.Value(0)).current;
+
+  // SafeAreaView has px-4 (16) and FlatList content has paddingHorizontal 16.
+  // Total horizontal padding = 32px per side.
+  const emptyCtaWidth = Math.min(320, Math.max(0, windowWidth - 64));
 
   const loadContacts = useCallback(() => {
     try {
@@ -235,8 +226,27 @@ export default function ContactsScreen() {
     useCallback(() => {
       setLoading(true);
       loadContacts();
+      setIsSearchVisible(false);
+      setSearchQuery("");
     }, [loadContacts]),
   );
+
+  useEffect(() => {
+    if (isSearchVisible) {
+      Animated.timing(searchHeightAnim, {
+        toValue: 60,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+      searchInputRef.current?.focus();
+    } else {
+      Animated.timing(searchHeightAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [isSearchVisible, searchHeightAnim]);
 
   const stats = useMemo(() => {
     const active = contacts.filter((contact) => !contact.isArchived);
@@ -283,37 +293,6 @@ export default function ContactsScreen() {
   const handleImportPress = useCallback(() => {
     router.push({ pathname: "/contacts/import", params: { autoRequest: "1" } });
   }, [router]);
-
-  const handleArchive = useCallback(
-    async (contactId: string) => {
-      const contact = contacts.find((c) => c.id === contactId);
-      Alert.alert(
-        "Archive Connection",
-        `Are you sure you want to archive ${contact?.name}? They won't appear in your main list, but you can restore them anytime.`,
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Archive",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                await archiveContact(contactId);
-                loadContacts();
-              } catch (error) {
-                Alert.alert(
-                  "Error",
-                  error instanceof Error
-                    ? error.message
-                    : "Failed to archive connection.",
-                );
-              }
-            },
-          },
-        ],
-      );
-    },
-    [contacts, loadContacts],
-  );
 
   const handleUnarchive = useCallback(
     async (contactId: string) => {
@@ -366,6 +345,15 @@ export default function ContactsScreen() {
       ],
     );
   }, [loadContacts]);
+
+  const handleSearchToggle = useCallback(() => {
+    setIsSearchVisible((prev) => !prev);
+  }, []);
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("");
+    searchInputRef.current?.focus();
+  }, []);
 
   const emptyState = useMemo(() => {
     const hasSearchQuery = searchQuery.trim().length > 0;
@@ -457,9 +445,6 @@ export default function ContactsScreen() {
         renderItem={({ item }) => (
           <ContactRow
             contact={item}
-            onArchive={
-              item.isArchived ? undefined : () => handleArchive(item.id)
-            }
             onUnarchive={
               item.isArchived ? () => handleUnarchive(item.id) : undefined
             }
@@ -476,10 +461,54 @@ export default function ContactsScreen() {
         }}
         ListHeaderComponent={
           <View className="pt-4 pb-4 mb-8">
-            <Text className="text-3xl font-semibold text-warmgray">Connections</Text>
-            <Text className="mt-1 text-base text-warmgray-muted">
-              Stay close to the people who matter most.
-            </Text>
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-1">
+                <Text className="text-3xl font-semibold text-warmgray">Connections</Text>
+                <Text className="mt-1 text-base text-warmgray-muted">
+                  Stay close to the people who matter most.
+                </Text>
+              </View>
+              {contacts.length > 0 && (
+                <TouchableOpacity
+                  onPress={handleSearchToggle}
+                  className="h-10 w-10 items-center justify-center rounded-full bg-surface border border-border"
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name="search"
+                    size={24}
+                    color="#A8A29E"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <Animated.View
+              style={{ height: searchHeightAnim, overflow: 'hidden' }}
+            >
+              <View className="w-full min-h-14 rounded-2xl border border-border bg-surface shadow-sm px-4 py-3 flex-row items-center gap-2">
+                <Ionicons name="search" size={20} color="#A8A29E" />
+                <TextInput
+                  ref={searchInputRef}
+                  className="flex-1 text-base leading-5 text-warmgray"
+                  placeholder="Search connections..."
+                  placeholderTextColor="#a8a29e"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  returnKeyType="search"
+                  textAlignVertical="center"
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity
+                    onPress={handleClearSearch}
+                    className="h-6 w-6 items-center justify-center rounded-full bg-cream"
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="close" size={14} color="#A8A29E" />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </Animated.View>
 
             {contacts.length > 0 && (
               <>
@@ -502,20 +531,6 @@ export default function ContactsScreen() {
                     Import from contacts
                   </Text>
                 </TouchableOpacity>
-
-                <View className="mt-6">
-                  <View className="w-full min-h-14 rounded-2xl border border-border bg-surface shadow-sm px-4 py-3 flex-row items-center">
-                    <TextInput
-                      className="flex-1 text-base leading-5 text-warmgray"
-                      placeholder="Search connections..."
-                      placeholderTextColor="#a8a29e"
-                      value={searchQuery}
-                      onChangeText={setSearchQuery}
-                      returnKeyType="search"
-                      textAlignVertical="center"
-                    />
-                  </View>
-                </View>
 
                 <View className="mt-5 flex-row flex-wrap gap-2">
                   {filterOptions.map((option) => (
@@ -546,7 +561,8 @@ export default function ContactsScreen() {
             {emptyState.showCTA && (
               <>
                 <TouchableOpacity
-                  className="mt-5 rounded-2xl bg-sage px-6 py-4"
+                  style={{ width: emptyCtaWidth }}
+                  className="mt-5 items-center rounded-2xl bg-sage py-4"
                   onPress={
                     emptyState.type === "all-archived"
                       ? () => setFilter("archived")
@@ -563,7 +579,8 @@ export default function ContactsScreen() {
 
                 {emptyState.type !== "all-archived" && (
                   <TouchableOpacity
-                    className="mt-3 rounded-2xl border border-sage bg-surface px-6 py-4"
+                    style={{ width: emptyCtaWidth }}
+                    className="mt-3 items-center rounded-2xl border border-sage bg-surface py-4"
                     onPress={handleImportPress}
                     activeOpacity={0.9}
                   >

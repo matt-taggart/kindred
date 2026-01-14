@@ -5,7 +5,7 @@ import { ActivityIndicator, Image, Alert, Linking, RefreshControl, SafeAreaView,
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, unarchiveContact, snoozeContact } from '@/services/contactService';
+import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, archiveContact, unarchiveContact, snoozeContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import InteractionListItem from '@/components/InteractionListItem';
 import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
@@ -221,6 +221,17 @@ export default function ContactDetailScreen() {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to restore connection.');
     } finally {
       setUnarchiving(false);
+    }
+  }, [contact, loadContactData]);
+
+  const handleArchive = useCallback(async () => {
+    if (!contact) return;
+
+    try {
+      await archiveContact(contact.id);
+      loadContactData();
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to archive connection.');
     }
   }, [contact, loadContactData]);
 
@@ -459,6 +470,7 @@ export default function ContactDetailScreen() {
           contact={contact}
           onClose={() => setShowEditModal(false)}
           onSave={handleSaveCadence}
+          onArchive={handleArchive}
         />
       )}
     </>
