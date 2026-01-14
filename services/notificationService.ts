@@ -45,8 +45,8 @@ export const scheduleReminder = async (contact: Contact): Promise<string | null>
 
   const identifier = await Notifications.scheduleNotificationAsync({
     content: {
-      title: `Time to catch up with ${contact.name}`,
-      body: "It's been a while.",
+      title: `It might be a good time to connect with ${contact.name}.`,
+      body: 'A gentle nudge from Kindred.',
       data: { contactId: contact.id },
     },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: new Date(contact.nextContactDate) },
@@ -87,11 +87,11 @@ export const scheduleDailyReminders = async (
   const contactNames = dueContacts.map((c) => c.name);
   const title =
     dueContacts.length === 1
-      ? `Time to catch up with ${contactNames[0]}`
-      : `${dueContacts.length} contacts are due for a check-in`;
+      ? `It might be a good time to connect with ${contactNames[0]}.`
+      : `${dueContacts.length} connections are ready today`;
   const body =
     dueContacts.length === 1
-      ? "It's been a while."
+      ? 'A gentle nudge from Kindred.'
       : contactNames.slice(0, 3).join(', ') + (dueContacts.length > 3 ? ` and ${dueContacts.length - 3} more` : '');
 
   const identifiers: string[] = [];

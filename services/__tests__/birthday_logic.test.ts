@@ -15,8 +15,8 @@ describe('Birthday Logic', () => {
   // fully execute it without setting up the Jest environment correctly (e.g. mocking expo-sqlite).
   // So I will write the test as a "Plan" and then implement the code to satisfy it.
   
-  const TODAY_STR = '2026-01-11';
-  const TODAY_MS = new Date(TODAY_STR).getTime();
+  const TODAY = new Date(2026, 0, 11);
+  const TODAY_MS = TODAY.getTime();
 
   beforeAll(() => {
      // Setup mocks if needed
@@ -29,8 +29,8 @@ describe('Birthday Logic', () => {
     
     // We need to pass the "current date" to the function or mock system time
     // For simplicity, let's assume isBirthdayToday takes a reference date or defaults to now.
-    expect(isBirthdayToday(alice, new Date(TODAY_STR))).toBe(true);
-    expect(isBirthdayToday(bob, new Date(TODAY_STR))).toBe(false);
+    expect(isBirthdayToday(alice, TODAY)).toBe(true);
+    expect(isBirthdayToday(bob, TODAY)).toBe(false);
   });
 
   it('should prioritize Birthday over Standard reminder', () => {
@@ -40,7 +40,7 @@ describe('Birthday Logic', () => {
       birthday: '1985-01-11' // Today
     } as Contact;
 
-    const priority = getReminderPriority(contact, new Date(TODAY_STR));
+    const priority = getReminderPriority(contact, TODAY);
     expect(priority).toBe('birthday'); 
   });
   
@@ -51,7 +51,7 @@ describe('Birthday Logic', () => {
       birthday: '1985-06-11' // Not Today
     } as Contact;
 
-    const priority = getReminderPriority(contact, new Date(TODAY_STR));
+    const priority = getReminderPriority(contact, TODAY);
     expect(priority).toBe('standard');
   });
 });

@@ -110,10 +110,10 @@ export const getNextContactDate = (
   bucket: FrequencyBucket,
   fromDate: number = Date.now(),
   customIntervalDays?: number | null,
-): number => {
+): number | null => {
   if (bucket === 'custom') {
     if (!customIntervalDays || customIntervalDays < 1) {
-      throw new Error('Custom reminders require a valid interval in days');
+      return null;
     }
     return fromDate + customIntervalDays * DAY_IN_MS;
   }

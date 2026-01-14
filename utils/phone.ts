@@ -64,8 +64,7 @@ export function formatPhoneNumberAsYouType(
   }
 
   const asYouType = new AsYouType(defaultCountry);
-  asYouType.input(phone);
-  return asYouType.getValue();
+  return asYouType.input(phone);
 }
 
 /**

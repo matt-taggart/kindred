@@ -107,8 +107,8 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
 
   const headline = useMemo(() => {
     if (isPro) return 'Welcome to Pro!';
-    if (importContext) return 'Unlock Unlimited Contacts';
-    return 'Never Lose Touch Again';
+    if (importContext) return 'Make room for more connections';
+    return 'A gentle way to nurture connection';
   }, [isPro, importContext]);
 
   const subheadline = useMemo(() => {
@@ -118,7 +118,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
       if (availableSlots === 0) {
         return 'Your free plan is full.';
       }
-      return `You have ${availableSlots} contacts remaining in your free plan.`;
+      return `You have ${availableSlots} connection${availableSlots !== 1 ? 's' : ''} remaining in your free plan.`;
     }
     return 'Invest in your relationships forever.';
   }, [isPro, importContext]);
@@ -164,15 +164,15 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
             {...panResponder.panHandlers} 
             className="w-full items-center pt-5 pb-6 bg-cream z-10"
           >
-            <View className="h-1.5 w-12 rounded-full bg-gray-200" />
+            <View className="h-1.5 w-12 rounded-full bg-border" />
           </View>
 
           {/* Fixed Header */}
           <View className="px-6 pb-4 bg-cream border-b border-sage/10 z-10">
-            <Text className="text-center text-2xl font-bold text-gray-900 leading-tight">
+            <Text className="text-center text-2xl font-bold text-warmgray leading-tight">
               {headline}
             </Text>
-            <Text className="mt-2 text-center text-base text-gray-700 leading-snug">
+            <Text className="mt-2 text-center text-base text-warmgray-muted leading-snug">
               {subheadline}
             </Text>
           </View>
@@ -188,31 +188,31 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
               {/* Price Tag */}
               {!isPro && (
                 <View className="items-center mb-8">
-                    <View className="bg-magic/10 px-4 py-1.5 rounded-full mb-3 border border-magic/20">
-                    <Text className="text-magic-600 text-xs font-bold uppercase tracking-wider">
-                      ✨ One-time payment
+                    <View className="bg-sage/10 px-4 py-1.5 rounded-full mb-3 border border-sage/20">
+                    <Text className="text-sage text-xs font-bold uppercase tracking-wider">
+                      One-time payment
                     </Text>
                   </View>
                   <View className="flex-row items-baseline">
-                    <Text className="text-4xl font-extrabold text-gray-900">$14.99</Text>
-                    <Text className="text-lg font-medium text-gray-500 ml-1">/ lifetime</Text>
+                    <Text className="text-4xl font-extrabold text-warmgray">$14.99</Text>
+                    <Text className="text-lg font-medium text-warmgray-muted ml-1">/ lifetime</Text>
                   </View>
-                  <Text className="text-sm text-gray-500 mt-1">One payment. A lifetime of connection.</Text>
+                  <Text className="text-sm text-warmgray-muted mt-1">One payment. A lifetime of connection.</Text>
                 </View>
               )}
 
               {!isPro && (
                 <>
                   {/* Comparison Card */}
-                  <View className="bg-white rounded-2xl shadow-sm border border-sage/10 overflow-hidden mb-8">
+                  <View className="bg-surface rounded-2xl shadow-sm border border-sage/10 overflow-hidden mb-8">
                     <View className="flex-row">
                       <View className="flex-1 p-5 items-center justify-center border-r border-sage/10">
                         <Text className="font-bold text-gray-400 uppercase tracking-widest text-[10px] mb-1">Free</Text>
-                        <Text className="text-gray-400 text-sm font-medium">5 contacts</Text>
+                        <Text className="text-gray-400 text-sm font-medium">5 connections</Text>
                       </View>
-                      <View className="flex-1 p-5 bg-magic/5 items-center justify-center">
-                        <Text className="font-bold text-magic-600 uppercase tracking-widest text-[10px] mb-1">PRO</Text>
-                        <Text className="font-bold text-magic-600 text-sm">unlimited contacts</Text>
+                      <View className="flex-1 p-5 bg-sage/5 items-center justify-center">
+                        <Text className="font-bold text-sage uppercase tracking-widest text-[10px] mb-1">PRO</Text>
+                        <Text className="font-bold text-sage text-sm">unlimited connections</Text>
                       </View>
                     </View>
                   </View>
@@ -225,28 +225,26 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                   <View className="space-y-4">
                     <FeatureItem
                       icon="∞"
-                      iconColor="text-magic-600"
-                      iconBg="bg-magic-100"
-                      text="Unlimited Contacts"
-                      detail="Add as many people as you want"
-                    />
-                    <FeatureItem
-                      icon="🔔"
-                      iconColor="text-terracotta"
-                      iconBg="bg-terracotta-100"
-                      text="Smart Reminders"
-                      detail="Custom daily, weekly, or yearly nudges"
-                    />
-                    <FeatureItem
-                      icon="📊"
                       iconColor="text-sage"
                       iconBg="bg-sage-100"
-                      text="Interaction History"
-                      detail="Track every call, text, and meetup"
+                      text="Unlimited connections"
+                      detail="Add as many people as you’d like"
+                    />
+                    <FeatureItem
+                      icon={<Ionicons name="notifications-outline" size={18} color="#D4896A" />}
+                      iconBg="bg-terracotta-100"
+                      text="Gentle reminders"
+                      detail="Choose rhythms that feel supportive"
+                    />
+                    <FeatureItem
+                      icon={<Ionicons name="heart-outline" size={18} color="#9CA986" />}
+                      iconBg="bg-sage-100"
+                      text="Shared moments"
+                      detail="Remember the little things"
                     />
                       <FeatureItem
-                      icon={<Ionicons name="sparkles" size={18} color="#4f46e5" />}
-                      iconBg="bg-magic-100"
+                      icon={<Ionicons name="sparkles" size={18} color="#9CA986" />}
+                      iconBg="bg-sage-100"
                       text="Future Updates"
                       detail="All new features included forever"
                     />
@@ -259,9 +257,9 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                   <View className="w-20 h-20 bg-sage/10 rounded-full items-center justify-center mb-6">
                     <Ionicons name="sparkles" size={40} color="#9CA986" />
                   </View>
-                  <Text className="text-2xl font-bold text-gray-900">Welcome to Kindred Pro</Text>
-                  <Text className="text-center text-gray-600 mt-2 px-6">
-                    You've unlocked the full potential of your circle.
+                  <Text className="text-2xl font-bold text-warmgray">Welcome to Kindred Pro</Text>
+                  <Text className="text-center text-warmgray-muted mt-2 px-6">
+                    You’ve unlocked the full version of Kindred.
                   </Text>
                 </View>
               )}
@@ -279,12 +277,12 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
           {/* Sticky Footer */}
           {!isPro && (
             <View 
-              className="bg-white px-6 pt-4 border-t border-sage/10 shadow-2xl"
+              className="bg-surface px-6 pt-4 border-t border-sage/10 shadow-2xl"
               style={{ paddingBottom: Math.max(insets.bottom, 24) }}
             >
               <TouchableOpacity
                 className={`w-full items-center justify-center rounded-2xl py-4 shadow-sm ${
-                  purchaseState.isPurchasing ? 'bg-magic-600/60' : 'bg-magic-600'
+                  purchaseState.isPurchasing ? 'bg-sage/60' : 'bg-sage'
                 }`}
                 onPress={handlePurchase}
                 activeOpacity={0.9}
@@ -301,24 +299,24 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                   disabled={isLoading}
                   hitSlop={15}
                 >
-                  <Text className={`text-[10px] font-bold uppercase tracking-widest ${purchaseState.isRestoring ? 'text-gray-300' : 'text-gray-400'}`}>
-                    {purchaseState.isRestoring ? 'Restoring...' : 'Restore Purchase'}
+                  <Text className={`text-[10px] font-bold uppercase tracking-widest ${purchaseState.isRestoring ? 'text-warmgray-muted/50' : 'text-warmgray-muted'}`}>
+                    {purchaseState.isRestoring ? 'Restoring…' : 'Restore purchase'}
                   </Text>
                 </TouchableOpacity>
 
-                <View className="w-[1px] h-3 bg-gray-200" />
+                <View className="w-[1px] h-3 bg-border" />
 
                 <TouchableOpacity 
                   onPress={importContext ? handlePartialImport : handleClose}
                   disabled={isLoading}
                   hitSlop={15}
                 >
-                  <Text className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                      {importContext
+                  <Text className="text-[10px] font-bold uppercase tracking-widest text-warmgray-muted">
+                    {importContext
                       ? importContext.availableSlots > 0
-                        ? `Import First ${importContext.availableSlots}`
-                        : 'Not Now'
-                      : 'Not Now'}
+                        ? `Import first ${importContext.availableSlots}`
+                        : 'Not now'
+                      : 'Not now'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -340,7 +338,7 @@ type FeatureItemProps = {
 
 function FeatureItem({ icon, iconColor, iconBg, text, detail }: FeatureItemProps) {
   return (
-    <View className="flex-row items-center gap-4 bg-white p-3 rounded-xl border border-gray-100">
+    <View className="flex-row items-center gap-4 bg-surface p-3 rounded-xl border border-border">
       <View className={`w-10 h-10 ${iconBg} rounded-full items-center justify-center`}>
         {typeof icon === 'string' ? (
           <Text className={`text-lg font-bold ${iconColor}`}>{icon}</Text>
@@ -349,8 +347,8 @@ function FeatureItem({ icon, iconColor, iconBg, text, detail }: FeatureItemProps
         )}
       </View>
       <View className="flex-1">
-        <Text className="text-base font-semibold text-gray-900">{text}</Text>
-        <Text className="text-xs text-gray-500">{detail}</Text>
+        <Text className="text-base font-semibold text-warmgray">{text}</Text>
+        <Text className="text-xs text-warmgray-muted">{detail}</Text>
       </View>
     </View>
   );

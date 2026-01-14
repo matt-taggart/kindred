@@ -8,7 +8,6 @@ module.exports = {
         sage: {
           DEFAULT: '#9CA986',
           100: '#E6E9E1',
-          muted: '#8B9678', // from plan text secondary
         },
         terracotta: {
           DEFAULT: '#D4896A',
@@ -16,10 +15,10 @@ module.exports = {
         },
         cream: '#F3F0E6',
         surface: '#FDFBF7',
-        slate: {
-          DEFAULT: '#5C6356',
-          600: '#5C6356', // mapping old usages
-          900: '#2D312A', // darker for headings
+        // Warm text colors (use instead of Tailwind's blue-gray slate)
+        warmgray: {
+          DEFAULT: '#5C6356',  // primary text
+          muted: '#8B9678',    // secondary text
         },
         border: '#E8E4DA',
       },

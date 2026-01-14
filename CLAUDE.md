@@ -79,7 +79,9 @@ Freemium model with 5 free contacts. `contactService.addContact()` enforces this
 ## Styling
 
 Custom colors defined in `tailwind.config.js`:
-- `sage` (green) - standard reminders
+- `sage` (green) - standard reminders, primary actions
 - `terracotta` (orange) - birthdays, overdue items
-- `magic` (indigo) - accents
-- `cream` - backgrounds
+- `cream` - page backgrounds
+- `surface` - card backgrounds
+- `border` - card borders
+- `warmgray` - primary text, `warmgray-muted` - secondary text

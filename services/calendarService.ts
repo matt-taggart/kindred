@@ -32,13 +32,6 @@ export const getTodayDateKey = (): string => {
   return formatToDateKey(Date.now());
 };
 
-const isOverdue = (contact: Contact): boolean => {
-  if (!contact.nextContactDate) {
-    return contact.lastContactedAt !== null;
-  }
-  return contact.nextContactDate <= Date.now();
-};
-
 const getBirthdayParts = (birthday: string): { month: number; day: number } | null => {
   try {
     let month: number;
@@ -68,7 +61,6 @@ export const getCalendarData = (): CalendarData => {
     // Handle regular contact dates
     if (contact.nextContactDate) {
       const dateKey = formatToDateKey(contact.nextContactDate);
-      const isOverdueContact = isOverdue(contact);
 
       if (!calendarData[dateKey]) {
         calendarData[dateKey] = {
@@ -79,7 +71,7 @@ export const getCalendarData = (): CalendarData => {
       }
 
       calendarData[dateKey].dots.push({
-        color: isOverdueContact ? '#D48158' : '#9CA986',
+        color: '#9CA986',
       });
       calendarData[dateKey].contactCount += 1;
     }
@@ -103,11 +95,11 @@ export const getCalendarData = (): CalendarData => {
           }
 
           // Check if we already have a birthday dot to avoid duplicates if something weird happens
-          const hasBirthdayDot = calendarData[dateString].dots.some(d => d.color === '#B086A9');
+          const hasBirthdayDot = calendarData[dateString].dots.some(d => d.color === '#D4896A');
           
           if (!hasBirthdayDot) {
             calendarData[dateString].dots.push({
-              color: '#B086A9', // Birthday color (purple/pink)
+              color: '#D4896A',
             });
             calendarData[dateString].contactCount += 1;
           }
@@ -156,12 +148,6 @@ export const getContactsByDate = (dateKey: string): CalendarContact[] => {
     .sort((a, b) => {
       if (a.isBirthday && !b.isBirthday) return -1;
       if (!a.isBirthday && b.isBirthday) return 1;
-
-      const aOverdue = isOverdue(a);
-      const bOverdue = isOverdue(b);
-
-      if (aOverdue && !bOverdue) return -1;
-      if (!aOverdue && bOverdue) return 1;
 
       return (a.nextContactDate || 0) - (b.nextContactDate || 0);
     });

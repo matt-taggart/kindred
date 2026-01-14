@@ -1,75 +1,70 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   FlatList,
   RefreshControl,
   SafeAreaView,
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 
 import { Contact } from "@/db/schema";
 import {
-  archiveContact,
   getContacts,
   resetDatabase,
   unarchiveContact,
 } from "@/services/contactService";
 import { formatPhoneNumber } from "@/utils/phone";
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
+import { formatLastConnected, formatNextReminder } from "@/utils/timeFormatting";
 
 const formatBucketLabel = (
   bucket: Contact["bucket"],
   customIntervalDays?: number | null,
 ) => {
   switch (bucket) {
-    case "daily": return "Daily";
-    case "weekly": return "Weekly";
-    case "bi-weekly": return "Every 2 weeks";
-    case "every-three-weeks": return "Every 3 weeks";
-    case "monthly": return "Monthly";
-    case "every-six-months": return "Seasonally";
-    case "yearly": return "Yearly";
+    case "daily":
+      return "Every day";
+    case "weekly":
+      return "Every week";
+    case "bi-weekly":
+      return "Every couple weeks";
+    case "every-three-weeks":
+      return "Every few weeks";
+    case "monthly":
+      return "Once a month";
+    case "every-six-months":
+      return "Seasonally";
+    case "yearly":
+      return "Once a year";
     case "custom": {
-        if (!customIntervalDays) return "Custom";
-        return `${customIntervalDays} days`;
+      if (!customIntervalDays || customIntervalDays < 1) return "Only when I choose";
+      if (customIntervalDays % 30 === 0) {
+        const months = customIntervalDays / 30;
+        return months === 1 ? "Monthly" : `Every ${months} months`;
+      }
+      if (customIntervalDays % 7 === 0) {
+        const weeks = customIntervalDays / 7;
+        return weeks === 1 ? "Every week" : `Every ${weeks} weeks`;
+      }
+      if (customIntervalDays === 1) return "Every day";
+      return `Every ${customIntervalDays} days`;
     }
-    default: return "Custom";
+    default:
+      return "Only when I choose";
   }
-};
-
-const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) return "No prior connection";
-
-  const diff = Math.max(0, Date.now() - lastContactedAt);
-  const days = Math.floor(diff / DAY_IN_MS);
-
-  if (days === 0) return "Today";
-  if (days === 1) return "Yesterday";
-  return `${days} days ago`;
-};
-
-const formatNextCheckIn = (nextContactDate?: number | null) => {
-  if (!nextContactDate) return "None";
-
-  const diff = nextContactDate - Date.now();
-  if (diff <= 0) return "Due";
-
-  const days = Math.ceil(diff / DAY_IN_MS);
-  if (days === 1) return "Tomorrow";
-  return `In ${days} days`;
 };
 
 const isContactDue = (contact: Contact) => {
   if (contact.isArchived) return false;
-  if (!contact.nextContactDate) return true;
+  if (!contact.nextContactDate) return false;
   return contact.nextContactDate <= Date.now();
 };
 
@@ -85,17 +80,17 @@ const FilterChip = ({
   onPress: () => void;
 }) => (
   <TouchableOpacity
-    className={`rounded-full border px-4 py-2 ${
-      active ? "border-sage bg-sage" : "border-border bg-white"
+    className={`rounded-full border px-4 py-3 ${
+      active ? "border-sage bg-sage" : "border-border bg-surface"
     }`}
     onPress={onPress}
     activeOpacity={0.85}
   >
     <Text
-      className={`text-sm font-medium ${active ? "text-white" : "text-slate-600"}`}
+      className={`text-base font-semibold ${active ? "text-white" : "text-warmgray"}`}
     >
       {label}
-      <Text className={active ? "text-white" : "text-slate-400"}>
+      <Text className={active ? "text-white" : "text-warmgray-muted"}>
         {" "}
         · {count}
       </Text>
@@ -105,51 +100,93 @@ const FilterChip = ({
 
 const ContactRow = ({
   contact,
-  onArchive,
   onUnarchive,
   onPress,
 }: {
   contact: Contact;
-  onArchive?: () => void;
   onUnarchive?: () => void;
   onPress?: () => void;
 }) => {
   const due = isContactDue(contact);
-  const initial = contact.name.charAt(0).toUpperCase();
+  const hasReminders = contact.nextContactDate !== null;
+  const statusLabel = hasReminders ? (due ? "Ready" : "Coming up") : "No reminders";
 
   return (
     <TouchableOpacity
-      className="mb-4 rounded-3xl bg-surface p-5 shadow-sm shadow-slate-200/50 border border-border/50"
+      className="mb-3 rounded-2xl border border-border bg-surface p-5 shadow-sm"
       onPress={onPress}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
-      <View className="flex-row items-center justify-between mb-4">
-         <View className="flex-row items-center gap-3">
-            <View className="h-10 w-10 items-center justify-center rounded-full bg-sage/10">
-                <Text className="text-base font-semibold text-sage">{initial}</Text>
-            </View>
-            <View>
-                <Text className="text-lg font-semibold text-slate-900">{contact.name}</Text>
-                <Text className="text-sm text-sage-muted">{formatBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
-            </View>
-         </View>
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1 pr-3">
+          <Text className="text-xl font-semibold text-warmgray">
+            {contact.name}
+          </Text>
+          <Text className="text-base text-warmgray-muted">
+            {formatBucketLabel(contact.bucket, contact.customIntervalDays)}
+          </Text>
+        </View>
 
-        {due && (
-           <View className="bg-terracotta/10 px-3 py-1 rounded-full">
-              <Text className="text-xs font-semibold text-terracotta">Due</Text>
-           </View>
-        )}
+        <View className="flex-row items-center gap-2">
+          {hasReminders ? (
+            <View
+              className={`rounded-full px-4 py-2 ${due ? "bg-terracotta-100" : "bg-sage-100"}`}
+            >
+              <Text
+                className={`text-sm font-semibold ${due ? "text-terracotta" : "text-sage"}`}
+              >
+                {statusLabel}
+              </Text>
+            </View>
+          ) : (
+            <View className="rounded-full border border-border bg-cream px-4 py-2">
+              <Text className="text-sm font-semibold text-warmgray-muted">{statusLabel}</Text>
+            </View>
+          )}
+          <Text className="text-2xl text-warmgray-muted -mt-0.5">›</Text>
+        </View>
       </View>
 
-      <View className="flex-row justify-between items-center border-t border-border/50 pt-3">
-         <View>
-             <Text className="text-xs font-medium uppercase tracking-wide text-slate-400">Last connected</Text>
-             <Text className="text-sm font-medium text-slate-700 mt-0.5">{formatLastContacted(contact.lastContactedAt)}</Text>
-         </View>
-         <View className="items-end">
-             <Text className="text-xs font-medium uppercase tracking-wide text-slate-400">Next</Text>
-             <Text className="text-sm font-medium text-slate-700 mt-0.5">{formatNextCheckIn(contact.nextContactDate)}</Text>
-         </View>
+      <View className="mt-4">
+        <Text className="text-sm font-semibold uppercase tracking-wide text-warmgray-muted">
+          Last connected
+        </Text>
+        <Text className="text-lg font-semibold text-warmgray">
+          {formatLastConnected(contact.lastContactedAt)}
+        </Text>
+
+        <Text className="mt-3 text-sm font-semibold uppercase tracking-wide text-warmgray-muted">
+          Next reminder
+        </Text>
+        <Text className="text-lg font-semibold text-warmgray">
+          {formatNextReminder(contact.nextContactDate)}
+        </Text>
+      </View>
+
+      <View className="mt-3 flex-row items-center justify-between">
+        <View className="flex-1">
+          {contact.phone ? (
+            <Text className="text-base text-warmgray-muted">
+              Phone · {formatPhoneNumber(contact.phone)}
+            </Text>
+          ) : null}
+        </View>
+
+        {contact.isArchived ? (
+          <TouchableOpacity
+            className="ml-2 flex-row items-center rounded-full bg-sage px-4 py-2"
+            onPress={(e) => {
+              e.stopPropagation();
+              onUnarchive?.();
+            }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="refresh-outline" size={16} color="white" />
+            <Text className="ml-1.5 text-sm font-semibold text-white">
+              Unarchive
+            </Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
     </TouchableOpacity>
   );
@@ -159,11 +196,19 @@ type ContactFilter = "all" | "due" | "archived";
 
 export default function ContactsScreen() {
   const router = useRouter();
+  const { width: windowWidth } = useWindowDimensions();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<ContactFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const searchInputRef = useRef<TextInput>(null);
+  const searchHeightAnim = useRef(new Animated.Value(0)).current;
+
+  // SafeAreaView has px-4 (16) and FlatList content has paddingHorizontal 16.
+  // Total horizontal padding = 32px per side.
+  const emptyCtaWidth = Math.min(320, Math.max(0, windowWidth - 64));
 
   const loadContacts = useCallback(() => {
     try {
@@ -181,8 +226,27 @@ export default function ContactsScreen() {
     useCallback(() => {
       setLoading(true);
       loadContacts();
+      setIsSearchVisible(false);
+      setSearchQuery("");
     }, [loadContacts]),
   );
+
+  useEffect(() => {
+    if (isSearchVisible) {
+      Animated.timing(searchHeightAnim, {
+        toValue: 60,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+      searchInputRef.current?.focus();
+    } else {
+      Animated.timing(searchHeightAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [isSearchVisible, searchHeightAnim]);
 
   const stats = useMemo(() => {
     const active = contacts.filter((contact) => !contact.isArchived);
@@ -222,13 +286,30 @@ export default function ContactsScreen() {
     loadContacts();
   }, [loadContacts]);
 
+  const handleAddConnection = useCallback(() => {
+    router.push("/contacts/add");
+  }, [router]);
+
   const handleImportPress = useCallback(() => {
     router.push({ pathname: "/contacts/import", params: { autoRequest: "1" } });
   }, [router]);
 
-  const handleAddPress = useCallback(() => {
-    router.push("/contacts/new");
-  }, [router]);
+  const handleUnarchive = useCallback(
+    async (contactId: string) => {
+      try {
+        await unarchiveContact(contactId);
+        loadContacts();
+      } catch (error) {
+        Alert.alert(
+          "Error",
+          error instanceof Error
+            ? error.message
+            : "Failed to unarchive connection.",
+        );
+      }
+    },
+    [loadContacts],
+  );
 
   const handleContactPress = useCallback(
     (contactId: string) => {
@@ -236,6 +317,107 @@ export default function ContactsScreen() {
     },
     [router],
   );
+
+  const handleResetDatabase = useCallback(async () => {
+    Alert.alert(
+      "Reset Database",
+      "This will delete all connections and shared moments. This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await resetDatabase();
+              loadContacts();
+              Alert.alert("Success", "Database has been reset.");
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error instanceof Error
+                  ? error.message
+                  : "Failed to reset database.",
+              );
+            }
+          },
+        },
+      ],
+    );
+  }, [loadContacts]);
+
+  const handleSearchToggle = useCallback(() => {
+    setIsSearchVisible((prev) => !prev);
+  }, []);
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("");
+    searchInputRef.current?.focus();
+  }, []);
+
+  const emptyState = useMemo(() => {
+    const hasSearchQuery = searchQuery.trim().length > 0;
+    const hasZeroContacts = contacts.length === 0;
+
+    if (hasZeroContacts) {
+      return {
+        type: "first-time" as const,
+        title: "No connections yet",
+        subtitle: "Add your first connection to start keeping in touch.",
+        showCTA: true,
+      };
+    }
+
+    if (hasSearchQuery) {
+      return {
+        type: "search" as const,
+        title: `No connections match '${searchQuery}'`,
+        subtitle: "Try a different search term.",
+        showCTA: false,
+      };
+    }
+
+    if (filter === "due" && stats.due === 0) {
+      return {
+        type: "no-due" as const,
+        title: "Everyone's resting",
+        subtitle: "Enjoy the quiet.",
+        showCTA: false,
+      };
+    }
+
+    if (filter === "archived" && stats.archived === 0) {
+      return {
+        type: "no-archived" as const,
+        title: "No archived connections",
+        subtitle: null,
+        showCTA: false,
+      };
+    }
+
+    if (filter === "all" && stats.active === 0 && contacts.length > 0) {
+      return {
+        type: "all-archived" as const,
+        title: "All your connections are archived",
+        subtitle: `You have ${stats.archived} archived connection${stats.archived > 1 ? "s" : ""}`,
+        showCTA: true,
+      };
+    }
+
+    return {
+      type: "default" as const,
+      title: "No connections found",
+      subtitle: null,
+      showCTA: false,
+    };
+  }, [
+    searchQuery,
+    contacts.length,
+    filter,
+    stats.due,
+    stats.archived,
+    stats.active,
+  ]);
 
   const filterOptions: {
     label: string;
@@ -256,81 +438,159 @@ export default function ContactsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-cream">
-      <View className="px-5 pt-4 pb-2 bg-cream">
-          <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-3xl font-semibold text-slate-900 tracking-tight">Contacts</Text>
-            <TouchableOpacity 
-                className="bg-sage h-10 w-10 items-center justify-center rounded-full shadow-sm"
-                onPress={handleAddPress}
-            >
-                <Ionicons name="add" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-col gap-3 mb-6 items-center">
-            <TouchableOpacity
-              className="w-full max-w-[260px] bg-sage py-3.5 rounded-2xl items-center justify-center shadow-sm shadow-sage/20"
-              onPress={handleAddPress}
-            >
-              <Text className="text-white font-semibold text-center" numberOfLines={1}>
-                Add a connection
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="w-full max-w-[260px] bg-white py-3.5 rounded-2xl items-center justify-center shadow-sm shadow-sage/30"
-              onPress={handleImportPress}
-            >
-              <Text className="text-sage font-semibold text-center" numberOfLines={1}>
-                Import from contacts
-              </Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View className="mb-4">
-             <TextInput
-                className="w-full bg-white border border-border rounded-xl px-4 py-3 text-base text-slate-900"
-                placeholder="Search..."
-                placeholderTextColor="#9ca3af"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                returnKeyType="search"
-             />
-          </View>
-
-          <View className="flex-row gap-2 mb-2">
-            {filterOptions.map((option) => (
-              <FilterChip
-                key={option.value}
-                active={filter === option.value}
-                label={option.label}
-                count={option.count}
-                onPress={() => setFilter(option.value)}
-              />
-            ))}
-          </View>
-      </View>
-
+    <SafeAreaView className="flex-1 bg-cream px-4 pt-4">
       <FlatList
         data={filteredContacts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ContactRow
             contact={item}
+            onUnarchive={
+              item.isArchived ? () => handleUnarchive(item.id) : undefined
+            }
             onPress={() => handleContactPress(item.id)}
           />
         )}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9CA986" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         contentContainerStyle={{
-          paddingHorizontal: 20,
+          paddingHorizontal: 16,
           paddingBottom: 24,
-          flexGrow: 1,
+          flexGrow: filteredContacts.length === 0 ? 1 : undefined,
         }}
+        ListHeaderComponent={
+          <View className="pt-4 pb-4 mb-8">
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-1">
+                <Text className="text-3xl font-semibold text-warmgray">Connections</Text>
+                <Text className="mt-1 text-base text-warmgray-muted">
+                  Stay close to the people who matter most.
+                </Text>
+              </View>
+              {contacts.length > 0 && (
+                <TouchableOpacity
+                  onPress={handleSearchToggle}
+                  className="h-10 w-10 items-center justify-center rounded-full bg-surface border border-border"
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name="search"
+                    size={24}
+                    color="#A8A29E"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <Animated.View
+              style={{ height: searchHeightAnim, overflow: 'hidden' }}
+            >
+              <View className="w-full min-h-14 rounded-2xl border border-border bg-surface shadow-sm px-4 py-3 flex-row items-center gap-2">
+                <Ionicons name="search" size={20} color="#A8A29E" />
+                <TextInput
+                  ref={searchInputRef}
+                  className="flex-1 text-base leading-5 text-warmgray"
+                  placeholder="Search connections..."
+                  placeholderTextColor="#a8a29e"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  returnKeyType="search"
+                  textAlignVertical="center"
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity
+                    onPress={handleClearSearch}
+                    className="h-6 w-6 items-center justify-center rounded-full bg-cream"
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="close" size={14} color="#A8A29E" />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </Animated.View>
+
+            {contacts.length > 0 && (
+              <>
+                <TouchableOpacity
+                  className="mt-4 w-full items-center rounded-2xl bg-sage py-4"
+                  onPress={handleAddConnection}
+                  activeOpacity={0.9}
+                >
+                  <Text className="text-base font-semibold text-white">
+                    Add a connection
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="mt-3 w-full items-center rounded-2xl border border-sage bg-surface py-4"
+                  onPress={handleImportPress}
+                  activeOpacity={0.9}
+                >
+                  <Text className="text-base font-semibold text-sage">
+                    Import from contacts
+                  </Text>
+                </TouchableOpacity>
+
+                <View className="mt-5 flex-row flex-wrap gap-2">
+                  {filterOptions.map((option) => (
+                    <FilterChip
+                      key={option.value}
+                      active={filter === option.value}
+                      label={option.label}
+                      count={option.count}
+                      onPress={() => setFilter(option.value)}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
+          </View>
+        }
         ListEmptyComponent={
-          <View className="flex-1 items-center justify-center py-20 opacity-60">
-             <Text className="text-lg text-slate-500 font-medium">No contacts found</Text>
+          <View className="flex-1 items-center justify-center py-16">
+            <Text className="text-2xl font-semibold text-warmgray">
+              {emptyState.title}
+            </Text>
+            {emptyState.subtitle && (
+              <Text className="mt-1 text-base text-warmgray-muted text-center">
+                {emptyState.subtitle}
+              </Text>
+            )}
+
+            {emptyState.showCTA && (
+              <>
+                <TouchableOpacity
+                  style={{ width: emptyCtaWidth }}
+                  className="mt-5 items-center rounded-2xl bg-sage py-4"
+                  onPress={
+                    emptyState.type === "all-archived"
+                      ? () => setFilter("archived")
+                      : handleAddConnection
+                  }
+                  activeOpacity={0.9}
+                >
+                  <Text className="text-lg font-semibold text-white">
+                    {emptyState.type === "all-archived"
+                      ? "View archived"
+                      : "Add a connection"}
+                  </Text>
+                </TouchableOpacity>
+
+                {emptyState.type !== "all-archived" && (
+                  <TouchableOpacity
+                    style={{ width: emptyCtaWidth }}
+                    className="mt-3 items-center rounded-2xl border border-sage bg-surface py-4"
+                    onPress={handleImportPress}
+                    activeOpacity={0.9}
+                  >
+                    <Text className="text-lg font-semibold text-sage">
+                      Import from contacts
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
           </View>
         }
       />

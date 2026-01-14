@@ -13,33 +13,39 @@ import {
   getTodayDateKey,
   CalendarContact,
 } from '@/services/calendarService';
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) {
-    return 'Never connected';
-  }
-
-  const diff = Math.max(0, Date.now() - lastContactedAt);
-  const days = Math.floor(diff / DAY_IN_MS);
-
-  if (days === 0) return 'Connected today';
-  if (days === 1) return 'Connected yesterday';
-  return `${days} days ago`;
-};
+import { formatLastConnected } from '@/utils/timeFormatting';
 
 const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   switch (bucket) {
-    case 'daily': return 'Daily';
-    case 'weekly': return 'Weekly';
-    case 'bi-weekly': return 'Bi-weekly';
-    case 'every-three-weeks': return 'Every 3 weeks';
-    case 'monthly': return 'Monthly';
-    case 'every-six-months': return 'Seasonally';
-    case 'yearly': return 'Yearly';
-    case 'custom': return 'Custom';
-    default: return 'Custom';
+    case 'daily':
+      return 'Every day';
+    case 'weekly':
+      return 'Every week';
+    case 'bi-weekly':
+      return 'Every few weeks';
+    case 'every-three-weeks':
+      return 'Every three weeks';
+    case 'monthly':
+      return 'Once a month';
+    case 'every-six-months':
+      return 'Seasonally';
+    case 'yearly':
+      return 'Once a year';
+    case 'custom': {
+      if (!customIntervalDays || customIntervalDays < 1) return 'Only when I choose';
+      if (customIntervalDays % 30 === 0) {
+        const months = customIntervalDays / 30;
+        return months === 1 ? 'Every month' : `Every ${months} months`;
+      }
+      if (customIntervalDays % 7 === 0) {
+        const weeks = customIntervalDays / 7;
+        return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
+      }
+      if (customIntervalDays === 1) return 'Every day';
+      return `Every ${customIntervalDays} days`;
+    }
+    default:
+      return 'Only when I choose';
   }
 };
 
@@ -49,36 +55,40 @@ type CalendarContactCardProps = {
 };
 
 const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => {
-  const isOverdue = contact.nextContactDate && contact.nextContactDate <= Date.now();
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
+
+  // Determine card accent based on type
+  const isBirthday = contact.isBirthday;
+
+  const title = isBirthday ? `${contact.name}'s birthday` : contact.name;
 
   return (
     <TouchableOpacity
-      className="mb-4 rounded-3xl bg-surface p-5 shadow-sm shadow-slate-200/50 border border-border/50"
+      className={`mb-3 rounded-2xl border bg-surface p-4 shadow-sm ${isBirthday ? 'border-terracotta/30' : 'border-border'}`}
       onPress={onPress}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
-      <View className="flex-row items-center gap-4">
-        <View className={`h-12 w-12 items-center justify-center rounded-full ${contact.isBirthday ? 'bg-terracotta' : 'bg-sage'}`}>
-          {contact.isBirthday ? (
-            <Ionicons name="gift-outline" size={24} color="white" />
+      <View className="flex-row items-center gap-3">
+        <View className={`h-12 w-12 items-center justify-center rounded-full ${isBirthday ? 'bg-terracotta' : 'bg-sage'}`}>
+          {isBirthday ? (
+            <Text className="text-lg">🎂</Text>
           ) : (
-            <Text className="text-lg font-semibold text-white">{initial}</Text>
+            <Text className="text-base font-semibold text-white">{initial}</Text>
           )}
         </View>
 
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-slate-900">{contact.name}</Text>
-          <Text className="text-sm text-sage-muted">
-            {contact.isBirthday ? 'Birthday today' : `${formatBucketLabel(contact.bucket, contact.customIntervalDays)} · ${formatLastContacted(contact.lastContactedAt)}`}
+          <Text className="text-lg font-semibold text-warmgray">{title}</Text>
+          <Text className="text-sm text-warmgray-muted">
+            {formatBucketLabel(contact.bucket, contact.customIntervalDays)} · {formatLastConnected(contact.lastContactedAt)}
           </Text>
         </View>
 
-        {isOverdue && !contact.isBirthday && (
-           <View className="bg-terracotta/10 px-3 py-1 rounded-full">
-              <Text className="text-xs font-semibold text-terracotta">Due</Text>
-           </View>
-        )}
+        <View className={`rounded-full px-3 py-1 ${isBirthday ? 'bg-terracotta-100' : 'bg-sage-100'}`}>
+          <Text className={`text-xs font-semibold ${isBirthday ? 'text-terracotta' : 'text-sage'}`}>
+            {isBirthday ? 'Birthday' : 'Reminder'}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -168,15 +178,19 @@ export default function CalendarScreen() {
     };
   }, [calendarData, selectedDate]);
 
+  const todayDate = useMemo(() => {
+    return getTodayDateKey();
+  }, []);
+
   const theme = {
-    calendarBackground: '#F3F0E6', // Cream background to match page
-    textSectionTitleColor: '#8B9678', // Muted sage
+    calendarBackground: '#FDFBF7',
+    textSectionTitleColor: '#8B9678',
     selectedDayBackgroundColor: '#9CA986',
     selectedDayTextColor: '#ffffff',
     todayTextColor: '#9CA986',
-    dayTextColor: '#5C6356', // Slate
-    textDisabledColor: '#D1D5DB',
-    dotColor: '#D4896A', // Terracotta for dots
+    dayTextColor: '#5C6356',
+    textDisabledColor: '#8B9678',
+    dotColor: '#9CA986',
     selectedDotColor: '#ffffff',
     arrowColor: '#9CA986',
     monthTextColor: '#5C6356',
@@ -184,26 +198,50 @@ export default function CalendarScreen() {
     textMonthFontFamily: 'System',
     textDayHeaderFontFamily: 'System',
     textDayFontSize: 16,
-    textMonthFontSize: 18,
+    textMonthFontSize: 16,
     textDayHeaderFontSize: 13,
-    textMonthFontWeight: '600',
   };
+
+  const emptyState = useMemo(() => {
+    const isToday = selectedDate === todayDate;
+    const dateObj = new Date(selectedDate);
+    const formattedDate = dateObj.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    return {
+      title: isToday ? 'All caught up!' : 'Nothing scheduled',
+      subtitle: isToday ? 'Enjoy your day.' : formattedDate,
+      icon: isToday ? ('sunny-outline' as const) : ('calendar-outline' as const),
+    };
+  }, [selectedDate, todayDate]);
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+        <ActivityIndicator size="large" color="#9CA986" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-cream">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9CA986" />}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View className="mb-6">
-          <Text className="text-3xl font-semibold text-slate-900 tracking-tight">Calendar</Text>
-          <Text className="mt-1 text-lg text-sage-muted">
-            {monthDueCount} reminder{monthDueCount !== 1 ? 's' : ''} this month
+        <View className="pt-2 mb-6">
+          <Text className="text-3xl font-semibold text-warmgray mb-1">Calendar</Text>
+          <Text className="text-lg text-warmgray-muted">
+            {monthDueCount} connection{monthDueCount !== 1 ? 's' : ''} this month
           </Text>
         </View>
 
-        <View className="mb-8 overflow-hidden rounded-3xl bg-surface shadow-sm border border-border/50 p-2">
+        <View className="mb-6 overflow-hidden rounded-2xl bg-surface shadow-sm">
           <Calendar
             markingType="multi-dot"
             markedDates={markedDates}
@@ -212,19 +250,21 @@ export default function CalendarScreen() {
             theme={theme}
             enableSwipeMonths
             firstDay={0}
-            style={{ borderRadius: 16 }}
           />
         </View>
 
         <View>
-           <Text className="text-lg font-semibold text-slate-900 mb-4 px-1">
-              {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-           </Text>
-           
           {contactsForDate.length === 0 ? (
-            <View className="items-center py-8 opacity-60 rounded-3xl border-2 border-dashed border-sage/20 bg-sage/5">
-              <Ionicons name="sunny-outline" size={48} color="#9CA986" />
-              <Text className="mt-4 text-base text-slate-600 font-medium">No plans for today</Text>
+            <View className="items-center py-12 px-6">
+              <Ionicons name={emptyState.icon} size={72} color="#9CA986" />
+              <Text className="mt-6 text-2xl font-semibold text-warmgray text-center">
+                {emptyState.title}
+              </Text>
+              {emptyState.subtitle && (
+                <Text className="mt-3 text-base text-center text-warmgray-muted leading-relaxed">
+                  {emptyState.subtitle}
+                </Text>
+              )}
             </View>
           ) : (
             contactsForDate.map((contact) => (

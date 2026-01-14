@@ -37,7 +37,6 @@ export default function LogInteractionModal() {
     if (!contactId || Array.isArray(contactId)) return undefined;
     return getContacts().find((item) => item.id === contactId);
   }, [contactId]);
-  console.log("contact", contact);
 
   useEffect(() => {
     if (
@@ -64,7 +63,7 @@ export default function LogInteractionModal() {
 
   const handleSave = async () => {
     if (!contactId || Array.isArray(contactId)) {
-      Alert.alert("Missing contact", "No contact was selected.");
+      Alert.alert('Missing connection', 'No connection was selected.');
       return;
     }
 
@@ -81,15 +80,6 @@ export default function LogInteractionModal() {
 
       if (isEditMode && interactionId) {
         await updateInteractionNote(interactionId, note.trim());
-        // Note: currently updateInteractionNote only updates notes, not type.
-        // If we want to update type too, we'd need to update the service.
-        // For now, assuming edit only edits notes as per previous logic,
-        // but it would be good to update type if the user changed it.
-        // However, the original code only had updateInteractionNote.
-        // Let's stick to the request which is about "adding a note".
-        // But since I added the UI, users might expect it to update on edit too.
-        // Given constraints, I'll stick to updating notes only for edit unless I change the service.
-        // Actually, let's keep it simple and consistent. The user asked "When we add a note...".
       } else if (noteOnly === "true") {
         await addNoteOnly(contactId, note.trim(), interactionType);
       } else {
@@ -117,7 +107,7 @@ export default function LogInteractionModal() {
 
   const handleSkip = async () => {
     if (!contactId || Array.isArray(contactId)) {
-      Alert.alert("Missing contact", "No contact was selected.");
+      Alert.alert('Missing connection', 'No connection was selected.');
       return;
     }
 
@@ -141,11 +131,11 @@ export default function LogInteractionModal() {
       <TouchableOpacity
         onPress={() => setInteractionType(type)}
         className={`flex-1 items-center rounded-xl border py-3 ${
-          isSelected ? "border-sage bg-sage" : "border-slate-200 bg-white"
+          isSelected ? 'border-sage bg-sage' : 'border-border bg-surface'
         }`}
       >
         <Text
-          className={`font-medium ${isSelected ? "text-white" : "text-slate-600"}`}
+          className={`font-medium ${isSelected ? 'text-white' : 'text-warmgray-muted'}`}
         >
           {label}
         </Text>
@@ -157,22 +147,22 @@ export default function LogInteractionModal() {
     <SafeAreaView className="flex-1 bg-cream">
       <View className="flex-1 px-6 pb-8 pt-6">
         <View className="flex-row items-center justify-between">
-          <Text className="text-2xl font-bold text-slate">
-            {isEditMode ? "Edit Note" : "Add a Note"}
+          <Text className="text-2xl font-bold text-warmgray">
+            {isEditMode ? 'Edit shared moment' : 'Add a shared moment'}
           </Text>
           <TouchableOpacity
             onPress={handleClose}
             activeOpacity={0.7}
             className="py-2 pl-4"
           >
-            <Text className="text-base font-semibold text-slate-400">
+            <Text className="text-base font-semibold text-warmgray-muted">
               Cancel
             </Text>
           </TouchableOpacity>
         </View>
 
         <View className="mt-6">
-          <Text className="mb-3 text-base font-medium text-slate">
+          <Text className="mb-3 text-base font-medium text-warmgray">
             How did you connect?
           </Text>
           <View className="flex-row gap-3">
@@ -183,30 +173,30 @@ export default function LogInteractionModal() {
           </View>
         </View>
 
-        <Text className="mt-6 text-base text-slate">
-          Want to remember something or add a note?
+        <Text className="mt-6 text-base text-warmgray">
+          Anything you'd like to remember?
         </Text>
 
         <TextInput
-          className="mt-4 min-h-[140px] rounded-2xl border border-sage-100 bg-white px-3 py-3 text-base text-slate"
+          className="mt-4 min-h-[140px] rounded-2xl border border-border bg-surface px-4 py-3 text-base text-warmgray"
           multiline
-          placeholder={`Add a note for ${contact.name}:`}
+          placeholder={`Add a note for ${contact?.name ?? 'them'}...`}
           value={note}
           onChangeText={setNote}
           // autoFocus // Removed autoFocus to prevent keyboard from popping up immediately over the type selection
-          placeholderTextColor="#64748b"
+          placeholderTextColor="#8B9678"
         />
 
         <View className="mt-6 gap-4">
           <View className="flex-row gap-2">
             {!isEditMode && noteOnly !== "true" && (
               <TouchableOpacity
-                className="flex-1 items-center rounded-2xl bg-white py-4"
+                className="flex-1 items-center rounded-2xl bg-surface border border-border py-4"
                 onPress={handleSkip}
                 activeOpacity={0.85}
                 disabled={saving}
               >
-                <Text className="font-semibold text-slate">Skip</Text>
+                <Text className="font-semibold text-warmgray">Not now</Text>
               </TouchableOpacity>
             )}
 

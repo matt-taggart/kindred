@@ -24,19 +24,19 @@ import { formatPhoneNumber } from "@/utils/phone";
 type Bucket = "daily" | "weekly" | "monthly" | "yearly" | "custom";
 
 const bucketLabels: Record<Bucket, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  monthly: "Monthly",
-  yearly: "Yearly",
-  custom: "Custom",
+  daily: "Every day",
+  weekly: "Every week",
+  monthly: "Once a month",
+  yearly: "Once a year",
+  custom: "Custom rhythm",
 };
 
 const bucketDescriptions: Record<Bucket, string> = {
-  daily: "Every day",
-  weekly: "Every 7 days",
-  monthly: "Every 30 days",
-  yearly: "Every 365 days",
-  custom: "Choose your own cadence",
+  daily: "For your closest relationships",
+  weekly: "For your inner circle",
+  monthly: "For people you care about",
+  yearly: "For long-distance friends",
+  custom: "Choose your own rhythm",
 };
 
 type CustomUnit = "days" | "weeks" | "months";
@@ -127,7 +127,7 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className={`mb-3 rounded-2xl border p-4 ${selected ? 'bg-surface border-sage' : 'bg-surface border-border/50'}`}
+      className="mb-3 rounded-2xl border border-border bg-surface p-4 shadow-sm"
       onPress={onToggle}
       activeOpacity={0.85}
     >
@@ -135,19 +135,19 @@ const ContactRow = ({
         {contact.avatarUri ? (
           <Image
             source={{ uri: contact.avatarUri }}
-            className="h-12 w-12 rounded-full"
+            className="h-10 w-10 rounded-full"
           />
         ) : (
-          <View className="h-12 w-12 items-center justify-center rounded-full bg-sage/20">
-            <Text className="text-base font-semibold text-sage">{initial}</Text>
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-sage">
+            <Text className="text-sm font-semibold text-white">{initial}</Text>
           </View>
         )}
 
         <View className="flex-1">
-          <Text className="text-base font-semibold text-slate-900">
+          <Text className="text-base font-semibold text-warmgray">
             {contact.name}
           </Text>
-          <Text className="text-sm text-sage-muted">
+          <Text className="text-sm text-warmgray-muted">
             {formatPhoneNumber(contact.phone)}
           </Text>
         </View>
@@ -158,11 +158,19 @@ const ContactRow = ({
         />
 
         <TouchableOpacity
-          className={`h-6 w-6 items-center justify-center rounded-full border ${selected ? 'bg-sage border-sage' : 'bg-white border-border'}`}
+          className="h-6 w-6 items-center justify-center rounded border border-border bg-surface"
           onPress={onToggle}
           activeOpacity={0.7}
         >
-            {selected && <Text className="text-xs font-bold text-white">✓</Text>}
+          <View
+            className={`h-5 w-5 items-center justify-center rounded ${
+              selected ? 'bg-sage' : 'bg-surface'
+            }`}
+          >
+            {selected ? (
+              <Text className="text-xs font-bold text-white">✓</Text>
+            ) : null}
+          </View>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -437,19 +445,18 @@ export default function ImportContactsScreen() {
     <SafeAreaView className="flex-1 bg-cream">
       <Stack.Screen
         options={{
-          title: "Import Contacts",
-          headerBackTitle: "Back",
+          title: 'Import from contacts',
+          headerBackTitle: 'Connections',
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: '#F3F0E6' },
-          headerTitleStyle: { fontSize: 18, fontWeight: "600", color: '#5C6356' },
+          headerTitleStyle: { fontSize: 18, fontWeight: "700" },
         }}
       />
 
       {loading ? (
         <View className="flex-1 items-center justify-center px-4">
           <ActivityIndicator size="large" color="#9CA986" />
-          <Text className="mt-3 text-sm font-semibold text-sage-muted">
-            Fetching contacts...
+          <Text className="mt-3 text-sm font-semibold text-warmgray">
+            Fetching contacts…
           </Text>
         </View>
       ) : (
@@ -468,39 +475,39 @@ export default function ImportContactsScreen() {
             )}
             ListHeaderComponent={
               <View className="pb-3">
-                <View className="mb-6 rounded-3xl border border-border/50 bg-surface p-6 shadow-sm">
-                  <Text className="text-xs font-semibold uppercase tracking-wide text-sage-muted">
+                <View className="mb-6 rounded-2xl border border-border bg-surface p-5 shadow-sm">
+                  <Text className="text-xs font-semibold uppercase tracking-wide text-sage">
                     Import
                   </Text>
-                  <Text className="mt-1 text-xl font-bold text-slate-900">
+                  <Text className="mt-1 text-xl font-bold text-warmgray">
                     {contacts.length > 0
-                      ? "Select contacts to import"
-                      : "Bring your people to Kindred"}
+                      ? 'Select who to import'
+                      : 'Bring your people to Kindred'}
                   </Text>
-                  <Text className="mt-2 text-sm text-slate-600">
+                  <Text className="mt-2 text-sm text-warmgray-muted">
                     {contacts.length > 0
-                      ? "Choose which contacts you want to add to Kindred."
-                      : "Grant permission to read your phone contacts, pick who you want to bring in, and save them to your Kindred list."}
+                      ? 'Choose which connections you’d like to add.'
+                      : 'Give permission, pick who you’d like to bring in, and save them to Kindred.'}
                   </Text>
 
                   {contacts.length === 0 ? (
                     <TouchableOpacity
-                      className="mt-4 items-center rounded-2xl bg-sage py-4"
+                      className="mt-4 items-center rounded-xl bg-sage py-4"
                       onPress={handleImportPress}
                       activeOpacity={0.9}
                     >
                       <Text className="text-base font-semibold text-white">
-                        Import from Phone
+                        Import from contacts
                       </Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
-                      className="mt-4 items-center rounded-2xl border-2 border-sage bg-transparent py-4"
+                      className="mt-4 items-center rounded-xl border-2 border-sage bg-transparent py-4"
                       onPress={handleAddMoreContacts}
                       activeOpacity={0.9}
                     >
                       <Text className="text-base font-semibold text-sage">
-                        Add More Contacts
+                        Add more contacts
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -508,23 +515,33 @@ export default function ImportContactsScreen() {
 
                 {contacts.length > 0 && (
                   <TouchableOpacity
-                    className="mb-2 flex-row items-center justify-between rounded-2xl border border-border/50 bg-surface p-4 shadow-sm"
+                    className="mb-2 flex-row items-center justify-between rounded-2xl border border-border bg-surface p-4 shadow-sm"
                     onPress={handleSelectAll}
                     activeOpacity={0.7}
                   >
-                    <Text className="text-base font-semibold text-slate-900">
-                      Select All
+                    <Text className="text-base font-semibold text-warmgray">
+                      Select all
                     </Text>
                     <View
-                      className={`h-6 w-6 items-center justify-center rounded-full border ${
+                      className={`h-6 w-6 items-center justify-center rounded border border-border ${
                         selected.size === contacts.length
                           ? "bg-sage border-sage"
-                          : "bg-white border-border"
+                          : 'bg-surface'
                       }`}
                     >
-                        {selected.size === contacts.length && (
-                          <Text className="text-xs font-bold text-white">✓</Text>
-                        )}
+                      <View
+                        className={`h-5 w-5 items-center justify-center rounded ${
+                          selected.size === contacts.length
+                            ? "bg-sage"
+                            : 'bg-surface'
+                        }`}
+                      >
+                        {selected.size === contacts.length ? (
+                          <Text className="text-xs font-bold text-white">
+                            ✓
+                          </Text>
+                        ) : null}
+                      </View>
                     </View>
                   </TouchableOpacity>
                 )}
@@ -543,18 +560,17 @@ export default function ImportContactsScreen() {
               </View>
             }
             ListEmptyComponent={
-              <View className="flex-1 items-center justify-center rounded-3xl border border-dashed border-border bg-surface px-4 py-12">
-                <Text className="text-base font-semibold text-slate-900">
+              <View className="flex-1 items-center justify-center rounded-2xl border border-dashed border-border bg-surface px-4 py-12">
+                <Text className="text-base font-semibold text-warmgray">
                   No contacts loaded yet.
                 </Text>
-                <Text className="mt-2 text-sm text-center text-slate-500">
-                  Tap "Import from Phone" to begin and pick people to bring into
-                  Kindred.
+                <Text className="mt-2 text-sm text-center text-warmgray-muted">
+                  Tap “Import from contacts” to begin and pick who you’d like to bring into Kindred.
                 </Text>
               </View>
             }
             contentContainerStyle={{
-              paddingHorizontal: 0,
+              paddingHorizontal: 16,
               paddingBottom: 140,
               paddingTop: 4,
               flexGrow: contacts.length === 0 ? 1 : undefined,
@@ -563,15 +579,15 @@ export default function ImportContactsScreen() {
         </View>
       )}
 
-      <View className="border-t border-border bg-white px-4 pb-4 pt-3">
+      <View className="border-t border-border bg-surface px-4 pb-4 pt-3">
         <TouchableOpacity
-          className={`items-center rounded-2xl py-4 ${selected.size > 0 ? "bg-sage" : "bg-gray-200"}`}
+          className={`items-center rounded-xl py-4 ${selected.size > 0 ? 'bg-sage' : 'bg-border'}`}
           onPress={handleSave}
           activeOpacity={0.9}
           disabled={selected.size === 0}
         >
           <Text
-            className={`text-base font-semibold ${selected.size > 0 ? "text-white" : "text-gray-500"}`}
+            className={`text-base font-semibold ${selected.size > 0 ? 'text-white' : 'text-warmgray-muted'}`}
           >
             {`Import and Review (${selected.size})`}
           </Text>
@@ -585,13 +601,13 @@ export default function ImportContactsScreen() {
         onRequestClose={() => setShowFrequencySelector(false)}
       >
         <View className="flex-1 items-center justify-center bg-black/50 px-6">
-          <View className="w-full rounded-3xl bg-surface p-6 shadow-lg border border-border">
-            <Text className="mb-2 text-lg font-bold text-slate-900">
-              Check-in frequency
+          <View className="w-full rounded-2xl bg-surface p-6 shadow-lg">
+            <Text className="mb-2 text-lg font-bold text-warmgray">
+              Reminder rhythm
             </Text>
             {editingContactId && (
-              <Text className="mb-4 text-base text-slate-600">
-                How often should you check in with{" "}
+              <Text className="mb-4 text-base text-warmgray-muted">
+                How often would you like a gentle reminder to connect with{' '}
                 {contacts.find((c) => c.id === editingContactId)?.name}?
               </Text>
             )}
@@ -610,8 +626,8 @@ export default function ImportContactsScreen() {
                   <TouchableOpacity
                     className={`rounded-2xl border-2 p-4 ${
                       contactFrequencies[editingContactId || ""] === bucket
-                        ? "border-sage bg-sage/10"
-                        : "border-border bg-white"
+                        ? 'border-sage bg-sage-100'
+                        : 'border-border bg-surface'
                     }`}
                     onPress={() => handleSelectFrequency(bucket)}
                     activeOpacity={0.7}
@@ -622,13 +638,13 @@ export default function ImportContactsScreen() {
                           className={`text-base font-semibold ${
                             contactFrequencies[editingContactId || ""] ===
                             bucket
-                              ? "text-slate-900"
-                              : "text-slate-600"
+                              ? 'text-warmgray'
+                              : 'text-warmgray'
                           }`}
                         >
                           {bucketLabels[bucket]}
                         </Text>
-                        <Text className="mt-1 text-sm text-slate-500">
+                        <Text className="mt-1 text-sm text-warmgray-muted">
                           {bucket === "custom" &&
                           customIntervals[editingContactId || ""]
                             ? formatCustomSummary(
@@ -641,7 +657,7 @@ export default function ImportContactsScreen() {
                         className={`h-6 w-6 rounded-full border-2 ${
                           contactFrequencies[editingContactId || ""] === bucket
                             ? "border-sage bg-sage"
-                            : "border-border"
+                            : 'border-border'
                         }`}
                       />
                     </View>
@@ -649,20 +665,20 @@ export default function ImportContactsScreen() {
 
                   {bucket === "custom" &&
                     contactFrequencies[editingContactId || ""] === "custom" && (
-                      <View className="mt-2 rounded-xl border border-sage/30 bg-white px-4 pb-4 pt-2">
+                      <View className="mt-2 rounded-xl border border-sage/20 bg-surface px-4 pb-4 pt-2">
                         <View className="mt-2 flex-col gap-3">
                           <View>
-                            <Text className="mb-1 text-xs font-medium text-slate-500">
+                            <Text className="mb-1 text-xs font-medium text-warmgray-muted">
                               Frequency
                             </Text>
-                            <View className="h-12 flex-row items-center rounded-xl border border-border bg-gray-50 px-3">
+                            <View className="h-12 flex-row items-center rounded-xl border border-border bg-cream px-3">
                               <TextInput
                                 value={customValue}
                                 onChangeText={(text) =>
                                   setCustomValue(text.replace(/[^0-9]/g, ""))
                                 }
                                 keyboardType="number-pad"
-                                className="flex-1 text-base leading-5 text-slate-900"
+                                className="flex-1 text-base leading-5 text-warmgray"
                                 placeholder="e.g., 30"
                                 placeholderTextColor="#94a3b8"
                                 autoFocus
@@ -671,10 +687,10 @@ export default function ImportContactsScreen() {
                             </View>
                           </View>
                           <View>
-                            <Text className="mb-1 text-xs font-medium text-slate-500">
+                            <Text className="mb-1 text-xs font-medium text-warmgray-muted">
                               Unit
                             </Text>
-                            <View className="flex-row gap-1 rounded-xl bg-gray-100 p-1">
+                            <View className="flex-row gap-1 rounded-xl bg-cream p-1 border border-border">
                               {(
                                 ["days", "weeks", "months"] as CustomUnit[]
                               ).map((unit) => (
@@ -682,7 +698,7 @@ export default function ImportContactsScreen() {
                                   key={unit}
                                   onPress={() => setCustomUnit(unit)}
                                   className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
-                                    customUnit === unit ? "bg-white" : ""
+                                    customUnit === unit ? 'bg-surface' : ''
                                   }`}
                                   style={
                                     customUnit === unit
@@ -699,8 +715,8 @@ export default function ImportContactsScreen() {
                                   <Text
                                     className={`text-sm font-medium ${
                                       customUnit === unit
-                                        ? "text-slate-900"
-                                        : "text-slate-500"
+                                        ? 'text-warmgray'
+                                        : 'text-warmgray-muted'
                                     }`}
                                   >
                                     {unit.charAt(0).toUpperCase() +
@@ -725,11 +741,11 @@ export default function ImportContactsScreen() {
             </ScrollView>
 
             <TouchableOpacity
-              className="mt-4 items-center rounded-2xl bg-gray-100 py-4"
+              className="mt-4 items-center rounded-xl bg-cream border border-border py-3"
               onPress={() => setShowFrequencySelector(false)}
               activeOpacity={0.7}
             >
-              <Text className="font-semibold text-slate-600">Cancel</Text>
+              <Text className="font-semibold text-warmgray-muted">Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>

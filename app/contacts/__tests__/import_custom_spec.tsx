@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import ImportContactsScreen from '../import';
 import * as Contacts from 'expo-contacts';
 import { useRouter } from 'expo-router';
@@ -22,6 +22,10 @@ jest.mock('expo-contacts', () => ({
   PermissionStatus: { GRANTED: 'granted' },
   Fields: { PhoneNumbers: 'phoneNumbers', Image: 'image' },
   SortTypes: { FirstName: 'firstName' },
+}));
+
+jest.mock('@/components/EnhancedPaywallModal', () => ({
+  EnhancedPaywallModal: () => null,
 }));
 
 describe('ImportContactsScreen - Custom Frequency Feature', () => {
@@ -54,25 +58,29 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     const { getByText, getAllByText } = render(<ImportContactsScreen />);
 
     // Wait for contacts to load
-    await act(async () => {});
+    await waitFor(() => {
+      expect(getByText('John Doe')).toBeTruthy();
+    });
 
     // Open frequency modal for the first contact
-    // Assuming the default badge says "Weekly"
-    fireEvent.press(getAllByText('Weekly')[0]); 
+    // Assuming the default badge says "Every week"
+    fireEvent.press(getAllByText('Every week')[0]); 
 
-    // Check if "Custom" option is available in the modal
-    expect(getByText('Custom')).toBeTruthy();
+    // Check if "Custom rhythm" option is available in the modal
+    expect(getByText('Custom rhythm')).toBeTruthy();
   });
 
   it('shows frequency and unit inputs when "Custom" is selected', async () => {
     const { getByText, getAllByText, getByPlaceholderText } = render(<ImportContactsScreen />);
-    await act(async () => {});
+    await waitFor(() => {
+      expect(getByText('John Doe')).toBeTruthy();
+    });
 
     // Open modal
-    fireEvent.press(getAllByText('Weekly')[0]);
+    fireEvent.press(getAllByText('Every week')[0]);
 
     // Select "Custom"
-    fireEvent.press(getByText('Custom'));
+    fireEvent.press(getByText('Custom rhythm'));
 
     // Expect inputs
     expect(getByPlaceholderText('e.g., 30')).toBeTruthy();
@@ -83,13 +91,15 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
 
   it('calculates custom interval based on unit and saves it', async () => {
     const { getByText, getAllByText, getByPlaceholderText, queryByText } = render(<ImportContactsScreen />);
-    await act(async () => {});
+    await waitFor(() => {
+      expect(getByText('John Doe')).toBeTruthy();
+    });
 
     // Open modal
-    fireEvent.press(getAllByText('Weekly')[0]);
+    fireEvent.press(getAllByText('Every week')[0]);
 
     // Select "Custom"
-    fireEvent.press(getByText('Custom'));
+    fireEvent.press(getByText('Custom rhythm'));
 
     // Enter 2 Weeks
     fireEvent.changeText(getByPlaceholderText('e.g., 30'), '2');
@@ -100,7 +110,7 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     fireEvent.press(confirmButton);
 
     // Modal should close
-    expect(queryByText('Check-in frequency')).toBeNull();
+    expect(queryByText('Reminder rhythm')).toBeNull();
     
     // Verify badge text or check saved state logic
     // The badge text might still say "Custom" but the underlying value is what matters for import
@@ -108,14 +118,16 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
 
   it('passes the custom bucket and interval to the review screen upon navigation', async () => {
     const { getByText, getAllByText, getByPlaceholderText } = render(<ImportContactsScreen />);
-    await act(async () => {});
+    await waitFor(() => {
+      expect(getByText('John Doe')).toBeTruthy();
+    });
 
     // Select the contact to enable import button
     fireEvent.press(getByText('John Doe'));
 
     // Set custom frequency
-    fireEvent.press(getAllByText('Weekly')[0]);
-    fireEvent.press(getByText('Custom'));
+    fireEvent.press(getAllByText('Every week')[0]);
+    fireEvent.press(getByText('Custom rhythm'));
     fireEvent.changeText(getByPlaceholderText('e.g., 30'), '45');
     fireEvent.press(getByText('Set'));
 

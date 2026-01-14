@@ -1,38 +1,49 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, Image, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, unarchiveContact, snoozeContact } from '@/services/contactService';
+import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, archiveContact, unarchiveContact, snoozeContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import InteractionListItem from '@/components/InteractionListItem';
 import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
+import { formatLastConnected, formatNextReminder } from '@/utils/timeFormatting';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) return 'No prior connection';
-
-  const diff = Math.max(0, Date.now() - lastContactedAt);
-  const days = Math.floor(diff / DAY_IN_MS);
-
-  if (days === 0) return 'Connected today';
-  if (days === 1) return 'Connected yesterday';
-  if (days < 30) return 'Connected recently';
-  return 'Connected last month';
+const bucketLabelMap: Record<Contact['bucket'], string> = {
+  daily: 'Every day',
+  weekly: 'Every week',
+  'bi-weekly': 'Every few weeks',
+  'every-three-weeks': 'Every few weeks',
+  monthly: 'Once a month',
+  'every-six-months': 'Seasonally',
+  yearly: 'Once a year',
+  custom: 'Custom rhythm',
 };
 
-const formatNextCheckIn = (nextContactDate?: number | null) => {
-  if (!nextContactDate) return 'No reminder set';
+const formatCustomLabel = (customIntervalDays?: number | null) => {
+  if (!customIntervalDays || customIntervalDays < 1) return 'Only when I choose';
 
-  const diff = nextContactDate - Date.now();
-  if (diff <= 0) return 'Due now';
+  if (customIntervalDays % 30 === 0) {
+    const months = customIntervalDays / 30;
+    return months === 1 ? 'Every month' : `Every ${months} months`;
+  }
 
-  const days = Math.ceil(diff / DAY_IN_MS);
-  if (days === 1) return 'Reminder tomorrow';
-  return `Next reminder in ${days} days`;
+  if (customIntervalDays % 7 === 0) {
+    const weeks = customIntervalDays / 7;
+    return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
+  }
+
+  if (customIntervalDays === 1) return 'Daily reminders';
+  return `Every ${customIntervalDays} days`;
+};
+
+const getBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
+  if (bucket === 'custom') return formatCustomLabel(customIntervalDays);
+  return bucketLabelMap[bucket];
 };
 
 export default function ContactDetailScreen() {
@@ -86,8 +97,8 @@ export default function ContactDetailScreen() {
     const now = Date.now();
     
     Alert.alert(
-      'Snooze Reminder',
-      'When would you like to be reminded?',
+      'Remind me later',
+      'When would you like a gentle reminder?',
       [
         { text: '1 hour', onPress: () => handleSnoozeContact(now + 60 * 60 * 1000) },
         { text: 'Tomorrow', onPress: () => handleSnoozeContact(now + DAY_IN_MS) },
@@ -117,7 +128,7 @@ export default function ContactDetailScreen() {
 
   const handleCall = useCallback(() => {
     if (!contact?.phone) {
-      Alert.alert('No Phone Number', 'This contact does not have a phone number.');
+      Alert.alert('No phone number', "This connection doesn't have a phone number yet.");
       return;
     }
     Alert.alert(
@@ -137,7 +148,7 @@ export default function ContactDetailScreen() {
 
   const handleText = useCallback(() => {
     if (!contact?.phone) {
-      Alert.alert('No Phone Number', 'This contact does not have a phone number.');
+      Alert.alert('No phone number', "This connection doesn't have a phone number yet.");
       return;
     }
     Alert.alert(
@@ -205,11 +216,22 @@ export default function ContactDetailScreen() {
     try {
       await unarchiveContact(contact.id);
       loadContactData();
-      Alert.alert('Success', 'Contact has been restored.');
+      Alert.alert('Success', 'Connection restored.');
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to unarchive contact.');
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to restore connection.');
     } finally {
       setUnarchiving(false);
+    }
+  }, [contact, loadContactData]);
+
+  const handleArchive = useCallback(async () => {
+    if (!contact) return;
+
+    try {
+      await archiveContact(contact.id);
+      loadContactData();
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to archive connection.');
     }
   }, [contact, loadContactData]);
 
@@ -240,16 +262,16 @@ export default function ContactDetailScreen() {
   }, [loadContactData]);
 
   const initial = contact?.name?.charAt(0).toUpperCase() || '?';
-  const isDue = contact?.nextContactDate && contact.nextContactDate <= Date.now();
 
+  // Screen options must be memoized and Stack.Screen must render in all code paths
+  // to maintain navigation context consistency (fixes crash when deleting all notes)
   const screenOptions = useMemo(() => ({
-    headerTitle: '',
+    title: contact?.name || 'Connection',
     headerBackTitle: 'Back',
-    headerShadowVisible: false,
-    headerStyle: { backgroundColor: '#F3F0E6' },
+    headerShown: true,
     headerRight: contact ? ({ tintColor }: { tintColor?: string }) => (
-      <TouchableOpacity onPress={handleEditContact} className="px-2">
-        <Text className="text-base font-medium text-sage-muted">Edit</Text>
+      <TouchableOpacity onPress={handleEditContact}>
+        <Text className="text-lg font-semibold" style={{ color: tintColor }}>Edit</Text>
       </TouchableOpacity>
     ) : undefined,
   }), [contact, handleEditContact]);
@@ -259,7 +281,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-cream">
-          <ActivityIndicator size="small" color="#9CA986" />
+          <Text className="text-warmgray">Loading…</Text>
         </SafeAreaView>
       </>
     );
@@ -270,7 +292,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-cream">
-          <Text className="text-slate">Contact not found</Text>
+          <Text className="text-warmgray">Connection not found</Text>
         </SafeAreaView>
       </>
     );
@@ -282,100 +304,150 @@ export default function ContactDetailScreen() {
       <SafeAreaView className="flex-1 bg-cream">
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9CA986" />}
+          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
-          {/* Header Card */}
-          <View className="items-center mb-8">
-             {contact.avatarUri ? (
-                <Image
-                  source={{ uri: contact.avatarUri }}
-                  className="h-24 w-24 rounded-full mb-4 border-4 border-white shadow-sm"
-                  resizeMode="cover"
-                />
+          {contact.isArchived && (
+            <View className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <View className="flex-row items-center mb-3">
+                <Ionicons name="archive-outline" size={20} color="#d97706" />
+                <Text className="ml-2 text-base font-semibold text-amber-800">Archived connection</Text>
+              </View>
+              <Text className="text-sm text-amber-700 mb-3">
+                This connection is archived and won't appear in your regular lists. Restore it to receive reminders again.
+              </Text>
+              <TouchableOpacity
+                className="flex-row items-center justify-center gap-2 rounded-xl bg-amber-600 py-3"
+                onPress={handleUnarchive}
+                disabled={unarchiving}
+                activeOpacity={0.85}
+              >
+                {unarchiving ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Ionicons name="refresh-outline" size={20} color="#fff" />
+                )}
+                <Text className="text-base font-semibold text-white">
+                  {unarchiving ? 'Restoring...' : 'Restore connection'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Contact Info Header */}
+          <View className="mb-6 rounded-2xl bg-surface p-6 shadow-sm">
+            <View className="items-center">
+              {contact.avatarUri ? (
+                <View className="h-20 w-20 overflow-hidden rounded-full">
+                  <Image
+                    source={{ uri: contact.avatarUri }}
+                    className="h-full w-full"
+                    resizeMode="cover"
+                  />
+                </View>
               ) : (
-                <View className="h-24 w-24 items-center justify-center rounded-full bg-sage mb-4 border-4 border-white shadow-sm">
+                <View className="h-20 w-20 items-center justify-center rounded-full bg-sage">
                   <Text className="text-3xl font-semibold text-white">{initial}</Text>
                 </View>
               )}
-              
-              <Text className="text-2xl font-semibold text-slate-900 mb-1">{contact.name}</Text>
-              {contact.phone && (
-                 <Text className="text-base text-slate-500 mb-4">{formatPhoneNumber(contact.phone)}</Text>
-              )}
 
-              <View className="items-center gap-1">
-                 <Text className="text-sm text-sage-muted font-medium">{formatLastContacted(contact.lastContactedAt)}</Text>
-                 <Text className="text-sm text-sage-muted">{formatNextCheckIn(contact.nextContactDate)}</Text>
+              <Text className="mt-3 text-2xl font-semibold text-warmgray">{contact.name}</Text>
+              {contact.phone && (
+                <Text className="mt-1 text-base text-warmgray-muted">{formatPhoneNumber(contact.phone)}</Text>
+              )}
+              <Text className="mt-1 text-base text-warmgray-muted">{getBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
+
+              <View className="mt-4 items-center">
+                <Text className="text-base text-warmgray-muted">{formatLastConnected(contact.lastContactedAt)}</Text>
+                {contact.nextContactDate ? (
+                  <Text className="mt-1 text-base text-warmgray-muted">Next reminder {formatNextReminder(contact.nextContactDate).toLowerCase()}</Text>
+                ) : (
+                  <Text className="mt-1 text-base text-warmgray-muted">No reminders scheduled</Text>
+                )}
               </View>
+            </View>
           </View>
 
-          {/* Quick Actions */}
-          <View className="flex-row justify-center gap-3 mb-8">
-              {contact.phone && (
-                 <>
-                    <TouchableOpacity
-                      className="flex-row items-center gap-2 px-5 py-3 rounded-full border border-sage/50 bg-white shadow-sm"
-                      onPress={handleCall}
-                    >
-                       <Ionicons name="call-outline" size={18} color="#5C6356" />
-                       <Text className="text-sm font-semibold text-slate-600">Call</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      className="flex-row items-center gap-2 px-5 py-3 rounded-full border border-sage/50 bg-white shadow-sm"
-                      onPress={handleText}
-                    >
-                       <Ionicons name="chatbubble-outline" size={18} color="#5C6356" />
-                       <Text className="text-sm font-semibold text-slate-600">Text</Text>
-                    </TouchableOpacity>
-                 </>
-              )}
-              
-               <TouchableOpacity
-                  className="flex-row items-center gap-2 px-5 py-3 rounded-full border border-sage/50 bg-white shadow-sm"
-                  onPress={handleAddNote}
+          {/* Quick Actions Row */}
+          <View className="mb-6 flex-row gap-2">
+            {contact.phone && (
+              <>
+                <TouchableOpacity
+                  className={`flex-row items-center justify-center gap-1.5 rounded-full px-4 py-2 ${
+                    contact.isArchived ? 'bg-gray-100 border border-gray-300' : 'border border-sage bg-surface'
+                  }`}
+                  onPress={handleCall}
+                  disabled={contact.isArchived}
+                  activeOpacity={contact.isArchived ? 1 : 0.85}
                 >
-                   <Ionicons name="pencil-outline" size={18} color="#5C6356" />
-                   <Text className="text-sm font-semibold text-slate-600">Note</Text>
+                  <Ionicons name="call-outline" size={18} color={contact.isArchived ? '#9ca3af' : '#9CA986'} />
+                  <Text className={`text-base font-medium ${contact.isArchived ? 'text-gray-400' : 'text-sage'}`}>
+                    Call
+                  </Text>
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                  className={`flex-row items-center justify-center gap-1.5 rounded-full px-4 py-2 ${
+                    contact.isArchived ? 'bg-gray-100 border border-gray-300' : 'border border-sage bg-surface'
+                  }`}
+                  onPress={handleText}
+                  disabled={contact.isArchived}
+                  activeOpacity={contact.isArchived ? 1 : 0.85}
+                >
+                  <Ionicons name="chatbubble-outline" size={18} color={contact.isArchived ? '#9ca3af' : '#9CA986'} />
+                  <Text className={`text-base font-medium ${contact.isArchived ? 'text-gray-400' : 'text-sage'}`}>
+                    Text
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            <TouchableOpacity
+              className="flex-row items-center justify-center gap-1.5 rounded-full border border-sage bg-surface px-4 py-2"
+              onPress={handleAddNote}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="pencil-outline" size={18} color="#9CA986" />
+              <Text className="text-base font-medium text-sage">Note</Text>
+            </TouchableOpacity>
           </View>
 
-          {/* Reach Out Section (If Due) */}
-          {isDue && !contact.isArchived && (
-             <View className="mb-8 p-6 bg-surface rounded-3xl shadow-sm border border-border">
-                <Text className="text-lg font-semibold text-slate-900 mb-4 text-center">Ready to connect?</Text>
-                <View className="flex-row gap-3">
-                   <TouchableOpacity
-                      className="flex-1 items-center justify-center rounded-full bg-sage py-3 shadow-sm"
-                      onPress={handleMarkDone}
-                    >
-                      <Text className="text-base font-semibold text-white">Reached out</Text>
-                    </TouchableOpacity>
+          {/* Mark Done / Snooze Actions */}
+          {!contact.isArchived && (
+            <View className="mb-6 flex-row gap-3">
+              <TouchableOpacity
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-2 border-sage py-3"
+                onPress={handleMarkDone}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="checkmark-circle-outline" size={24} color="#9CA986" />
+                <Text className="text-lg font-semibold text-sage">Reached out</Text>
+              </TouchableOpacity>
 
-                    <TouchableOpacity
-                      className="flex-1 items-center justify-center rounded-full border border-border bg-white py-3"
-                      onPress={handleSnooze}
-                      disabled={snoozing}
-                    >
-                      <Text className="text-base font-medium text-slate-600">{snoozing ? '...' : 'Later'}</Text>
-                    </TouchableOpacity>
-                </View>
-             </View>
+              <TouchableOpacity
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-2 border-sage py-3"
+                onPress={handleSnooze}
+                disabled={snoozing}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="alarm-outline" size={24} color="#9CA986" />
+                <Text className="text-lg font-semibold text-sage">
+                  {snoozing ? 'Later...' : 'Later'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
 
           {/* Shared Moments */}
           <View>
-            <Text className="mb-4 text-xl font-semibold text-slate-900 px-1">Shared moments</Text>
+            <Text className="mb-3 text-xl font-bold text-warmgray">Shared moments</Text>
 
-            <View className="flex flex-col">
+            {/* Stable outer View prevents full unmount/remount during list→empty transition */}
+            <View className="flex flex-col gap-4">
               {interactions.length === 0 ? (
-                <View className="items-center justify-center rounded-3xl bg-surface p-8 shadow-sm border border-border/50">
-                  <Ionicons name="book-outline" size={32} color="#9CA986" style={{ opacity: 0.5 }} />
-                  <Text className="mt-3 text-base text-slate-600 font-medium">Your story starts here</Text>
-                  <Text className="mt-1 text-sm text-sage-muted text-center max-w-[200px]">
-                    Log your first interaction to start building a history.
-                  </Text>
+                <View className="items-center justify-center rounded-2xl bg-surface border border-border p-8">
+                  <Ionicons name="heart-outline" size={48} color="#8B9678" />
+                  <Text className="mt-3 text-base text-warmgray">Your story together starts here.</Text>
                 </View>
               ) : (
                 interactions.map((interaction) => (
@@ -389,19 +461,6 @@ export default function ContactDetailScreen() {
               )}
             </View>
           </View>
-
-          {contact.isArchived && (
-             <TouchableOpacity
-               className="mt-8 flex-row items-center justify-center gap-2 rounded-xl bg-amber-100 py-3 mx-4"
-               onPress={handleUnarchive}
-               disabled={unarchiving}
-             >
-               <Ionicons name="refresh-outline" size={20} color="#92400e" />
-               <Text className="text-base font-semibold text-amber-800">
-                 {unarchiving ? 'Restoring...' : 'Unarchive Contact'}
-               </Text>
-             </TouchableOpacity>
-          )}
         </ScrollView>
       </SafeAreaView>
 
@@ -411,6 +470,7 @@ export default function ContactDetailScreen() {
           contact={contact}
           onClose={() => setShowEditModal(false)}
           onSave={handleSaveCadence}
+          onArchive={handleArchive}
         />
       )}
     </>
