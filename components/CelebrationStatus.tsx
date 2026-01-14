@@ -1,7 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text } from 'react-native';
 
-export default function CelebrationStatus() {
+type Props = {
+  completionCount?: number;
+};
+
+export default function CelebrationStatus({ completionCount = 0 }: Props) {
   return (
     <View className="flex-1 items-center justify-center px-8">
       <View className="mb-6 items-center justify-center">
@@ -12,9 +16,16 @@ export default function CelebrationStatus() {
         All caught up!
       </Text>
 
-      <Text className="mt-4 text-xl text-warmgray-muted text-center leading-relaxed">
-        Enjoy your day.
-      </Text>
+      {completionCount > 0 ? (
+        <Text className="mt-4 text-xl text-warmgray-muted text-center leading-relaxed">
+          {completionCount} {completionCount === 1 ? 'connection' : 'connections'} nurtured today.{'\n'}
+          Enjoy your day.
+        </Text>
+      ) : (
+        <Text className="mt-4 text-xl text-warmgray-muted text-center leading-relaxed">
+          Enjoy your day.
+        </Text>
+      )}
     </View>
   );
 }
