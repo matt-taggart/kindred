@@ -40,15 +40,17 @@ export default function AddConnectionNameScreen() {
           Every relationship has its own rhythm.
         </Text>
 
-        <View className="mt-8 min-h-14 rounded-2xl border border-border bg-surface px-4 flex-row items-center">
+        <View className="mt-8 h-12 rounded-2xl border border-border bg-surface px-4 flex-row items-center">
           <TextInput
             value={name}
             onChangeText={setName}
             placeholder="Name"
             placeholderTextColor="#8B9678"
-            className="flex-1 text-lg text-warmgray"
+            className="flex-1 text-lg leading-5 text-warmgray"
             autoCapitalize="words"
             returnKeyType="done"
+            textAlignVertical="center"
+            style={{ paddingTop: 0 }}
           />
         </View>
 

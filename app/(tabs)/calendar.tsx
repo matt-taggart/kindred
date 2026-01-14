@@ -213,7 +213,7 @@ export default function CalendarScreen() {
     });
 
     return {
-      title: isToday ? 'Your connections are resting' : 'Nothing scheduled',
+      title: isToday ? 'All caught up!' : 'Nothing scheduled',
       subtitle: isToday ? 'Enjoy your day.' : formattedDate,
       icon: isToday ? ('sunny-outline' as const) : ('calendar-outline' as const),
     };

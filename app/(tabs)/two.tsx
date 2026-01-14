@@ -375,7 +375,7 @@ export default function ContactsScreen() {
       return {
         type: "first-time" as const,
         title: "No connections yet",
-        subtitle: "Add a connection to start gently nurturing your circle.",
+        subtitle: "Add your first connection to start keeping in touch.",
         showCTA: true,
       };
     }
@@ -478,7 +478,7 @@ export default function ContactsScreen() {
           <View className="pt-4 pb-4 mb-8">
             <Text className="text-3xl font-semibold text-warmgray">Connections</Text>
             <Text className="mt-1 text-base text-warmgray-muted">
-              A gentle view of the people you want to stay close to.
+              Stay close to the people who matter most.
             </Text>
 
             {contacts.length > 0 && (

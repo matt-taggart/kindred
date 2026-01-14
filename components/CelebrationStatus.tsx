@@ -9,7 +9,7 @@ export default function CelebrationStatus() {
       </View>
 
       <Text className="text-3xl font-bold text-warmgray text-center leading-tight">
-        Your connections are resting
+        All caught up!
       </Text>
 
       <Text className="mt-4 text-xl text-warmgray-muted text-center leading-relaxed">
