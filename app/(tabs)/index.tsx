@@ -4,11 +4,14 @@ import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  LayoutAnimation,
+  Platform,
   RefreshControl,
   SafeAreaView,
   SectionList,
   Text,
   TouchableOpacity,
+  UIManager,
   View,
   Image,
 } from 'react-native';
@@ -18,6 +21,11 @@ import { getDueContactsGrouped, GroupedDueContacts, snoozeContact, isBirthdayTod
 import CelebrationStatus from '@/components/CelebrationStatus';
 import ReachedOutSheet from '@/components/ReachedOutSheet';
 import { formatLastConnected } from '@/utils/timeFormatting';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 type Section = {
   title: string;
@@ -155,6 +163,9 @@ export default function HomeScreen() {
     try {
       await updateInteraction(selectedContact.id, 'call', note || undefined);
       setCompletionCount(prev => prev + 1);
+
+      // Animate the list change
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       loadContacts();
     } catch (error) {
       Alert.alert('Error', 'Failed to save. Please try again.');
