@@ -153,29 +153,29 @@ export default function EditContactModal({
         <View className="flex-1 px-6 pb-4 pt-6">
           <View className="mb-6 flex-row items-center justify-between">
             <Pressable onPress={onClose}>
-              <Text className="font-semibold text-slate">Cancel</Text>
+              <Text className="font-semibold text-warmgray-muted">Cancel</Text>
             </Pressable>
-            <Text className="text-lg font-bold text-slate">
-              Contact Settings
+            <Text className="text-lg font-bold text-warmgray">
+              Connection settings
             </Text>
             <View className="w-12" />
           </View>
 
           <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-            <Text className="mb-2 text-lg font-bold text-slate">
+            <Text className="mb-2 text-lg font-bold text-warmgray">
               {contact.name}
             </Text>
-            <Text className="mb-6 text-base text-slate-500">
-              How often would you like to check in with {contact.name}?
+            <Text className="mb-6 text-base text-warmgray-muted">
+              How often would you like a gentle reminder to connect?
             </Text>
 
-            <View className="mb-8 rounded-2xl bg-white p-4 shadow-sm border border-gray-100">
+            <View className="mb-8 rounded-2xl bg-surface p-4 shadow-sm border border-border">
               <View className="flex-row items-center justify-between mb-2.5">
                 <View className="flex-row items-center gap-2">
                   <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
                     <Text className="text-lg">🎂</Text>
                   </View>
-                  <Text className="text-base font-semibold text-slate">
+                  <Text className="text-base font-semibold text-warmgray">
                     Birthday
                   </Text>
                 </View>
@@ -184,7 +184,7 @@ export default function EditContactModal({
                     onPress={() => setBirthday("")}
                     className="active:opacity-60"
                   >
-                    <Text className="text-sm font-medium text-rose-500">
+                    <Text className="text-sm font-medium text-terracotta">
                       Remove
                     </Text>
                   </Pressable>
@@ -194,14 +194,14 @@ export default function EditContactModal({
               {!birthday ? (
                 <Pressable
                   onPress={() => setBirthday(formatDate(new Date()))}
-                  className="flex-row items-center justify-center rounded-xl border-2 border-sage-100 bg-white py-4 active:bg-sage-50"
+                  className="flex-row items-center justify-center rounded-xl border border-sage/20 bg-cream py-4"
                 >
                   <Text className="text-base font-bold text-sage">
-                    + Add Birthday Reminder
+                    Add birthday (optional)
                   </Text>
                 </Pressable>
               ) : (
-                <View className="flex-row items-center justify-between rounded-xl border border-sage-100 bg-white p-3">
+                <View className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-3">
                   <DateTimePicker
                     value={parseDate(birthday)}
                     mode="date"
@@ -212,14 +212,14 @@ export default function EditContactModal({
                   />
                 </View>
               )}
-              <Text className="mt-3 text-xs text-slate-400 text-center">
-                We'll prioritize this over regular check-ins on their birthday.
+              <Text className="mt-3 text-xs text-warmgray-muted text-center">
+                We'll prioritize this over regular reminders on their birthday.
               </Text>
             </View>
 
             <View className="mb-3 flex-row items-center gap-2">
-              <Text className="text-base font-semibold text-slate">
-                Check-in Frequency
+              <Text className="text-base font-semibold text-warmgray">
+                Reminder rhythm
               </Text>
             </View>
 
@@ -238,8 +238,8 @@ export default function EditContactModal({
                   <Pressable
                     className={`border-2 p-4 ${
                       selectedBucket === bucket
-                        ? "border-sage bg-sage-10"
-                        : "border-gray-200 bg-white"
+                        ? 'border-sage bg-sage-100'
+                        : 'border-border bg-surface'
                     } ${
                       bucket === "custom" && selectedBucket === "custom"
                         ? "rounded-t-2xl border-b-0"
@@ -260,13 +260,13 @@ export default function EditContactModal({
                         <Text
                           className={`text-base font-semibold ${
                             selectedBucket === bucket
-                              ? "text-slate"
-                              : "text-slate-700"
+                              ? 'text-warmgray'
+                              : 'text-warmgray'
                           }`}
                         >
                           {bucketLabels[bucket]}
                         </Text>
-                        <Text className="mt-1 text-sm text-slate-500">
+                        <Text className="mt-1 text-sm text-warmgray-muted">
                           {bucket === "custom"
                             ? formatCustomSummary(
                                 derivedCustomDays ?? contact.customIntervalDays,
@@ -278,20 +278,20 @@ export default function EditContactModal({
                         className={`h-6 w-6 rounded-full border-2 ${
                           selectedBucket === bucket
                             ? "border-sage bg-sage"
-                            : "border-gray-300"
+                            : 'border-border'
                         }`}
                       />
                     </View>
                   </Pressable>
 
                   {bucket === "custom" && selectedBucket === "custom" && (
-                    <View className="rounded-b-2xl border-x-2 border-b-2 border-sage bg-white px-4 pb-4 pt-2">
+                    <View className="rounded-b-2xl border-x-2 border-b-2 border-sage bg-surface px-4 pb-4 pt-2">
                       <View className="mt-2 flex-col gap-3">
                         <View>
-                          <Text className="text-xs font-medium text-slate-500 mb-1">
+                          <Text className="text-xs font-medium text-warmgray-muted mb-1">
                             Frequency
                           </Text>
-                          <View className="h-12 flex-row items-center rounded-xl border border-gray-200 bg-gray-50 px-3">
+                          <View className="h-12 flex-row items-center rounded-xl border border-border bg-cream px-3">
                             <TextInput
                               value={customValue}
                               onChangeText={(text) =>
@@ -301,18 +301,18 @@ export default function EditContactModal({
                                 })
                               }
                               keyboardType="number-pad"
-                              className="flex-1 text-base leading-5 text-slate"
+                              className="flex-1 text-base leading-5 text-warmgray"
                               placeholder="e.g., 30"
-                              placeholderTextColor="#94a3b8"
+                              placeholderTextColor="#8B9678"
                               style={{ marginTop: -2 }}
                             />
                           </View>
                         </View>
                         <View>
-                          <Text className="text-xs font-medium text-slate-500 mb-1">
+                          <Text className="text-xs font-medium text-warmgray-muted mb-1">
                             Unit
                           </Text>
-                          <View className="flex-row gap-1 bg-gray-100 p-1 rounded-xl">
+                          <View className="flex-row gap-1 bg-cream border border-border p-1 rounded-xl">
                             {(["days", "weeks", "months"] as CustomUnit[]).map(
                               (unit) => (
                                 <Pressable
@@ -324,7 +324,7 @@ export default function EditContactModal({
                                     })
                                   }
                                   className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
-                                    customUnit === unit ? "bg-white" : ""
+                                    customUnit === unit ? 'bg-surface' : ''
                                   }`}
                                   style={
                                     customUnit === unit
@@ -341,8 +341,8 @@ export default function EditContactModal({
                                   <Text
                                     className={`text-sm font-medium ${
                                       customUnit === unit
-                                        ? "text-slate-900"
-                                        : "text-slate-500"
+                                        ? 'text-warmgray'
+                                        : 'text-warmgray-muted'
                                     }`}
                                   >
                                     {unit.charAt(0).toUpperCase() +
@@ -356,15 +356,15 @@ export default function EditContactModal({
                       </View>
 
                       {!isCustomValid && (
-                        <Text className="mt-3 text-sm text-rose-500 font-medium">
+                        <Text className="mt-3 text-sm text-terracotta font-medium">
                           Please enter a valid duration (1-365 days)
                         </Text>
                       )}
 
                       {isCustomValid && derivedCustomDays && (
-                        <Text className="mt-3 text-sm text-slate-600">
-                          We’ll remind you{" "}
-                          <Text className="font-semibold text-sage-700">
+                        <Text className="mt-3 text-sm text-warmgray-muted">
+                          We’ll remind you{' '}
+                          <Text className="font-semibold text-sage">
                             {formatCustomSummary(derivedCustomDays)}
                           </Text>
                           .
@@ -381,15 +381,15 @@ export default function EditContactModal({
             onPress={handleSave}
             disabled={saveDisabled}
             className={`flex-row items-center justify-center rounded-2xl py-4 ${
-              saveDisabled ? "bg-gray-200" : "bg-sage"
+              saveDisabled ? 'bg-border' : 'bg-sage'
             }`}
           >
             <Text
               className={`text-lg font-semibold ${
-                saveDisabled ? "text-gray-400" : "text-white"
+                saveDisabled ? 'text-warmgray-muted' : 'text-white'
               }`}
             >
-              Save Changes
+              Save changes
             </Text>
           </Pressable>
         </View>

@@ -54,7 +54,8 @@ const isSameDay = (date1: Date, date2: Date) => {
 
 const normalizeCustomInterval = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   if (bucket !== 'custom') return null;
-  if (!customIntervalDays || customIntervalDays < 1 || customIntervalDays > 365) {
+  if (customIntervalDays === null || customIntervalDays === undefined) return null;
+  if (customIntervalDays < 1 || customIntervalDays > 365) {
     throw new Error('Custom reminders require a valid interval');
   }
   return customIntervalDays;
@@ -83,7 +84,9 @@ export const addContact = async (contact: InsertableContact): Promise<Contact> =
   const lastContactedAt = contact.lastContactedAt ?? undefined;
   const customIntervalDays = normalizeCustomInterval(contact.bucket, contact.customIntervalDays);
   const nextContactDate =
-    contact.nextContactDate ?? getNextContactDate(contact.bucket, lastContactedAt ?? Date.now(), customIntervalDays);
+    contact.nextContactDate !== undefined
+      ? contact.nextContactDate
+      : getNextContactDate(contact.bucket, lastContactedAt ?? Date.now(), customIntervalDays);
 
   db.insert(contacts)
     .values({ ...contact, id, lastContactedAt, nextContactDate, customIntervalDays })
@@ -120,7 +123,7 @@ export const getContacts = (options: GetContactsOptions = {}): Contact[] => {
     query = query.where(eq(contacts.isArchived, false));
   }
 
-  return query.orderBy(asc(contacts.nextContactDate)).all();
+  return query.orderBy(asc(isNull(contacts.nextContactDate)), asc(contacts.nextContactDate)).all();
 };
 
 export const getDueContacts = (): Contact[] => {
@@ -141,7 +144,7 @@ export const getDueContacts = (): Contact[] => {
         return false;
       }
 
-      const isDue = !contact.lastContactedAt || (contact.nextContactDate !== null && contact.nextContactDate <= nowMs);
+      const isDue = contact.nextContactDate !== null && contact.nextContactDate <= nowMs;
       const isBirthday = isBirthdayToday(contact, now);
       return isDue || isBirthday;
     })
@@ -397,7 +400,10 @@ export const updateContactCadence = async (
     throw new Error(`Contact not found: ${contactId}`);
   }
 
-  const normalizedCustomDays = normalizeCustomInterval(newBucket, customIntervalDays ?? contact.customIntervalDays);
+  const normalizedCustomDays = normalizeCustomInterval(
+    newBucket,
+    customIntervalDays !== undefined ? customIntervalDays : contact.customIntervalDays,
+  );
   const lastContactedAt = contact.lastContactedAt || Date.now();
   const nextContactDate = getNextContactDate(newBucket, lastContactedAt, normalizedCustomDays);
 

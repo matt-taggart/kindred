@@ -69,8 +69,8 @@ describe('ReviewScheduleScreen - Import Limits', () => {
     // Assert
     // Expect a warning message to be present
     await waitFor(() => {
-      expect(getByText(/Contact Limit Reached/i)).toBeTruthy();
-      expect(getByText(/only includes 5/i)).toBeTruthy(); 
+      expect(getByText(/Free plan limit reached/i)).toBeTruthy();
+      expect(getByText(/Only the first 5 connections? will be imported/i)).toBeTruthy();
     });
   });
 
@@ -82,7 +82,7 @@ describe('ReviewScheduleScreen - Import Limits', () => {
     const { queryByText } = render(<ReviewScheduleScreen />);
 
     await waitFor(() => {
-      expect(queryByText(/Contact Limit Reached/i)).toBeNull();
+      expect(queryByText(/Free plan limit reached/i)).toBeNull();
     });
   });
 
@@ -96,7 +96,7 @@ describe('ReviewScheduleScreen - Import Limits', () => {
     const { queryByText } = render(<ReviewScheduleScreen />);
 
     await waitFor(() => {
-      expect(queryByText(/Contact Limit Reached/i)).toBeNull();
+      expect(queryByText(/Free plan limit reached/i)).toBeNull();
     });
   });
 
@@ -106,7 +106,7 @@ describe('ReviewScheduleScreen - Import Limits', () => {
      // Assert
      // Check for specific copy or indication that truncation will occur
      await waitFor(() => {
-         expect(getByText(/first 5/i)).toBeTruthy();
+         expect(getByText(/Only the first 5 connections? will be imported/i)).toBeTruthy();
      });
   });
 });

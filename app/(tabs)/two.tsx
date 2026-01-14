@@ -22,9 +22,7 @@ import {
   unarchiveContact,
 } from "@/services/contactService";
 import { formatPhoneNumber } from "@/utils/phone";
-import { formatLastConnected } from "@/utils/timeFormatting";
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
+import { formatLastConnected, formatNextReminder } from "@/utils/timeFormatting";
 
 const formatBucketLabel = (
   bucket: Contact["bucket"],
@@ -40,14 +38,13 @@ const formatBucketLabel = (
     case "every-three-weeks":
       return "Every few weeks";
     case "monthly":
-      return "Monthly";
+      return "Once a month";
     case "every-six-months":
       return "Seasonally";
     case "yearly":
       return "Once a year";
     case "custom": {
-      if (!customIntervalDays || customIntervalDays < 1)
-        return "Custom rhythm";
+      if (!customIntervalDays || customIntervalDays < 1) return "Only when I choose";
       if (customIntervalDays % 30 === 0) {
         const months = customIntervalDays / 30;
         return months === 1 ? "Monthly" : `Every ${months} months`;
@@ -60,24 +57,13 @@ const formatBucketLabel = (
       return `Every ${customIntervalDays} days`;
     }
     default:
-      return "Custom rhythm";
+      return "Only when I choose";
   }
-};
-
-const formatNextCheckIn = (nextContactDate?: number | null) => {
-  if (!nextContactDate) return "Not scheduled";
-
-  const diff = nextContactDate - Date.now();
-  if (diff <= 0) return "Due now";
-
-  const days = Math.ceil(diff / DAY_IN_MS);
-  if (days === 1) return "Tomorrow";
-  return `In ${days} days`;
 };
 
 const isContactDue = (contact: Contact) => {
   if (contact.isArchived) return false;
-  if (!contact.nextContactDate) return true;
+  if (!contact.nextContactDate) return false;
   return contact.nextContactDate <= Date.now();
 };
 
@@ -123,6 +109,8 @@ const ContactRow = ({
   onPress?: () => void;
 }) => {
   const due = isContactDue(contact);
+  const hasReminders = contact.nextContactDate !== null;
+  const statusLabel = hasReminders ? (due ? "Ready" : "Coming up") : "No reminders";
 
   return (
     <TouchableOpacity
@@ -141,15 +129,21 @@ const ContactRow = ({
         </View>
 
         <View className="flex-row items-center gap-2">
-          <View
-            className={`rounded-full px-4 py-2 ${due ? "bg-terracotta-100" : "bg-sage"}`}
-          >
-            <Text
-              className={`text-sm font-semibold ${due ? "text-terracotta" : "text-white"}`}
+          {hasReminders ? (
+            <View
+              className={`rounded-full px-4 py-2 ${due ? "bg-terracotta-100" : "bg-sage-100"}`}
             >
-              {due ? "Due" : "Upcoming"}
-            </Text>
-          </View>
+              <Text
+                className={`text-sm font-semibold ${due ? "text-terracotta" : "text-sage"}`}
+              >
+                {statusLabel}
+              </Text>
+            </View>
+          ) : (
+            <View className="rounded-full border border-border bg-cream px-4 py-2">
+              <Text className="text-sm font-semibold text-warmgray-muted">{statusLabel}</Text>
+            </View>
+          )}
           <Text className="text-2xl text-warmgray-muted -mt-0.5">›</Text>
         </View>
       </View>
@@ -163,10 +157,10 @@ const ContactRow = ({
         </Text>
 
         <Text className="mt-3 text-sm font-semibold uppercase tracking-wide text-warmgray-muted">
-          Next check-in
+          Next reminder
         </Text>
         <Text className="text-lg font-semibold text-warmgray">
-          {formatNextCheckIn(contact.nextContactDate)}
+          {formatNextReminder(contact.nextContactDate)}
         </Text>
       </View>
 
@@ -282,6 +276,10 @@ export default function ContactsScreen() {
     loadContacts();
   }, [loadContacts]);
 
+  const handleAddConnection = useCallback(() => {
+    router.push("/contacts/add");
+  }, [router]);
+
   const handleImportPress = useCallback(() => {
     router.push({ pathname: "/contacts/import", params: { autoRequest: "1" } });
   }, [router]);
@@ -377,7 +375,7 @@ export default function ContactsScreen() {
       return {
         type: "first-time" as const,
         title: "No connections yet",
-        subtitle: "Import from your phone to start nurturing your circle.",
+        subtitle: "Add a connection to start gently nurturing your circle.",
         showCTA: true,
       };
     }
@@ -480,18 +478,28 @@ export default function ContactsScreen() {
           <View className="pt-4 pb-4 mb-8">
             <Text className="text-3xl font-semibold text-warmgray">Connections</Text>
             <Text className="mt-1 text-base text-warmgray-muted">
-              See who's due for a check-in and manage your connections.
+              A gentle view of the people you want to stay close to.
             </Text>
 
             {contacts.length > 0 && (
               <>
                 <TouchableOpacity
                   className="mt-4 w-full items-center rounded-2xl bg-sage py-4"
-                  onPress={handleImportPress}
+                  onPress={handleAddConnection}
                   activeOpacity={0.9}
                 >
                   <Text className="text-base font-semibold text-white">
-                    Add Connection
+                    Add a connection
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="mt-3 w-full items-center rounded-2xl border border-sage bg-surface py-4"
+                  onPress={handleImportPress}
+                  activeOpacity={0.9}
+                >
+                  <Text className="text-base font-semibold text-sage">
+                    Import from contacts
                   </Text>
                 </TouchableOpacity>
 
@@ -536,21 +544,35 @@ export default function ContactsScreen() {
             )}
 
             {emptyState.showCTA && (
-              <TouchableOpacity
-                className="mt-5 rounded-2xl bg-sage px-6 py-4"
-                onPress={
-                  emptyState.type === "all-archived"
-                    ? () => setFilter("archived")
-                    : handleImportPress
-                }
-                activeOpacity={0.9}
-              >
-                <Text className="text-lg font-semibold text-white">
-                  {emptyState.type === "all-archived"
-                    ? "View Archived"
-                    : "Import from Phone"}
-                </Text>
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity
+                  className="mt-5 rounded-2xl bg-sage px-6 py-4"
+                  onPress={
+                    emptyState.type === "all-archived"
+                      ? () => setFilter("archived")
+                      : handleAddConnection
+                  }
+                  activeOpacity={0.9}
+                >
+                  <Text className="text-lg font-semibold text-white">
+                    {emptyState.type === "all-archived"
+                      ? "View archived"
+                      : "Add a connection"}
+                  </Text>
+                </TouchableOpacity>
+
+                {emptyState.type !== "all-archived" && (
+                  <TouchableOpacity
+                    className="mt-3 rounded-2xl border border-sage bg-surface px-6 py-4"
+                    onPress={handleImportPress}
+                    activeOpacity={0.9}
+                  >
+                    <Text className="text-lg font-semibold text-sage">
+                      Import from contacts
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </>
             )}
           </View>
         }

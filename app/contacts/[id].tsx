@@ -25,7 +25,7 @@ const bucketLabelMap: Record<Contact['bucket'], string> = {
 };
 
 const formatCustomLabel = (customIntervalDays?: number | null) => {
-  if (!customIntervalDays || customIntervalDays < 1) return 'Custom reminders';
+  if (!customIntervalDays || customIntervalDays < 1) return 'Only when I choose';
 
   if (customIntervalDays % 30 === 0) {
     const months = customIntervalDays / 30;
@@ -128,7 +128,7 @@ export default function ContactDetailScreen() {
 
   const handleCall = useCallback(() => {
     if (!contact?.phone) {
-      Alert.alert('No Phone Number', 'This contact does not have a phone number.');
+      Alert.alert('No phone number', "This connection doesn't have a phone number yet.");
       return;
     }
     Alert.alert(
@@ -148,7 +148,7 @@ export default function ContactDetailScreen() {
 
   const handleText = useCallback(() => {
     if (!contact?.phone) {
-      Alert.alert('No Phone Number', 'This contact does not have a phone number.');
+      Alert.alert('No phone number', "This connection doesn't have a phone number yet.");
       return;
     }
     Alert.alert(
@@ -216,9 +216,9 @@ export default function ContactDetailScreen() {
     try {
       await unarchiveContact(contact.id);
       loadContactData();
-      Alert.alert('Success', 'Contact has been restored.');
+      Alert.alert('Success', 'Connection restored.');
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to unarchive contact.');
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to restore connection.');
     } finally {
       setUnarchiving(false);
     }
@@ -255,7 +255,7 @@ export default function ContactDetailScreen() {
   // Screen options must be memoized and Stack.Screen must render in all code paths
   // to maintain navigation context consistency (fixes crash when deleting all notes)
   const screenOptions = useMemo(() => ({
-    title: contact?.name || 'Contact',
+    title: contact?.name || 'Connection',
     headerBackTitle: 'Back',
     headerShown: true,
     headerRight: contact ? ({ tintColor }: { tintColor?: string }) => (
@@ -270,7 +270,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-cream">
-          <Text className="text-slate">Loading...</Text>
+          <Text className="text-warmgray">Loading…</Text>
         </SafeAreaView>
       </>
     );
@@ -281,7 +281,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-cream">
-          <Text className="text-slate">Contact not found</Text>
+          <Text className="text-warmgray">Connection not found</Text>
         </SafeAreaView>
       </>
     );
@@ -300,10 +300,10 @@ export default function ContactDetailScreen() {
             <View className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-4">
               <View className="flex-row items-center mb-3">
                 <Ionicons name="archive-outline" size={20} color="#d97706" />
-                <Text className="ml-2 text-base font-semibold text-amber-800">Archived Contact</Text>
+                <Text className="ml-2 text-base font-semibold text-amber-800">Archived connection</Text>
               </View>
               <Text className="text-sm text-amber-700 mb-3">
-                This contact is archived and won't appear in your regular lists. Restore it to receive reminders again.
+                This connection is archived and won't appear in your regular lists. Restore it to receive reminders again.
               </Text>
               <TouchableOpacity
                 className="flex-row items-center justify-center gap-2 rounded-xl bg-amber-600 py-3"
@@ -317,7 +317,7 @@ export default function ContactDetailScreen() {
                   <Ionicons name="refresh-outline" size={20} color="#fff" />
                 )}
                 <Text className="text-base font-semibold text-white">
-                  {unarchiving ? 'Restoring...' : 'Unarchive Contact'}
+                  {unarchiving ? 'Restoring...' : 'Restore connection'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -348,7 +348,11 @@ export default function ContactDetailScreen() {
 
               <View className="mt-4 items-center">
                 <Text className="text-base text-warmgray-muted">{formatLastConnected(contact.lastContactedAt)}</Text>
-                <Text className="mt-1 text-base text-warmgray-muted">Next reminder {formatNextReminder(contact.nextContactDate).toLowerCase()}</Text>
+                {contact.nextContactDate ? (
+                  <Text className="mt-1 text-base text-warmgray-muted">Next reminder {formatNextReminder(contact.nextContactDate).toLowerCase()}</Text>
+                ) : (
+                  <Text className="mt-1 text-base text-warmgray-muted">No reminders scheduled</Text>
+                )}
               </View>
             </View>
           </View>
@@ -406,7 +410,7 @@ export default function ContactDetailScreen() {
                 activeOpacity={0.85}
               >
                 <Ionicons name="checkmark-circle-outline" size={24} color="#9CA986" />
-                <Text className="text-lg font-semibold text-sage">Mark Done</Text>
+                <Text className="text-lg font-semibold text-sage">Reached out</Text>
               </TouchableOpacity>
 
               <TouchableOpacity

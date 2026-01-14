@@ -1,12 +1,12 @@
-const tintColorLight = '#9CA986'; // Sage
+const tintColorLight = '#9CA986';
 const tintColorDark = '#fff';
 
 export default {
   light: {
-    text: '#475569', // Slate
-    background: '#F3F0E6', // Cream
+    text: '#5C6356',
+    background: '#F3F0E6',
     tint: tintColorLight,
-    tabIconDefault: '#ccc',
+    tabIconDefault: '#8B9678',
     tabIconSelected: tintColorLight,
   },
   dark: {

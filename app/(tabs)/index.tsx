@@ -76,7 +76,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
         <TouchableOpacity
           className={`flex-1 items-center rounded-2xl py-3 border-2 ${
             isSnoozing
-              ? (isBirthday ? 'bg-terracotta border-terracotta' : 'bg-gray-100 border-gray-200')
+              ? (isBirthday ? 'bg-terracotta border-terracotta' : 'bg-cream border-border')
               : (isBirthday ? 'bg-transparent border-terracotta-100/50' : 'bg-transparent border-sage')
           }`}
           onPress={onSnooze}
@@ -85,7 +85,7 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
         >
           <Text className={`text-lg font-semibold ${
             isSnoozing
-              ? (isBirthday ? 'text-terracotta-100' : 'text-gray-400')
+              ? (isBirthday ? 'text-terracotta-100' : 'text-warmgray-muted')
               : (isBirthday ? 'text-terracotta-100' : 'text-sage')
           }`}>
             {isSnoozing ? 'Later...' : 'Later'}

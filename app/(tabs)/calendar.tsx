@@ -13,40 +13,26 @@ import {
   getTodayDateKey,
   CalendarContact,
 } from '@/services/calendarService';
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) {
-    return 'Never';
-  }
-
-  const diff = Math.max(0, Date.now() - lastContactedAt);
-  const days = Math.floor(diff / DAY_IN_MS);
-
-  if (days === 0) return 'Today';
-  if (days === 1) return '1 day ago';
-  return `${days} days ago`;
-};
+import { formatLastConnected } from '@/utils/timeFormatting';
 
 const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   switch (bucket) {
     case 'daily':
-      return 'Daily';
+      return 'Every day';
     case 'weekly':
-      return 'Weekly';
+      return 'Every week';
     case 'bi-weekly':
-      return 'Every two weeks';
+      return 'Every few weeks';
     case 'every-three-weeks':
       return 'Every three weeks';
     case 'monthly':
-      return 'Monthly';
+      return 'Once a month';
     case 'every-six-months':
-      return 'Every six months';
+      return 'Seasonally';
     case 'yearly':
-      return 'Yearly';
+      return 'Once a year';
     case 'custom': {
-      if (!customIntervalDays || customIntervalDays < 1) return 'Custom';
+      if (!customIntervalDays || customIntervalDays < 1) return 'Only when I choose';
       if (customIntervalDays % 30 === 0) {
         const months = customIntervalDays / 30;
         return months === 1 ? 'Every month' : `Every ${months} months`;
@@ -55,11 +41,11 @@ const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: numbe
         const weeks = customIntervalDays / 7;
         return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
       }
-      if (customIntervalDays === 1) return 'Daily';
+      if (customIntervalDays === 1) return 'Every day';
       return `Every ${customIntervalDays} days`;
     }
     default:
-      return 'Custom';
+      return 'Only when I choose';
   }
 };
 
@@ -69,25 +55,12 @@ type CalendarContactCardProps = {
 };
 
 const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => {
-  const isOverdue = contact.nextContactDate && contact.nextContactDate <= Date.now();
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
 
   // Determine card accent based on type
   const isBirthday = contact.isBirthday;
 
-  // Generate warm, connection-focused copy
-  const getCardTitle = () => {
-    if (isBirthday) {
-      return `${contact.name}'s birthday`;
-    }
-    return `Connect with ${contact.name}`;
-  };
-
-  const getStatusLabel = () => {
-    if (isBirthday) return 'Celebrate';
-    if (isOverdue) return 'Overdue';
-    return 'Upcoming';
-  };
+  const title = isBirthday ? `${contact.name}'s birthday` : contact.name;
 
   return (
     <TouchableOpacity
@@ -105,15 +78,15 @@ const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => 
         </View>
 
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-warmgray">{getCardTitle()}</Text>
+          <Text className="text-lg font-semibold text-warmgray">{title}</Text>
           <Text className="text-sm text-warmgray-muted">
-            {formatBucketLabel(contact.bucket, contact.customIntervalDays)} · {formatLastContacted(contact.lastContactedAt)}
+            {formatBucketLabel(contact.bucket, contact.customIntervalDays)} · {formatLastConnected(contact.lastContactedAt)}
           </Text>
         </View>
 
-        <View className={`rounded-full px-3 py-1 ${isBirthday ? 'bg-terracotta-100' : (isOverdue ? 'bg-terracotta-100' : 'bg-sage-100')}`}>
-          <Text className={`text-xs font-semibold ${isBirthday ? 'text-terracotta' : (isOverdue ? 'text-terracotta' : 'text-sage')}`}>
-            {getStatusLabel()}
+        <View className={`rounded-full px-3 py-1 ${isBirthday ? 'bg-terracotta-100' : 'bg-sage-100'}`}>
+          <Text className={`text-xs font-semibold ${isBirthday ? 'text-terracotta' : 'text-sage'}`}>
+            {isBirthday ? 'Birthday' : 'Reminder'}
           </Text>
         </View>
       </View>
@@ -210,17 +183,17 @@ export default function CalendarScreen() {
   }, []);
 
   const theme = {
-    calendarBackground: '#FFFFFF',
-    textSectionTitleColor: '#6B7280',
+    calendarBackground: '#FDFBF7',
+    textSectionTitleColor: '#8B9678',
     selectedDayBackgroundColor: '#9CA986',
     selectedDayTextColor: '#ffffff',
     todayTextColor: '#9CA986',
-    dayTextColor: '#374151',
-    textDisabledColor: '#9CA3AF',
+    dayTextColor: '#5C6356',
+    textDisabledColor: '#8B9678',
     dotColor: '#9CA986',
     selectedDotColor: '#ffffff',
     arrowColor: '#9CA986',
-    monthTextColor: '#1F2937',
+    monthTextColor: '#5C6356',
     textDayFontFamily: 'System',
     textMonthFontFamily: 'System',
     textDayHeaderFontFamily: 'System',
@@ -240,9 +213,9 @@ export default function CalendarScreen() {
     });
 
     return {
-      title: isToday ? "You're all caught up!" : "No connections scheduled",
-      subtitle: isToday ? "Enjoy your day" : formattedDate,
-      icon: isToday ? "checkmark-circle" as const : "calendar-outline" as const,
+      title: isToday ? 'Your connections are resting' : 'Nothing scheduled',
+      subtitle: isToday ? 'Enjoy your day.' : formattedDate,
+      icon: isToday ? ('sunny-outline' as const) : ('calendar-outline' as const),
     };
   }, [selectedDate, todayDate]);
 

@@ -21,14 +21,14 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarInactiveTintColor: '#8B9678',
         tabBarStyle: {
           height: Platform.OS === 'ios' ? 88 : 68,
           paddingBottom: Platform.OS === 'ios' ? 28 : 8,
           paddingTop: 8,
-          backgroundColor: colorScheme === 'dark' ? '#000' : '#FFFFFF',
+          backgroundColor: colorScheme === 'dark' ? '#000' : '#FDFBF7',
           borderTopWidth: 1,
-          borderTopColor: colorScheme === 'dark' ? '#333' : '#E5E7EB',
+          borderTopColor: colorScheme === 'dark' ? '#333' : '#E8E4DA',
           elevation: 0,
           shadowOpacity: 0,
         },
@@ -49,7 +49,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="two"
         options={{
-          title: 'Contacts',
+          title: 'Connections',
           tabBarIcon: ({ color }) => <TabBarIcon name="address-book" color={color} />,
         }}
       />

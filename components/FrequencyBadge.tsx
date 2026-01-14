@@ -11,29 +11,29 @@ const bucketLabels: Record<Contact['bucket'], string> = {
   monthly: 'Once a month',
   'every-six-months': 'Seasonally',
   yearly: 'Once a year',
-  custom: 'Custom',
+  custom: 'Custom rhythm',
 };
 
-const bucketColors: Record<Contact['bucket'], string> = {
-  daily: 'bg-purple-100',
-  weekly: 'bg-blue-100',
-  'bi-weekly': 'bg-indigo-100',
-  'every-three-weeks': 'bg-indigo-100',
-  monthly: 'bg-teal-100',
-  'every-six-months': 'bg-amber-100',
-  yearly: 'bg-orange-100',
-  custom: 'bg-gray-200',
+const bucketPillClasses: Record<Contact['bucket'], string> = {
+  daily: 'bg-sage-100 border border-sage/20',
+  weekly: 'bg-sage-100 border border-sage/20',
+  'bi-weekly': 'bg-sage-100 border border-sage/20',
+  'every-three-weeks': 'bg-sage-100 border border-sage/20',
+  monthly: 'bg-sage-100 border border-sage/20',
+  'every-six-months': 'bg-sage-100 border border-sage/20',
+  yearly: 'bg-sage-100 border border-sage/20',
+  custom: 'bg-cream border border-border',
 };
 
-const bucketTextColors: Record<Contact['bucket'], string> = {
-  daily: 'text-purple-700',
-  weekly: 'text-blue-700',
-  'bi-weekly': 'text-indigo-700',
-  'every-three-weeks': 'text-indigo-700',
-  monthly: 'text-teal-700',
-  'every-six-months': 'text-amber-700',
-  yearly: 'text-orange-700',
-  custom: 'text-gray-800',
+const bucketTextClasses: Record<Contact['bucket'], string> = {
+  daily: 'text-sage',
+  weekly: 'text-sage',
+  'bi-weekly': 'text-sage',
+  'every-three-weeks': 'text-sage',
+  monthly: 'text-sage',
+  'every-six-months': 'text-sage',
+  yearly: 'text-sage',
+  custom: 'text-warmgray-muted',
 };
 
 interface FrequencyBadgeProps {
@@ -45,17 +45,19 @@ export default function FrequencyBadge({ bucket, onPress }: FrequencyBadgeProps)
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`flex-row items-center rounded-full px-3 py-1 ${bucketColors[bucket]}`}
+      className={`flex-row items-center rounded-full px-3 py-1 ${bucketPillClasses[bucket]}`}
       activeOpacity={0.7}
       disabled={!onPress}
     >
-      <Text className={`text-xs font-semibold ${bucketTextColors[bucket]}`}>{bucketLabels[bucket]}</Text>
-      <Ionicons
-        name="chevron-down"
-        size={14}
-        color={bucketTextColors[bucket]?.replace('text-', '')}
-        style={{ marginLeft: 2 }}
-      />
+      <Text className={`text-xs font-semibold ${bucketTextClasses[bucket]}`}>{bucketLabels[bucket]}</Text>
+      {onPress ? (
+        <Ionicons
+          name="chevron-down"
+          size={14}
+          color={bucket === 'custom' ? '#8B9678' : '#9CA986'}
+          style={{ marginLeft: 2 }}
+        />
+      ) : null}
     </TouchableOpacity>
   );
 }

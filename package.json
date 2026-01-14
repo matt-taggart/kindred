@@ -12,6 +12,9 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!(\\.pnpm|@react-native|react-native|@expo|expo.*|nativewind|react-native-css-interop|react-native-calendars|@react-navigation|@react-native-community)/)"
     ]
