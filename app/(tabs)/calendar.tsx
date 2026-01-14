@@ -18,48 +18,28 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 const formatLastContacted = (lastContactedAt?: number | null) => {
   if (!lastContactedAt) {
-    return 'Never';
+    return 'Never connected';
   }
 
   const diff = Math.max(0, Date.now() - lastContactedAt);
   const days = Math.floor(diff / DAY_IN_MS);
 
-  if (days === 0) return 'Today';
-  if (days === 1) return '1 day ago';
+  if (days === 0) return 'Connected today';
+  if (days === 1) return 'Connected yesterday';
   return `${days} days ago`;
 };
 
 const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   switch (bucket) {
-    case 'daily':
-      return 'Daily';
-    case 'weekly':
-      return 'Weekly';
-    case 'bi-weekly':
-      return 'Every two weeks';
-    case 'every-three-weeks':
-      return 'Every three weeks';
-    case 'monthly':
-      return 'Monthly';
-    case 'every-six-months':
-      return 'Every six months';
-    case 'yearly':
-      return 'Yearly';
-    case 'custom': {
-      if (!customIntervalDays || customIntervalDays < 1) return 'Custom';
-      if (customIntervalDays % 30 === 0) {
-        const months = customIntervalDays / 30;
-        return months === 1 ? 'Every month' : `Every ${months} months`;
-      }
-      if (customIntervalDays % 7 === 0) {
-        const weeks = customIntervalDays / 7;
-        return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
-      }
-      if (customIntervalDays === 1) return 'Daily';
-      return `Every ${customIntervalDays} days`;
-    }
-    default:
-      return 'Custom';
+    case 'daily': return 'Daily';
+    case 'weekly': return 'Weekly';
+    case 'bi-weekly': return 'Bi-weekly';
+    case 'every-three-weeks': return 'Every 3 weeks';
+    case 'monthly': return 'Monthly';
+    case 'every-six-months': return 'Seasonally';
+    case 'yearly': return 'Yearly';
+    case 'custom': return 'Custom';
+    default: return 'Custom';
   }
 };
 
@@ -74,31 +54,31 @@ const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => 
 
   return (
     <TouchableOpacity
-      className="mb-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+      className="mb-4 rounded-3xl bg-surface p-5 shadow-sm shadow-slate-200/50 border border-border/50"
       onPress={onPress}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
     >
-      <View className="flex-row items-center gap-3">
-        <View className={`h-12 w-12 items-center justify-center rounded-full ${contact.isBirthday ? 'bg-[#B086A9]' : 'bg-sage'}`}>
+      <View className="flex-row items-center gap-4">
+        <View className={`h-12 w-12 items-center justify-center rounded-full ${contact.isBirthday ? 'bg-terracotta' : 'bg-sage'}`}>
           {contact.isBirthday ? (
             <Ionicons name="gift-outline" size={24} color="white" />
           ) : (
-            <Text className="text-base font-semibold text-white">{initial}</Text>
+            <Text className="text-lg font-semibold text-white">{initial}</Text>
           )}
         </View>
 
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-900">{contact.name}</Text>
-          <Text className="text-sm text-gray-500">
-            {formatBucketLabel(contact.bucket, contact.customIntervalDays)} · {formatLastContacted(contact.lastContactedAt)}
+          <Text className="text-lg font-semibold text-slate-900">{contact.name}</Text>
+          <Text className="text-sm text-sage-muted">
+            {contact.isBirthday ? 'Birthday today' : `${formatBucketLabel(contact.bucket, contact.customIntervalDays)} · ${formatLastContacted(contact.lastContactedAt)}`}
           </Text>
         </View>
 
-        <View className={`rounded-full px-3 py-1 ${contact.isBirthday ? 'bg-[#F3E6F0]' : (isOverdue ? 'bg-terracotta-100' : 'bg-sage')}`}>
-          <Text className={`text-xs font-semibold ${contact.isBirthday ? 'text-[#B086A9]' : (isOverdue ? 'text-terracotta' : 'text-white')}`}>
-            {contact.isBirthday ? 'Birthday Today!' : (isOverdue ? 'Overdue' : 'Upcoming')}
-          </Text>
-        </View>
+        {isOverdue && !contact.isBirthday && (
+           <View className="bg-terracotta/10 px-3 py-1 rounded-full">
+              <Text className="text-xs font-semibold text-terracotta">Due</Text>
+           </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -188,70 +168,42 @@ export default function CalendarScreen() {
     };
   }, [calendarData, selectedDate]);
 
-  const todayDate = useMemo(() => {
-    return getTodayDateKey();
-  }, []);
-
   const theme = {
-    calendarBackground: '#FFFFFF',
-    textSectionTitleColor: '#6B7280',
+    calendarBackground: '#F3F0E6', // Cream background to match page
+    textSectionTitleColor: '#8B9678', // Muted sage
     selectedDayBackgroundColor: '#9CA986',
     selectedDayTextColor: '#ffffff',
     todayTextColor: '#9CA986',
-    dayTextColor: '#374151',
-    textDisabledColor: '#9CA3AF',
-    dotColor: '#9CA986',
+    dayTextColor: '#5C6356', // Slate
+    textDisabledColor: '#D1D5DB',
+    dotColor: '#D4896A', // Terracotta for dots
     selectedDotColor: '#ffffff',
     arrowColor: '#9CA986',
-    monthTextColor: '#1F2937',
+    monthTextColor: '#5C6356',
     textDayFontFamily: 'System',
     textMonthFontFamily: 'System',
     textDayHeaderFontFamily: 'System',
     textDayFontSize: 16,
-    textMonthFontSize: 16,
+    textMonthFontSize: 18,
     textDayHeaderFontSize: 13,
+    textMonthFontWeight: '600',
   };
-
-  const emptyState = useMemo(() => {
-    const isToday = selectedDate === todayDate;
-    const dateObj = new Date(selectedDate);
-    const formattedDate = dateObj.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-
-    return {
-      title: isToday ? "You're all caught up!" : "No contacts scheduled",
-      subtitle: isToday ? "No contacts scheduled for today" : formattedDate,
-      icon: isToday ? "checkmark-circle" as const : "calendar-outline" as const,
-    };
-  }, [selectedDate, todayDate]);
-
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-cream">
-        <ActivityIndicator size="large" color="#9CA986" />
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView className="flex-1 bg-cream">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9CA986" />}
       >
-        <View className="mb-4">
-          <Text className="text-2xl font-bold text-gray-900">Calendar</Text>
-          <Text className="mt-1 text-base text-gray-500">
-            {monthDueCount} contact{monthDueCount !== 1 ? 's' : ''} due this month
+        <View className="mb-6">
+          <Text className="text-3xl font-semibold text-slate-900 tracking-tight">Calendar</Text>
+          <Text className="mt-1 text-lg text-sage-muted">
+            {monthDueCount} reminder{monthDueCount !== 1 ? 's' : ''} this month
           </Text>
         </View>
 
-        <View className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+        <View className="mb-8 overflow-hidden rounded-3xl bg-surface shadow-sm border border-border/50 p-2">
           <Calendar
             markingType="multi-dot"
             markedDates={markedDates}
@@ -260,21 +212,19 @@ export default function CalendarScreen() {
             theme={theme}
             enableSwipeMonths
             firstDay={0}
+            style={{ borderRadius: 16 }}
           />
         </View>
 
         <View>
+           <Text className="text-lg font-semibold text-slate-900 mb-4 px-1">
+              {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+           </Text>
+           
           {contactsForDate.length === 0 ? (
-            <View className="items-center py-12 px-6">
-              <Ionicons name={emptyState.icon} size={80} color="#9CA986" />
-              <Text className="mt-6 text-3xl font-bold text-gray-900 text-center leading-tight">
-                {emptyState.title}
-              </Text>
-              {emptyState.subtitle && (
-                <Text className="mt-4 text-xl text-center text-gray-600">
-                  {emptyState.subtitle}
-                </Text>
-              )}
+            <View className="items-center py-8 opacity-60 rounded-3xl border-2 border-dashed border-sage/20 bg-sage/5">
+              <Ionicons name="sunny-outline" size={48} color="#9CA986" />
+              <Text className="mt-4 text-base text-slate-600 font-medium">No plans for today</Text>
             </View>
           ) : (
             contactsForDate.map((contact) => (

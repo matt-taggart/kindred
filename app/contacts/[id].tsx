@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, Image, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,59 +12,27 @@ import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const bucketLabelMap: Record<Contact['bucket'], string> = {
-  daily: 'Daily reminders',
-  weekly: 'Weekly reminders',
-  'bi-weekly': 'Bi-weekly reminders',
-  'every-three-weeks': 'Every three weeks reminders',
-  monthly: 'Monthly reminders',
-  'every-six-months': 'Every six months reminders',
-  yearly: 'Yearly reminders',
-  custom: 'Custom reminders',
-};
-
-const formatCustomLabel = (customIntervalDays?: number | null) => {
-  if (!customIntervalDays || customIntervalDays < 1) return 'Custom reminders';
-
-  if (customIntervalDays % 30 === 0) {
-    const months = customIntervalDays / 30;
-    return months === 1 ? 'Every month' : `Every ${months} months`;
-  }
-
-  if (customIntervalDays % 7 === 0) {
-    const weeks = customIntervalDays / 7;
-    return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
-  }
-
-  if (customIntervalDays === 1) return 'Daily reminders';
-  return `Every ${customIntervalDays} days`;
-};
-
-const getBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
-  if (bucket === 'custom') return formatCustomLabel(customIntervalDays);
-  return bucketLabelMap[bucket];
-};
-
 const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) return 'Never';
+  if (!lastContactedAt) return 'No prior connection';
 
   const diff = Math.max(0, Date.now() - lastContactedAt);
   const days = Math.floor(diff / DAY_IN_MS);
 
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  return `${days} days ago`;
+  if (days === 0) return 'Connected today';
+  if (days === 1) return 'Connected yesterday';
+  if (days < 30) return 'Connected recently';
+  return 'Connected last month';
 };
 
 const formatNextCheckIn = (nextContactDate?: number | null) => {
-  if (!nextContactDate) return 'Not scheduled';
+  if (!nextContactDate) return 'No reminder set';
 
   const diff = nextContactDate - Date.now();
   if (diff <= 0) return 'Due now';
 
   const days = Math.ceil(diff / DAY_IN_MS);
-  if (days === 1) return 'Tomorrow';
-  return `In ${days} days`;
+  if (days === 1) return 'Reminder tomorrow';
+  return `Next reminder in ${days} days`;
 };
 
 export default function ContactDetailScreen() {
@@ -272,16 +240,16 @@ export default function ContactDetailScreen() {
   }, [loadContactData]);
 
   const initial = contact?.name?.charAt(0).toUpperCase() || '?';
+  const isDue = contact?.nextContactDate && contact.nextContactDate <= Date.now();
 
-  // Screen options must be memoized and Stack.Screen must render in all code paths
-  // to maintain navigation context consistency (fixes crash when deleting all notes)
   const screenOptions = useMemo(() => ({
-    title: contact?.name || 'Contact',
+    headerTitle: '',
     headerBackTitle: 'Back',
-    headerShown: true,
+    headerShadowVisible: false,
+    headerStyle: { backgroundColor: '#F3F0E6' },
     headerRight: contact ? ({ tintColor }: { tintColor?: string }) => (
-      <TouchableOpacity onPress={handleEditContact}>
-        <Text className="text-lg font-semibold" style={{ color: tintColor }}>Edit</Text>
+      <TouchableOpacity onPress={handleEditContact} className="px-2">
+        <Text className="text-base font-medium text-sage-muted">Edit</Text>
       </TouchableOpacity>
     ) : undefined,
   }), [contact, handleEditContact]);
@@ -291,7 +259,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-cream">
-          <Text className="text-slate">Loading...</Text>
+          <ActivityIndicator size="small" color="#9CA986" />
         </SafeAreaView>
       </>
     );
@@ -314,157 +282,99 @@ export default function ContactDetailScreen() {
       <SafeAreaView className="flex-1 bg-cream">
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9CA986" />}
         >
-          {contact.isArchived && (
-            <View className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-4">
-              <View className="flex-row items-center mb-3">
-                <Ionicons name="archive-outline" size={20} color="#d97706" />
-                <Text className="ml-2 text-base font-semibold text-amber-800">Archived Contact</Text>
-              </View>
-              <Text className="text-sm text-amber-700 mb-3">
-                This contact is archived and won't appear in your regular lists. Restore it to receive reminders again.
-              </Text>
-              <TouchableOpacity
-                className="flex-row items-center justify-center gap-2 rounded-xl bg-amber-600 py-3"
-                onPress={handleUnarchive}
-                disabled={unarchiving}
-                activeOpacity={0.85}
-              >
-                {unarchiving ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Ionicons name="refresh-outline" size={20} color="#fff" />
-                )}
-                <Text className="text-base font-semibold text-white">
-                  {unarchiving ? 'Restoring...' : 'Unarchive Contact'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Contact Info Header */}
-          <View className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-            <View className="flex-row items-center gap-4">
-              {contact.avatarUri ? (
-                <View className="h-16 w-16 overflow-hidden rounded-full">
-                  <Image
-                    source={{ uri: contact.avatarUri }}
-                    className="h-full w-full"
-                    resizeMode="cover"
-                  />
-                </View>
+          {/* Header Card */}
+          <View className="items-center mb-8">
+             {contact.avatarUri ? (
+                <Image
+                  source={{ uri: contact.avatarUri }}
+                  className="h-24 w-24 rounded-full mb-4 border-4 border-white shadow-sm"
+                  resizeMode="cover"
+                />
               ) : (
-                <View className="h-16 w-16 items-center justify-center rounded-full bg-sage">
-                  <Text className="text-2xl font-semibold text-white">{initial}</Text>
+                <View className="h-24 w-24 items-center justify-center rounded-full bg-sage mb-4 border-4 border-white shadow-sm">
+                  <Text className="text-3xl font-semibold text-white">{initial}</Text>
                 </View>
               )}
+              
+              <Text className="text-2xl font-semibold text-slate-900 mb-1">{contact.name}</Text>
+              {contact.phone && (
+                 <Text className="text-base text-slate-500 mb-4">{formatPhoneNumber(contact.phone)}</Text>
+              )}
 
-              <View className="flex-1">
-                <Text className="text-2xl font-bold text-slate">{contact.name}</Text>
-                {contact.phone && (
-                  <Text className="text-lg text-slate-600">{formatPhoneNumber(contact.phone)}</Text>
-                )}
-                <Text className="text-base text-slate-500">{getBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
+              <View className="items-center gap-1">
+                 <Text className="text-sm text-sage-muted font-medium">{formatLastContacted(contact.lastContactedAt)}</Text>
+                 <Text className="text-sm text-sage-muted">{formatNextCheckIn(contact.nextContactDate)}</Text>
               </View>
-            </View>
-
-            <View className="mt-4 rounded-xl border border-sage-100 bg-cream p-3">
-              <View className="flex-row justify-between">
-                <View>
-                  <Text className="text-sm text-gray-600">Last contacted</Text>
-                  <Text className="text-lg font-semibold text-slate">{formatLastContacted(contact.lastContactedAt)}</Text>
-                </View>
-                <View className="items-end">
-                  <Text className="text-sm text-gray-600">Next check-in</Text>
-                  <Text className="text-lg font-semibold text-slate">{formatNextCheckIn(contact.nextContactDate)}</Text>
-                </View>
-              </View>
-            </View>
           </View>
 
-          {/* Call/Text Action Buttons */}
-          {contact.phone && (
-            <View className="mb-6 flex-row gap-3">
-              <TouchableOpacity
-                className={`flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3 ${
-                  contact.isArchived ? 'bg-gray-200 border border-gray-300' : 'bg-sage'
-                }`}
-                onPress={handleCall}
-                disabled={contact.isArchived}
-                activeOpacity={contact.isArchived ? 1 : 0.85}
-              >
-                <Ionicons name="call-outline" size={24} color={contact.isArchived ? '#6b7280' : '#fff'} />
-                <Text className={`text-lg font-semibold ${contact.isArchived ? 'text-gray-400' : 'text-white'}`}>
-                  Call
-                </Text>
-              </TouchableOpacity>
+          {/* Quick Actions */}
+          <View className="flex-row justify-center gap-3 mb-8">
+              {contact.phone && (
+                 <>
+                    <TouchableOpacity
+                      className="flex-row items-center gap-2 px-5 py-3 rounded-full border border-sage/50 bg-white shadow-sm"
+                      onPress={handleCall}
+                    >
+                       <Ionicons name="call-outline" size={18} color="#5C6356" />
+                       <Text className="text-sm font-semibold text-slate-600">Call</Text>
+                    </TouchableOpacity>
 
-              <TouchableOpacity
-                className={`flex-1 flex-row items-center justify-center gap-2 rounded-2xl py-3 ${
-                  contact.isArchived ? 'bg-gray-200 border border-gray-300' : 'bg-sage'
-                }`}
-                onPress={handleText}
-                disabled={contact.isArchived}
-                activeOpacity={contact.isArchived ? 1 : 0.85}
-              >
-                <Ionicons name="chatbubble-outline" size={24} color={contact.isArchived ? '#6b7280' : '#fff'} />
-                <Text className={`text-lg font-semibold ${contact.isArchived ? 'text-gray-400' : 'text-white'}`}>
-                  Text
-                </Text>
-              </TouchableOpacity>
-            </View>
+                    <TouchableOpacity
+                      className="flex-row items-center gap-2 px-5 py-3 rounded-full border border-sage/50 bg-white shadow-sm"
+                      onPress={handleText}
+                    >
+                       <Ionicons name="chatbubble-outline" size={18} color="#5C6356" />
+                       <Text className="text-sm font-semibold text-slate-600">Text</Text>
+                    </TouchableOpacity>
+                 </>
+              )}
+              
+               <TouchableOpacity
+                  className="flex-row items-center gap-2 px-5 py-3 rounded-full border border-sage/50 bg-white shadow-sm"
+                  onPress={handleAddNote}
+                >
+                   <Ionicons name="pencil-outline" size={18} color="#5C6356" />
+                   <Text className="text-sm font-semibold text-slate-600">Note</Text>
+                </TouchableOpacity>
+          </View>
+
+          {/* Reach Out Section (If Due) */}
+          {isDue && !contact.isArchived && (
+             <View className="mb-8 p-6 bg-surface rounded-3xl shadow-sm border border-border">
+                <Text className="text-lg font-semibold text-slate-900 mb-4 text-center">Ready to connect?</Text>
+                <View className="flex-row gap-3">
+                   <TouchableOpacity
+                      className="flex-1 items-center justify-center rounded-full bg-sage py-3 shadow-sm"
+                      onPress={handleMarkDone}
+                    >
+                      <Text className="text-base font-semibold text-white">Reached out</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      className="flex-1 items-center justify-center rounded-full border border-border bg-white py-3"
+                      onPress={handleSnooze}
+                      disabled={snoozing}
+                    >
+                      <Text className="text-base font-medium text-slate-600">{snoozing ? '...' : 'Later'}</Text>
+                    </TouchableOpacity>
+                </View>
+             </View>
           )}
 
-          {/* Mark Done / Snooze Actions */}
-          {!contact.isArchived && (
-            <View className="mb-6 flex-row gap-3">
-              <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-2 border-sage py-3"
-                onPress={handleMarkDone}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="checkmark-circle-outline" size={24} color="#9CA986" />
-                <Text className="text-lg font-semibold text-sage">Mark Done</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-2 border-sage py-3"
-                onPress={handleSnooze}
-                disabled={snoozing}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="alarm-outline" size={24} color="#9CA986" />
-                <Text className="text-lg font-semibold text-sage">
-                  {snoozing ? 'Snoozing...' : 'Snooze'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Add Note Button */}
-          <TouchableOpacity
-            className="mb-6 flex-row items-center justify-center gap-2 rounded-2xl bg-white border-2 border-sage py-3"
-            onPress={handleAddNote}
-            activeOpacity={0.85}
-          >
-            <Ionicons name="pencil-outline" size={24} color="#9CA986" />
-            <Text className="text-lg font-semibold text-sage">Add Note</Text>
-          </TouchableOpacity>
-
-          {/* Interaction History */}
+          {/* Shared Moments */}
           <View>
-            <Text className="mb-3 text-xl font-bold text-slate">History</Text>
+            <Text className="mb-4 text-xl font-semibold text-slate-900 px-1">Shared moments</Text>
 
-            {/* Stable outer View prevents full unmount/remount during list→empty transition */}
-            <View className="flex flex-col gap-4">
+            <View className="flex flex-col">
               {interactions.length === 0 ? (
-                <View className="items-center justify-center rounded-2xl bg-white p-8 shadow-sm">
-                  <Ionicons name="time-outline" size={48} color="#94a3b8" />
-                  <Text className="mt-3 text-base text-slate-600">No history yet</Text>
-                  <Text className="mt-1 text-sm text-slate-500">
-                    Your conversation history will appear here once you start logging interactions.
+                <View className="items-center justify-center rounded-3xl bg-surface p-8 shadow-sm border border-border/50">
+                  <Ionicons name="book-outline" size={32} color="#9CA986" style={{ opacity: 0.5 }} />
+                  <Text className="mt-3 text-base text-slate-600 font-medium">Your story starts here</Text>
+                  <Text className="mt-1 text-sm text-sage-muted text-center max-w-[200px]">
+                    Log your first interaction to start building a history.
                   </Text>
                 </View>
               ) : (
@@ -479,6 +389,19 @@ export default function ContactDetailScreen() {
               )}
             </View>
           </View>
+
+          {contact.isArchived && (
+             <TouchableOpacity
+               className="mt-8 flex-row items-center justify-center gap-2 rounded-xl bg-amber-100 py-3 mx-4"
+               onPress={handleUnarchive}
+               disabled={unarchiving}
+             >
+               <Ionicons name="refresh-outline" size={20} color="#92400e" />
+               <Text className="text-base font-semibold text-amber-800">
+                 {unarchiving ? 'Restoring...' : 'Unarchive Contact'}
+               </Text>
+             </TouchableOpacity>
+          )}
         </ScrollView>
       </SafeAreaView>
 

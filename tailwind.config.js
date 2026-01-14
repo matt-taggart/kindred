@@ -7,20 +7,21 @@ module.exports = {
       colors: {
         sage: {
           DEFAULT: '#9CA986',
-          100: '#E6E9E1', // lighter tint for backgrounds
+          100: '#E6E9E1',
+          muted: '#8B9678', // from plan text secondary
         },
         terracotta: {
-          DEFAULT: '#D48158',
-          100: '#F6E6DE', // lighter tint
-        },
-        magic: {
-          DEFAULT: '#6366f1', // Indigo 500
-          100: '#e0e7ff', // Indigo 100
-          200: '#c7d2fe', // Indigo 200
-          600: '#4f46e5', // Indigo 600
+          DEFAULT: '#D4896A',
+          100: '#F6E6DE',
         },
         cream: '#F3F0E6',
-        slate: '#475569',
+        surface: '#FDFBF7',
+        slate: {
+          DEFAULT: '#5C6356',
+          600: '#5C6356', // mapping old usages
+          900: '#2D312A', // darker for headings
+        },
+        border: '#E8E4DA',
       },
     },
   },

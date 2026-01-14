@@ -29,11 +29,11 @@ const formatInteractionDate = (date: number) => {
   const dateObj = new Date(date);
   const time = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
-  if (days === 0) return `Today at ${time}`;
-  if (days === 1) return `Yesterday at ${time}`;
-  if (days < 7) return `${days} days ago at ${time}`;
+  if (days === 0) return `Today`;
+  if (days === 1) return `Yesterday`;
+  if (days < 7) return `${days} days ago`;
 
-  return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ` at ${time}`;
+  return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 export interface InteractionListItemProps {
@@ -45,29 +45,27 @@ export interface InteractionListItemProps {
 export default function InteractionListItem({ interaction, onEdit, onDelete }: InteractionListItemProps) {
   return (
     <TouchableOpacity
-      className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+      className="rounded-2xl bg-surface p-5 shadow-sm shadow-slate-200/50 mb-3 border border-border/50"
       onPress={() => onEdit(interaction)}
       activeOpacity={0.7}
     >
-      <View className="flex-row items-start gap-3">
-        <View className="mt-1">
-          <Ionicons name={typeIcons[interaction.type]} size={24} color="#475569" />
+      <View className="flex-row items-start gap-4">
+        <View className="mt-1 h-10 w-10 items-center justify-center rounded-full bg-sage-100">
+          <Ionicons name={typeIcons[interaction.type]} size={20} color="#5C6356" />
         </View>
 
         <View className="flex-1">
           <View className="flex-row items-center justify-between">
-            <Text className="text-lg font-semibold text-slate">{typeLabels[interaction.type]}</Text>
-            <TouchableOpacity onPress={onDelete} activeOpacity={0.7}>
-              <Ionicons name="trash-outline" size={20} color="#94a3b8" />
-            </TouchableOpacity>
+             <Text className="text-base font-semibold text-slate-900">{formatInteractionDate(interaction.date)}</Text>
+             <TouchableOpacity onPress={onDelete} hitSlop={10} activeOpacity={0.6}>
+               <Ionicons name="trash-outline" size={18} color="#9CA986" />
+             </TouchableOpacity>
           </View>
-
-          <Text className="text-base text-slate-500">{formatInteractionDate(interaction.date)}</Text>
+          
+          <Text className="text-sm text-sage-muted mt-0.5 mb-2">{typeLabels[interaction.type]}</Text>
 
           {interaction.notes && (
-            <View className="mt-2 rounded-lg border border-sage-100 bg-cream p-3">
-              <Text className="text-base text-slate">{interaction.notes}</Text>
-            </View>
+            <Text className="text-base text-slate leading-relaxed">{interaction.notes}</Text>
           )}
         </View>
       </View>

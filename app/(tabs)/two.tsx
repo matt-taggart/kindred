@@ -30,55 +30,37 @@ const formatBucketLabel = (
   customIntervalDays?: number | null,
 ) => {
   switch (bucket) {
-    case "daily":
-      return "Daily reminders";
-    case "weekly":
-      return "Weekly reminders";
-    case "bi-weekly":
-      return "Every two weeks";
-    case "every-three-weeks":
-      return "Every three weeks";
-    case "monthly":
-      return "Monthly reminders";
-    case "every-six-months":
-      return "Every six months";
-    case "yearly":
-      return "Yearly reminders";
+    case "daily": return "Daily";
+    case "weekly": return "Weekly";
+    case "bi-weekly": return "Every 2 weeks";
+    case "every-three-weeks": return "Every 3 weeks";
+    case "monthly": return "Monthly";
+    case "every-six-months": return "Seasonally";
+    case "yearly": return "Yearly";
     case "custom": {
-      if (!customIntervalDays || customIntervalDays < 1)
-        return "Custom reminders";
-      if (customIntervalDays % 30 === 0) {
-        const months = customIntervalDays / 30;
-        return months === 1 ? "Every month" : `Every ${months} months`;
-      }
-      if (customIntervalDays % 7 === 0) {
-        const weeks = customIntervalDays / 7;
-        return weeks === 1 ? "Every week" : `Every ${weeks} weeks`;
-      }
-      if (customIntervalDays === 1) return "Daily reminders";
-      return `Every ${customIntervalDays} days`;
+        if (!customIntervalDays) return "Custom";
+        return `${customIntervalDays} days`;
     }
-    default:
-      return "Custom reminders";
+    default: return "Custom";
   }
 };
 
 const formatLastContacted = (lastContactedAt?: number | null) => {
-  if (!lastContactedAt) return "Never";
+  if (!lastContactedAt) return "No prior connection";
 
   const diff = Math.max(0, Date.now() - lastContactedAt);
   const days = Math.floor(diff / DAY_IN_MS);
 
   if (days === 0) return "Today";
-  if (days === 1) return "1 day ago";
+  if (days === 1) return "Yesterday";
   return `${days} days ago`;
 };
 
 const formatNextCheckIn = (nextContactDate?: number | null) => {
-  if (!nextContactDate) return "Not scheduled";
+  if (!nextContactDate) return "None";
 
   const diff = nextContactDate - Date.now();
-  if (diff <= 0) return "Due now";
+  if (diff <= 0) return "Due";
 
   const days = Math.ceil(diff / DAY_IN_MS);
   if (days === 1) return "Tomorrow";
@@ -103,17 +85,17 @@ const FilterChip = ({
   onPress: () => void;
 }) => (
   <TouchableOpacity
-    className={`rounded-full border px-4 py-3 ${
-      active ? "border-sage bg-sage" : "border-gray-200 bg-white"
+    className={`rounded-full border px-4 py-2 ${
+      active ? "border-sage bg-sage" : "border-border bg-white"
     }`}
     onPress={onPress}
     activeOpacity={0.85}
   >
     <Text
-      className={`text-base font-semibold ${active ? "text-white" : "text-gray-700"}`}
+      className={`text-sm font-medium ${active ? "text-white" : "text-slate-600"}`}
     >
       {label}
-      <Text className={active ? "text-white" : "text-gray-400"}>
+      <Text className={active ? "text-white" : "text-slate-400"}>
         {" "}
         · {count}
       </Text>
@@ -133,93 +115,41 @@ const ContactRow = ({
   onPress?: () => void;
 }) => {
   const due = isContactDue(contact);
+  const initial = contact.name.charAt(0).toUpperCase();
 
   return (
     <TouchableOpacity
-      className="mb-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+      className="mb-4 rounded-3xl bg-surface p-5 shadow-sm shadow-slate-200/50 border border-border/50"
       onPress={onPress}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
     >
-      <View className="flex-row items-center justify-between">
-        <View className="flex-1 pr-3">
-          <Text className="text-xl font-semibold text-gray-900">
-            {contact.name}
-          </Text>
-          <Text className="text-base text-gray-500">
-            {formatBucketLabel(contact.bucket, contact.customIntervalDays)}
-          </Text>
-        </View>
+      <View className="flex-row items-center justify-between mb-4">
+         <View className="flex-row items-center gap-3">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-sage/10">
+                <Text className="text-base font-semibold text-sage">{initial}</Text>
+            </View>
+            <View>
+                <Text className="text-lg font-semibold text-slate-900">{contact.name}</Text>
+                <Text className="text-sm text-sage-muted">{formatBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
+            </View>
+         </View>
 
-        <View className="flex-row items-center gap-2">
-          <View
-            className={`rounded-full px-4 py-2 ${due ? "bg-terracotta-100" : "bg-sage"}`}
-          >
-            <Text
-              className={`text-sm font-semibold ${due ? "text-terracotta" : "text-white"}`}
-            >
-              {due ? "Due" : "Upcoming"}
-            </Text>
-          </View>
-          <Text className="text-2xl text-gray-400 -mt-0.5">›</Text>
-        </View>
+        {due && (
+           <View className="bg-terracotta/10 px-3 py-1 rounded-full">
+              <Text className="text-xs font-semibold text-terracotta">Due</Text>
+           </View>
+        )}
       </View>
 
-      <View className="mt-4">
-        <Text className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Last contacted
-        </Text>
-        <Text className="text-lg font-semibold text-gray-900">
-          {formatLastContacted(contact.lastContactedAt)}
-        </Text>
-
-        <Text className="mt-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Next check-in
-        </Text>
-        <Text className="text-lg font-semibold text-gray-900">
-          {formatNextCheckIn(contact.nextContactDate)}
-        </Text>
-      </View>
-
-      <View className="mt-3 flex-row items-center justify-between">
-        <View className="flex-1">
-          {contact.phone ? (
-            <Text className="text-base text-gray-500">
-              Phone · {formatPhoneNumber(contact.phone)}
-            </Text>
-          ) : null}
-        </View>
-
-        {contact.isArchived ? (
-          <TouchableOpacity
-            className="ml-2 flex-row items-center rounded-full bg-sage px-4 py-2"
-            onPress={(e) => {
-              e.stopPropagation();
-              onUnarchive?.();
-            }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="refresh-outline" size={16} color="white" />
-            <Text className="ml-1.5 text-sm font-semibold text-white">
-              Unarchive
-            </Text>
-          </TouchableOpacity>
-        ) : null}
-
-        {!contact.isArchived && onArchive ? (
-          <TouchableOpacity
-            className="ml-2 flex-row items-center rounded-full bg-gray-100 px-4 py-2"
-            onPress={(e) => {
-              e.stopPropagation();
-              onArchive?.();
-            }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="archive-outline" size={16} color="#374151" />
-            <Text className="ml-1.5 text-sm font-semibold text-gray-700">
-              Archive
-            </Text>
-          </TouchableOpacity>
-        ) : null}
+      <View className="flex-row justify-between items-center border-t border-border/50 pt-3">
+         <View>
+             <Text className="text-xs font-medium uppercase tracking-wide text-slate-400">Last connected</Text>
+             <Text className="text-sm font-medium text-slate-700 mt-0.5">{formatLastContacted(contact.lastContactedAt)}</Text>
+         </View>
+         <View className="items-end">
+             <Text className="text-xs font-medium uppercase tracking-wide text-slate-400">Next</Text>
+             <Text className="text-sm font-medium text-slate-700 mt-0.5">{formatNextCheckIn(contact.nextContactDate)}</Text>
+         </View>
       </View>
     </TouchableOpacity>
   );
@@ -296,53 +226,9 @@ export default function ContactsScreen() {
     router.push({ pathname: "/contacts/import", params: { autoRequest: "1" } });
   }, [router]);
 
-  const handleArchive = useCallback(
-    async (contactId: string) => {
-      const contact = contacts.find((c) => c.id === contactId);
-      Alert.alert(
-        "Archive Contact",
-        `Are you sure you want to archive ${contact?.name}? They won't appear in your main list, but you can restore them anytime.`,
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Archive",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                await archiveContact(contactId);
-                loadContacts();
-              } catch (error) {
-                Alert.alert(
-                  "Error",
-                  error instanceof Error
-                    ? error.message
-                    : "Failed to archive contact.",
-                );
-              }
-            },
-          },
-        ],
-      );
-    },
-    [contacts, loadContacts],
-  );
-
-  const handleUnarchive = useCallback(
-    async (contactId: string) => {
-      try {
-        await unarchiveContact(contactId);
-        loadContacts();
-      } catch (error) {
-        Alert.alert(
-          "Error",
-          error instanceof Error
-            ? error.message
-            : "Failed to unarchive contact.",
-        );
-      }
-    },
-    [loadContacts],
-  );
+  const handleAddPress = useCallback(() => {
+    router.push("/contacts/new");
+  }, [router]);
 
   const handleContactPress = useCallback(
     (contactId: string) => {
@@ -350,98 +236,6 @@ export default function ContactsScreen() {
     },
     [router],
   );
-
-  const handleResetDatabase = useCallback(async () => {
-    Alert.alert(
-      "Reset Database",
-      "This will delete all contacts and interactions. This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Reset",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await resetDatabase();
-              loadContacts();
-              Alert.alert("Success", "Database has been reset.");
-            } catch (error) {
-              Alert.alert(
-                "Error",
-                error instanceof Error
-                  ? error.message
-                  : "Failed to reset database.",
-              );
-            }
-          },
-        },
-      ],
-    );
-  }, [loadContacts]);
-
-  const emptyState = useMemo(() => {
-    const hasSearchQuery = searchQuery.trim().length > 0;
-    const hasZeroContacts = contacts.length === 0;
-
-    if (hasZeroContacts) {
-      return {
-        type: "first-time" as const,
-        title: "No contacts yet",
-        subtitle: "Import from your phone to start building your circle.",
-        showCTA: true,
-      };
-    }
-
-    if (hasSearchQuery) {
-      return {
-        type: "search" as const,
-        title: `No contacts match '${searchQuery}'`,
-        subtitle: "Try a different search term.",
-        showCTA: false,
-      };
-    }
-
-    if (filter === "due" && stats.due === 0) {
-      return {
-        type: "no-due" as const,
-        title: "No contacts are due right now",
-        subtitle: "Great job staying on top of things!",
-        showCTA: false,
-      };
-    }
-
-    if (filter === "archived" && stats.archived === 0) {
-      return {
-        type: "no-archived" as const,
-        title: "No archived contacts",
-        subtitle: null,
-        showCTA: false,
-      };
-    }
-
-    if (filter === "all" && stats.active === 0 && contacts.length > 0) {
-      return {
-        type: "all-archived" as const,
-        title: "All your contacts are archived",
-        subtitle: `You have ${stats.archived} archived contact${stats.archived > 1 ? "s" : ""}`,
-        showCTA: true,
-      };
-    }
-
-    return {
-      type: "default" as const,
-      title: "No contacts found",
-      subtitle: null,
-      showCTA: false,
-    };
-  }, [
-    searchQuery,
-    contacts.length,
-    filter,
-    stats.due,
-    stats.archived,
-    stats.active,
-  ]);
 
   const filterOptions: {
     label: string;
@@ -462,106 +256,81 @@ export default function ContactsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-cream px-4 pt-4">
+    <SafeAreaView className="flex-1 bg-cream">
+      <View className="px-5 pt-4 pb-2 bg-cream">
+          <View className="flex-row justify-between items-center mb-6">
+            <Text className="text-3xl font-semibold text-slate-900 tracking-tight">Contacts</Text>
+            <TouchableOpacity 
+                className="bg-sage h-10 w-10 items-center justify-center rounded-full shadow-sm"
+                onPress={handleAddPress}
+            >
+                <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          <View className="flex-col gap-3 mb-6 items-center">
+            <TouchableOpacity
+              className="w-full max-w-[260px] bg-sage py-3.5 rounded-2xl items-center justify-center shadow-sm shadow-sage/20"
+              onPress={handleAddPress}
+            >
+              <Text className="text-white font-semibold text-center" numberOfLines={1}>
+                Add a connection
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="w-full max-w-[260px] bg-white py-3.5 rounded-2xl items-center justify-center shadow-sm shadow-sage/30"
+              onPress={handleImportPress}
+            >
+              <Text className="text-sage font-semibold text-center" numberOfLines={1}>
+                Import from contacts
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View className="mb-4">
+             <TextInput
+                className="w-full bg-white border border-border rounded-xl px-4 py-3 text-base text-slate-900"
+                placeholder="Search..."
+                placeholderTextColor="#9ca3af"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                returnKeyType="search"
+             />
+          </View>
+
+          <View className="flex-row gap-2 mb-2">
+            {filterOptions.map((option) => (
+              <FilterChip
+                key={option.value}
+                active={filter === option.value}
+                label={option.label}
+                count={option.count}
+                onPress={() => setFilter(option.value)}
+              />
+            ))}
+          </View>
+      </View>
+
       <FlatList
         data={filteredContacts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ContactRow
             contact={item}
-            onArchive={
-              item.isArchived ? undefined : () => handleArchive(item.id)
-            }
-            onUnarchive={
-              item.isArchived ? () => handleUnarchive(item.id) : undefined
-            }
             onPress={() => handleContactPress(item.id)}
           />
         )}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9CA986" />
         }
         contentContainerStyle={{
-          paddingHorizontal: 16,
+          paddingHorizontal: 20,
           paddingBottom: 24,
-          flexGrow: filteredContacts.length === 0 ? 1 : undefined,
+          flexGrow: 1,
         }}
-        ListHeaderComponent={
-          <View className="pb-4">
-            <Text className="text-2xl font-bold text-gray-900">Contacts</Text>
-            <Text className="mt-1 text-base text-gray-500">
-              See who's due for a check-in and manage your contacts.
-            </Text>
-
-            {contacts.length > 0 && (
-              <>
-                <TouchableOpacity
-                  className="mt-4 w-full items-center rounded-2xl bg-sage py-4"
-                  onPress={handleImportPress}
-                  activeOpacity={0.9}
-                >
-                  <Text className="text-base font-semibold text-white">
-                    Add More Contacts
-                  </Text>
-                </TouchableOpacity>
-
-                <View className="mt-6">
-                  <View className="w-full min-h-14 rounded-2xl border border-gray-200 bg-white shadow-sm px-4 py-3 flex-row items-center">
-                    <TextInput
-                      className="flex-1 text-base leading-5 text-gray-900"
-                      placeholder="Search by name or number"
-                      placeholderTextColor="#9ca3af"
-                      value={searchQuery}
-                      onChangeText={setSearchQuery}
-                      returnKeyType="search"
-                      textAlignVertical="center"
-                    />
-                  </View>
-                </View>
-
-                <View className="mt-5 flex-row flex-wrap gap-2">
-                  {filterOptions.map((option) => (
-                    <FilterChip
-                      key={option.value}
-                      active={filter === option.value}
-                      label={option.label}
-                      count={option.count}
-                      onPress={() => setFilter(option.value)}
-                    />
-                  ))}
-                </View>
-              </>
-            )}
-          </View>
-        }
         ListEmptyComponent={
-          <View className="flex-1 items-center justify-center py-16">
-            <Text className="text-2xl font-bold text-gray-900">
-              {emptyState.title}
-            </Text>
-            {emptyState.subtitle && (
-              <Text className="mt-1 text-base text-gray-600 text-center">
-                {emptyState.subtitle}
-              </Text>
-            )}
-
-            {emptyState.showCTA && (
-              <TouchableOpacity
-                className="mt-5 rounded-2xl bg-sage px-6 py-4"
-                onPress={
-                  emptyState.type === "all-archived"
-                    ? () => setFilter("archived")
-                    : handleImportPress
-                }
-                activeOpacity={0.9}
-              >
-                <Text className="text-lg font-semibold text-white">
-                  {emptyState.type === "all-archived"
-                    ? "View Archived"
-                    : "Import from Phone"}
-                </Text>
-              </TouchableOpacity>
-            )}
+          <View className="flex-1 items-center justify-center py-20 opacity-60">
+             <Text className="text-lg text-slate-500 font-medium">No contacts found</Text>
           </View>
         }
       />
