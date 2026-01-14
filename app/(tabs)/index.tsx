@@ -4,20 +4,25 @@ import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
-  Image,
   RefreshControl,
   SafeAreaView,
+  SectionList,
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from 'react-native';
 
 import { Contact } from '@/db/schema';
-import { getDueContacts, snoozeContact, isBirthdayToday, updateInteraction } from '@/services/contactService';
+import { getDueContactsGrouped, GroupedDueContacts, snoozeContact, isBirthdayToday, updateInteraction } from '@/services/contactService';
 import CelebrationStatus from '@/components/CelebrationStatus';
 import ReachedOutSheet from '@/components/ReachedOutSheet';
 import { formatLastConnected } from '@/utils/timeFormatting';
+
+type Section = {
+  title: string;
+  data: Contact[];
+};
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -98,18 +103,19 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [groupedContacts, setGroupedContacts] = useState<GroupedDueContacts>({ birthdays: [], reconnect: [] });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [snoozingContactId, setSnoozingContactId] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
+  const [completionCount, setCompletionCount] = useState(0);
 
   const loadContacts = useCallback(() => {
     try {
-      const results = getDueContacts();
-      setContacts(results);
+      const results = getDueContactsGrouped();
+      setGroupedContacts(results);
     } catch (e) {
       console.warn('Failed to load contacts:', e);
     } finally {
@@ -125,6 +131,19 @@ export default function HomeScreen() {
     }, [loadContacts]),
   );
 
+  const sections: Section[] = useMemo(() => {
+    const result: Section[] = [];
+    if (groupedContacts.birthdays.length > 0) {
+      result.push({ title: 'Birthdays', data: groupedContacts.birthdays });
+    }
+    if (groupedContacts.reconnect.length > 0) {
+      result.push({ title: 'Time to reconnect', data: groupedContacts.reconnect });
+    }
+    return result;
+  }, [groupedContacts]);
+
+  const totalContacts = groupedContacts.birthdays.length + groupedContacts.reconnect.length;
+
   const handleMarkDone = useCallback((contact: Contact) => {
     setSelectedContact(contact);
     setShowReachedOutSheet(true);
@@ -135,6 +154,7 @@ export default function HomeScreen() {
 
     try {
       await updateInteraction(selectedContact.id, 'call', note || undefined);
+      setCompletionCount(prev => prev + 1);
       loadContacts();
     } catch (error) {
       Alert.alert('Error', 'Failed to save. Please try again.');
@@ -205,6 +225,12 @@ export default function HomeScreen() {
     [handleMarkDone, handleSnooze, snoozingContactId, handleContactPress],
   );
 
+  const renderSectionHeader = useCallback(({ section }: { section: Section }) => (
+    <Text className="text-lg font-semibold text-warmgray-muted mb-3 mt-6">
+      {section.title}
+    </Text>
+  ), []);
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     loadContacts();
@@ -222,7 +248,7 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-cream">
       <View className="flex-1 px-4 pt-6">
         <Text className="mb-1 text-3xl font-semibold text-warmgray">Today</Text>
-        <Text className="mb-8 text-lg text-warmgray-muted font-medium">
+        <Text className="text-lg text-warmgray-muted font-medium">
           {currentDate.toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
@@ -231,17 +257,32 @@ export default function HomeScreen() {
           })}
         </Text>
 
-        <FlatList
-          data={contacts}
+        {totalContacts > 0 && (
+          <Text className="mt-2 text-base text-warmgray-muted">
+            Who would you like to reach out to?
+          </Text>
+        )}
+
+        <SectionList
+          sections={sections}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={{
             paddingBottom: 24,
-            flexGrow: contacts.length === 0 ? 1 : undefined,
+            flexGrow: totalContacts === 0 ? 1 : undefined,
           }}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={<CelebrationStatus />}
+          ListEmptyComponent={<CelebrationStatus completionCount={completionCount} />}
+          ListFooterComponent={
+            totalContacts > 0 && completionCount > 0 ? (
+              <Text className="text-center text-warmgray-muted mt-6">
+                {completionCount} {completionCount === 1 ? 'connection' : 'connections'} nurtured today
+              </Text>
+            ) : null
+          }
+          stickySectionHeadersEnabled={false}
         />
       </View>
 
