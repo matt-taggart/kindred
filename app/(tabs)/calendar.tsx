@@ -256,12 +256,12 @@ export default function CalendarScreen() {
         <View>
           {contactsForDate.length === 0 ? (
             <View className="items-center py-12 px-6">
-              <Ionicons name={emptyState.icon} size={80} color="#9CA986" />
-              <Text className="mt-6 text-3xl font-bold text-warmgray text-center leading-tight">
+              <Ionicons name={emptyState.icon} size={72} color="#9CA986" />
+              <Text className="mt-6 text-2xl font-semibold text-warmgray text-center">
                 {emptyState.title}
               </Text>
               {emptyState.subtitle && (
-                <Text className="mt-4 text-xl text-center text-warmgray-muted">
+                <Text className="mt-3 text-base text-center text-warmgray-muted leading-relaxed">
                   {emptyState.subtitle}
                 </Text>
               )}
