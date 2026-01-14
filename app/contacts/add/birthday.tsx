@@ -45,12 +45,35 @@ export default function AddConnectionBirthdayScreen() {
     return isNaN(days) ? undefined : days;
   }, [params.customIntervalDays]);
 
-  const [birthdayEnabled, setBirthdayEnabled] = useState(false);
-  const [birthdayDate, setBirthdayDate] = useState<Date>(new Date());
+  type BirthdayState = 'collapsed' | 'editing' | 'saved';
+  const [birthdayState, setBirthdayState] = useState<BirthdayState>('collapsed');
+  const [editingDate, setEditingDate] = useState<Date>(new Date());
+  const [savedDate, setSavedDate] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
 
-  const handleSave = async (withBirthday: boolean) => {
+  const handleAddBirthday = () => {
+    setBirthdayState('editing');
+  };
+
+  const handleCancel = () => {
+    setEditingDate(new Date());
+    setBirthdayState('collapsed');
+  };
+
+  const handleSaveBirthday = () => {
+    setSavedDate(editingDate);
+    setBirthdayState('saved');
+  };
+
+  const handleEdit = () => {
+    if (savedDate) {
+      setEditingDate(savedDate);
+    }
+    setBirthdayState('editing');
+  };
+
+  const handleDone = async () => {
     if (!name) {
       router.replace('/contacts/add');
       return;
@@ -68,7 +91,7 @@ export default function AddConnectionBirthdayScreen() {
         bucket,
         customIntervalDays,
         nextContactDate: customIntervalDays ? undefined : null,
-        birthday: withBirthday ? formatDate(birthdayDate) : null,
+        birthday: savedDate ? formatDate(savedDate) : null,
       });
       router.replace(`/contacts/${created.id}`);
     } catch (error) {
@@ -81,6 +104,10 @@ export default function AddConnectionBirthdayScreen() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const formatDisplayDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -111,75 +138,87 @@ export default function AddConnectionBirthdayScreen() {
         </View>
 
         <View className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
-          {!birthdayEnabled ? (
+          {birthdayState === 'collapsed' && (
             <TouchableOpacity
               className="flex-row items-center justify-center py-4"
-              onPress={() => setBirthdayEnabled(true)}
+              onPress={handleAddBirthday}
               activeOpacity={0.7}
               disabled={saving}
             >
               <Ionicons name="gift-outline" size={24} color="#788467" style={{ marginRight: 8 }} />
               <Text className="text-lg font-semibold text-sage">Add Birthday</Text>
             </TouchableOpacity>
-          ) : (
+          )}
+
+          {birthdayState === 'editing' && (
             <View>
               <View className="flex-row items-center justify-between mb-4">
-                <View className="flex-row items-center gap-2">
-                  <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
-                    <Ionicons name="calendar-outline" size={18} color="#788467" />
-                  </View>
-                  <Text className="text-base font-semibold text-warmgray">Birthday</Text>
-                </View>
+                <Text className="text-base font-semibold text-warmgray">Birthday</Text>
                 <TouchableOpacity
-                  onPress={() => setBirthdayEnabled(false)}
+                  onPress={handleCancel}
                   activeOpacity={0.7}
                   disabled={saving}
                 >
-                  <Text className="text-sm font-medium text-terracotta">Remove</Text>
+                  <Text className="text-sm font-medium text-terracotta">Cancel</Text>
                 </TouchableOpacity>
               </View>
 
               <View className="items-center py-2 bg-cream rounded-xl border border-border/50">
                 <DateTimePicker
-                  value={birthdayDate}
+                  value={editingDate}
                   mode="date"
                   display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={(_e, date) => date && setBirthdayDate(date)}
+                  onChange={(_e, date) => date && setEditingDate(date)}
                   textColor="#57534E"
                   style={Platform.OS === 'ios' ? { height: 120 } : undefined}
                 />
               </View>
-              
-              <Text className="mt-4 text-xs text-warmgray-muted text-center">
-                We'll prioritize this over regular reminders on their birthday.
-              </Text>
+
+              <TouchableOpacity
+                className="mt-4 items-center justify-center rounded-xl bg-sage py-3"
+                onPress={handleSaveBirthday}
+                activeOpacity={0.9}
+                disabled={saving}
+              >
+                <Text className="text-base font-semibold text-white">Save Birthday</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {birthdayState === 'saved' && savedDate && (
+            <View className="flex-row items-center justify-between py-4">
+              <View className="flex-row items-center gap-3">
+                <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
+                  <Ionicons name="checkmark" size={20} color="#788467" />
+                </View>
+                <Text className="text-base font-medium text-warmgray">
+                  {formatDisplayDate(savedDate)}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={handleEdit}
+                activeOpacity={0.7}
+                disabled={saving}
+              >
+                <Text className="text-sm font-medium text-sage">Edit</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
 
         <View className="mt-auto pb-6">
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              className="flex-1 items-center justify-center rounded-2xl bg-surface border border-border h-14"
-              onPress={() => handleSave(false)}
-              activeOpacity={0.9}
-              disabled={saving}
-            >
-              <Text className="text-lg font-semibold text-warmgray-muted">Skip</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 items-center justify-center rounded-2xl bg-sage h-14 shadow-sm"
-              onPress={() => handleSave(birthdayEnabled)}
-              activeOpacity={0.9}
-              disabled={saving}
-            >
-              {saving ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text className="text-lg font-semibold text-white">Done</Text>
-              )}
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            className="items-center justify-center rounded-2xl bg-sage h-14 shadow-sm"
+            onPress={handleDone}
+            activeOpacity={0.9}
+            disabled={saving}
+          >
+            {saving ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text className="text-lg font-semibold text-white">Done</Text>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
