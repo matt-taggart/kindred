@@ -56,6 +56,14 @@ describe('formatLastConnected - specific days', () => {
     expect(formatLastConnected(NOW - 100 * DAY, NOW)).toBe('Connected 3 months ago');
   });
 
+  it('returns "Connected 4 months ago" for 120-149 days', () => {
+    expect(formatLastConnected(NOW - 135 * DAY, NOW)).toBe('Connected 4 months ago');
+  });
+
+  it('returns "Connected 5 months ago" for 150-179 days', () => {
+    expect(formatLastConnected(NOW - 165 * DAY, NOW)).toBe('Connected 5 months ago');
+  });
+
   it('returns "It\'s been a while" for 180+ days', () => {
     expect(formatLastConnected(NOW - 200 * DAY, NOW)).toBe("It's been a while");
   });
