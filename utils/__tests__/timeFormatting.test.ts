@@ -1,36 +1,67 @@
 import { formatLastConnected, formatNextReminder } from '../timeFormatting';
 
-describe('formatLastConnected', () => {
-  const NOW = new Date('2026-01-13T12:00:00Z').getTime();
+describe('formatLastConnected - specific days', () => {
+  const NOW = new Date('2026-01-15T12:00:00Z').getTime();
+  const DAY = 24 * 60 * 60 * 1000;
 
-  it('returns "Today" for same day', () => {
-    const timestamp = NOW - 1000 * 60 * 60; // 1 hour ago
-    expect(formatLastConnected(timestamp, NOW)).toBe('Today');
+  it('returns "Connected today" for same day', () => {
+    expect(formatLastConnected(NOW - 1000, NOW)).toBe('Connected today');
   });
 
-  it('returns "Connected recently" for 1-2 days ago', () => {
-    const timestamp = NOW - 1000 * 60 * 60 * 24 * 2; // 2 days ago
-    expect(formatLastConnected(timestamp, NOW)).toBe('Connected recently');
+  it('returns "Connected yesterday" for 1 day ago', () => {
+    expect(formatLastConnected(NOW - DAY, NOW)).toBe('Connected yesterday');
   });
 
-  it('returns "Connected last week" for 3-14 days ago', () => {
-    const timestamp = NOW - 1000 * 60 * 60 * 24 * 7; // 7 days ago
-    expect(formatLastConnected(timestamp, NOW)).toBe('Connected last week');
+  it('returns "Connected 2 days ago" for 2 days', () => {
+    expect(formatLastConnected(NOW - 2 * DAY, NOW)).toBe('Connected 2 days ago');
   });
 
-  it('returns "Connected last month" for 15-45 days ago', () => {
-    const timestamp = NOW - 1000 * 60 * 60 * 24 * 30; // 30 days ago
-    expect(formatLastConnected(timestamp, NOW)).toBe('Connected last month');
+  it('returns "Connected 3 days ago" for 3 days', () => {
+    expect(formatLastConnected(NOW - 3 * DAY, NOW)).toBe('Connected 3 days ago');
   });
 
-  it('returns "It\'s been a while" for 46+ days ago', () => {
-    const timestamp = NOW - 1000 * 60 * 60 * 24 * 60; // 60 days ago
-    expect(formatLastConnected(timestamp, NOW)).toBe("It's been a while");
+  it('returns "Connected 4 days ago" for 4 days', () => {
+    expect(formatLastConnected(NOW - 4 * DAY, NOW)).toBe('Connected 4 days ago');
   });
 
-  it('returns "Never" for null/undefined', () => {
-    expect(formatLastConnected(null, NOW)).toBe('Never');
-    expect(formatLastConnected(undefined, NOW)).toBe('Never');
+  it('returns "Connected 5 days ago" for 5 days', () => {
+    expect(formatLastConnected(NOW - 5 * DAY, NOW)).toBe('Connected 5 days ago');
+  });
+
+  it('returns "Connected 6 days ago" for 6 days', () => {
+    expect(formatLastConnected(NOW - 6 * DAY, NOW)).toBe('Connected 6 days ago');
+  });
+
+  it('returns "Connected last week" for 7-13 days', () => {
+    expect(formatLastConnected(NOW - 10 * DAY, NOW)).toBe('Connected last week');
+  });
+
+  it('returns "Connected 2 weeks ago" for 14-20 days', () => {
+    expect(formatLastConnected(NOW - 16 * DAY, NOW)).toBe('Connected 2 weeks ago');
+  });
+
+  it('returns "Connected 3 weeks ago" for 21-29 days', () => {
+    expect(formatLastConnected(NOW - 25 * DAY, NOW)).toBe('Connected 3 weeks ago');
+  });
+
+  it('returns "Connected last month" for 30-59 days', () => {
+    expect(formatLastConnected(NOW - 45 * DAY, NOW)).toBe('Connected last month');
+  });
+
+  it('returns "Connected 2 months ago" for 60-89 days', () => {
+    expect(formatLastConnected(NOW - 75 * DAY, NOW)).toBe('Connected 2 months ago');
+  });
+
+  it('returns "Connected 3 months ago" for 90-119 days', () => {
+    expect(formatLastConnected(NOW - 100 * DAY, NOW)).toBe('Connected 3 months ago');
+  });
+
+  it('returns "It\'s been a while" for 180+ days', () => {
+    expect(formatLastConnected(NOW - 200 * DAY, NOW)).toBe("It's been a while");
+  });
+
+  it('returns "Not reached out yet" for null', () => {
+    expect(formatLastConnected(null, NOW)).toBe('Not reached out yet');
   });
 });
 
