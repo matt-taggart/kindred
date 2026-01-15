@@ -1,9 +1,12 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
+  AppState,
+  AppStateStatus,
   LayoutAnimation,
   Linking,
   Platform,
@@ -44,21 +47,36 @@ type ContactCardProps = {
   isSnoozing?: boolean;
   onPress: () => void;
   highlightReachedOut?: boolean;
+  onCallOrText?: () => void;
 };
 
-const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPress, highlightReachedOut }: ContactCardProps) => {
+const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPress, highlightReachedOut, onCallOrText }: ContactCardProps) => {
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
   const isBirthday = isBirthdayToday(contact);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (highlightReachedOut) {
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 150, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 150, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [highlightReachedOut, pulseAnim]);
 
   const handleCall = useCallback(() => {
     if (!contact.phone) return;
+    onCallOrText?.();
     Linking.openURL(`tel:${formatPhoneUrl(contact.phone)}`);
-  }, [contact.phone]);
+  }, [contact.phone, onCallOrText]);
 
   const handleText = useCallback(() => {
     if (!contact.phone) return;
+    onCallOrText?.();
     Linking.openURL(`sms:${formatPhoneUrl(contact.phone)}`);
-  }, [contact.phone]);
+  }, [contact.phone, onCallOrText]);
 
   const clockColor = isBirthday ? null : getClockColor(contact.lastContactedAt);
 
@@ -133,13 +151,15 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
       )}
 
       <View className="mt-4 flex-row gap-2">
-        <TouchableOpacity
-          className={`flex-1 items-center rounded-2xl py-3 border-2 ${isBirthday ? 'bg-white border-white' : 'bg-sage border-transparent'}`}
-          onPress={onMarkDone}
-          activeOpacity={0.85}
-        >
-          <Text className={`text-lg font-semibold ${isBirthday ? 'text-terracotta' : 'text-white'}`}>Reached out</Text>
-        </TouchableOpacity>
+        <Animated.View style={{ flex: 1, transform: [{ scale: pulseAnim }] }}>
+          <TouchableOpacity
+            className={`flex-1 items-center rounded-2xl py-3 border-2 ${isBirthday ? 'bg-white border-white' : 'bg-sage border-transparent'}`}
+            onPress={onMarkDone}
+            activeOpacity={0.85}
+          >
+            <Text className={`text-lg font-semibold ${isBirthday ? 'text-terracotta' : 'text-white'}`}>Reached out</Text>
+          </TouchableOpacity>
+        </Animated.View>
 
         <TouchableOpacity
           className={`flex-1 items-center rounded-2xl py-3 border-2 ${
@@ -174,6 +194,23 @@ export default function HomeScreen() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
   const [completionCount, setCompletionCount] = useState(0);
+  const [lastCalledContactId, setLastCalledContactId] = useState<string | null>(null);
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App came to foreground - trigger highlight if we have a pending contact
+        if (lastCalledContactId) {
+          // Clear it after a short delay to allow animation to complete
+          setTimeout(() => setLastCalledContactId(null), 1000);
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => subscription.remove();
+  }, [lastCalledContactId]);
 
   const loadContacts = useCallback(() => {
     try {
@@ -286,9 +323,11 @@ export default function HomeScreen() {
         onSnooze={() => handleSnooze(item)}
         isSnoozing={snoozingContactId === item.id}
         onPress={() => handleContactPress(item.id)}
+        highlightReachedOut={lastCalledContactId === item.id}
+        onCallOrText={() => setLastCalledContactId(item.id)}
       />
     ),
-    [handleMarkDone, handleSnooze, snoozingContactId, handleContactPress],
+    [handleMarkDone, handleSnooze, snoozingContactId, handleContactPress, lastCalledContactId],
   );
 
   const renderSectionHeader = useCallback(({ section }: { section: Section }) => (
