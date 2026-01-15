@@ -1,4 +1,4 @@
-import { formatLastConnected, formatNextReminder } from '../timeFormatting';
+import { formatLastConnected, formatNextReminder, getClockColor } from '../timeFormatting';
 
 describe('formatLastConnected - specific days', () => {
   const NOW = new Date('2026-01-15T12:00:00Z').getTime();
@@ -99,5 +99,31 @@ describe('formatNextReminder', () => {
   it('returns "Not scheduled" for null/undefined', () => {
     expect(formatNextReminder(null, NOW)).toBe('Not scheduled');
     expect(formatNextReminder(undefined, NOW)).toBe('Not scheduled');
+  });
+});
+
+describe('getClockColor', () => {
+  const NOW = new Date('2026-01-15T12:00:00Z').getTime();
+  const DAY = 24 * 60 * 60 * 1000;
+
+  it('returns sage for 0-14 days (recent)', () => {
+    expect(getClockColor(NOW, NOW)).toBe('sage');
+    expect(getClockColor(NOW - 7 * DAY, NOW)).toBe('sage');
+    expect(getClockColor(NOW - 14 * DAY, NOW)).toBe('sage');
+  });
+
+  it('returns warmgray-muted for 15-60 days (neutral)', () => {
+    expect(getClockColor(NOW - 15 * DAY, NOW)).toBe('warmgray-muted');
+    expect(getClockColor(NOW - 30 * DAY, NOW)).toBe('warmgray-muted');
+    expect(getClockColor(NOW - 60 * DAY, NOW)).toBe('warmgray-muted');
+  });
+
+  it('returns amber for 61+ days (attention)', () => {
+    expect(getClockColor(NOW - 61 * DAY, NOW)).toBe('amber');
+    expect(getClockColor(NOW - 120 * DAY, NOW)).toBe('amber');
+  });
+
+  it('returns amber for null (never contacted)', () => {
+    expect(getClockColor(null, NOW)).toBe('amber');
   });
 });

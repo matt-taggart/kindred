@@ -1,5 +1,21 @@
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
+export type ClockColor = 'sage' | 'warmgray-muted' | 'amber';
+
+export function getClockColor(
+  timestamp: number | null | undefined,
+  now: number = Date.now()
+): ClockColor {
+  if (!timestamp) return 'amber';
+
+  const diff = Math.max(0, now - timestamp);
+  const days = Math.floor(diff / DAY_IN_MS);
+
+  if (days <= 14) return 'sage';
+  if (days <= 60) return 'warmgray-muted';
+  return 'amber';
+}
+
 export function formatLastConnected(
   timestamp: number | null | undefined,
   now: number = Date.now()
