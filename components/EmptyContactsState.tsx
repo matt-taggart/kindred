@@ -28,6 +28,8 @@ export default function EmptyContactsState() {
         className="w-full items-center rounded-2xl bg-sage py-4 mb-3"
         onPress={() => router.push('/contacts/import')}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Import contacts from phone"
       >
         <Text className="text-lg font-semibold text-white">Import from contacts</Text>
       </TouchableOpacity>
@@ -35,6 +37,8 @@ export default function EmptyContactsState() {
       <TouchableOpacity
         onPress={() => router.push('/contacts/new')}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="Add a connection manually"
       >
         <Text className="text-base font-medium text-sage">Add manually</Text>
       </TouchableOpacity>
