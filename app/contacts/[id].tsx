@@ -16,8 +16,8 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const bucketLabelMap: Record<Contact['bucket'], string> = {
   daily: 'Every day',
   weekly: 'Every week',
-  'bi-weekly': 'Every few weeks',
-  'every-three-weeks': 'Every few weeks',
+  'bi-weekly': 'Every 2 weeks',
+  'every-three-weeks': 'Every 3 weeks',
   monthly: 'Once a month',
   'every-six-months': 'Seasonally',
   yearly: 'Once a year',
@@ -356,14 +356,44 @@ export default function ContactDetailScreen() {
               {contact.phone && (
                 <Text className="mt-1 text-base text-warmgray-muted">{formatPhoneNumber(contact.phone)}</Text>
               )}
-              <Text className="mt-1 text-base text-warmgray-muted">{getBucketLabel(contact.bucket, contact.customIntervalDays)}</Text>
 
-              <View className="mt-4 items-center">
-                <Text className="text-base text-warmgray-muted">{formatLastConnected(contact.lastContactedAt)}</Text>
-                {contact.nextContactDate ? (
-                  <Text className="mt-1 text-base text-warmgray-muted">Next reminder {formatNextReminder(contact.nextContactDate).toLowerCase()}</Text>
-                ) : (
-                  <Text className="mt-1 text-base text-warmgray-muted">No reminders scheduled</Text>
+              {/* Schedule summary */}
+              <View className="mt-5 w-full rounded-2xl border border-border bg-cream px-4 py-4">
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-xs font-semibold uppercase tracking-wider text-warmgray-muted">
+                    Remind me
+                  </Text>
+                  <Text className="text-sm font-semibold text-warmgray">
+                    {getBucketLabel(contact.bucket, contact.customIntervalDays)}
+                  </Text>
+                </View>
+
+                <View className="my-3 h-px w-full bg-border" />
+
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-xs font-semibold uppercase tracking-wider text-warmgray-muted">
+                    Last connected
+                  </Text>
+                  <Text className="text-sm font-semibold text-warmgray">
+                    {formatLastConnected(contact.lastContactedAt)}
+                  </Text>
+                </View>
+
+                <View className="my-3 h-px w-full bg-border" />
+
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-xs font-semibold uppercase tracking-wider text-warmgray-muted">
+                    Next check-in
+                  </Text>
+                  <Text className="text-sm font-semibold text-warmgray">
+                    {formatNextReminder(contact.nextContactDate)}
+                  </Text>
+                </View>
+
+                {!contact.nextContactDate && (
+                  <Text className="mt-2 text-xs text-warmgray-muted">
+                    Set a cadence to schedule your next reminder.
+                  </Text>
                 )}
               </View>
             </View>
@@ -403,14 +433,6 @@ export default function ContactDetailScreen() {
               </>
             )}
 
-            <TouchableOpacity
-              className="flex-row items-center justify-center gap-1.5 rounded-full border border-sage bg-surface px-4 py-2"
-              onPress={handleAddNote}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="pencil-outline" size={18} color="#9CA986" />
-              <Text className="text-base font-medium text-sage">Note</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Mark Done / Snooze Actions */}
@@ -441,14 +463,24 @@ export default function ContactDetailScreen() {
 
           {/* Shared Moments */}
           <View>
-            <Text className="mb-3 text-xl font-bold text-warmgray">Shared moments</Text>
+            <View className="mb-3 flex-row items-center justify-between">
+              <Text className="text-xl font-bold text-warmgray">Shared moments</Text>
+              <TouchableOpacity 
+                className="flex-row items-center gap-1 rounded-full bg-surface border border-sage px-3 py-1.5"
+                onPress={handleAddNote}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="add" size={16} color="#9CA986" />
+                <Text className="text-sm font-medium text-sage">Add note</Text>
+              </TouchableOpacity>
+            </View>
 
             {/* Stable outer View prevents full unmount/remount during list→empty transition */}
             <View className="flex flex-col gap-4">
               {interactions.length === 0 ? (
                 <View className="items-center justify-center rounded-2xl bg-surface border border-border p-8">
-                  <Ionicons name="heart-outline" size={48} color="#8B9678" />
-                  <Text className="mt-3 text-base text-warmgray">Your story together starts here.</Text>
+                  <Ionicons name="bookmarks-outline" size={48} color="#8B9678" />
+                  <Text className="mt-3 text-base text-warmgray">Keep track of your moments here.</Text>
                 </View>
               ) : (
                 interactions.map((interaction) => (
