@@ -20,6 +20,7 @@ import {
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import FrequencyBadge from "@/components/FrequencyBadge";
 import { formatPhoneNumber } from "@/utils/phone";
+import { formatBirthdayDisplay } from "@/utils/formatters";
 
 type Bucket = "daily" | "weekly" | "monthly" | "yearly" | "custom";
 
@@ -78,6 +79,7 @@ type ImportableContact = {
   name: string;
   phone: string;
   avatarUri?: string;
+  birthday?: string;  // Format: "YYYY-MM-DD" or "MM-DD"
 };
 
 const getName = (contact: any) => {
@@ -88,13 +90,23 @@ const getName = (contact: any) => {
   return (contact.name ?? parts).trim() || "Unnamed Contact";
 };
 
-const toImportable = (contact: any): ImportableContact | null => {
-  const phoneNumber = contact.phoneNumbers?.find((entry: any) =>
+const toImportable = (contact: Contacts.Contact & { id: string }): ImportableContact | null => {
+  const phoneNumber = contact.phoneNumbers?.find((entry) =>
     entry.number?.trim(),
   );
 
   if (!phoneNumber?.number) {
     return null;
+  }
+
+  let birthday: string | undefined;
+  if (contact.birthday) {
+    const { day, month, year } = contact.birthday;
+    if (day !== undefined && month !== undefined) {
+      const mm = String(month).padStart(2, '0');
+      const dd = String(day).padStart(2, '0');
+      birthday = year ? `${year}-${mm}-${dd}` : `${mm}-${dd}`;
+    }
   }
 
   return {
@@ -104,6 +116,7 @@ const toImportable = (contact: any): ImportableContact | null => {
     avatarUri: contact.imageAvailable
       ? (contact.image?.uri ?? undefined)
       : undefined,
+    birthday,
   };
 };
 
@@ -150,6 +163,11 @@ const ContactRow = ({
           <Text className="text-sm text-warmgray-muted">
             {formatPhoneNumber(contact.phone)}
           </Text>
+          {contact.birthday && (
+            <Text className="text-xs text-warmgray-muted mt-0.5">
+              🎂 {formatBirthdayDisplay(contact.birthday)}
+            </Text>
+          )}
         </View>
 
         <FrequencyBadge
@@ -208,7 +226,11 @@ export default function ImportContactsScreen() {
     setLoading(true);
     try {
       const { data } = await Contacts.getContactsAsync({
-        fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Image],
+        fields: [
+          Contacts.Fields.PhoneNumbers,
+          Contacts.Fields.Image,
+          Contacts.Fields.Birthday,
+        ],
         sort: Contacts.SortTypes.FirstName,
       });
 
@@ -428,6 +450,7 @@ export default function ImportContactsScreen() {
       name: contact.name,
       phone: contact.phone,
       avatarUri: contact.avatarUri,
+      birthday: contact.birthday,
       bucket: contactFrequencies[contact.id] || "weekly",
       customIntervalDays:
         contactFrequencies[contact.id] === "custom"

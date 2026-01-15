@@ -30,6 +30,7 @@ import {
   getDateLabel,
   groupByDate,
 } from "@/utils/scheduler";
+import { formatBirthdayDisplay } from "@/utils/formatters";
 
 type ContactToImport = {
   id: string;
@@ -46,6 +47,7 @@ type ContactToImport = {
     | "yearly"
     | "custom";
   customIntervalDays?: number | null;
+  birthday?: string;
 };
 
 const bucketLabels: Record<string, string> = {
@@ -181,6 +183,7 @@ export default function ReviewScheduleScreen() {
           avatarUri: original.avatarUri,
           customIntervalDays: original.customIntervalDays,
           nextContactDate: distributed.nextContactDate,
+          birthday: original.birthday ?? null,
         });
         importedCount++;
       }
@@ -317,28 +320,41 @@ export default function ReviewScheduleScreen() {
             <Text className="text-sm font-semibold text-warmgray mb-2 px-1">
               {getDateLabel(new Date(dateKey).getTime())}
             </Text>
-            {contacts.map((contact) => (
-              <TouchableOpacity
-                key={contact.id}
-                className="mb-2 rounded-2xl border border-border bg-surface p-4"
-                onPress={() => handleEditDate(contact.id)}
-                activeOpacity={0.7}
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-1">
-                    <Text className="text-base font-semibold text-warmgray">
-                      {contact.name}
-                    </Text>
-                    <Text className="text-sm text-warmgray-muted">
-                      {bucketLabels[contact.bucket]}
-                    </Text>
+            {contacts.map((contact) => {
+              const originalContact = contactsData.find((c) => c.id === contact.id);
+              return (
+                <TouchableOpacity
+                  key={contact.id}
+                  className="mb-2 rounded-2xl border border-border bg-surface p-4"
+                  onPress={() => handleEditDate(contact.id)}
+                  activeOpacity={0.7}
+                >
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-1">
+                      <Text className="text-base font-semibold text-warmgray">
+                        {contact.name}
+                      </Text>
+                      <Text className="text-sm text-warmgray-muted">
+                        {bucketLabels[contact.bucket]}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      <Text className="text-xs text-sage">Tap to edit</Text>
+                    </View>
                   </View>
-                  <View className="flex-row items-center gap-2">
-                    <Text className="text-xs text-sage">Tap to edit</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+                  {originalContact?.birthday && (
+                    <View className="mt-3 pt-3 border-t border-border/50">
+                      <Text className="text-xs font-medium text-warmgray-muted uppercase tracking-wide mb-1">
+                        Birthday
+                      </Text>
+                      <Text className="text-sm text-warmgray">
+                        🎂 {formatBirthdayDisplay(originalContact.birthday)}
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       />
