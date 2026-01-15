@@ -334,9 +334,16 @@ export default function HomeScreen() {
   );
 
   const renderSectionHeader = useCallback(({ section }: { section: Section }) => (
-    <Text className="text-lg font-semibold text-warmgray-muted mb-3 mt-6">
-      {section.title}
-    </Text>
+    <>
+      <Text className="text-lg font-semibold text-warmgray-muted mb-3 mt-6">
+        {section.title}
+      </Text>
+      {section.title === 'Time to reconnect' && (
+        <Text className="text-base text-warmgray-muted mb-3">
+          Who would you like to reach out to?
+        </Text>
+      )}
+    </>
   ), []);
 
   const onRefresh = useCallback(() => {
@@ -383,12 +390,6 @@ export default function HomeScreen() {
             year: 'numeric',
           })}
         </Text>
-
-        {totalContacts > 0 && (
-          <Text className="mt-2 text-base text-warmgray-muted">
-            Who would you like to reach out to?
-          </Text>
-        )}
 
         <SectionList
           sections={sections}

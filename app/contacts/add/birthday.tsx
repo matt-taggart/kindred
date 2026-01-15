@@ -35,7 +35,7 @@ export default function AddConnectionBirthdayScreen() {
   const name = useMemo(() => (typeof params.name === 'string' ? params.name.trim() : ''), [params.name]);
   const bucket = useMemo(() => {
     const raw = params.bucket;
-    if (typeof raw !== 'string') return 'bi-weekly' as Contact['bucket'];
+    if (typeof raw !== 'string') return 'weekly' as Contact['bucket'];
     return raw as Contact['bucket'];
   }, [params.bucket]);
   const customIntervalDays = useMemo(() => {
@@ -90,7 +90,6 @@ export default function AddConnectionBirthdayScreen() {
         name,
         bucket,
         customIntervalDays,
-        nextContactDate: customIntervalDays ? undefined : null,
         birthday: savedDate ? formatDate(savedDate) : null,
       });
       router.replace(`/contacts/${created.id}`);
@@ -126,8 +125,8 @@ export default function AddConnectionBirthdayScreen() {
         <ProgressDots step={3} />
 
         <View className="items-center mb-8 mt-10">
-          <View className="h-24 w-24 items-center justify-center rounded-full bg-sage-100 mb-6 shadow-sm">
-            <Text className="text-5xl">🎂</Text>
+          <View className="h-24 w-24 items-center justify-center rounded-full bg-sage mb-6 shadow-sm">
+            <Ionicons name="gift" size={48} color="#fff" />
           </View>
           <Text className="text-2xl font-bold text-warmgray text-center mb-3">
             One more thing...

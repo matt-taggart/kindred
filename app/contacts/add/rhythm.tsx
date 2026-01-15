@@ -47,11 +47,6 @@ const RHYTHMS: RhythmOption[] = [
     description: bucketDescriptions.weekly,
   },
   {
-    label: "Every few weeks",
-    value: "bi-weekly",
-    description: bucketDescriptions["bi-weekly"],
-  },
-  {
     label: "Once a month",
     value: "monthly",
     description: bucketDescriptions.monthly,
@@ -109,7 +104,7 @@ export default function AddConnectionRhythmScreen() {
     () => (typeof name === "string" ? name.trim() : ""),
     [name],
   );
-  const [selected, setSelected] = useState<RhythmOption>(RHYTHMS[2]);
+  const [selected, setSelected] = useState<RhythmOption>(RHYTHMS[1]);
   const [{ customUnit, customValue }, setCustomState] = useState(() =>
     deriveCustomUnitAndValue(),
   );

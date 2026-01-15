@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { addContact } from "@/services/contactService";
 
 type Step = "name" | "rhythm" | "birthday";
-type Rhythm = "weekly" | "bi-weekly" | "monthly" | "seasonally" | "custom";
+type Rhythm = "weekly" | "monthly" | "seasonally" | "custom";
 
 export default function NewConnectionScreen() {
   const router = useRouter();
@@ -120,7 +120,6 @@ export default function NewConnectionScreen() {
             <View className="gap-3">
               {[
                 { label: "Every week", value: "weekly" },
-                { label: "Every few weeks", value: "bi-weekly" },
                 { label: "Once a month", value: "monthly" },
                 { label: "Seasonally", value: "seasonally" },
               ].map((opt) => (

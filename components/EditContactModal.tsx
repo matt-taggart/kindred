@@ -249,7 +249,6 @@ export default function EditContactModal({
                 [
                   "daily",
                   "weekly",
-                  "bi-weekly",
                   "monthly",
                   "yearly",
                   "custom",

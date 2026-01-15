@@ -68,8 +68,9 @@ describe('formatLastConnected - specific days', () => {
     expect(formatLastConnected(NOW - 200 * DAY, NOW)).toBe("It's been a while");
   });
 
-  it('returns "Not reached out yet" for null', () => {
+  it('returns "Not reached out yet" for null/undefined', () => {
     expect(formatLastConnected(null, NOW)).toBe('Not reached out yet');
+    expect(formatLastConnected(undefined, NOW)).toBe('Not reached out yet');
   });
 });
 

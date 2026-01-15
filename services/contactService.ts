@@ -84,7 +84,7 @@ export const addContact = async (contact: InsertableContact): Promise<Contact> =
   const lastContactedAt = contact.lastContactedAt ?? undefined;
   const customIntervalDays = normalizeCustomInterval(contact.bucket, contact.customIntervalDays);
   const nextContactDate =
-    contact.nextContactDate !== undefined
+    typeof contact.nextContactDate === 'number'
       ? contact.nextContactDate
       : getNextContactDate(contact.bucket, lastContactedAt ?? Date.now(), customIntervalDays);
 
