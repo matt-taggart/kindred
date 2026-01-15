@@ -20,6 +20,7 @@ import {
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import FrequencyBadge from "@/components/FrequencyBadge";
 import { formatPhoneNumber } from "@/utils/phone";
+import { formatBirthdayDisplay } from "@/utils/formatters";
 
 type Bucket = "daily" | "weekly" | "monthly" | "yearly" | "custom";
 
@@ -71,15 +72,6 @@ const formatCustomSummary = (days?: number | null) => {
     return weeks === 1 ? "Every week" : `Every ${weeks} weeks`;
   }
   return `Every ${days} days`;
-};
-
-const formatBirthdayDisplay = (birthday: string): string => {
-  const parts = birthday.split('-');
-  const month = parseInt(parts.length === 3 ? parts[1] : parts[0], 10);
-  const day = parseInt(parts.length === 3 ? parts[2] : parts[1], 10);
-
-  const date = new Date(2000, month - 1, day);
-  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 };
 
 type ImportableContact = {
