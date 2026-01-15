@@ -32,7 +32,9 @@ const bucketDescriptions: Record<Contact["bucket"], string> = {
   daily: "For your closest relationships",
   weekly: "For your inner circle",
   "bi-weekly": "Every 14 days",
+  "every-three-weeks": "Every 21 days",
   monthly: "For people you care about",
+  "every-six-months": "Twice a year",
   yearly: "For long-distance friends",
   custom: "Choose your own rhythm",
 };

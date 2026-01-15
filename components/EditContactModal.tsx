@@ -398,25 +398,10 @@ export default function EditContactModal({
             </View>
           </ScrollView>
 
-          {onArchive && !contact.isArchived && (
-            <View className="mb-3">
-              <TouchableOpacity
-                onPress={handleArchive}
-                className="flex-row items-center justify-center gap-2 rounded-2xl border-2 border-terracotta-200 bg-terracotta-50 py-3"
-                activeOpacity={0.85}
-              >
-                <Ionicons name="archive-outline" size={20} color="#EA580C" />
-                <Text className="text-base font-semibold text-terracotta">
-                  Archive connection
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
           <Pressable
             onPress={handleSave}
             disabled={saveDisabled}
-            className={`flex-row items-center justify-center rounded-2xl py-4 ${
+            className={`flex-row items-center justify-center rounded-2xl py-4 mt-5 ${
               saveDisabled ? 'bg-border' : 'bg-sage'
             }`}
           >
@@ -428,6 +413,19 @@ export default function EditContactModal({
               Save changes
             </Text>
           </Pressable>
+
+          {onArchive && !contact.isArchived && (
+            <TouchableOpacity
+              onPress={handleArchive}
+              className="flex-row items-center justify-center gap-2 py-3"
+              activeOpacity={0.85}
+            >
+              <Ionicons name="archive-outline" size={20} color="#8B9678" />
+              <Text className="text-base text-warmgray-muted">
+                Archive connection
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </SafeAreaView>
     </Modal>
