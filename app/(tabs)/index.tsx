@@ -93,11 +93,44 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
             {isBirthday ? (
               <Text className="text-base text-terracotta-100 font-medium">It's {contact.name}'s birthday</Text>
             ) : (
-              <Text className="text-base text-warmgray-muted">{formatLastConnected(contact.lastContactedAt)}</Text>
+              <View className="flex-row items-center gap-1">
+                <Ionicons
+                  name="time-outline"
+                  size={14}
+                  color={clockColor ? clockColorClass[clockColor] : '#9A9A8E'}
+                />
+                <Text className="text-base text-warmgray-muted">{formatLastConnected(contact.lastContactedAt)}</Text>
+              </View>
             )}
           </View>
         </View>
       </TouchableOpacity>
+
+      {contact.phone && (
+        <View className="mt-4 flex-row gap-2">
+          <TouchableOpacity
+            className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl py-2.5 ${
+              isBirthday ? 'bg-white/20' : 'bg-cream border border-border'
+            }`}
+            onPress={handleCall}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="call-outline" size={18} color={isBirthday ? '#FFFFFF' : '#9CA986'} />
+            <Text className={`text-base font-medium ${isBirthday ? 'text-white' : 'text-sage'}`}>Call</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl py-2.5 ${
+              isBirthday ? 'bg-white/20' : 'bg-cream border border-border'
+            }`}
+            onPress={handleText}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chatbubble-outline" size={18} color={isBirthday ? '#FFFFFF' : '#9CA986'} />
+            <Text className={`text-base font-medium ${isBirthday ? 'text-white' : 'text-sage'}`}>Text</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <View className="mt-4 flex-row gap-2">
         <TouchableOpacity
