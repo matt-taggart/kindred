@@ -22,7 +22,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact } from '@/db/schema';
-import { getDueContactsGrouped, GroupedDueContacts, snoozeContact, isBirthdayToday, updateInteraction } from '@/services/contactService';
+import { getDueContactsGrouped, GroupedDueContacts, snoozeContact, isBirthdayToday, updateInteraction, getContactCount } from '@/services/contactService';
+import EmptyContactsState from '@/components/EmptyContactsState';
 import CelebrationStatus from '@/components/CelebrationStatus';
 import ReachedOutSheet from '@/components/ReachedOutSheet';
 import { formatLastConnected, getClockColor, ClockColor } from '@/utils/timeFormatting';
@@ -195,6 +196,7 @@ export default function HomeScreen() {
   const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
   const [completionCount, setCompletionCount] = useState(0);
   const [lastCalledContactId, setLastCalledContactId] = useState<string | null>(null);
+  const [totalContactCount, setTotalContactCount] = useState<number | null>(null);
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -216,6 +218,7 @@ export default function HomeScreen() {
     try {
       const results = getDueContactsGrouped();
       setGroupedContacts(results);
+      setTotalContactCount(getContactCount());
     } catch (e) {
       console.warn('Failed to load contacts:', e);
     } finally {
@@ -345,6 +348,25 @@ export default function HomeScreen() {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-cream">
         <ActivityIndicator size="large" color="#9CA986" />
+      </SafeAreaView>
+    );
+  }
+
+  if (totalContactCount === 0) {
+    return (
+      <SafeAreaView className="flex-1 bg-cream">
+        <View className="flex-1 px-4 pt-6">
+          <Text className="mb-1 text-3xl font-semibold text-warmgray">Today</Text>
+          <Text className="text-lg text-warmgray-muted font-medium">
+            {currentDate.toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </Text>
+          <EmptyContactsState />
+        </View>
       </SafeAreaView>
     );
   }
