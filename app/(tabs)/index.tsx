@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Alert,
   LayoutAnimation,
+  Linking,
   Platform,
   RefreshControl,
   SafeAreaView,
@@ -15,12 +16,14 @@ import {
   View,
   Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Contact } from '@/db/schema';
 import { getDueContactsGrouped, GroupedDueContacts, snoozeContact, isBirthdayToday, updateInteraction } from '@/services/contactService';
 import CelebrationStatus from '@/components/CelebrationStatus';
 import ReachedOutSheet from '@/components/ReachedOutSheet';
-import { formatLastConnected } from '@/utils/timeFormatting';
+import { formatLastConnected, getClockColor, ClockColor } from '@/utils/timeFormatting';
+import { formatPhoneUrl } from '@/utils/phone';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -40,11 +43,30 @@ type ContactCardProps = {
   onSnooze: () => void;
   isSnoozing?: boolean;
   onPress: () => void;
+  highlightReachedOut?: boolean;
 };
 
-const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPress }: ContactCardProps) => {
+const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPress, highlightReachedOut }: ContactCardProps) => {
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
   const isBirthday = isBirthdayToday(contact);
+
+  const handleCall = useCallback(() => {
+    if (!contact.phone) return;
+    Linking.openURL(`tel:${formatPhoneUrl(contact.phone)}`);
+  }, [contact.phone]);
+
+  const handleText = useCallback(() => {
+    if (!contact.phone) return;
+    Linking.openURL(`sms:${formatPhoneUrl(contact.phone)}`);
+  }, [contact.phone]);
+
+  const clockColor = isBirthday ? null : getClockColor(contact.lastContactedAt);
+
+  const clockColorClass: Record<ClockColor, string> = {
+    'sage': '#9CA986',
+    'warmgray-muted': '#9A9A8E',
+    'amber': '#D4A574',
+  };
 
   return (
     <View className={`mb-3 rounded-2xl border p-5 shadow-sm ${isBirthday ? 'bg-terracotta border-terracotta' : 'bg-surface border-border'}`}>
