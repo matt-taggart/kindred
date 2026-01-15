@@ -471,7 +471,7 @@ export default function ContactDetailScreen() {
                 activeOpacity={0.7}
               >
                 <Ionicons name="add" size={16} color="#9CA986" />
-                <Text className="text-sm font-medium text-sage">Add note</Text>
+                <Text className="text-sm font-medium text-sage">Add moment</Text>
               </TouchableOpacity>
             </View>
 
