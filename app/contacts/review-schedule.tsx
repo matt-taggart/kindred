@@ -449,8 +449,44 @@ export default function ReviewScheduleScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* iOS Date Picker / Input - Bottom Sheet */}
-      {Platform.OS === "ios" && showDatePicker && (
+      {/* iOS Start Date Picker - Bottom Sheet */}
+      {Platform.OS === "ios" && showDatePicker && editingState?.field === "startDate" && (
+        <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-surface px-4 pb-8 pt-4">
+          <View className="mb-2 flex-row items-center justify-between">
+            <TouchableOpacity
+              onPress={() => {
+                setShowDatePicker(false);
+                setEditingState(null);
+              }}
+            >
+              <Text className="text-base font-semibold text-warmgray-muted">
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            <Text className="text-base font-bold text-warmgray">
+              {editingContactName
+                ? `${editingContactName}'s Start Date`
+                : "Adjust Start Date"}
+            </Text>
+            <TouchableOpacity onPress={handleConfirmDate}>
+              <Text className="text-base font-semibold text-sage">Done</Text>
+            </TouchableOpacity>
+          </View>
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display="spinner"
+            minimumDate={new Date()}
+            maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
+            onChange={(_e, date) => date && setSelectedDate(date)}
+            accentColor="#9CA986"
+            themeVariant="light"
+          />
+        </View>
+      )}
+
+      {/* iOS Birthday Input - Bottom Sheet */}
+      {Platform.OS === "ios" && showDatePicker && editingState?.field === "birthday" && (
         <KeyboardAvoidingView
           behavior="padding"
           className="absolute bottom-0 left-0 right-0 border-t border-border bg-surface px-4 pb-8 pt-4"
@@ -467,96 +503,71 @@ export default function ReviewScheduleScreen() {
               </Text>
             </TouchableOpacity>
             <Text className="text-base font-bold text-warmgray">
-              {editingState?.field === "birthday"
-                ? `Set Birthday`
-                : editingContactName
-                  ? `${editingContactName}'s Start Date`
-                  : "Adjust Start Date"}
+              Set Birthday
             </Text>
-            <TouchableOpacity
-              onPress={
-                editingState?.field === "birthday"
-                  ? handleConfirmBirthday
-                  : handleConfirmDate
-              }
-            >
+            <TouchableOpacity onPress={handleConfirmBirthday}>
               <Text className="text-base font-semibold text-sage">Done</Text>
             </TouchableOpacity>
           </View>
-          
-          {editingState?.field === "birthday" ? (
-            <View className="py-8 items-center">
-              <TextInput
-                value={birthdayInput}
-                onChangeText={setBirthdayInput}
-                placeholder="MM/DD"
-                placeholderTextColor="#A0A0A0"
-                keyboardType="numbers-and-punctuation"
-                autoFocus
-                className="text-3xl font-bold text-center w-full text-warmgray"
-                maxLength={5}
-              />
-              <Text className="text-sm text-warmgray-muted mt-2">
-                Format: MM/DD (e.g. 03/15)
-              </Text>
-            </View>
-          ) : (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="spinner"
-              minimumDate={new Date()}
-              maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
-              onChange={(_e, date) => date && setSelectedDate(date)}
-              accentColor="#9CA986"
-              themeVariant="light"
+          <View className="py-8 items-center">
+            <TextInput
+              value={birthdayInput}
+              onChangeText={setBirthdayInput}
+              placeholder="MM/DD"
+              placeholderTextColor="#A0A0A0"
+              keyboardType="numbers-and-punctuation"
+              autoFocus
+              className="text-3xl font-bold text-center w-full text-warmgray"
+              maxLength={5}
             />
-          )}
+            <Text className="text-sm text-warmgray-muted mt-2">
+              Format: MM/DD (e.g. 03/15)
+            </Text>
+          </View>
         </KeyboardAvoidingView>
       )}
 
-      {/* Android Date Picker / Input */}
-      {Platform.OS === "android" && showDatePicker && (
-        <>
-          {editingState?.field === "birthday" ? (
-             <View className="absolute bottom-0 left-0 right-0 top-0 bg-black/50 items-center justify-center p-4">
-               <View className="bg-surface p-6 rounded-2xl w-full max-w-sm">
-                 <Text className="text-lg font-bold text-warmgray mb-4">Set Birthday</Text>
-                 <TextInput
-                   value={birthdayInput}
-                   onChangeText={setBirthdayInput}
-                   placeholder="MM/DD"
-                   placeholderTextColor="#A0A0A0"
-                   keyboardType="numbers-and-punctuation"
-                   autoFocus
-                   className="text-2xl font-bold border-b border-border py-2 mb-2 text-warmgray"
-                   maxLength={5}
-                 />
-                 <Text className="text-sm text-warmgray-muted mb-6">
-                   Format: MM/DD
-                 </Text>
-                 <View className="flex-row justify-end gap-4">
-                   <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                     <Text className="text-base font-medium text-warmgray-muted">Cancel</Text>
-                   </TouchableOpacity>
-                   <TouchableOpacity onPress={handleConfirmBirthday}>
-                     <Text className="text-base font-bold text-sage">Save</Text>
-                   </TouchableOpacity>
-                 </View>
-               </View>
-             </View>
-          ) : (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="default"
-              minimumDate={new Date()}
-              maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
-              onChange={handleDateChange}
-              accentColor="#9CA986"
+      {/* Android Start Date Picker */}
+      {Platform.OS === "android" && showDatePicker && editingState?.field === "startDate" && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          minimumDate={new Date()}
+          maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
+          onChange={handleDateChange}
+          accentColor="#9CA986"
+        />
+      )}
+
+      {/* Android Birthday Input */}
+      {Platform.OS === "android" && showDatePicker && editingState?.field === "birthday" && (
+        <View className="absolute bottom-0 left-0 right-0 top-0 bg-black/50 items-center justify-center p-4">
+          <View className="bg-surface p-6 rounded-2xl w-full max-w-sm">
+            <Text className="text-lg font-bold text-warmgray mb-4">Set Birthday</Text>
+            <TextInput
+              value={birthdayInput}
+              onChangeText={setBirthdayInput}
+              placeholder="MM/DD"
+              placeholderTextColor="#A0A0A0"
+              keyboardType="numbers-and-punctuation"
+              autoFocus
+              className="text-2xl font-bold border-b border-border py-2 mb-2 text-warmgray"
+              maxLength={5}
             />
-          )}
-        </>
+            <Text className="text-sm text-warmgray-muted mb-6">
+              Format: MM/DD
+            </Text>
+            <View className="flex-row justify-end gap-4">
+              <TouchableOpacity onPress={() => { setShowDatePicker(false); setEditingState(null); }}>
+                <Text className="text-base font-medium text-warmgray-muted">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleConfirmBirthday}>
+                <Text className="text-base font-bold text-sage">Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       )}
 
       <EnhancedPaywallModal
