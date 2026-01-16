@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -38,11 +38,9 @@ export default function NewConnectionScreen() {
         bucket:
           rhythm === "seasonally"
             ? "every-six-months"
-            : rhythm === "bi-weekly"
-              ? "bi-weekly"
-              : rhythm === "weekly"
-                ? "weekly"
-                : "monthly", // Mapping simplistically for now
+            : rhythm === "weekly"
+              ? "weekly"
+              : "monthly", // Mapping simplistically for now
         birthday: birthday || undefined,
       });
       router.back();
@@ -57,6 +55,14 @@ export default function NewConnectionScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-cream">
+      <Stack.Screen
+        options={{
+          title: "Add a connection",
+          headerBackTitle: "Back",
+          headerShadowVisible: false,
+          headerTitleStyle: { fontSize: 18, fontWeight: "700" },
+        }}
+      />
       <View className="flex-1 px-6 pt-8">
         {/* Progress Dots */}
         <View className="flex-row justify-center gap-2 mb-12">
