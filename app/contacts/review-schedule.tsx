@@ -144,10 +144,12 @@ export default function ReviewScheduleScreen() {
         if (originalContact) {
           setEditingState({ id: contactId, field });
           if (originalContact.birthday) {
-            setSelectedDate(new Date(originalContact.birthday));
+            // Append noon time to prevent timezone shifts when parsing YYYY-MM-DD
+            setSelectedDate(new Date(originalContact.birthday + "T12:00:00"));
           } else {
-            // Default to today for new birthday
-            setSelectedDate(new Date());
+            // Default to a reasonable past date (e.g. Jan 1, 1990) for new birthdays
+            // instead of "Today" to avoid boundary issues and provide better UX
+            setSelectedDate(new Date(1990, 0, 1));
           }
           setShowDatePicker(true);
         }
@@ -173,7 +175,11 @@ export default function ReviewScheduleScreen() {
           );
         } else {
           // Update birthday in contactsData
-          const birthdayString = date.toISOString().split("T")[0];
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          const birthdayString = `${year}-${month}-${day}`;
+
           setContactsData((prev) =>
             prev.map((c) =>
               c.id === editingState.id ? { ...c, birthday: birthdayString } : c,
@@ -200,7 +206,11 @@ export default function ReviewScheduleScreen() {
         );
       } else {
         // Update birthday in contactsData
-        const birthdayString = selectedDate.toISOString().split("T")[0];
+        const year = selectedDate.getFullYear();
+        const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+        const day = String(selectedDate.getDate()).padStart(2, "0");
+        const birthdayString = `${year}-${month}-${day}`;
+        
         setContactsData((prev) =>
           prev.map((c) =>
             c.id === editingState.id ? { ...c, birthday: birthdayString } : c,
