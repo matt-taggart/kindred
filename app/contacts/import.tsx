@@ -103,7 +103,7 @@ const toImportable = (contact: Contacts.Contact & { id: string }): ImportableCon
   if (contact.birthday) {
     const { day, month, year } = contact.birthday;
     if (day !== undefined && month !== undefined) {
-      const mm = String(month).padStart(2, '0');
+      const mm = String(month + 1).padStart(2, '0');
       const dd = String(day).padStart(2, '0');
       birthday = year ? `${year}-${mm}-${dd}` : `${mm}-${dd}`;
     }
