@@ -144,12 +144,20 @@ export default function ReviewScheduleScreen() {
         if (originalContact) {
           setEditingState({ id: contactId, field });
           if (originalContact.birthday) {
-            // Append noon time to prevent timezone shifts when parsing YYYY-MM-DD
-            setSelectedDate(new Date(originalContact.birthday + "T12:00:00"));
+            // Check if format is YYYY-MM-DD or MM-DD
+            const parts = originalContact.birthday.split("-");
+            let dateStr = originalContact.birthday;
+
+            // If MM-DD, prepend a leap year (2000) to allow Feb 29
+            if (parts.length === 2) {
+              dateStr = `2000-${originalContact.birthday}`;
+            }
+
+            // Append noon time to prevent timezone shifts
+            setSelectedDate(new Date(dateStr + "T12:00:00"));
           } else {
-            // Default to a reasonable past date (e.g. Jan 1, 1990) for new birthdays
-            // instead of "Today" to avoid boundary issues and provide better UX
-            setSelectedDate(new Date(1990, 0, 1));
+            // Default to a leap year (2000) for new birthdays
+            setSelectedDate(new Date(2000, 0, 1));
           }
           setShowDatePicker(true);
         }
@@ -175,10 +183,9 @@ export default function ReviewScheduleScreen() {
           );
         } else {
           // Update birthday in contactsData
-          const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, "0");
           const day = String(date.getDate()).padStart(2, "0");
-          const birthdayString = `${year}-${month}-${day}`;
+          const birthdayString = `${month}-${day}`;
 
           setContactsData((prev) =>
             prev.map((c) =>
@@ -206,10 +213,9 @@ export default function ReviewScheduleScreen() {
         );
       } else {
         // Update birthday in contactsData
-        const year = selectedDate.getFullYear();
         const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
         const day = String(selectedDate.getDate()).padStart(2, "0");
-        const birthdayString = `${year}-${month}-${day}`;
+        const birthdayString = `${month}-${day}`;
         
         setContactsData((prev) =>
           prev.map((c) =>
