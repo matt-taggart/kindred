@@ -148,7 +148,7 @@ export default function LogInteractionModal() {
       <View className="flex-1 px-6 pb-8 pt-6">
         <View className="flex-row items-center justify-between">
           <Text className="text-2xl font-bold text-warmgray">
-            {isEditMode ? 'Edit shared moment' : 'Add a shared moment'}
+            {isEditMode ? 'Edit note' : 'Add a note'}
           </Text>
           <TouchableOpacity
             onPress={handleClose}

@@ -464,14 +464,14 @@ export default function ContactDetailScreen() {
           {/* Shared Moments */}
           <View>
             <View className="mb-3 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-warmgray">Shared moments</Text>
+              <Text className="text-xl font-bold text-warmgray">Notes</Text>
               <TouchableOpacity 
                 className="flex-row items-center gap-1 rounded-full bg-surface border border-sage px-3 py-1.5"
                 onPress={handleAddNote}
                 activeOpacity={0.7}
               >
                 <Ionicons name="add" size={16} color="#9CA986" />
-                <Text className="text-sm font-medium text-sage">Add moment</Text>
+                <Text className="text-sm font-medium text-sage">Add note</Text>
               </TouchableOpacity>
             </View>
 
@@ -480,7 +480,7 @@ export default function ContactDetailScreen() {
               {interactions.length === 0 ? (
                 <View className="items-center justify-center rounded-2xl bg-surface border border-border p-8">
                   <Ionicons name="bookmarks-outline" size={48} color="#8B9678" />
-                  <Text className="mt-3 text-base text-warmgray">Keep track of your moments here.</Text>
+                  <Text className="mt-3 text-base text-warmgray">Your notes will appear here</Text>
                 </View>
               ) : (
                 interactions.map((interaction) => (

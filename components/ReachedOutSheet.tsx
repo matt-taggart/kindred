@@ -12,7 +12,6 @@ import {
   Dimensions,
 } from 'react-native';
 import { Contact } from '@/db/schema';
-import { isBirthdayToday } from '@/services/contactService';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -41,12 +40,6 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
     }
   }, [visible, slideAnim]);
 
-  const isBirthday = contact ? isBirthdayToday(contact) : false;
-  const prompt = isBirthday ? 'How did you celebrate them?' : 'How was it?';
-  const placeholder = isBirthday
-    ? 'Sent a birthday message...'
-    : 'Caught up about her move—felt good to connect.';
-
   const handleSubmit = useCallback(() => {
     onSubmit(note.trim());
     setNote('');
@@ -60,6 +53,9 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
   }, [onClose]);
 
   if (!contact) return null;
+
+  const prompt = "Anything you'd like to remember?";
+  const placeholder = `Add a note for ${contact.name}`;
 
   return (
     <Modal
@@ -86,7 +82,7 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
               <Text className="text-xl font-semibold text-warmgray">
                 Connected with {contact.name}
               </Text>
-              <Text className="text-2xl">✓</Text>
+              <Text className="text-2xl text-sage">✓</Text>
             </View>
 
             {/* Note input */}
