@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -8,9 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { Contact } from '@/db/schema';
 import { isBirthdayToday } from '@/services/contactService';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 type Props = {
   visible: boolean;
@@ -22,6 +26,20 @@ type Props = {
 export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }: Props) {
   const [note, setNote] = useState('');
   const [expanded, setExpanded] = useState(false);
+  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 65,
+        friction: 11,
+      }).start();
+    } else {
+      slideAnim.setValue(SCREEN_HEIGHT);
+    }
+  }, [visible, slideAnim]);
 
   const isBirthday = contact ? isBirthdayToday(contact) : false;
   const prompt = isBirthday ? 'How did you celebrate them?' : 'How was it?';
@@ -47,7 +65,7 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={handleClose}
     >
       <Pressable className="flex-1 bg-black/30" onPress={handleClose}>
@@ -55,10 +73,11 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           className="flex-1 justify-end"
         >
-          <Pressable
-            className="bg-surface rounded-t-3xl px-6 pb-8 pt-6"
-            onPress={(e) => e.stopPropagation()}
-          >
+          <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
+            <Pressable
+              className="bg-surface rounded-t-3xl px-6 pb-8 pt-6"
+              onPress={(e) => e.stopPropagation()}
+            >
             {/* Handle bar */}
             <View className="mb-4 h-1 w-10 self-center rounded-full bg-border" />
 
@@ -105,7 +124,8 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
             >
               <Text className="text-lg font-semibold text-white">Done</Text>
             </TouchableOpacity>
-          </Pressable>
+            </Pressable>
+          </Animated.View>
         </KeyboardAvoidingView>
       </Pressable>
     </Modal>

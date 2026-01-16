@@ -195,24 +195,27 @@ export default function HomeScreen() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
   const [completionCount, setCompletionCount] = useState(0);
-  const [lastCalledContactId, setLastCalledContactId] = useState<string | null>(null);
+  const [highlightContactId, setHighlightContactId] = useState<string | null>(null);
   const [totalContactCount, setTotalContactCount] = useState<number | null>(null);
   const appState = useRef(AppState.currentState);
+  const pendingCallContactId = useRef<string | null>(null);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         // App came to foreground - trigger highlight if we have a pending contact
-        if (lastCalledContactId) {
-          // Clear it after a short delay to allow animation to complete
-          setTimeout(() => setLastCalledContactId(null), 1000);
+        if (pendingCallContactId.current) {
+          setHighlightContactId(pendingCallContactId.current);
+          pendingCallContactId.current = null;
+          // Clear highlight after animation completes
+          setTimeout(() => setHighlightContactId(null), 1000);
         }
       }
       appState.current = nextAppState;
     });
 
     return () => subscription.remove();
-  }, [lastCalledContactId]);
+  }, []);
 
   const loadContacts = useCallback(() => {
     try {
@@ -326,11 +329,11 @@ export default function HomeScreen() {
         onSnooze={() => handleSnooze(item)}
         isSnoozing={snoozingContactId === item.id}
         onPress={() => handleContactPress(item.id)}
-        highlightReachedOut={lastCalledContactId === item.id}
-        onCallOrText={() => setLastCalledContactId(item.id)}
+        highlightReachedOut={highlightContactId === item.id}
+        onCallOrText={() => { pendingCallContactId.current = item.id; }}
       />
     ),
-    [handleMarkDone, handleSnooze, snoozingContactId, handleContactPress, lastCalledContactId],
+    [handleMarkDone, handleSnooze, snoozingContactId, handleContactPress, highlightContactId],
   );
 
   const renderSectionHeader = useCallback(({ section }: { section: Section }) => (
