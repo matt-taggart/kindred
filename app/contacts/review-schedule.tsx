@@ -257,7 +257,7 @@ export default function ReviewScheduleScreen() {
     <SafeAreaView className="flex-1 bg-cream">
       <Stack.Screen
         options={{
-          title: 'Review rhythm',
+          title: "Review",
           headerBackTitle: "Back",
           headerShadowVisible: false,
           headerTitleStyle: { fontSize: 18, fontWeight: "700" },
@@ -280,7 +280,9 @@ export default function ReviewScheduleScreen() {
                   Free plan limit reached
                 </Text>
                 <Text className="mt-1 text-sm text-amber-800">
-                  Only the first {availableSlots} connection{availableSlots !== 1 ? 's' : ''} will be imported unless you upgrade.
+                  Only the first {availableSlots} connection
+                  {availableSlots !== 1 ? "s" : ""} will be imported unless you
+                  upgrade.
                 </Text>
               </View>
             )}
@@ -289,29 +291,13 @@ export default function ReviewScheduleScreen() {
               <Text className="text-xs font-semibold uppercase tracking-wide text-sage">
                 Schedule preview
               </Text>
-              <Text className="mt-1 text-xl font-bold text-warmgray">
-                Your reminders are spread out.
+              <Text className="mt-1 text-lg font-semibold text-warmgray">
+                Kindred has spread out your reminders.
               </Text>
               <Text className="mt-2 text-sm text-warmgray-muted">
                 Kindred has distributed your {distributedContacts.length}{" "}
-                connections across {stats.totalDays} days (~{stats.avgPerDay} per
-                day). Tap any connection to adjust their start date.
+                connections across {stats.totalDays} days. Tap any connection to adjust their start date.
               </Text>
-            </View>
-
-            <View className="flex-row gap-3 mb-2">
-              <View className="flex-1 rounded-xl bg-surface border border-border p-3">
-                <Text className="text-2xl font-bold text-sage">
-                  {stats.totalDays}
-                </Text>
-                <Text className="text-xs text-warmgray-muted">Days covered</Text>
-              </View>
-              <View className="flex-1 rounded-xl bg-surface border border-border p-3">
-                <Text className="text-2xl font-bold text-sage">
-                  {stats.avgPerDay}
-                </Text>
-                <Text className="text-xs text-warmgray-muted">Avg per day</Text>
-              </View>
             </View>
           </View>
         }
@@ -321,7 +307,9 @@ export default function ReviewScheduleScreen() {
               {getDateLabel(new Date(dateKey).getTime())}
             </Text>
             {contacts.map((contact) => {
-              const originalContact = contactsData.find((c) => c.id === contact.id);
+              const originalContact = contactsData.find(
+                (c) => c.id === contact.id,
+              );
               return (
                 <TouchableOpacity
                   key={contact.id}
@@ -361,15 +349,15 @@ export default function ReviewScheduleScreen() {
 
       <View className="border-t border-border bg-surface px-4 pb-4 pt-3">
         <TouchableOpacity
-          className={`items-center rounded-xl py-4 ${!saving ? 'bg-sage' : 'bg-border'}`}
+          className={`items-center rounded-xl py-4 ${!saving ? "bg-sage" : "bg-border"}`}
           onPress={handleImport}
           activeOpacity={0.9}
           disabled={saving}
         >
           <Text
-            className={`text-base font-semibold ${!saving ? 'text-white' : 'text-warmgray-muted'}`}
+            className={`text-base font-semibold ${!saving ? "text-white" : "text-warmgray-muted"}`}
           >
-            {saving ? 'Importing…' : 'Looks good — import all'}
+            {saving ? "Importing…" : "Looks good — import all"}
           </Text>
         </TouchableOpacity>
       </View>
