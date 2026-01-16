@@ -17,6 +17,7 @@ import {
 } from "react-native";
 
 import { Contact } from "@/db/schema";
+import Badge from "@/components/Badge";
 import {
   getContacts,
   resetDatabase,
@@ -136,23 +137,13 @@ const ContactRow = ({
         </View>
 
         <View className="flex-row items-center gap-2">
-          {hasReminders ? (
-            <View
-              className={`rounded-full px-4 py-2 ${due ? "bg-sage-100" : "bg-cream"}`}
-            >
-              <Text
-                className={`text-sm font-semibold ${due ? "text-sage" : "text-warmgray-muted"}`}
-              >
-                {statusLabel}
-              </Text>
-            </View>
-          ) : (
-            <View className="rounded-full border border-border bg-cream px-4 py-2">
-              <Text className="text-sm font-semibold text-warmgray-muted">
-                {statusLabel}
-              </Text>
-            </View>
-          )}
+          <Badge
+            label={statusLabel}
+            variant={hasReminders && due ? "sage" : "neutral"}
+            size="md"
+            leftDot={hasReminders && due}
+            textClassName={hasReminders && due ? undefined : "text-warmgray-muted"}
+          />
           <Text className="text-2xl text-warmgray-muted -mt-0.5">›</Text>
         </View>
       </View>
@@ -558,6 +549,21 @@ export default function ContactsScreen() {
         }
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center py-16">
+            {(emptyState.type === "first-time" ||
+              emptyState.type === "all-archived") && (
+              <View
+                className="mb-6 items-center justify-center"
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                <View className="relative">
+                  <Ionicons name="people-outline" size={80} color="#9CA986" />
+                  <View className="absolute -bottom-1 -right-1 rounded-full bg-cream p-1">
+                    <Ionicons name="heart" size={24} color="#C4A484" />
+                  </View>
+                </View>
+              </View>
+            )}
             <Text className="text-2xl font-semibold text-warmgray">
               {emptyState.title}
             </Text>

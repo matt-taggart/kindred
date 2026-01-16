@@ -6,6 +6,7 @@ import { ActivityIndicator, RefreshControl, SafeAreaView, ScrollView, Text, Touc
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact } from '@/db/schema';
+import Badge from '@/components/Badge';
 import {
   getContactsByDate,
   getCalendarData,
@@ -84,11 +85,12 @@ const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => 
           </Text>
         </View>
 
-        <View className={`rounded-full px-3 py-1 ${isBirthday ? 'bg-terracotta-100' : 'bg-sage-100'}`}>
-          <Text className={`text-xs font-semibold ${isBirthday ? 'text-terracotta' : 'text-sage'}`}>
-            {isBirthday ? 'Birthday' : 'Reminder'}
-          </Text>
-        </View>
+        <Badge
+          label={isBirthday ? 'Birthday' : 'Reminder'}
+          variant={isBirthday ? 'terracotta' : 'sage'}
+          size="sm"
+          leftDot
+        />
       </View>
     </TouchableOpacity>
   );

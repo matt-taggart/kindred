@@ -17,6 +17,12 @@
     ],
     "transformIgnorePatterns": [
       "node_modules/(?!(\\.pnpm|@react-native|react-native|@expo|expo.*|nativewind|react-native-css-interop|react-native-calendars|@react-navigation|@react-native-community)/)"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/.worktrees/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/.worktrees/"
     ]
   },
   "dependencies": {

@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import Badge from '@/components/Badge';
 import { useUserStore } from '@/lib/userStore';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -188,11 +189,14 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
               {/* Price Tag */}
               {!isPro && (
                 <View className="items-center mb-8">
-                    <View className="bg-sage/10 px-4 py-1.5 rounded-full mb-3 border border-sage/20">
-                    <Text className="text-sage text-xs font-bold uppercase tracking-wider">
-                      One-time payment
-                    </Text>
-                  </View>
+                  <Badge
+                    label="One-time payment"
+                    variant="sage"
+                    size="sm"
+                    leftDot
+                    className="px-4 py-1.5 mb-3"
+                    textClassName="text-xs font-bold uppercase tracking-wider"
+                  />
                   <View className="flex-row items-baseline">
                     <Text className="text-4xl font-extrabold text-warmgray">$14.99</Text>
                     <Text className="text-lg font-medium text-warmgray-muted ml-1">/ lifetime</Text>
@@ -222,7 +226,7 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
                     PRO Features
                   </Text>
 
-                  <View className="space-y-4">
+                  <View className="space-y-6">
                     <FeatureItem
                       icon="∞"
                       iconColor="text-sage"
