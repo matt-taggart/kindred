@@ -526,12 +526,9 @@ export default function ContactsScreen() {
                   onPress={handleImportPress}
                   activeOpacity={0.9}
                 >
-                  <View className="flex-row items-center gap-2">
-                    <Ionicons name="people-outline" size={18} color="white" />
-                    <Text className="text-base font-semibold text-white">
-                      Import from contacts
-                    </Text>
-                  </View>
+                  <Text className="text-base font-semibold text-white">
+                    Import from contacts
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -591,12 +588,9 @@ export default function ContactsScreen() {
                       onPress={handleImportPress}
                       activeOpacity={0.9}
                     >
-                      <View className="flex-row items-center gap-2">
-                        <Ionicons name="people-outline" size={20} color="white" />
-                        <Text className="text-lg font-semibold text-white">
-                          Import from contacts
-                        </Text>
-                      </View>
+                      <Text className="text-lg font-semibold text-white">
+                        Import from contacts
+                      </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
