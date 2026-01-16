@@ -138,10 +138,10 @@ const ContactRow = ({
         <View className="flex-row items-center gap-2">
           {hasReminders ? (
             <View
-              className={`rounded-full px-4 py-2 ${due ? "bg-terracotta-100" : "bg-sage-100"}`}
+              className={`rounded-full px-4 py-2 ${due ? "bg-sage-100" : "bg-cream"}`}
             >
               <Text
-                className={`text-sm font-semibold ${due ? "text-terracotta" : "text-sage"}`}
+                className={`text-sm font-semibold ${due ? "text-sage" : "text-warmgray-muted"}`}
               >
                 {statusLabel}
               </Text>
@@ -372,8 +372,8 @@ export default function ContactsScreen() {
     if (hasZeroContacts) {
       return {
         type: "first-time" as const,
-        title: "No connections yet.",
-        subtitle: "Add your first connection to start keeping in touch.",
+        title: "Start by importing your contacts",
+        subtitle: "It’s the fastest way to add people you already know.",
         showCTA: true,
       };
     }
@@ -471,7 +471,7 @@ export default function ContactsScreen() {
         }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
-          <View className="pt-4 pb-4 mb-8">
+          <View className="pt-4 pb-2 mb-4">
             <View className="flex-row items-center justify-between mb-2">
               <View className="flex-1">
                 <Text className="text-3xl font-semibold text-warmgray">
@@ -523,25 +523,28 @@ export default function ContactsScreen() {
               <>
                 <TouchableOpacity
                   className="mt-4 w-full items-center rounded-2xl bg-sage py-4"
-                  onPress={handleAddConnection}
+                  onPress={handleImportPress}
                   activeOpacity={0.9}
                 >
-                  <Text className="text-base font-semibold text-white">
-                    Add a connection
-                  </Text>
+                  <View className="flex-row items-center gap-2">
+                    <Ionicons name="people-outline" size={18} color="white" />
+                    <Text className="text-base font-semibold text-white">
+                      Import from contacts
+                    </Text>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   className="mt-3 w-full items-center rounded-2xl border border-sage bg-surface py-4"
-                  onPress={handleImportPress}
+                  onPress={handleAddConnection}
                   activeOpacity={0.9}
                 >
                   <Text className="text-base font-semibold text-sage">
-                    Import from contacts
+                    Add manually
                   </Text>
                 </TouchableOpacity>
 
-                <View className="mt-5 flex-row flex-wrap gap-2">
+                <View className="mt-4 flex-row flex-wrap gap-2">
                   {filterOptions.map((option) => (
                     <FilterChip
                       key={option.value}
@@ -569,34 +572,44 @@ export default function ContactsScreen() {
 
             {emptyState.showCTA && (
               <>
-                <TouchableOpacity
-                  style={{ width: emptyCtaWidth }}
-                  className="mt-5 items-center rounded-2xl bg-sage py-4"
-                  onPress={
-                    emptyState.type === "all-archived"
-                      ? () => setFilter("archived")
-                      : handleAddConnection
-                  }
-                  activeOpacity={0.9}
-                >
-                  <Text className="text-lg font-semibold text-white">
-                    {emptyState.type === "all-archived"
-                      ? "View archived"
-                      : "Add a connection"}
-                  </Text>
-                </TouchableOpacity>
-
-                {emptyState.type !== "all-archived" && (
+                {emptyState.type === "all-archived" ? (
                   <TouchableOpacity
                     style={{ width: emptyCtaWidth }}
-                    className="mt-3 items-center rounded-2xl border border-sage bg-surface py-4"
-                    onPress={handleImportPress}
+                    className="mt-5 items-center rounded-2xl bg-sage py-4"
+                    onPress={() => setFilter("archived")}
                     activeOpacity={0.9}
                   >
-                    <Text className="text-lg font-semibold text-sage">
-                      Import from contacts
+                    <Text className="text-lg font-semibold text-white">
+                      View archived
                     </Text>
                   </TouchableOpacity>
+                ) : (
+                  <>
+                    <TouchableOpacity
+                      style={{ width: emptyCtaWidth }}
+                      className="mt-5 items-center rounded-2xl bg-sage py-4"
+                      onPress={handleImportPress}
+                      activeOpacity={0.9}
+                    >
+                      <View className="flex-row items-center gap-2">
+                        <Ionicons name="people-outline" size={20} color="white" />
+                        <Text className="text-lg font-semibold text-white">
+                          Import from contacts
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={{ width: emptyCtaWidth }}
+                      className="mt-3 items-center rounded-2xl border border-sage bg-surface py-4"
+                      onPress={handleAddConnection}
+                      activeOpacity={0.9}
+                    >
+                      <Text className="text-lg font-semibold text-sage">
+                        Add manually
+                      </Text>
+                    </TouchableOpacity>
+                  </>
                 )}
               </>
             )}
