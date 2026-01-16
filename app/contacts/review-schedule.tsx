@@ -7,10 +7,11 @@ import {
   FlatList,
   Platform,
   SafeAreaView,
-  ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
+  KeyboardAvoidingView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -80,6 +81,7 @@ export default function ReviewScheduleScreen() {
   
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [birthdayInput, setBirthdayInput] = useState("");
   const [availableSlots, setAvailableSlots] = useState<number>(5);
   const isPro = useUserStore((s) => s.isPro);
 
@@ -143,22 +145,7 @@ export default function ReviewScheduleScreen() {
         const originalContact = contactsData.find((c) => c.id === contactId);
         if (originalContact) {
           setEditingState({ id: contactId, field });
-          if (originalContact.birthday) {
-            // Check if format is YYYY-MM-DD or MM-DD
-            const parts = originalContact.birthday.split("-");
-            let dateStr = originalContact.birthday;
-
-            // If MM-DD, prepend a leap year (2000) to allow Feb 29
-            if (parts.length === 2) {
-              dateStr = `2000-${originalContact.birthday}`;
-            }
-
-            // Append noon time to prevent timezone shifts
-            setSelectedDate(new Date(dateStr + "T12:00:00"));
-          } else {
-            // Default to a leap year (2000) for new birthdays
-            setSelectedDate(new Date(2000, 0, 1));
-          }
+          setBirthdayInput(originalContact.birthday || "");
           setShowDatePicker(true);
         }
       }
@@ -172,27 +159,14 @@ export default function ReviewScheduleScreen() {
         setShowDatePicker(false);
       }
 
-      if (date && editingState) {
-        if (editingState.field === "startDate") {
-          setDistributedContacts((prev) =>
-            prev.map((c) =>
-              c.id === editingState.id
-                ? { ...c, nextContactDate: date.getTime() }
-                : c,
-            ),
-          );
-        } else {
-          // Update birthday in contactsData
-          const month = String(date.getMonth() + 1).padStart(2, "0");
-          const day = String(date.getDate()).padStart(2, "0");
-          const birthdayString = `${month}-${day}`;
-
-          setContactsData((prev) =>
-            prev.map((c) =>
-              c.id === editingState.id ? { ...c, birthday: birthdayString } : c,
-            ),
-          );
-        }
+      if (date && editingState?.field === "startDate") {
+        setDistributedContacts((prev) =>
+          prev.map((c) =>
+            c.id === editingState.id
+              ? { ...c, nextContactDate: date.getTime() }
+              : c,
+          ),
+        );
         if (Platform.OS === "android") {
           setEditingState(null);
         }
@@ -200,6 +174,48 @@ export default function ReviewScheduleScreen() {
     },
     [editingState],
   );
+
+  const handleConfirmBirthday = useCallback(() => {
+    if (!editingState || editingState.field !== "birthday") return;
+
+    // Basic validation for MM-DD or MM/DD
+    const cleaned = birthdayInput.replace(/\//g, "-");
+    const parts = cleaned.split("-");
+
+    if (
+      parts.length === 2 &&
+      !isNaN(parseInt(parts[0])) &&
+      !isNaN(parseInt(parts[1]))
+    ) {
+      const month = parseInt(parts[0]);
+      const day = parseInt(parts[1]);
+
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        const birthdayString = `${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        setContactsData((prev) =>
+          prev.map((c) =>
+            c.id === editingState.id ? { ...c, birthday: birthdayString } : c,
+          ),
+        );
+      } else {
+        Alert.alert("Invalid Date", "Please enter a valid month (1-12) and day (1-31).");
+        return; // Don't close modal on error
+      }
+    } else if (birthdayInput.trim() === "") {
+        // Allow clearing birthday
+        setContactsData((prev) =>
+          prev.map((c) =>
+            c.id === editingState.id ? { ...c, birthday: undefined } : c,
+          ),
+        );
+    } else {
+      Alert.alert("Invalid Format", "Please enter date as MM/DD");
+      return; // Don't close modal
+    }
+
+    setShowDatePicker(false);
+    setEditingState(null);
+  }, [editingState, birthdayInput]);
 
   const handleConfirmDate = useCallback(() => {
     if (editingState) {
@@ -209,17 +225,6 @@ export default function ReviewScheduleScreen() {
             c.id === editingState.id
               ? { ...c, nextContactDate: selectedDate.getTime() }
               : c,
-          ),
-        );
-      } else {
-        // Update birthday in contactsData
-        const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
-        const day = String(selectedDate.getDate()).padStart(2, "0");
-        const birthdayString = `${month}-${day}`;
-        
-        setContactsData((prev) =>
-          prev.map((c) =>
-            c.id === editingState.id ? { ...c, birthday: birthdayString } : c,
           ),
         );
       }
@@ -444,9 +449,12 @@ export default function ReviewScheduleScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* iOS Date Picker - Bottom Sheet */}
+      {/* iOS Date Picker / Input - Bottom Sheet */}
       {Platform.OS === "ios" && showDatePicker && (
-        <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-surface px-4 pb-8 pt-4">
+        <KeyboardAvoidingView
+          behavior="padding"
+          className="absolute bottom-0 left-0 right-0 border-t border-border bg-surface px-4 pb-8 pt-4"
+        >
           <View className="mb-2 flex-row items-center justify-between">
             <TouchableOpacity
               onPress={() => {
@@ -459,48 +467,96 @@ export default function ReviewScheduleScreen() {
               </Text>
             </TouchableOpacity>
             <Text className="text-base font-bold text-warmgray">
-              {editingState?.field === "birthday" 
+              {editingState?.field === "birthday"
                 ? `Set Birthday`
                 : editingContactName
                   ? `${editingContactName}'s Start Date`
                   : "Adjust Start Date"}
             </Text>
-            <TouchableOpacity onPress={handleConfirmDate}>
+            <TouchableOpacity
+              onPress={
+                editingState?.field === "birthday"
+                  ? handleConfirmBirthday
+                  : handleConfirmDate
+              }
+            >
               <Text className="text-base font-semibold text-sage">Done</Text>
             </TouchableOpacity>
           </View>
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            display="spinner"
-            minimumDate={editingState?.field === "startDate" ? new Date() : undefined}
-            maximumDate={
-              editingState?.field === "startDate"
-                ? new Date(Date.now() + 365 * DAY_IN_MS)
-                : new Date()
-            }
-            onChange={(_e, date) => date && setSelectedDate(date)}
-            accentColor="#9CA986"
-            themeVariant="light"
-          />
-        </View>
+          
+          {editingState?.field === "birthday" ? (
+            <View className="py-8 items-center">
+              <TextInput
+                value={birthdayInput}
+                onChangeText={setBirthdayInput}
+                placeholder="MM/DD"
+                placeholderTextColor="#A0A0A0"
+                keyboardType="numbers-and-punctuation"
+                autoFocus
+                className="text-3xl font-bold text-center w-full text-warmgray"
+                maxLength={5}
+              />
+              <Text className="text-sm text-warmgray-muted mt-2">
+                Format: MM/DD (e.g. 03/15)
+              </Text>
+            </View>
+          ) : (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="spinner"
+              minimumDate={new Date()}
+              maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
+              onChange={(_e, date) => date && setSelectedDate(date)}
+              accentColor="#9CA986"
+              themeVariant="light"
+            />
+          )}
+        </KeyboardAvoidingView>
       )}
 
-      {/* Android Date Picker */}
+      {/* Android Date Picker / Input */}
       {Platform.OS === "android" && showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display="default"
-          minimumDate={editingState?.field === "startDate" ? new Date() : undefined}
-          maximumDate={
-            editingState?.field === "startDate"
-              ? new Date(Date.now() + 365 * DAY_IN_MS)
-              : new Date()
-          }
-          onChange={handleDateChange}
-          accentColor="#9CA986"
-        />
+        <>
+          {editingState?.field === "birthday" ? (
+             <View className="absolute bottom-0 left-0 right-0 top-0 bg-black/50 items-center justify-center p-4">
+               <View className="bg-surface p-6 rounded-2xl w-full max-w-sm">
+                 <Text className="text-lg font-bold text-warmgray mb-4">Set Birthday</Text>
+                 <TextInput
+                   value={birthdayInput}
+                   onChangeText={setBirthdayInput}
+                   placeholder="MM/DD"
+                   placeholderTextColor="#A0A0A0"
+                   keyboardType="numbers-and-punctuation"
+                   autoFocus
+                   className="text-2xl font-bold border-b border-border py-2 mb-2 text-warmgray"
+                   maxLength={5}
+                 />
+                 <Text className="text-sm text-warmgray-muted mb-6">
+                   Format: MM/DD
+                 </Text>
+                 <View className="flex-row justify-end gap-4">
+                   <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                     <Text className="text-base font-medium text-warmgray-muted">Cancel</Text>
+                   </TouchableOpacity>
+                   <TouchableOpacity onPress={handleConfirmBirthday}>
+                     <Text className="text-base font-bold text-sage">Save</Text>
+                   </TouchableOpacity>
+                 </View>
+               </View>
+             </View>
+          ) : (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="default"
+              minimumDate={new Date()}
+              maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
+              onChange={handleDateChange}
+              accentColor="#9CA986"
+            />
+          )}
+        </>
       )}
 
       <EnhancedPaywallModal
