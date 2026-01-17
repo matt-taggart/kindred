@@ -40,7 +40,40 @@ describe('validateBirthday', () => {
   it('rejects invalid format', () => {
     expect(validateBirthday('abc')).toEqual({ valid: false, error: 'Use format MM/DD' });
     expect(validateBirthday('123')).toEqual({ valid: false, error: 'Use format MM/DD' });
-    expect(validateBirthday('03/15/1990')).toEqual({ valid: false, error: 'Use format MM/DD' });
+    expect(validateBirthday('03/15/1990')).toEqual({ valid: false, error: 'Use format YYYY-MM-DD or MM/DD' });
+  });
+});
+
+describe('validateBirthday with year', () => {
+  it('accepts valid YYYY-MM-DD format', () => {
+    expect(validateBirthday('1990-03-15')).toEqual({ valid: true });
+    expect(validateBirthday('2000-12-31')).toEqual({ valid: true });
+    expect(validateBirthday('1985-01-01')).toEqual({ valid: true });
+  });
+
+  it('rejects invalid year', () => {
+    expect(validateBirthday('0000-03-15')).toEqual({ valid: false, error: 'Invalid year' });
+    expect(validateBirthday('3000-03-15')).toEqual({ valid: false, error: 'Invalid year' });
+  });
+
+  it('rejects invalid month in YYYY-MM-DD', () => {
+    expect(validateBirthday('1990-13-15')).toEqual({ valid: false, error: 'Month must be 1-12' });
+    expect(validateBirthday('1990-00-15')).toEqual({ valid: false, error: 'Month must be 1-12' });
+  });
+
+  it('rejects invalid day in YYYY-MM-DD', () => {
+    expect(validateBirthday('1990-02-30')).toEqual({ valid: false, error: 'Invalid day for this month' });
+    expect(validateBirthday('1990-04-31')).toEqual({ valid: false, error: 'Invalid day for this month' });
+  });
+
+  it('allows Feb 29 in leap year', () => {
+    expect(validateBirthday('2000-02-29')).toEqual({ valid: true });
+    expect(validateBirthday('2004-02-29')).toEqual({ valid: true });
+  });
+
+  it('rejects Feb 29 in non-leap year', () => {
+    expect(validateBirthday('1900-02-29')).toEqual({ valid: false, error: 'Invalid day for this month' });
+    expect(validateBirthday('2001-02-29')).toEqual({ valid: false, error: 'Invalid day for this month' });
   });
 });
 
@@ -59,5 +92,16 @@ describe('normalizeBirthday', () => {
   it('returns empty string for invalid input', () => {
     expect(normalizeBirthday('abc')).toBe('');
     expect(normalizeBirthday('13/15')).toBe('');
+  });
+
+  it('normalizes YYYY-MM-DD format', () => {
+    expect(normalizeBirthday('1990-03-15')).toBe('1990-03-15');
+    expect(normalizeBirthday('2000-1-5')).toBe('2000-01-05');
+    expect(normalizeBirthday('1985-12-31')).toBe('1985-12-31');
+  });
+
+  it('returns empty string for invalid YYYY-MM-DD input', () => {
+    expect(normalizeBirthday('3000-03-15')).toBe('');
+    expect(normalizeBirthday('1990-13-15')).toBe('');
   });
 });
