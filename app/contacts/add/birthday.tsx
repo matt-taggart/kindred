@@ -1,13 +1,14 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Platform, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import type { Contact } from '@/db/schema';
 import { addContact, getAvailableSlots } from '@/services/contactService';
 import { useUserStore } from '@/lib/userStore';
 import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
+import BirthdayInput from '@/components/BirthdayInput';
+import { formatBirthdayDisplay } from '@/utils/formatters';
 
 const ProgressDots = ({ step }: { step: 1 | 2 | 3 }) => (
   <View className="flex-row items-center justify-center gap-2">
@@ -19,13 +20,6 @@ const ProgressDots = ({ step }: { step: 1 | 2 | 3 }) => (
     ))}
   </View>
 );
-
-const formatDate = (date: Date) => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
 
 export default function AddConnectionBirthdayScreen() {
   const router = useRouter();
@@ -47,29 +41,30 @@ export default function AddConnectionBirthdayScreen() {
 
   type BirthdayState = 'collapsed' | 'editing' | 'saved';
   const [birthdayState, setBirthdayState] = useState<BirthdayState>('collapsed');
-  const [editingDate, setEditingDate] = useState<Date>(new Date());
-  const [savedDate, setSavedDate] = useState<Date | null>(null);
+  const [savedBirthday, setSavedBirthday] = useState<string>('');
+  const [editingBirthday, setEditingBirthday] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
 
   const handleAddBirthday = () => {
+    setEditingBirthday(savedBirthday);
     setBirthdayState('editing');
   };
 
   const handleCancel = () => {
-    setEditingDate(new Date());
-    setBirthdayState('collapsed');
+    setEditingBirthday('');
+    setBirthdayState(savedBirthday ? 'saved' : 'collapsed');
   };
 
   const handleSaveBirthday = () => {
-    setSavedDate(editingDate);
-    setBirthdayState('saved');
+    if (editingBirthday) {
+      setSavedBirthday(editingBirthday);
+      setBirthdayState('saved');
+    }
   };
 
   const handleEdit = () => {
-    if (savedDate) {
-      setEditingDate(savedDate);
-    }
+    setEditingBirthday(savedBirthday);
     setBirthdayState('editing');
   };
 
@@ -90,7 +85,7 @@ export default function AddConnectionBirthdayScreen() {
         name,
         bucket,
         customIntervalDays,
-        birthday: savedDate ? formatDate(savedDate) : null,
+        birthday: savedBirthday || null,
       });
       router.replace(`/contacts/${created.id}`);
     } catch (error) {
@@ -105,10 +100,6 @@ export default function AddConnectionBirthdayScreen() {
     }
   };
 
-  const formatDisplayDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  };
-
   return (
     <SafeAreaView className="flex-1 bg-cream">
       <Stack.Screen
@@ -116,8 +107,8 @@ export default function AddConnectionBirthdayScreen() {
           title: name || 'Add a connection',
           headerBackTitle: 'Back',
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: '#FDFCF8' }, // bg-cream
-          headerTintColor: '#57534E', // warmgray
+          headerStyle: { backgroundColor: '#FDFCF8' },
+          headerTintColor: '#57534E',
         }}
       />
 
@@ -162,36 +153,35 @@ export default function AddConnectionBirthdayScreen() {
                 </TouchableOpacity>
               </View>
 
-              <View className="items-center py-2 bg-cream rounded-xl border border-border/50">
-                <DateTimePicker
-                  value={editingDate}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={(_e, date) => date && setEditingDate(date)}
-                  textColor="#57534E"
-                  style={Platform.OS === 'ios' ? { height: 120 } : undefined}
+              <View className="py-2 bg-cream rounded-xl border border-border/50">
+                <BirthdayInput
+                  value={editingBirthday}
+                  onChange={setEditingBirthday}
+                  autoFocus
                 />
               </View>
 
               <TouchableOpacity
-                className="mt-4 items-center justify-center rounded-xl bg-sage py-3"
+                className={`mt-4 items-center justify-center rounded-xl py-3 ${editingBirthday ? 'bg-sage' : 'bg-border'}`}
                 onPress={handleSaveBirthday}
                 activeOpacity={0.9}
-                disabled={saving}
+                disabled={saving || !editingBirthday}
               >
-                <Text className="text-base font-semibold text-white">Save Birthday</Text>
+                <Text className={`text-base font-semibold ${editingBirthday ? 'text-white' : 'text-warmgray-muted'}`}>
+                  Save Birthday
+                </Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {birthdayState === 'saved' && savedDate && (
+          {birthdayState === 'saved' && savedBirthday && (
             <View className="flex-row items-center justify-between py-4">
               <View className="flex-row items-center gap-3">
                 <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
                   <Ionicons name="checkmark" size={20} color="#788467" />
                 </View>
                 <Text className="text-base font-medium text-warmgray">
-                  {formatDisplayDate(savedDate)}
+                  {formatBirthdayDisplay(savedBirthday)}
                 </Text>
               </View>
               <TouchableOpacity
