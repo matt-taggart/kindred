@@ -8,13 +8,13 @@ import {
   Platform,
   SafeAreaView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
+import BirthdayInput from "@/components/BirthdayInput";
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import FrequencyBadge from "@/components/FrequencyBadge";
 
@@ -178,40 +178,13 @@ export default function ReviewScheduleScreen() {
   const handleConfirmBirthday = useCallback(() => {
     if (!editingState || editingState.field !== "birthday") return;
 
-    // Basic validation for MM-DD or MM/DD
-    const cleaned = birthdayInput.replace(/\//g, "-");
-    const parts = cleaned.split("-");
-
-    if (
-      parts.length === 2 &&
-      !isNaN(parseInt(parts[0])) &&
-      !isNaN(parseInt(parts[1]))
-    ) {
-      const month = parseInt(parts[0]);
-      const day = parseInt(parts[1]);
-
-      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-        const birthdayString = `${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        setContactsData((prev) =>
-          prev.map((c) =>
-            c.id === editingState.id ? { ...c, birthday: birthdayString } : c,
-          ),
-        );
-      } else {
-        Alert.alert("Invalid Date", "Please enter a valid month (1-12) and day (1-31).");
-        return; // Don't close modal on error
-      }
-    } else if (birthdayInput.trim() === "") {
-        // Allow clearing birthday
-        setContactsData((prev) =>
-          prev.map((c) =>
-            c.id === editingState.id ? { ...c, birthday: undefined } : c,
-          ),
-        );
-    } else {
-      Alert.alert("Invalid Format", "Please enter date as MM/DD");
-      return; // Don't close modal
-    }
+    setContactsData((prev) =>
+      prev.map((c) =>
+        c.id === editingState.id
+          ? { ...c, birthday: birthdayInput || undefined }
+          : c,
+      ),
+    );
 
     setShowDatePicker(false);
     setEditingState(null);
@@ -509,20 +482,12 @@ export default function ReviewScheduleScreen() {
               <Text className="text-base font-semibold text-sage">Done</Text>
             </TouchableOpacity>
           </View>
-          <View className="py-8 items-center">
-            <TextInput
+          <View className="py-4">
+            <BirthdayInput
               value={birthdayInput}
-              onChangeText={setBirthdayInput}
-              placeholder="MM/DD"
-              placeholderTextColor="#A0A0A0"
-              keyboardType="numbers-and-punctuation"
+              onChange={setBirthdayInput}
               autoFocus
-              className="text-3xl font-bold text-center w-full text-warmgray"
-              maxLength={5}
             />
-            <Text className="text-sm text-warmgray-muted mt-2">
-              Format: MM/DD (e.g. 03/15)
-            </Text>
           </View>
         </KeyboardAvoidingView>
       )}
@@ -545,20 +510,12 @@ export default function ReviewScheduleScreen() {
         <View className="absolute bottom-0 left-0 right-0 top-0 bg-black/50 items-center justify-center p-4">
           <View className="bg-surface p-6 rounded-2xl w-full max-w-sm">
             <Text className="text-lg font-bold text-warmgray mb-4">Set Birthday</Text>
-            <TextInput
+            <BirthdayInput
               value={birthdayInput}
-              onChangeText={setBirthdayInput}
-              placeholder="MM/DD"
-              placeholderTextColor="#A0A0A0"
-              keyboardType="numbers-and-punctuation"
+              onChange={setBirthdayInput}
               autoFocus
-              className="text-2xl font-bold border-b border-border py-2 mb-2 text-warmgray"
-              maxLength={5}
             />
-            <Text className="text-sm text-warmgray-muted mb-6">
-              Format: MM/DD
-            </Text>
-            <View className="flex-row justify-end gap-4">
+            <View className="flex-row justify-end gap-4 mt-4">
               <TouchableOpacity onPress={() => { setShowDatePicker(false); setEditingState(null); }}>
                 <Text className="text-base font-medium text-warmgray-muted">Cancel</Text>
               </TouchableOpacity>
