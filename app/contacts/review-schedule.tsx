@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-import BirthdayInput from "@/components/BirthdayInput";
+import BirthdayPicker from "@/components/BirthdayPicker";
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import FrequencyBadge from "@/components/FrequencyBadge";
 
@@ -483,10 +483,9 @@ export default function ReviewScheduleScreen() {
             </TouchableOpacity>
           </View>
           <View className="py-4">
-            <BirthdayInput
+            <BirthdayPicker
               value={birthdayInput}
               onChange={setBirthdayInput}
-              autoFocus
             />
           </View>
         </KeyboardAvoidingView>
@@ -510,10 +509,9 @@ export default function ReviewScheduleScreen() {
         <View className="absolute bottom-0 left-0 right-0 top-0 bg-black/50 items-center justify-center p-4">
           <View className="bg-surface p-6 rounded-2xl w-full max-w-sm">
             <Text className="text-lg font-bold text-warmgray mb-4">Set Birthday</Text>
-            <BirthdayInput
+            <BirthdayPicker
               value={birthdayInput}
               onChange={setBirthdayInput}
-              autoFocus
             />
             <View className="flex-row justify-end gap-4 mt-4">
               <TouchableOpacity onPress={() => { setShowDatePicker(false); setEditingState(null); }}>
