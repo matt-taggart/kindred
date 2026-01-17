@@ -1,4 +1,4 @@
-import { validateBirthday, normalizeBirthday } from '../birthdayValidation';
+import { validateBirthday, normalizeBirthday, hasYear, getMonthDay, getYear } from '../birthdayValidation';
 
 describe('validateBirthday', () => {
   it('accepts empty string (optional field)', () => {
@@ -103,5 +103,53 @@ describe('normalizeBirthday', () => {
   it('returns empty string for invalid YYYY-MM-DD input', () => {
     expect(normalizeBirthday('3000-03-15')).toBe('');
     expect(normalizeBirthday('1990-13-15')).toBe('');
+  });
+});
+
+describe('hasYear', () => {
+  it('returns true for YYYY-MM-DD format', () => {
+    expect(hasYear('1990-03-15')).toBe(true);
+    expect(hasYear('2000-12-31')).toBe(true);
+  });
+
+  it('returns false for MM-DD format', () => {
+    expect(hasYear('03-15')).toBe(false);
+    expect(hasYear('12-31')).toBe(false);
+  });
+
+  it('returns false for empty string', () => {
+    expect(hasYear('')).toBe(false);
+  });
+});
+
+describe('getMonthDay', () => {
+  it('extracts MM-DD from YYYY-MM-DD', () => {
+    expect(getMonthDay('1990-03-15')).toBe('03-15');
+    expect(getMonthDay('2000-12-31')).toBe('12-31');
+  });
+
+  it('returns MM-DD as is', () => {
+    expect(getMonthDay('03-15')).toBe('03-15');
+    expect(getMonthDay('12-31')).toBe('12-31');
+  });
+
+  it('returns empty string for empty input', () => {
+    expect(getMonthDay('')).toBe('');
+  });
+});
+
+describe('getYear', () => {
+  it('extracts year from YYYY-MM-DD', () => {
+    expect(getYear('1990-03-15')).toBe(1990);
+    expect(getYear('2000-12-31')).toBe(2000);
+  });
+
+  it('returns null for MM-DD format', () => {
+    expect(getYear('03-15')).toBe(null);
+    expect(getYear('12-31')).toBe(null);
+  });
+
+  it('returns null for empty string', () => {
+    expect(getYear('')).toBe(null);
   });
 });

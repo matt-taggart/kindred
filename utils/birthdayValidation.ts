@@ -109,3 +109,27 @@ export function normalizeBirthday(input: string): string {
   const day = parseInt(parts[1], 10);
   return `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
+
+export function hasYear(birthday: string): boolean {
+  if (!birthday) return false;
+  const parts = birthday.split('-');
+  return parts.length === 3 && parts[0].length === 4;
+}
+
+export function getMonthDay(birthday: string): string {
+  if (!birthday) return '';
+  const parts = birthday.split('-');
+  if (parts.length === 3) {
+    return `${parts[1]}-${parts[2]}`;
+  }
+  return birthday;
+}
+
+export function getYear(birthday: string): number | null {
+  if (!birthday) return null;
+  const parts = birthday.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    return parseInt(parts[0], 10);
+  }
+  return null;
+}
