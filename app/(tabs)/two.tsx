@@ -557,7 +557,7 @@ export default function ContactsScreen() {
                 importantForAccessibility="no-hide-descendants"
               >
                 <View className="relative">
-                  <Ionicons name="people-outline" size={80} color="#9CA986" />
+                  <Ionicons name="book-outline" size={80} color="#9CA986" />
                   <View className="absolute -bottom-1 -right-1 rounded-full bg-cream p-1">
                     <Ionicons name="heart" size={24} color="#C4A484" />
                   </View>
