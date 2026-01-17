@@ -7,7 +7,7 @@ import type { Contact } from '@/db/schema';
 import { addContact, getAvailableSlots } from '@/services/contactService';
 import { useUserStore } from '@/lib/userStore';
 import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
-import BirthdayInput from '@/components/BirthdayInput';
+import BirthdayPicker from '@/components/BirthdayPicker';
 import { formatBirthdayDisplay } from '@/utils/formatters';
 
 const ProgressDots = ({ step }: { step: 1 | 2 | 3 }) => (
@@ -153,11 +153,10 @@ export default function AddConnectionBirthdayScreen() {
                 </TouchableOpacity>
               </View>
 
-              <View className="py-2 bg-cream rounded-xl border border-border/50">
-                <BirthdayInput
+              <View className="py-2">
+                <BirthdayPicker
                   value={editingBirthday}
                   onChange={setEditingBirthday}
-                  autoFocus
                 />
               </View>
 
