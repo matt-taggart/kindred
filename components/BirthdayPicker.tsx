@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, Pressable, TouchableOpacity } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,11 @@ interface BirthdayPickerProps {
   onChange: (value: string) => void;
   autoFocus?: boolean;
 }
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
 
 const calendarTheme = {
   calendarBackground: '#FDFBF7',
@@ -111,6 +116,18 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     };
   }, [yearUnknown]);
 
+  const renderHeader = useCallback((date: any) => {
+    if (!date) return null;
+    const month = MONTH_NAMES[date.getMonth()];
+    const year = date.getFullYear();
+
+    return (
+      <Text className="text-base font-semibold text-warmgray">
+        {yearUnknown ? month : `${month} ${year}`}
+      </Text>
+    );
+  }, [yearUnknown]);
+
   return (
     <View>
       {/* Toggle Row */}
@@ -139,6 +156,8 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
           theme={yearMutedTheme}
           enableSwipeMonths
           firstDay={0}
+          showSixWeeks={true}
+          renderHeader={renderHeader}
         />
       </View>
 
