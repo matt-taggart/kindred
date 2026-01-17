@@ -1,8 +1,8 @@
-import { Modal, Pressable, Platform, TouchableOpacity } from "react-native";
+import { Modal, Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView, ScrollView, Text, TextInput, View, Alert } from "react-native";
 import { useEffect, useMemo, useState } from "react";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import BirthdayInput from '@/components/BirthdayInput';
 
 import { Contact } from "@/db/schema";
 
@@ -74,18 +74,6 @@ const formatCustomSummary = (days?: number | null) => {
   return `Every ${days} days`;
 };
 
-const formatDate = (date: Date) => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-};
-
-const parseDate = (dateString: string) => {
-  const [y, m, d] = dateString.split("-").map(Number);
-  return new Date(y, m - 1, d);
-};
-
 export default function EditContactModal({
   contact,
   visible,
@@ -137,12 +125,6 @@ export default function EditContactModal({
       onSave(selectedBucket, customDays ?? null, birthday || null);
     }
     onClose();
-  };
-
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      setBirthday(formatDate(selectedDate));
-    }
   };
 
   const handleArchive = () => {
@@ -212,27 +194,13 @@ export default function EditContactModal({
                 ) : null}
               </View>
 
-              {!birthday ? (
-                <Pressable
-                  onPress={() => setBirthday(formatDate(new Date()))}
-                  className="flex-row items-center justify-center rounded-xl border border-sage/20 bg-cream py-4"
-                >
-                  <Text className="text-base font-bold text-sage">
-                    Add birthday (optional)
-                  </Text>
-                </Pressable>
-              ) : (
-                <View className="flex-row items-center justify-between rounded-xl border border-border bg-surface p-3">
-                  <DateTimePicker
-                    value={parseDate(birthday)}
-                    mode="date"
-                    display="compact"
-                    onChange={handleDateChange}
-                    accentColor="#9CA986" // Sage
-                    themeVariant="light"
-                  />
-                </View>
-              )}
+              <View className="py-2 bg-cream rounded-xl border border-border/50">
+                <BirthdayInput
+                  value={birthday}
+                  onChange={setBirthday}
+                />
+              </View>
+
               <Text className="mt-3 text-xs text-warmgray-muted text-center">
                 We'll prioritize this over regular reminders on their birthday.
               </Text>
