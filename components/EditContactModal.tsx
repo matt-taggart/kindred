@@ -2,7 +2,7 @@ import { Modal, Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView, ScrollView, Text, TextInput, View, Alert } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import BirthdayInput from '@/components/BirthdayInput';
+import BirthdayPicker from '@/components/BirthdayPicker';
 
 import { Contact } from "@/db/schema";
 
@@ -194,8 +194,8 @@ export default function EditContactModal({
                 ) : null}
               </View>
 
-              <View className="py-2 bg-cream rounded-xl border border-border/50">
-                <BirthdayInput
+              <View className="py-2">
+                <BirthdayPicker
                   value={birthday}
                   onChange={setBirthday}
                 />
