@@ -12,3 +12,7 @@ jest.mock('expo-notifications', () => ({
   AndroidImportance: { DEFAULT: 3 },
   SchedulableTriggerInputTypes: { DATE: 'date', DAILY: 'daily' },
 }));
+
+jest.mock('react-native-calendars', () => ({
+  Calendar: jest.fn(() => null),
+}));
