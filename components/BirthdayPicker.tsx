@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, Text, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { hasYear, getMonthDay } from '@/utils/birthdayValidation';
@@ -14,6 +14,10 @@ const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
+
+// Generate year range (1920 to current year, newest first)
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: CURRENT_YEAR - 1920 + 1 }, (_, i) => CURRENT_YEAR - i);
 
 const calendarTheme = {
   calendarBackground: '#FDFBF7',
@@ -49,6 +53,8 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     const monthDay = getMonthDay(value);
     return `${currentYear}-${monthDay}`;
   });
+
+  const [showYearPicker, setShowYearPicker] = useState(false);
 
   useEffect(() => {
     if (!value) {
@@ -97,6 +103,18 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     onChange('');
   };
 
+  const handleYearSelect = (year: number) => {
+    // Get current month from selectedDate or default to current month
+    const currentMonth = selectedDate
+      ? selectedDate.split('-')[1]
+      : String(new Date().getMonth() + 1).padStart(2, '0');
+
+    // Navigate calendar to new year, same month
+    const newDate = `${year}-${currentMonth}-01`;
+    setSelectedDate(newDate);
+    setShowYearPicker(false);
+  };
+
   const markedDates = useMemo(() => {
     if (!selectedDate) return {};
     return {
@@ -121,10 +139,25 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     const month = MONTH_NAMES[date.getMonth()];
     const year = date.getFullYear();
 
+    if (yearUnknown) {
+      return (
+        <Text className="text-base font-semibold text-warmgray">
+          {month}
+        </Text>
+      );
+    }
+
     return (
-      <Text className="text-base font-semibold text-warmgray">
-        {yearUnknown ? month : `${month} ${year}`}
-      </Text>
+      <View className="flex-row items-center">
+        <Text className="text-base font-semibold text-warmgray">
+          {month}{' '}
+        </Text>
+        <Pressable onPress={() => setShowYearPicker(true)} testID="year-selector">
+          <Text className="text-base font-semibold text-sage underline">
+            {year}
+          </Text>
+        </Pressable>
+      </View>
     );
   }, [yearUnknown]);
 
@@ -150,6 +183,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       {/* Calendar */}
       <View className="rounded-2xl overflow-hidden bg-surface border border-border">
         <Calendar
+          key={selectedDate?.slice(0, 7) || 'default'}
           current={selectedDate || undefined}
           markedDates={markedDates}
           onDayPress={handleDayPress}
@@ -160,6 +194,48 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
           renderHeader={renderHeader}
         />
       </View>
+
+      {/* Year Picker Modal */}
+      <Modal
+        visible={showYearPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowYearPicker(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowYearPicker(false)}
+        >
+          <Pressable
+            className="bg-surface rounded-2xl w-64 max-h-80 overflow-hidden"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text className="text-center py-3 text-base font-semibold text-warmgray border-b border-border">
+              Select Year
+            </Text>
+            <ScrollView>
+              {YEARS.map((year) => (
+                <Pressable
+                  key={year}
+                  onPress={() => handleYearSelect(year)}
+                  className={`py-3 px-4 ${
+                    selectedDate?.startsWith(String(year)) ? 'bg-sage/20' : ''
+                  }`}
+                  testID={`year-option-${year}`}
+                >
+                  <Text className={`text-center text-base ${
+                    selectedDate?.startsWith(String(year))
+                      ? 'text-sage font-semibold'
+                      : 'text-warmgray'
+                  }`}>
+                    {year}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Clear Link */}
       {selectedDate && (
