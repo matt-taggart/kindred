@@ -10,6 +10,8 @@ import EditContactModal from '@/components/EditContactModal';
 import InteractionListItem from '@/components/InteractionListItem';
 import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
 import { formatLastConnected, formatNextReminder } from '@/utils/timeFormatting';
+import { formatBirthdayDisplay } from '@/utils/formatters';
+import { hasYear, getYear } from '@/utils/birthdayValidation';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -355,6 +357,15 @@ export default function ContactDetailScreen() {
               <Text className="mt-3 text-2xl font-semibold text-warmgray">{contact.name}</Text>
               {contact.phone && (
                 <Text className="mt-1 text-base text-warmgray-muted">{formatPhoneNumber(contact.phone)}</Text>
+              )}
+              {contact.birthday && (
+                <View className="mt-1 flex-row items-center">
+                  <Ionicons name="gift-outline" size={14} color="#9CA986" />
+                  <Text className="ml-1 text-base text-warmgray-muted">
+                    {formatBirthdayDisplay(contact.birthday)}
+                    {hasYear(contact.birthday) && `, ${getYear(contact.birthday)}`}
+                  </Text>
+                </View>
               )}
 
               {/* Schedule summary */}
