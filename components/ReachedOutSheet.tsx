@@ -72,7 +72,7 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
           <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
             <Pressable
               className="bg-surface rounded-t-3xl px-6 pb-8 pt-6"
-              onPress={(e) => e.stopPropagation()}
+              onPress={(e) => e.stopPropagation?.()}
             >
             {/* Handle bar */}
             <View className="mb-4 h-1 w-10 self-center rounded-full bg-border" />

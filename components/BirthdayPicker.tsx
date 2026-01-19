@@ -289,7 +289,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
         >
           <Pressable
             className="bg-surface rounded-2xl w-64 max-h-80 overflow-hidden"
-            onPress={(e) => e.stopPropagation()}
+            onPress={(e) => e.stopPropagation?.()}
           >
             <Text className="text-center py-3 text-base font-semibold text-warmgray border-b border-border">
               Select Year

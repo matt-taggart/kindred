@@ -296,25 +296,23 @@ export const updateInteraction = async (
   const interactionId = generateId();
   const nextContactDate = getNextContactDate(contact.bucket, timestamp, contact.customIntervalDays);
 
-  db.transaction((tx: any) => {
-    tx.insert(interactions)
-      .values({
-        id: interactionId,
-        contactId,
-        date: timestamp,
-        type,
-        notes,
-      })
-      .run();
+  db.insert(interactions)
+    .values({
+      id: interactionId,
+      contactId,
+      date: timestamp,
+      type,
+      notes,
+    })
+    .run();
 
-    tx.update(contacts)
-      .set({
-        lastContactedAt: timestamp,
-        nextContactDate,
-      })
-      .where(eq(contacts.id, contactId))
-      .run();
-  });
+  db.update(contacts)
+    .set({
+      lastContactedAt: timestamp,
+      nextContactDate,
+    })
+    .where(eq(contacts.id, contactId))
+    .run();
 
   const [updated] = db
     .select()

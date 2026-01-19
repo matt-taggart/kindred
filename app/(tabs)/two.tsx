@@ -177,7 +177,7 @@ const ContactRow = ({
           <TouchableOpacity
             className="ml-2 flex-row items-center rounded-full bg-sage px-4 py-2"
             onPress={(e) => {
-              e.stopPropagation();
+              e.stopPropagation?.();
               onUnarchive?.();
             }}
             activeOpacity={0.7}
