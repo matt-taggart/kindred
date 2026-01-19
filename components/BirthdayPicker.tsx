@@ -60,7 +60,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     console.log('[BirthdayPicker useEffect] value changed to:', value);
     if (!value) {
       setYearUnknown(false);
-      setSelectedDate('');
+      setSelectedDate('1990-01-01');
       return;
     }
     const hasYearValue = hasYear(value);
@@ -70,8 +70,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       console.log('[BirthdayPicker useEffect] Setting selectedDate to:', value);
       setSelectedDate(value);
     } else {
-      const currentYear = new Date().getFullYear();
-      const newDate = `${currentYear}-${getMonthDay(value)}`;
+      const newDate = `1990-${getMonthDay(value)}`;
       console.log('[BirthdayPicker useEffect] Setting selectedDate to:', newDate);
       setSelectedDate(newDate);
     }
