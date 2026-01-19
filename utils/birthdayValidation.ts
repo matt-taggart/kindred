@@ -133,3 +133,13 @@ export function getYear(birthday: string): number | null {
   }
   return null;
 }
+
+export function calculateTurningAge(birthday: string, targetDate: Date): number | null {
+  const birthYear = getYear(birthday);
+  if (birthYear === null) {
+    return null;
+  }
+
+  const targetYear = targetDate.getFullYear();
+  return targetYear - birthYear;
+}

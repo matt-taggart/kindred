@@ -1,4 +1,4 @@
-import { validateBirthday, normalizeBirthday, hasYear, getMonthDay, getYear } from '../birthdayValidation';
+import { validateBirthday, normalizeBirthday, hasYear, getMonthDay, getYear, calculateTurningAge } from '../birthdayValidation';
 
 describe('validateBirthday', () => {
   it('accepts empty string (optional field)', () => {
@@ -151,5 +151,29 @@ describe('getYear', () => {
 
   it('returns null for empty string', () => {
     expect(getYear('')).toBe(null);
+  });
+});
+
+describe('calculateTurningAge', () => {
+  it('returns age for birthday with year', () => {
+    // Person born March 15, 1990. On March 15, 2026 they turn 36
+    expect(calculateTurningAge('1990-03-15', new Date('2026-03-15'))).toBe(36);
+  });
+
+  it('returns null for birthday without year', () => {
+    expect(calculateTurningAge('03-15', new Date('2026-03-15'))).toBe(null);
+  });
+
+  it('returns null for empty string', () => {
+    expect(calculateTurningAge('', new Date('2026-03-15'))).toBe(null);
+  });
+
+  it('returns null for invalid birthday', () => {
+    expect(calculateTurningAge('invalid', new Date('2026-03-15'))).toBe(null);
+  });
+
+  it('calculates correct age for different years', () => {
+    expect(calculateTurningAge('2000-12-25', new Date('2026-12-25'))).toBe(26);
+    expect(calculateTurningAge('1985-01-01', new Date(2026, 0, 1))).toBe(41);
   });
 });
