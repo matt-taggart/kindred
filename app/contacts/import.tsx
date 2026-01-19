@@ -375,9 +375,6 @@ export default function ImportContactsScreen() {
       if (bucket === "custom") {
         return;
       }
-
-      setShowFrequencySelector(false);
-      setEditingContactId(null);
     },
     [editingContactId],
   );
@@ -401,9 +398,12 @@ export default function ImportContactsScreen() {
         [editingContactId]: "custom",
       }));
     }
+  }, [customValue, customUnit, editingContactId]);
+
+  const handleSaveFrequencyChange = useCallback(() => {
     setShowFrequencySelector(false);
     setEditingContactId(null);
-  }, [customValue, customUnit, editingContactId]);
+  }, []);
 
   const handleSetAllFrequency = useCallback(
     (bucket: Bucket) => {
@@ -763,13 +763,22 @@ export default function ImportContactsScreen() {
               ))}
             </ScrollView>
 
-            <TouchableOpacity
-              className="mt-4 items-center rounded-xl bg-cream border border-border py-3"
-              onPress={() => setShowFrequencySelector(false)}
-              activeOpacity={0.7}
-            >
-              <Text className="font-semibold text-warmgray-muted">Cancel</Text>
-            </TouchableOpacity>
+            <View className="mt-4 flex-col gap-3">
+              <TouchableOpacity
+                className="items-center rounded-xl bg-sage py-3"
+                onPress={handleSaveFrequencyChange}
+                activeOpacity={0.9}
+              >
+                <Text className="font-semibold text-white">Save Changes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="items-center rounded-xl bg-cream border border-border py-3"
+                onPress={() => setShowFrequencySelector(false)}
+                activeOpacity={0.7}
+              >
+                <Text className="font-semibold text-warmgray-muted">Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
