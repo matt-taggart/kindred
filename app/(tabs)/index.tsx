@@ -28,6 +28,7 @@ import CelebrationStatus from '@/components/CelebrationStatus';
 import ReachedOutSheet from '@/components/ReachedOutSheet';
 import { formatLastConnected, getClockColor, ClockColor } from '@/utils/timeFormatting';
 import { formatPhoneUrl } from '@/utils/phone';
+import { calculateTurningAge } from '@/utils/birthdayValidation';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -54,6 +55,9 @@ type ContactCardProps = {
 const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPress, highlightReachedOut, onCallOrText }: ContactCardProps) => {
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
   const isBirthday = isBirthdayToday(contact);
+  const turningAge = isBirthday && contact.birthday
+    ? calculateTurningAge(contact.birthday, new Date())
+    : null;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -110,7 +114,11 @@ const ContactCard = ({ contact, onMarkDone, onSnooze, isSnoozing = false, onPres
             </View>
 
             {isBirthday ? (
-              <Text className="text-base text-terracotta-100 font-medium">It's {contact.name}'s birthday</Text>
+              <Text className="text-base text-terracotta-100 font-medium">
+                {turningAge
+                  ? `${contact.name} is turning ${turningAge} today!`
+                  : `It's ${contact.name}'s birthday`}
+              </Text>
             ) : (
               <View className="flex-row items-center gap-1">
                 <Ionicons
