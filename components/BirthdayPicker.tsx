@@ -57,31 +57,40 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
   const [showYearPicker, setShowYearPicker] = useState(false);
 
   useEffect(() => {
+    console.log('[BirthdayPicker useEffect] value changed to:', value);
     if (!value) {
       setYearUnknown(false);
       setSelectedDate('');
       return;
     }
-    setYearUnknown(!hasYear(value));
-    if (hasYear(value)) {
+    const hasYearValue = hasYear(value);
+    console.log('[BirthdayPicker useEffect] hasYear:', hasYearValue);
+    setYearUnknown(!hasYearValue);
+    if (hasYearValue) {
+      console.log('[BirthdayPicker useEffect] Setting selectedDate to:', value);
       setSelectedDate(value);
     } else {
       const currentYear = new Date().getFullYear();
-      setSelectedDate(`${currentYear}-${getMonthDay(value)}`);
+      const newDate = `${currentYear}-${getMonthDay(value)}`;
+      console.log('[BirthdayPicker useEffect] Setting selectedDate to:', newDate);
+      setSelectedDate(newDate);
     }
   }, [value]);
 
   const handleToggleYear = () => {
     const newYearUnknown = !yearUnknown;
     setYearUnknown(newYearUnknown);
+    console.log('[BirthdayPicker] handleToggleYear newYearUnknown:', newYearUnknown, 'selectedDate:', selectedDate);
 
     if (selectedDate) {
       const parts = selectedDate.split('-');
       if (parts.length === 3) {
         const monthDay = `${parts[1]}-${parts[2]}`;
         if (newYearUnknown) {
+          console.log('[BirthdayPicker] handleToggleYear passing MM-DD:', monthDay);
           onChange(monthDay);
         } else {
+          console.log('[BirthdayPicker] handleToggleYear passing full date:', selectedDate);
           onChange(selectedDate);
         }
       }
@@ -92,8 +101,11 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     setSelectedDate(day.dateString);
     if (yearUnknown) {
       const parts = day.dateString.split('-');
-      onChange(`${parts[1]}-${parts[2]}`);
+      const value = `${parts[1]}-${parts[2]}`;
+      console.log('[BirthdayPicker] handleDayPress yearUnknown=true, passing:', value);
+      onChange(value);
     } else {
+      console.log('[BirthdayPicker] handleDayPress yearUnknown=false, passing:', day.dateString);
       onChange(day.dateString);
     }
   };
@@ -104,15 +116,43 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
   };
 
   const handleYearSelect = (year: number) => {
-    // Get current month from selectedDate or default to current month
-    const currentMonth = selectedDate
-      ? selectedDate.split('-')[1]
-      : String(new Date().getMonth() + 1).padStart(2, '0');
-
-    // Navigate calendar to new year, same month
-    const newDate = `${year}-${currentMonth}-01`;
-    setSelectedDate(newDate);
+    console.log('[handleYearSelect] START - year:', year, 'selectedDate:', selectedDate, 'yearUnknown:', yearUnknown);
+    
+    if (selectedDate) {
+      // Preserve existing month and day, just change the year
+      const parts = selectedDate.split('-');
+      const currentMonth = parts[1];
+      const currentDay = parts[2];
+      const newDateString = `${year}-${currentMonth}-${currentDay}`;
+      
+      console.log('[handleYearSelect] newDateString:', newDateString);
+      
+      // Update local state immediately
+      setSelectedDate(newDateString);
+      
+      // If "I don't know the year" was checked, uncheck it
+      // Since we're now providing a specific year, ALWAYS pass the full date
+      if (yearUnknown) {
+        console.log('[handleYearSelect] yearUnknown was TRUE, setting to FALSE');
+        setYearUnknown(false);
+      }
+      
+      // Always pass full date (YYYY-MM-DD) to parent
+      // The useEffect will handle state reconciliation correctly
+      console.log('[handleYearSelect] Calling onChange with:', newDateString);
+      onChange(newDateString);
+    } else {
+      // No date selected yet, default to first day of current month in selected year
+      const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+      const newDateString = `${year}-${currentMonth}-01`;
+      
+      console.log('[handleYearSelect] No date selected, newDateString:', newDateString);
+      setSelectedDate(newDateString);
+      onChange(newDateString);
+    }
+    
     setShowYearPicker(false);
+    console.log('[handleYearSelect] END');
   };
 
   const markedDates = useMemo(() => {
@@ -148,16 +188,11 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     }
 
     return (
-      <View className="flex-row items-center">
-        <Text className="text-base font-semibold text-warmgray">
-          {month}{' '}
+      <Pressable onPress={() => setShowYearPicker(true)} testID="date-header-selector">
+        <Text className="text-base font-semibold text-sage underline">
+          {month} {year}
         </Text>
-        <Pressable onPress={() => setShowYearPicker(true)} testID="year-selector">
-          <Text className="text-base font-semibold text-sage underline">
-            {year}
-          </Text>
-        </Pressable>
-      </View>
+      </Pressable>
     );
   }, [yearUnknown]);
 
@@ -181,9 +216,9 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       </Pressable>
 
       {/* Calendar */}
-      <View className="rounded-2xl overflow-hidden bg-surface border border-border">
+      <View className="rounded-2xl overflow-hidden bg-surface border border-border" style={{ height: 340 }}>
         <Calendar
-          key={selectedDate?.slice(0, 7) || 'default'}
+          key={`calendar-${selectedDate?.slice(0, 7) || 'default'}-${yearUnknown}`}
           current={selectedDate || undefined}
           markedDates={markedDates}
           onDayPress={handleDayPress}
@@ -237,16 +272,17 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
         </Pressable>
       </Modal>
 
-      {/* Clear Link */}
-      {selectedDate && (
-        <TouchableOpacity
-          onPress={handleClear}
-          className="py-3 items-center"
-          activeOpacity={0.7}
-        >
-          <Text className="text-sm font-medium text-warmgray-muted">Clear</Text>
-        </TouchableOpacity>
-      )}
+      {/* Clear Link - always rendered to maintain stable height */}
+      <TouchableOpacity
+        onPress={handleClear}
+        className="py-3 items-center"
+        activeOpacity={selectedDate ? 0.7 : 1}
+        disabled={!selectedDate}
+      >
+        <Text className={`text-sm font-medium ${selectedDate ? 'text-warmgray-muted' : 'text-transparent'}`}>
+          Clear
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
