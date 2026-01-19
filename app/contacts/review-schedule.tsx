@@ -386,7 +386,7 @@ export default function ReviewScheduleScreen() {
                             Birthday
                           </Text>
                           <Text className="text-sm text-warmgray">
-                            🎂 {formatBirthdayDisplay(originalContact.birthday)}
+                            🎂 {formatBirthdayDisplay(originalContact.birthday, { includeYear: true })}
                           </Text>
                         </View>
                         <Ionicons name="pencil" size={14} color="#9CA986" />

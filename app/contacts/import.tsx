@@ -165,7 +165,7 @@ const ContactRow = ({
           </Text>
           {contact.birthday && (
             <Text className="text-xs text-warmgray-muted mt-0.5">
-              🎂 {formatBirthdayDisplay(contact.birthday)}
+              🎂 {formatBirthdayDisplay(contact.birthday, { includeYear: true })}
             </Text>
           )}
         </View>

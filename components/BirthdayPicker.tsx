@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, Text, Pressable, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { View, Text, Pressable, TouchableOpacity, Modal, ScrollView, LayoutChangeEvent } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { hasYear, getMonthDay } from '@/utils/birthdayValidation';
@@ -18,6 +18,7 @@ const MONTH_NAMES = [
 // Generate year range (1920 to current year, newest first)
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 1920 + 1 }, (_, i) => CURRENT_YEAR - i);
+const DEFAULT_DISPLAY_DATE = '1990-01-01';
 
 const calendarTheme = {
   calendarBackground: '#FDFBF7',
@@ -48,19 +49,49 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     if (!value) return '';
     if (hasYear(value)) return value;
-    // For MM-DD, use current year to display
-    const currentYear = new Date().getFullYear();
     const monthDay = getMonthDay(value);
-    return `${currentYear}-${monthDay}`;
+    return `1990-${monthDay}`;
+  });
+  const [displayDate, setDisplayDate] = useState<string>(() => {
+    if (!value) return DEFAULT_DISPLAY_DATE;
+    if (hasYear(value)) return value;
+    const monthDay = getMonthDay(value);
+    return `1990-${monthDay}`;
   });
 
   const [showYearPicker, setShowYearPicker] = useState(false);
+  const yearScrollViewRef = useRef<ScrollView>(null);
+  const [yearRowHeight, setYearRowHeight] = useState<number | null>(null);
+  const [yearListHeight, setYearListHeight] = useState<number | null>(null);
+
+  const handleYearRowLayout = useCallback((event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    setYearRowHeight((prev) => (prev === height ? prev : height));
+  }, []);
+
+  const handleYearListLayout = useCallback((event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    setYearListHeight((prev) => (prev === height ? prev : height));
+  }, []);
+
+  // Calculate scroll offset to center the selected year in view
+  const scrollOffset = useMemo(() => {
+    if (!yearRowHeight || !yearListHeight) return 0;
+    const scrollDate = selectedDate || displayDate;
+    const currentYear = parseInt(scrollDate.split('-')[0]);
+    const yearIndex = currentYear ? YEARS.indexOf(currentYear) : YEARS.indexOf(1990);
+    if (yearIndex < 0) return 0;
+
+    const offset = (yearIndex * yearRowHeight) - (yearListHeight / 2) + (yearRowHeight / 2);
+    return Math.max(0, offset);
+  }, [selectedDate, displayDate, yearRowHeight, yearListHeight]);
 
   useEffect(() => {
     console.log('[BirthdayPicker useEffect] value changed to:', value);
     if (!value) {
       setYearUnknown(false);
-      setSelectedDate('1990-01-01');
+      setSelectedDate('');
+      setDisplayDate(DEFAULT_DISPLAY_DATE);
       return;
     }
     const hasYearValue = hasYear(value);
@@ -69,12 +100,22 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     if (hasYearValue) {
       console.log('[BirthdayPicker useEffect] Setting selectedDate to:', value);
       setSelectedDate(value);
+      setDisplayDate(value);
     } else {
       const newDate = `1990-${getMonthDay(value)}`;
       console.log('[BirthdayPicker useEffect] Setting selectedDate to:', newDate);
       setSelectedDate(newDate);
+      setDisplayDate(newDate);
     }
   }, [value]);
+
+  // Auto-scroll to center the selected year when year picker opens
+  useEffect(() => {
+    if (!showYearPicker || !yearScrollViewRef.current || !yearRowHeight || !yearListHeight) {
+      return;
+    }
+    yearScrollViewRef.current.scrollTo({ x: 0, y: scrollOffset, animated: false });
+  }, [showYearPicker, scrollOffset, yearRowHeight, yearListHeight]);
 
   const handleToggleYear = () => {
     const newYearUnknown = !yearUnknown;
@@ -98,6 +139,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
 
   const handleDayPress = (day: DateData) => {
     setSelectedDate(day.dateString);
+    setDisplayDate(day.dateString);
     if (yearUnknown) {
       const parts = day.dateString.split('-');
       const value = `${parts[1]}-${parts[2]}`;
@@ -111,15 +153,18 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
 
   const handleClear = () => {
     setSelectedDate('');
+    setDisplayDate(DEFAULT_DISPLAY_DATE);
     onChange('');
   };
 
   const handleYearSelect = (year: number) => {
     console.log('[handleYearSelect] START - year:', year, 'selectedDate:', selectedDate, 'yearUnknown:', yearUnknown);
     
-    if (selectedDate) {
+    const baseDate = selectedDate || displayDate;
+
+    if (baseDate) {
       // Preserve existing month and day, just change the year
-      const parts = selectedDate.split('-');
+      const parts = baseDate.split('-');
       const currentMonth = parts[1];
       const currentDay = parts[2];
       const newDateString = `${year}-${currentMonth}-${currentDay}`;
@@ -128,6 +173,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       
       // Update local state immediately
       setSelectedDate(newDateString);
+      setDisplayDate(newDateString);
       
       // If "I don't know the year" was checked, uncheck it
       // Since we're now providing a specific year, ALWAYS pass the full date
@@ -147,6 +193,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       
       console.log('[handleYearSelect] No date selected, newDateString:', newDateString);
       setSelectedDate(newDateString);
+      setDisplayDate(newDateString);
       onChange(newDateString);
     }
     
@@ -217,8 +264,8 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       {/* Calendar */}
       <View className="rounded-2xl overflow-hidden bg-surface border border-border" style={{ height: 340 }}>
         <Calendar
-          key={`calendar-${selectedDate?.slice(0, 7) || 'default'}-${yearUnknown}`}
-          current={selectedDate || undefined}
+          key={`calendar-${displayDate?.slice(0, 7) || 'default'}-${yearUnknown}`}
+          current={displayDate || undefined}
           markedDates={markedDates}
           onDayPress={handleDayPress}
           theme={yearMutedTheme}
@@ -247,11 +294,12 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
             <Text className="text-center py-3 text-base font-semibold text-warmgray border-b border-border">
               Select Year
             </Text>
-            <ScrollView>
+            <ScrollView ref={yearScrollViewRef} onLayout={handleYearListLayout}>
               {YEARS.map((year) => (
                 <Pressable
                   key={year}
                   onPress={() => handleYearSelect(year)}
+                  onLayout={year === YEARS[0] ? handleYearRowLayout : undefined}
                   className={`py-3 px-4 ${
                     selectedDate?.startsWith(String(year)) ? 'bg-sage/20' : ''
                   }`}
@@ -279,7 +327,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
         disabled={!selectedDate}
       >
         <Text className={`text-sm font-medium ${selectedDate ? 'text-warmgray-muted' : 'text-transparent'}`}>
-          Clear
+          {selectedDate ? 'Clear' : '\u00A0'}
         </Text>
       </TouchableOpacity>
     </View>

@@ -106,8 +106,8 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     fireEvent.press(getByText('Weeks'));
     
     // Confirm
-    const confirmButton = getByText('Set');
-    fireEvent.press(confirmButton);
+    fireEvent.press(getByText('Set'));
+    fireEvent.press(getByText('Save Changes'));
 
     // Modal should close
     expect(queryByText('Reminder rhythm')).toBeNull();
