@@ -15,6 +15,7 @@ import {
   CalendarContact,
 } from '@/services/calendarService';
 import { formatLastConnected } from '@/utils/timeFormatting';
+import { calculateTurningAge } from '@/utils/birthdayValidation';
 
 const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   switch (bucket) {
@@ -53,15 +54,21 @@ const formatBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: numbe
 type CalendarContactCardProps = {
   contact: CalendarContact;
   onPress: () => void;
+  selectedDate: string;
 };
 
-const CalendarContactCard = ({ contact, onPress }: CalendarContactCardProps) => {
+const CalendarContactCard = ({ contact, onPress, selectedDate }: CalendarContactCardProps) => {
   const initial = useMemo(() => contact.name.charAt(0).toUpperCase(), [contact.name]);
 
   // Determine card accent based on type
   const isBirthday = contact.isBirthday;
+  const turningAge = isBirthday && contact.birthday
+    ? calculateTurningAge(contact.birthday, new Date(selectedDate))
+    : null;
 
-  const title = isBirthday ? `${contact.name}'s birthday` : contact.name;
+  const title = isBirthday
+    ? (turningAge ? `${contact.name}'s birthday (turning ${turningAge})` : `${contact.name}'s birthday`)
+    : contact.name;
 
   return (
     <TouchableOpacity
@@ -275,6 +282,7 @@ export default function CalendarScreen() {
                 key={contact.id}
                 contact={contact}
                 onPress={() => handleContactPress(contact.id)}
+                selectedDate={selectedDate}
               />
             ))
           )}
