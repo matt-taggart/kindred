@@ -6,6 +6,7 @@ import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, Vie
 import { useUserStore } from '@/lib/userStore';
 import { resetDatabase } from '@/services/contactService';
 import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
+import { cancelAllReminders } from '@/services/notificationService';
 
 type SettingsRowProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -59,6 +60,24 @@ export default function SettingsScreen() {
 
   const handleNotifications = () => {
     router.push('/settings/notifications');
+  };
+
+  const handleClearAllNotifications = async () => {
+    Alert.alert(
+      'Clear All Notifications',
+      'Are you sure you want to cancel all scheduled notifications? This is useful for debugging.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear All',
+          style: 'destructive',
+          onPress: async () => {
+            await cancelAllReminders();
+            Alert.alert('Done', 'All notifications have been cleared.');
+          },
+        },
+      ]
+    );
   };
 
   const handleUpgrade = () => {
@@ -124,6 +143,16 @@ export default function SettingsScreen() {
             label="Reminder Schedule"
             onPress={handleNotifications}
           />
+          {__DEV__ && (
+            <>
+              <Divider />
+              <SettingsRow
+                icon="close-circle-outline"
+                label="Clear All Notifications (Debug)"
+                onPress={handleClearAllNotifications}
+              />
+            </>
+          )}
         </SettingsSection>
 
         <SettingsSection title="About">
