@@ -1,7 +1,8 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import type { Contact } from '@/db/schema';
 import { addContact, getAvailableSlots } from '@/services/contactService';
@@ -9,6 +10,7 @@ import { useUserStore } from '@/lib/userStore';
 import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
 import BirthdayPicker from '@/components/BirthdayPicker';
 import { formatBirthdayDisplay } from '@/utils/formatters';
+import { getDateLabel } from '@/utils/scheduler';
 
 const ProgressDots = ({ step }: { step: 1 | 2 | 3 }) => (
   <View className="flex-row items-center justify-center gap-2">
@@ -41,6 +43,8 @@ export default function AddConnectionBirthdayScreen() {
 
   const [showBirthdayPicker, setShowBirthdayPicker] = useState(false);
   const [birthday, setBirthday] = useState<string>('');
+  const [startDate, setStartDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
 
@@ -62,6 +66,7 @@ export default function AddConnectionBirthdayScreen() {
         bucket,
         customIntervalDays,
         birthday: birthday || null,
+        nextContactDate: startDate.getTime(),
       });
       router.dismissTo('/(tabs)/two');
     } catch (error) {
@@ -142,6 +147,54 @@ export default function AddConnectionBirthdayScreen() {
                   />
                 </View>
               </View>
+            )}
+          </View>
+
+          {/* Start Date Selection */}
+          <View className="rounded-2xl border border-border bg-surface p-5 shadow-sm mt-4">
+            <TouchableOpacity
+              className="flex-row items-center justify-between"
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
+              disabled={saving}
+            >
+              <View>
+                <Text className="text-base font-semibold text-warmgray">Start Reminders</Text>
+                <Text className="text-sm text-warmgray-muted">{getDateLabel(startDate.getTime())}</Text>
+              </View>
+              <Text className="text-sm font-medium text-sage">Edit</Text>
+            </TouchableOpacity>
+
+            {showDatePicker && Platform.OS === 'ios' && (
+              <View className="mt-4 pt-4 border-t border-border">
+                <View className="flex-row justify-end mb-2">
+                  <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                    <Text className="text-sm font-medium text-sage">Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={startDate}
+                  mode="date"
+                  display="spinner"
+                  minimumDate={new Date()}
+                  onChange={(_e, date) => date && setStartDate(date)}
+                  themeVariant="light"
+                  accentColor="#9CA986"
+                />
+              </View>
+            )}
+
+            {showDatePicker && Platform.OS === 'android' && (
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                display="default"
+                minimumDate={new Date()}
+                onChange={(_e, date) => {
+                  setShowDatePicker(false);
+                  if (date) setStartDate(date);
+                }}
+              />
             )}
           </View>
         </ScrollView>
