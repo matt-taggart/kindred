@@ -24,9 +24,9 @@ describe('addContact scheduling', () => {
     jest.resetAllMocks();
   });
 
-  it('computes nextContactDate when passed null for a non-custom bucket', async () => {
+  it('defaults nextContactDate to today when passed null for a non-custom bucket', async () => {
     const now = Date.now();
-    const expectedNext = now + 7 * DAY_IN_MS;
+    const expectedNext = now;
 
     let lastInserted: any;
 

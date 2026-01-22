@@ -83,10 +83,13 @@ export const addContact = async (contact: InsertableContact): Promise<Contact> =
   const id = contact.id ?? generateId();
   const lastContactedAt = contact.lastContactedAt ?? undefined;
   const customIntervalDays = normalizeCustomInterval(contact.bucket, contact.customIntervalDays);
+
+  // If adding a new contact without an explicit nextContactDate, default to today
+  // This ensures "every day" and other frequent contacts show up immediately
   const nextContactDate =
     typeof contact.nextContactDate === 'number'
       ? contact.nextContactDate
-      : getNextContactDate(contact.bucket, lastContactedAt ?? Date.now(), customIntervalDays);
+      : Date.now();
 
   db.insert(contacts)
     .values({ ...contact, id, lastContactedAt, nextContactDate, customIntervalDays })

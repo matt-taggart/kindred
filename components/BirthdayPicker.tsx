@@ -87,7 +87,6 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
   }, [selectedDate, displayDate, yearRowHeight, yearListHeight]);
 
   useEffect(() => {
-    console.log('[BirthdayPicker useEffect] value changed to:', value);
     if (!value) {
       setYearUnknown(false);
       setSelectedDate('');
@@ -95,15 +94,12 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       return;
     }
     const hasYearValue = hasYear(value);
-    console.log('[BirthdayPicker useEffect] hasYear:', hasYearValue);
     setYearUnknown(!hasYearValue);
     if (hasYearValue) {
-      console.log('[BirthdayPicker useEffect] Setting selectedDate to:', value);
       setSelectedDate(value);
       setDisplayDate(value);
     } else {
       const newDate = `1990-${getMonthDay(value)}`;
-      console.log('[BirthdayPicker useEffect] Setting selectedDate to:', newDate);
       setSelectedDate(newDate);
       setDisplayDate(newDate);
     }
@@ -120,17 +116,14 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
   const handleToggleYear = () => {
     const newYearUnknown = !yearUnknown;
     setYearUnknown(newYearUnknown);
-    console.log('[BirthdayPicker] handleToggleYear newYearUnknown:', newYearUnknown, 'selectedDate:', selectedDate);
 
     if (selectedDate) {
       const parts = selectedDate.split('-');
       if (parts.length === 3) {
         const monthDay = `${parts[1]}-${parts[2]}`;
         if (newYearUnknown) {
-          console.log('[BirthdayPicker] handleToggleYear passing MM-DD:', monthDay);
           onChange(monthDay);
         } else {
-          console.log('[BirthdayPicker] handleToggleYear passing full date:', selectedDate);
           onChange(selectedDate);
         }
       }
@@ -143,10 +136,8 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     if (yearUnknown) {
       const parts = day.dateString.split('-');
       const value = `${parts[1]}-${parts[2]}`;
-      console.log('[BirthdayPicker] handleDayPress yearUnknown=true, passing:', value);
       onChange(value);
     } else {
-      console.log('[BirthdayPicker] handleDayPress yearUnknown=false, passing:', day.dateString);
       onChange(day.dateString);
     }
   };
@@ -158,7 +149,6 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
   };
 
   const handleYearSelect = (year: number) => {
-    console.log('[handleYearSelect] START - year:', year, 'selectedDate:', selectedDate, 'yearUnknown:', yearUnknown);
     
     const baseDate = selectedDate || displayDate;
 
@@ -169,7 +159,6 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       const currentDay = parts[2];
       const newDateString = `${year}-${currentMonth}-${currentDay}`;
       
-      console.log('[handleYearSelect] newDateString:', newDateString);
       
       // Update local state immediately
       setSelectedDate(newDateString);
@@ -178,27 +167,23 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       // If "I don't know the year" was checked, uncheck it
       // Since we're now providing a specific year, ALWAYS pass the full date
       if (yearUnknown) {
-        console.log('[handleYearSelect] yearUnknown was TRUE, setting to FALSE');
         setYearUnknown(false);
       }
       
       // Always pass full date (YYYY-MM-DD) to parent
       // The useEffect will handle state reconciliation correctly
-      console.log('[handleYearSelect] Calling onChange with:', newDateString);
       onChange(newDateString);
     } else {
       // No date selected yet, default to first day of current month in selected year
       const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
       const newDateString = `${year}-${currentMonth}-01`;
       
-      console.log('[handleYearSelect] No date selected, newDateString:', newDateString);
       setSelectedDate(newDateString);
       setDisplayDate(newDateString);
       onChange(newDateString);
     }
     
     setShowYearPicker(false);
-    console.log('[handleYearSelect] END');
   };
 
   const markedDates = useMemo(() => {

@@ -35,7 +35,7 @@ export default function EmptyContactsState() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => router.push('/contacts/new')}
+        onPress={() => router.push('/contacts/add')}
         activeOpacity={0.7}
         accessibilityRole="button"
         accessibilityLabel="Add a connection manually"

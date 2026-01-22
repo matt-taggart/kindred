@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import type { Contact } from '@/db/schema';
@@ -39,34 +39,10 @@ export default function AddConnectionBirthdayScreen() {
     return isNaN(days) ? undefined : days;
   }, [params.customIntervalDays]);
 
-  type BirthdayState = 'collapsed' | 'editing' | 'saved';
-  const [birthdayState, setBirthdayState] = useState<BirthdayState>('collapsed');
-  const [savedBirthday, setSavedBirthday] = useState<string>('');
-  const [editingBirthday, setEditingBirthday] = useState<string>('');
+  const [showBirthdayPicker, setShowBirthdayPicker] = useState(false);
+  const [birthday, setBirthday] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
-
-  const handleAddBirthday = () => {
-    setEditingBirthday(savedBirthday);
-    setBirthdayState('editing');
-  };
-
-  const handleCancel = () => {
-    setEditingBirthday('');
-    setBirthdayState(savedBirthday ? 'saved' : 'collapsed');
-  };
-
-  const handleSaveBirthday = () => {
-    if (editingBirthday) {
-      setSavedBirthday(editingBirthday);
-      setBirthdayState('saved');
-    }
-  };
-
-  const handleEdit = () => {
-    setEditingBirthday(savedBirthday);
-    setBirthdayState('editing');
-  };
 
   const handleDone = async () => {
     if (!name) {
@@ -85,9 +61,9 @@ export default function AddConnectionBirthdayScreen() {
         name,
         bucket,
         customIntervalDays,
-        birthday: savedBirthday || null,
+        birthday: birthday || null,
       });
-      router.replace(`/contacts/${created.id}`);
+      router.dismissTo('/(tabs)/two');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to add connection.';
       if (message.toLowerCase().includes('free plan')) {
@@ -113,88 +89,65 @@ export default function AddConnectionBirthdayScreen() {
       />
 
       <View className="flex-1 px-6 pt-6">
-        <ProgressDots step={3} />
+        {/* Scrollable content area */}
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 24 }}
+        >
+          <ProgressDots step={3} />
 
-        <View className="items-center mb-8 mt-10">
-          <View className="h-24 w-24 items-center justify-center rounded-full bg-sage mb-6 shadow-sm">
-            <Ionicons name="gift" size={48} color="#fff" />
-          </View>
-          <Text className="text-2xl font-bold text-warmgray text-center mb-3">
-            One more thing...
-          </Text>
-          <Text className="text-base text-warmgray-muted text-center px-4 leading-relaxed">
-            Would you like to remember {name ? `${name}'s` : 'their'} birthday?
-          </Text>
-        </View>
-
-        <View className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
-          {birthdayState === 'collapsed' && (
-            <TouchableOpacity
-              className="flex-row items-center justify-center py-4"
-              onPress={handleAddBirthday}
-              activeOpacity={0.7}
-              disabled={saving}
-            >
-              <Ionicons name="gift-outline" size={24} color="#788467" style={{ marginRight: 8 }} />
-              <Text className="text-lg font-semibold text-sage">Add Birthday</Text>
-            </TouchableOpacity>
-          )}
-
-          {birthdayState === 'editing' && (
-            <View>
-              <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-base font-semibold text-warmgray">Birthday</Text>
-                <TouchableOpacity
-                  onPress={handleCancel}
-                  activeOpacity={0.7}
-                  disabled={saving}
-                >
-                  <Text className="text-sm font-medium text-terracotta">Cancel</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View className="py-2">
-                <BirthdayPicker
-                  value={editingBirthday}
-                  onChange={setEditingBirthday}
-                />
-              </View>
-
-              <TouchableOpacity
-                className={`mt-4 items-center justify-center rounded-xl py-3 ${editingBirthday ? 'bg-sage' : 'bg-border'}`}
-                onPress={handleSaveBirthday}
-                activeOpacity={0.9}
-                disabled={saving || !editingBirthday}
-              >
-                <Text className={`text-base font-semibold ${editingBirthday ? 'text-white' : 'text-warmgray-muted'}`}>
-                  Save Birthday
-                </Text>
-              </TouchableOpacity>
+          <View className="items-center mb-8 mt-10">
+            <View className="h-24 w-24 items-center justify-center rounded-full bg-sage mb-6 shadow-sm">
+              <Ionicons name="gift" size={48} color="#fff" />
             </View>
-          )}
+            <Text className="text-2xl font-bold text-warmgray text-center mb-3">
+              One more thing...
+            </Text>
+            <Text className="text-base text-warmgray-muted text-center px-4 leading-relaxed">
+              Would you like to remember {name ? `${name}'s` : 'their'} birthday?
+            </Text>
+          </View>
 
-          {birthdayState === 'saved' && savedBirthday && (
-            <View className="flex-row items-center justify-between py-4">
-              <View className="flex-row items-center gap-3">
-                <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
-                  <Ionicons name="checkmark" size={20} color="#788467" />
-                </View>
-                <Text className="text-base font-medium text-warmgray">
-                  {formatBirthdayDisplay(savedBirthday)}
-                </Text>
-              </View>
+          <View className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+            {!showBirthdayPicker ? (
               <TouchableOpacity
-                onPress={handleEdit}
+                className="flex-row items-center justify-center py-4"
+                onPress={() => setShowBirthdayPicker(true)}
                 activeOpacity={0.7}
                 disabled={saving}
               >
-                <Text className="text-sm font-medium text-sage">Edit</Text>
+                <Ionicons name="gift-outline" size={24} color="#788467" style={{ marginRight: 8 }} />
+                <Text className="text-lg font-semibold text-sage">
+                  {birthday ? formatBirthdayDisplay(birthday) : 'Add Birthday'}
+                </Text>
               </TouchableOpacity>
-            </View>
-          )}
-        </View>
+            ) : (
+              <View>
+                <View className="flex-row items-center justify-between mb-4">
+                  <Text className="text-base font-semibold text-warmgray">Birthday</Text>
+                  <TouchableOpacity
+                    onPress={() => setShowBirthdayPicker(false)}
+                    activeOpacity={0.7}
+                    disabled={saving}
+                  >
+                    <Text className="text-sm font-medium text-sage">Done</Text>
+                  </TouchableOpacity>
+                </View>
 
-        <View className="mt-auto pb-6">
+                <View className="py-2">
+                  <BirthdayPicker
+                    value={birthday}
+                    onChange={setBirthday}
+                  />
+                </View>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+
+        {/* Fixed button at bottom - always visible */}
+        <View className="pb-6 pt-4">
           <TouchableOpacity
             className="items-center justify-center rounded-2xl bg-sage h-14 shadow-sm"
             onPress={handleDone}

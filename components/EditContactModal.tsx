@@ -3,8 +3,42 @@ import { SafeAreaView, ScrollView, Text, TextInput, View, Alert } from "react-na
 import { useEffect, useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import BirthdayPicker from '@/components/BirthdayPicker';
+import { hasYear, getMonthDay } from '@/utils/birthdayValidation';
 
 import { Contact } from "@/db/schema";
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const formatBirthdayDisplay = (birthday: string): string => {
+  if (!birthday) return '';
+
+  let month: number;
+  let day: number;
+  let year: number | null = null;
+
+  if (hasYear(birthday)) {
+    // Format: YYYY-MM-DD
+    const parts = birthday.split('-');
+    year = parseInt(parts[0], 10);
+    month = parseInt(parts[1], 10);
+    day = parseInt(parts[2], 10);
+  } else {
+    // Format: MM-DD
+    const monthDay = getMonthDay(birthday);
+    const parts = monthDay.split('-');
+    month = parseInt(parts[0], 10);
+    day = parseInt(parts[1], 10);
+  }
+
+  const monthName = MONTH_NAMES[month - 1];
+  if (year) {
+    return `${monthName} ${day}, ${year}`;
+  }
+  return `${monthName} ${day}`;
+};
 
 interface EditContactModalProps {
   contact: Contact;
@@ -88,6 +122,7 @@ export default function EditContactModal({
     deriveCustomUnitAndValue(contact.customIntervalDays),
   );
   const [birthday, setBirthday] = useState<string>(contact.birthday || "");
+  const [isBirthdayExpanded, setIsBirthdayExpanded] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -95,6 +130,7 @@ export default function EditContactModal({
       const derived = deriveCustomUnitAndValue(contact.customIntervalDays);
       setCustomState(derived);
       setBirthday(contact.birthday || "");
+      setIsBirthdayExpanded(false);
     }
   }, [visible, contact.bucket, contact.customIntervalDays, contact.birthday]);
 
@@ -172,46 +208,7 @@ export default function EditContactModal({
               How often would you like a gentle reminder to connect?
             </Text>
 
-            <View className="mb-8 rounded-2xl bg-surface p-4 shadow-sm border border-border">
-              <View className="flex-row items-center justify-between mb-2.5">
-                <View className="flex-row items-center gap-2">
-                  <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
-                    <Text className="text-lg">🎂</Text>
-                  </View>
-                  <Text className="text-base font-semibold text-warmgray">
-                    Birthday
-                  </Text>
-                </View>
-                {birthday ? (
-                  <Pressable
-                    onPress={() => setBirthday("")}
-                    className="active:opacity-60"
-                  >
-                    <Text className="text-sm font-medium text-terracotta">
-                      Remove
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
-
-              <View className="py-2">
-                <BirthdayPicker
-                  value={birthday}
-                  onChange={setBirthday}
-                />
-              </View>
-
-              <Text className="mt-3 text-xs text-warmgray-muted text-center">
-                We'll prioritize this over regular reminders on their birthday.
-              </Text>
-            </View>
-
-            <View className="mb-3 flex-row items-center gap-2">
-              <Text className="text-base font-semibold text-warmgray">
-                Reminder rhythm
-              </Text>
-            </View>
-
+            {/* Reminder Rhythm Section */}
             <View className="mb-4 flex gap-2">
               {(
                 [
@@ -351,7 +348,7 @@ export default function EditContactModal({
 
                       {isCustomValid && derivedCustomDays && (
                         <Text className="mt-3 text-sm text-warmgray-muted">
-                          We’ll remind you{' '}
+                          We'll remind you{' '}
                           <Text className="font-semibold text-sage">
                             {formatCustomSummary(derivedCustomDays)}
                           </Text>
@@ -362,6 +359,75 @@ export default function EditContactModal({
                   )}
                 </View>
               ))}
+            </View>
+
+            {/* Birthday Section - Collapsible */}
+            <View className="mb-4 rounded-2xl bg-surface p-4 shadow-sm border border-border">
+              {/* Header Row */}
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
+                    <Text className="text-lg">🎂</Text>
+                  </View>
+                  <Text className="text-base font-semibold text-warmgray">
+                    Birthday
+                  </Text>
+                </View>
+                {isBirthdayExpanded ? (
+                  <Pressable
+                    onPress={() => setIsBirthdayExpanded(false)}
+                    className="active:opacity-60"
+                  >
+                    <Text className="text-sm font-medium text-warmgray-muted">
+                      Cancel
+                    </Text>
+                  </Pressable>
+                ) : birthday ? (
+                  <Pressable
+                    onPress={() => setIsBirthdayExpanded(true)}
+                    className="active:opacity-60"
+                  >
+                    <Text className="text-sm font-medium text-sage">
+                      Edit
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
+
+              {/* Content */}
+              {isBirthdayExpanded ? (
+                /* Expanded: Show BirthdayPicker */
+                <>
+                  <View className="py-2 mt-2">
+                    <BirthdayPicker
+                      value={birthday}
+                      onChange={setBirthday}
+                    />
+                  </View>
+
+                  <Text className="mt-3 text-xs text-warmgray-muted text-center">
+                    We'll prioritize this over regular reminders on their birthday.
+                  </Text>
+                </>
+              ) : birthday ? (
+                /* Collapsed with birthday set: Show formatted date */
+                <Text className="text-base text-warmgray text-center py-4">
+                  {formatBirthdayDisplay(birthday)}
+                </Text>
+              ) : (
+                /* Collapsed without birthday: Show Add button */
+                <Pressable
+                  onPress={() => setIsBirthdayExpanded(true)}
+                  className="py-4 items-center active:opacity-60"
+                >
+                  <View className="flex-row items-center gap-2 bg-sage-100 px-4 py-2 rounded-full">
+                    <Ionicons name="add" size={18} color="#8B9678" />
+                    <Text className="text-sm font-medium text-sage">
+                      Add Birthday
+                    </Text>
+                  </View>
+                </Pressable>
+              )}
             </View>
           </ScrollView>
 
