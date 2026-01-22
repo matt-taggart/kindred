@@ -63,6 +63,8 @@ const bucketLabels: Record<string, string> = {
   custom: "Custom rhythm",
 };
 
+const MAX_START_DATE_YEARS = 5;
+
 export default function ReviewScheduleScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ contacts: string }>();
@@ -84,6 +86,11 @@ export default function ReviewScheduleScreen() {
   const [birthdayInput, setBirthdayInput] = useState("");
   const [availableSlots, setAvailableSlots] = useState<number>(5);
   const isPro = useUserStore((s) => s.isPro);
+
+  const maxStartDate = useMemo(() => {
+    const now = new Date();
+    return new Date(now.getFullYear() + MAX_START_DATE_YEARS, 11, 31);
+  }, []);
 
   useEffect(() => {
     setAvailableSlots(getAvailableSlots());
@@ -450,7 +457,7 @@ export default function ReviewScheduleScreen() {
             mode="date"
             display="spinner"
             minimumDate={new Date()}
-            maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
+            maximumDate={maxStartDate}
             onChange={(_e, date) => date && setSelectedDate(date)}
             accentColor="#9CA986"
             themeVariant="light"
@@ -498,7 +505,7 @@ export default function ReviewScheduleScreen() {
           mode="date"
           display="default"
           minimumDate={new Date()}
-          maximumDate={new Date(Date.now() + 365 * DAY_IN_MS)}
+          maximumDate={maxStartDate}
           onChange={handleDateChange}
           accentColor="#9CA986"
         />
