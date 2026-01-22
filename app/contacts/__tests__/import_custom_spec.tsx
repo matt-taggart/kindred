@@ -104,9 +104,6 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     // Enter 2 Weeks
     fireEvent.changeText(getByPlaceholderText('e.g., 30'), '2');
     fireEvent.press(getByText('Weeks'));
-    
-    // Confirm
-    fireEvent.press(getByText('Set'));
     fireEvent.press(getByText('Save Changes'));
 
     // Modal should close
@@ -129,7 +126,7 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     fireEvent.press(getAllByText('Every week')[0]);
     fireEvent.press(getByText('Custom rhythm'));
     fireEvent.changeText(getByPlaceholderText('e.g., 30'), '45');
-    fireEvent.press(getByText('Set'));
+    fireEvent.press(getByText('Save Changes'));
 
     // Click "Import and Review"
     fireEvent.press(getByText(/Import and Review/));

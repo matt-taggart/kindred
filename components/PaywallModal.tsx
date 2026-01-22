@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { Modal, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import type { CustomerInfo } from 'react-native-purchases';
 
 import { useUserStore } from '@/lib/userStore';
 
@@ -9,10 +10,13 @@ type PaywallModalProps = {
 };
 
 export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
-  const { isPro, purchasePro, restorePurchase, purchaseState, clearError } = useUserStore();
-
-  const headline = useMemo(() => (isPro ? 'Pro Unlocked' : 'Upgrade to Kindred Pro'), [isPro]);
-  const isLoading = purchaseState.isPurchasing || purchaseState.isRestoring;
+  const { isPro, setIsPro } = useUserStore();
+  let RevenueCatUI;
+  try {
+     RevenueCatUI = require('react-native-purchases-ui');
+  } catch (e) {
+    console.error('Failed to load react-native-purchases-ui', e);
+  }
 
   useEffect(() => {
     if (isPro) {
@@ -20,90 +24,36 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
     }
   }, [isPro, onClose]);
 
-  const handlePurchase = async () => {
-    clearError();
-    await purchasePro();
-  };
-
-  const handleRestore = async () => {
-    clearError();
-    await restorePurchase();
-  };
+  if (!visible) return null;
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/50">
-        <SafeAreaView className="mt-auto rounded-t-3xl bg-white px-6 py-6">
-          <View className="mb-4 h-1 w-12 self-center rounded-full bg-gray-200" />
-
-          <Text className="text-2xl font-bold text-gray-900">{headline}</Text>
-          <Text className="mt-2 text-base text-gray-700">
-            Free plan allows up to 5 contacts. Upgrade to keep everyone in your circle organized and
-            never miss a check-in.
-          </Text>
-
-          <View className="mt-4 rounded-xl border border-sage-100 bg-sage-100 p-4">
-            <Text className="text-sm font-semibold text-gray-900">Pro unlocks:</Text>
-            <View className="mt-2 gap-1">
-              <Text className="text-sm text-gray-700">• Unlimited contacts</Text>
-              <Text className="text-sm text-gray-700">• Ongoing reminders</Text>
-              <Text className="text-sm text-gray-700">• All future updates</Text>
-            </View>
-          </View>
-
-          {!isPro && (
-            <>
-              <TouchableOpacity
-                className={`mt-6 items-center rounded-xl py-3 ${purchaseState.isPurchasing ? 'bg-gray-400' : 'bg-terracotta'}`}
-                onPress={handlePurchase}
-                activeOpacity={0.9}
-                disabled={isLoading}
-              >
-                <Text className="text-base font-semibold text-white">
-                  {purchaseState.isPurchasing ? 'Processing...' : 'Purchase Pro'}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className={`mt-3 items-center rounded-xl bg-gray-200 py-3 ${purchaseState.isRestoring ? 'opacity-50' : ''}`}
-                onPress={handleRestore}
-                activeOpacity={0.9}
-                disabled={isLoading}
-              >
-                <Text className="text-base font-semibold text-gray-800">
-                  {purchaseState.isRestoring ? 'Restoring...' : 'Restore Purchase'}
-                </Text>
-              </TouchableOpacity>
-            </>
+        <SafeAreaView className="mt-auto h-[90%] rounded-t-3xl bg-white overflow-hidden">
+          {RevenueCatUI && (
+            <RevenueCatUI.Paywall
+              onPurchaseCompleted={(customerInfo: CustomerInfo) => {
+                const isPro = Boolean(customerInfo.entitlements.active['Kindred Pro']);
+                setIsPro(isPro);
+                if (isPro) onClose();
+              }}
+              onRestoreCompleted={(customerInfo: CustomerInfo) => {
+                const isPro = Boolean(customerInfo.entitlements.active['Kindred Pro']);
+                setIsPro(isPro);
+                if (isPro) onClose();
+              }}
+            />
           )}
-
-          {isPro && (
-            <TouchableOpacity
-              className="mt-6 items-center rounded-xl bg-sage py-3"
-              onPress={onClose}
-              activeOpacity={0.9}
-            >
-              <Text className="text-base font-semibold text-white">Continue</Text>
-            </TouchableOpacity>
-          )}
-
-          {!isPro && (
-            <TouchableOpacity
-              className="mt-3 items-center rounded-xl border border-gray-300 py-3"
-              onPress={onClose}
-              activeOpacity={0.9}
-            >
-              <Text className="text-base font-semibold text-gray-600">Not Now</Text>
-            </TouchableOpacity>
-          )}
-
-          {purchaseState.error && (
-            <View className="mt-4 rounded-lg bg-red-50 p-3">
-              <Text className="text-sm text-red-600">{purchaseState.error}</Text>
-            </View>
-          )}
+          <TouchableOpacity
+            className="absolute top-4 right-4 z-10 p-2 bg-black/20 rounded-full"
+            onPress={onClose}
+          >
+            <Text className="text-white font-bold">✕</Text>
+          </TouchableOpacity>
         </SafeAreaView>
       </View>
     </Modal>
   );
 };
+
+

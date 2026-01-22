@@ -67,6 +67,7 @@ export default function RootLayout() {
 
         const { IAPService } = await import('@/services/iapService');
         await IAPService.initialize();
+        await IAPService.getProducts();
       } catch (e) {
         console.error('Bootstrap failed:', e);
       } finally {

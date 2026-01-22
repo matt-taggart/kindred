@@ -1,5 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Contacts from "expo-contacts";
+import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -214,6 +215,12 @@ export default function ImportContactsScreen() {
   const [customValue, setCustomValue] = useState("");
   const [customUnit, setCustomUnit] = useState<CustomUnit>("days");
 
+  const derivedCustomDays = useMemo(() => {
+    const numericValue = parseInt(customValue, 10);
+    if (!Number.isFinite(numericValue) || numericValue <= 0) return null;
+    return numericValue * unitMultipliers[customUnit];
+  }, [customUnit, customValue]);
+
   const shouldAutoRequest = useMemo(() => {
     const value = params.autoRequest;
     if (Array.isArray(value)) {
@@ -373,22 +380,43 @@ export default function ImportContactsScreen() {
       }
 
       if (bucket === "custom") {
+        const existingDays = editingContactId
+          ? customIntervals[editingContactId]
+          : undefined;
+        const { customUnit: u, customValue: v } =
+          deriveCustomUnitAndValue(existingDays);
+        setCustomUnit(u);
+        setCustomValue(v);
         return;
       }
     },
-    [editingContactId],
+    [customIntervals, editingContactId],
   );
 
-  const handleConfirmCustom = useCallback(() => {
-    const numericValue = parseInt(customValue, 10);
-    if (isNaN(numericValue) || numericValue <= 0) {
-      Alert.alert("Invalid Input", "Please enter a valid number.");
+  const handleSaveFrequencyChange = useCallback(() => {
+    if (!editingContactId) {
+      setShowFrequencySelector(false);
       return;
     }
 
-    const days = numericValue * unitMultipliers[customUnit];
+    const bucket = contactFrequencies[editingContactId] || "weekly";
 
-    if (editingContactId) {
+    if (bucket === "custom") {
+      const numericValue = parseInt(customValue, 10);
+      if (!Number.isFinite(numericValue) || numericValue <= 0) {
+        Alert.alert("Invalid Input", "Please enter a valid number.");
+        return;
+      }
+
+      const days = numericValue * unitMultipliers[customUnit];
+      if (days < 1 || days > 365) {
+        Alert.alert(
+          "Invalid cadence",
+          "Custom reminders must be between 1 and 365 days.",
+        );
+        return;
+      }
+
       setCustomIntervals((prev) => ({
         ...prev,
         [editingContactId]: days,
@@ -398,12 +426,10 @@ export default function ImportContactsScreen() {
         [editingContactId]: "custom",
       }));
     }
-  }, [customValue, customUnit, editingContactId]);
 
-  const handleSaveFrequencyChange = useCallback(() => {
     setShowFrequencySelector(false);
     setEditingContactId(null);
-  }, []);
+  }, [contactFrequencies, customUnit, customValue, editingContactId]);
 
   const handleSetAllFrequency = useCallback(
     (bucket: Bucket) => {
@@ -583,12 +609,29 @@ export default function ImportContactsScreen() {
               </View>
             }
             ListEmptyComponent={
-              <View className="flex-1 items-center justify-center rounded-2xl border border-dashed border-border bg-surface px-4 py-12">
-                <Text className="text-base font-semibold text-warmgray">
-                  No contacts loaded yet.
+              <View className="flex-1 items-center justify-center px-6 py-14">
+                <View
+                  className="mb-6 items-center justify-center"
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                >
+                  <View className="relative">
+                    <Ionicons name="people-outline" size={80} color="#9CA986" />
+                    <View className="absolute -bottom-1 -right-1 rounded-full bg-cream p-1">
+                      <Ionicons name="heart" size={24} color="#C4A484" />
+                    </View>
+                  </View>
+                </View>
+
+                <Text className="text-2xl font-semibold text-warmgray text-center leading-tight mb-2">
+                  {permissionDenied
+                    ? "Contacts access needed"
+                    : "Your contacts will show up here"}
                 </Text>
-                <Text className="mt-2 text-sm text-center text-warmgray-muted">
-                  Tap “Import from contacts” to begin and pick who you’d like to bring into Kindred.
+                <Text className="text-base text-center text-warmgray-muted">
+                  {permissionDenied
+                    ? "Enable contact access in Settings to import from your address book."
+                    : "Tap “Import from contacts” above to choose who you’d like to bring into Kindred."}
                 </Text>
               </View>
             }
@@ -668,11 +711,16 @@ export default function ImportContactsScreen() {
                           {bucketLabels[bucket]}
                         </Text>
                         <Text className="mt-1 text-sm text-warmgray-muted">
-                          {bucket === "custom" &&
-                          customIntervals[editingContactId || ""]
-                            ? formatCustomSummary(
-                                customIntervals[editingContactId || ""],
-                              )
+                          {bucket === "custom"
+                            ? contactFrequencies[editingContactId || ""] ===
+                                "custom" &&
+                              (derivedCustomDays ||
+                                customIntervals[editingContactId || ""])
+                              ? formatCustomSummary(
+                                  derivedCustomDays ||
+                                    customIntervals[editingContactId || ""],
+                                )
+                              : bucketDescriptions[bucket]
                             : bucketDescriptions[bucket]}
                         </Text>
                       </View>
@@ -751,12 +799,6 @@ export default function ImportContactsScreen() {
                           </View>
                         </View>
 
-                        <TouchableOpacity
-                          className="mt-4 items-center justify-center rounded-xl bg-sage px-6 py-3"
-                          onPress={handleConfirmCustom}
-                        >
-                          <Text className="font-semibold text-white">Set</Text>
-                        </TouchableOpacity>
                       </View>
                     )}
                 </View>

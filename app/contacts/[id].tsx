@@ -362,7 +362,6 @@ export default function ContactDetailScreen() {
                 <View className="mt-1 flex-row items-center">
                   <Ionicons name="gift-outline" size={14} color="#9CA986" />
                   <Text className="ml-1 text-base text-warmgray-muted">
-                    {/* DEBUG: */ console.log('[ContactDetail] birthday:', contact.birthday, 'hasYear:', hasYear(contact.birthday))}
                     {formatBirthdayDisplay(contact.birthday)}
                     {hasYear(contact.birthday) && `, ${getYear(contact.birthday)}`}
                   </Text>

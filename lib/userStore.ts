@@ -19,9 +19,11 @@ export type NotificationSettings = {
 
 type UserState = {
   isPro: boolean;
+  priceLabel: string | null;
   purchaseState: PurchaseState;
   notificationSettings: NotificationSettings;
   setIsPro: (value: boolean) => void;
+  setPriceLabel: (value: string | null) => void;
   purchasePro: () => Promise<void>;
   restorePurchase: () => Promise<void>;
   clearError: () => void;
@@ -35,6 +37,7 @@ export const useUserStore = create<UserState>()(
   persist(
     (set, get) => ({
       isPro: false,
+      priceLabel: null,
       purchaseState: {
         isPurchasing: false,
         isRestoring: false,
@@ -45,6 +48,7 @@ export const useUserStore = create<UserState>()(
         reminderTimes: DEFAULT_REMINDER_TIMES,
       },
       setIsPro: (value) => set({ isPro: value }),
+      setPriceLabel: (value) => set({ priceLabel: value }),
       clearError: () => set({ purchaseState: { ...get().purchaseState, error: null } }),
       setNotificationFrequency: (frequency) => set({
         notificationSettings: { ...get().notificationSettings, frequency },
@@ -56,37 +60,7 @@ export const useUserStore = create<UserState>()(
         set({ notificationSettings: { ...notificationSettings, reminderTimes: newTimes } });
       },
       purchasePro: async () => {
-        const { purchaseState } = get();
-
-        if (purchaseState.isPurchasing) {
-          return;
-        }
-
-        set({ purchaseState: { ...purchaseState, isPurchasing: true, error: null } });
-
-        try {
-          const result = await IAPService.purchaseLifetime();
-
-          if (result.success) {
-            set({ isPro: true, purchaseState: { ...get().purchaseState, isPurchasing: false, error: null } });
-          } else {
-            set({
-              purchaseState: {
-                ...get().purchaseState,
-                isPurchasing: false,
-                error: result.error || 'Purchase failed',
-              },
-            });
-          }
-        } catch (error: any) {
-          set({
-            purchaseState: {
-              ...get().purchaseState,
-              isPurchasing: false,
-              error: error.message || 'Purchase failed',
-            },
-          });
-        }
+        // purchasePro is now handled by RevenueCat Paywall UI
       },
       restorePurchase: async () => {
         const { purchaseState } = get();
@@ -128,10 +102,6 @@ export const useUserStore = create<UserState>()(
       version: 1,
       onRehydrateStorage: () => async (state) => {
         if (!state) return;
-
-        if (__DEV__) {
-          return;
-        }
 
         try {
           const isPro = await IAPService.checkCurrentPurchase();
