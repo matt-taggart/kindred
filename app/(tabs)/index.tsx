@@ -263,11 +263,11 @@ export default function HomeScreen() {
     setShowReachedOutSheet(true);
   }, []);
 
-  const handleReachedOutSubmit = useCallback(async (note: string) => {
+  const handleReachedOutSubmit = useCallback(async (type: any, note: string) => {
     if (!selectedContact) return;
 
     try {
-      await updateInteraction(selectedContact.id, 'call', note || undefined);
+      await updateInteraction(selectedContact.id, type, note || undefined);
       setCompletionCount(prev => prev + 1);
 
       // Animate the list change

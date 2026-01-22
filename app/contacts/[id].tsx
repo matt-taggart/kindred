@@ -238,7 +238,7 @@ export default function ContactDetailScreen() {
   }, [contact, loadContactData]);
 
   const handleSaveCadence = useCallback(
-    async (newBucket: Contact['bucket'], customIntervalDays?: number | null, birthday?: string | null) => {
+    async (newBucket: Contact['bucket'], customIntervalDays?: number | null, birthday?: string | null, nextContactDate?: number | null) => {
       if (!contact) return;
 
       setSavingCadence(true);
@@ -246,7 +246,7 @@ export default function ContactDetailScreen() {
         if (birthday !== undefined) {
           await updateContact(contact.id, { birthday });
         }
-        const updated = await updateContactCadence(contact.id, newBucket, customIntervalDays);
+        const updated = await updateContactCadence(contact.id, newBucket, customIntervalDays, nextContactDate);
         setContact(updated);
         loadContactData();
       } catch (error) {

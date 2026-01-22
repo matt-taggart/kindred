@@ -436,6 +436,7 @@ export const updateContactCadence = async (
   contactId: Contact['id'],
   newBucket: Contact['bucket'],
   customIntervalDays?: number | null,
+  overrideNextContactDate?: number | null,
 ): Promise<Contact> => {
   const db = getDb();
 
@@ -454,8 +455,11 @@ export const updateContactCadence = async (
     newBucket,
     customIntervalDays !== undefined ? customIntervalDays : contact.customIntervalDays,
   );
+  
   const lastContactedAt = contact.lastContactedAt || Date.now();
-  const nextContactDate = getNextContactDate(newBucket, lastContactedAt, normalizedCustomDays);
+  const nextContactDate = overrideNextContactDate !== undefined 
+    ? overrideNextContactDate 
+    : getNextContactDate(newBucket, lastContactedAt, normalizedCustomDays);
 
   db.update(contacts)
     .set({

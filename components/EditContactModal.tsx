@@ -1,9 +1,11 @@
-import { Modal, Pressable, TouchableOpacity } from "react-native";
+import { Modal, Pressable, TouchableOpacity, Platform } from "react-native";
 import { SafeAreaView, ScrollView, Text, TextInput, View, Alert } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import BirthdayPicker from '@/components/BirthdayPicker';
 import { hasYear, getMonthDay } from '@/utils/birthdayValidation';
+import { getDateLabel } from '@/utils/scheduler';
 
 import { Contact } from "@/db/schema";
 
@@ -48,6 +50,7 @@ interface EditContactModalProps {
     newBucket: Contact["bucket"],
     customIntervalDays?: number | null,
     birthday?: string | null,
+    nextContactDate?: number | null,
   ) => void;
   onArchive?: () => void;
 }
@@ -123,6 +126,8 @@ export default function EditContactModal({
   );
   const [birthday, setBirthday] = useState<string>(contact.birthday || "");
   const [isBirthdayExpanded, setIsBirthdayExpanded] = useState(false);
+  const [startDate, setStartDate] = useState(contact.nextContactDate ? new Date(contact.nextContactDate) : new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -131,8 +136,10 @@ export default function EditContactModal({
       setCustomState(derived);
       setBirthday(contact.birthday || "");
       setIsBirthdayExpanded(false);
+      setStartDate(contact.nextContactDate ? new Date(contact.nextContactDate) : new Date());
+      setShowDatePicker(false);
     }
-  }, [visible, contact.bucket, contact.customIntervalDays, contact.birthday]);
+  }, [visible, contact.bucket, contact.customIntervalDays, contact.birthday, contact.nextContactDate]);
 
   const derivedCustomDays = useMemo(() => {
     const numericValue = Number(customValue);
@@ -150,7 +157,8 @@ export default function EditContactModal({
     selectedBucket !== contact.bucket ||
     (isCustom && derivedCustomDays !== contact.customIntervalDays) ||
     (!isCustom && contact.bucket === "custom") ||
-    birthday !== (contact.birthday || "");
+    birthday !== (contact.birthday || "") ||
+    startDate.getTime() !== (contact.nextContactDate || 0);
 
   const saveDisabled = !isCustomValid || !hasChanges;
 
@@ -158,7 +166,7 @@ export default function EditContactModal({
     if (!isCustomValid) return;
     const customDays = selectedBucket === "custom" ? derivedCustomDays : null;
     if (hasChanges) {
-      onSave(selectedBucket, customDays ?? null, birthday || null);
+      onSave(selectedBucket, customDays ?? null, birthday || null, startDate.getTime());
     }
     onClose();
   };
@@ -427,6 +435,58 @@ export default function EditContactModal({
                     </Text>
                   </View>
                 </Pressable>
+              )}
+            </View>
+
+            {/* Next Reminder Section */}
+            <View className="mb-4 rounded-2xl bg-surface p-4 shadow-sm border border-border">
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                className="flex-row items-center justify-between"
+                activeOpacity={0.7}
+              >
+                <View className="flex-row items-center gap-3">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
+                    <Ionicons name="calendar-outline" size={18} color="#8B9678" />
+                  </View>
+                  <View>
+                    <Text className="text-base font-semibold text-warmgray">Next Reminder</Text>
+                    <Text className="text-sm text-warmgray-muted">{getDateLabel(startDate.getTime())}</Text>
+                  </View>
+                </View>
+                <Text className="text-sm font-medium text-sage">Edit</Text>
+              </TouchableOpacity>
+
+              {showDatePicker && Platform.OS === 'ios' && (
+                <View className="mt-4 pt-4 border-t border-border">
+                  <View className="flex-row justify-end mb-2">
+                    <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                      <Text className="text-sm font-medium text-sage">Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <DateTimePicker
+                    value={startDate}
+                    mode="date"
+                    display="spinner"
+                    minimumDate={new Date()}
+                    onChange={(_e, date) => date && setStartDate(date)}
+                    themeVariant="light"
+                    accentColor="#9CA986"
+                  />
+                </View>
+              )}
+
+              {showDatePicker && Platform.OS === 'android' && (
+                <DateTimePicker
+                  value={startDate}
+                  mode="date"
+                  display="default"
+                  minimumDate={new Date()}
+                  onChange={(_e, date) => {
+                    setShowDatePicker(false);
+                    if (date) setStartDate(date);
+                  }}
+                />
               )}
             </View>
           </ScrollView>

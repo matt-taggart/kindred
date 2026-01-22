@@ -11,19 +11,22 @@ import {
   Animated,
   Dimensions,
 } from 'react-native';
-import { Contact } from '@/db/schema';
+import { Contact, NewInteraction } from '@/db/schema';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
+
+type InteractionType = NewInteraction['type'];
 
 type Props = {
   visible: boolean;
   contact: Contact | null;
   onClose: () => void;
-  onSubmit: (note: string) => void;
+  onSubmit: (type: InteractionType, note: string) => void;
 };
 
 export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }: Props) {
   const [note, setNote] = useState('');
+  const [type, setType] = useState<InteractionType>('call');
   const [expanded, setExpanded] = useState(false);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
@@ -41,13 +44,15 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
   }, [visible, slideAnim]);
 
   const handleSubmit = useCallback(() => {
-    onSubmit(note.trim());
+    onSubmit(type, note.trim());
     setNote('');
+    setType('call');
     setExpanded(false);
-  }, [note, onSubmit]);
+  }, [type, note, onSubmit]);
 
   const handleClose = useCallback(() => {
     setNote('');
+    setType('call');
     setExpanded(false);
     onClose();
   }, [onClose]);
@@ -83,6 +88,32 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
                 Connected with {contact.name}
               </Text>
               <Text className="text-2xl text-sage">✓</Text>
+            </View>
+
+            {/* Interaction Type Section */}
+            <View className="mb-6">
+              <Text className="mb-3 text-base font-medium text-warmgray">
+                How did you connect?
+              </Text>
+              <View className="flex-row gap-2">
+                {(['call', 'text', 'email', 'meet'] as InteractionType[]).map((t) => (
+                  <TouchableOpacity
+                    key={t}
+                    onPress={() => setType(t)}
+                    className={`flex-1 items-center rounded-xl border py-3 ${
+                      type === t ? 'border-sage bg-sage' : 'border-border bg-cream'
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-semibold capitalize ${
+                        type === t ? 'text-white' : 'text-warmgray-muted'
+                      }`}
+                    >
+                      {t}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             {/* Note input */}
