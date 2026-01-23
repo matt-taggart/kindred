@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Modal, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, View } from 'react-native';
 import type { CustomerInfo } from 'react-native-purchases';
 
 import { useUserStore } from '@/lib/userStore';
@@ -13,7 +13,8 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
   const { isPro, setIsPro } = useUserStore();
   let RevenueCatUI;
   try {
-     RevenueCatUI = require('react-native-purchases-ui');
+    const PurchasesUI = require('react-native-purchases-ui');
+    RevenueCatUI = PurchasesUI.default || PurchasesUI;
   } catch (e) {
     console.error('Failed to load react-native-purchases-ui', e);
   }
@@ -29,9 +30,10 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/50">
-        <SafeAreaView className="mt-auto h-[90%] rounded-t-3xl bg-white overflow-hidden">
+        <View className="mt-auto h-[90%] rounded-t-3xl bg-surface overflow-hidden">
           {RevenueCatUI && (
             <RevenueCatUI.Paywall
+              style={{ flex: 1 }}
               onPurchaseCompleted={(customerInfo: CustomerInfo) => {
                 const isPro = Boolean(customerInfo.entitlements.active['Kindred Pro']);
                 setIsPro(isPro);
@@ -42,15 +44,10 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
                 setIsPro(isPro);
                 if (isPro) onClose();
               }}
+              onDismiss={onClose}
             />
           )}
-          <TouchableOpacity
-            className="absolute top-4 right-4 z-10 p-2 bg-black/20 rounded-full"
-            onPress={onClose}
-          >
-            <Text className="text-white font-bold">✕</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
+        </View>
       </View>
     </Modal>
   );
