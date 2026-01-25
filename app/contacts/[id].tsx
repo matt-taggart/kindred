@@ -1,17 +1,16 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, Image, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
 import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, archiveContact, unarchiveContact, snoozeContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import InteractionListItem from '@/components/InteractionListItem';
+import { ConnectionDetailHeader, ConnectionProfileSection } from '@/components';
 import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
-import { formatLastConnected, formatNextReminder } from '@/utils/timeFormatting';
-import { formatBirthdayDisplay } from '@/utils/formatters';
-import { hasYear, getYear } from '@/utils/birthdayValidation';
+import { formatLastConnected } from '@/utils/timeFormatting';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -263,26 +262,19 @@ export default function ContactDetailScreen() {
     loadContactData();
   }, [loadContactData]);
 
-  const initial = contact?.name?.charAt(0).toUpperCase() || '?';
-
   // Screen options must be memoized and Stack.Screen must render in all code paths
   // to maintain navigation context consistency (fixes crash when deleting all notes)
   const screenOptions = useMemo(() => ({
     title: contact?.name || 'Connection',
     headerBackTitle: 'Back',
-    headerShown: true,
-    headerRight: contact ? ({ tintColor }: { tintColor?: string }) => (
-      <TouchableOpacity onPress={handleEditContact}>
-        <Text className="text-lg font-semibold" style={{ color: tintColor }}>Edit</Text>
-      </TouchableOpacity>
-    ) : undefined,
-  }), [contact, handleEditContact]);
+    headerShown: false,
+  }), [contact]);
 
   if (loading) {
     return (
       <>
         <Stack.Screen options={screenOptions} />
-        <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+        <SafeAreaView className="flex-1 items-center justify-center bg-background-light">
           <Text className="text-warmgray">Loading…</Text>
         </SafeAreaView>
       </>
@@ -293,7 +285,7 @@ export default function ContactDetailScreen() {
     return (
       <>
         <Stack.Screen options={screenOptions} />
-        <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+        <SafeAreaView className="flex-1 items-center justify-center bg-background-light">
           <Text className="text-warmgray">Connection not found</Text>
         </SafeAreaView>
       </>
@@ -303,7 +295,13 @@ export default function ContactDetailScreen() {
   return (
     <>
       <Stack.Screen options={screenOptions} />
-      <SafeAreaView className="flex-1 bg-cream">
+      <SafeAreaView className="flex-1 bg-background-light">
+        <ConnectionDetailHeader
+          name={contact.name}
+          relationship={contact.relationship || 'Connection'}
+          onBackPress={() => router.back()}
+          onMorePress={handleEditContact}
+        />
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
@@ -337,78 +335,13 @@ export default function ContactDetailScreen() {
             </View>
           )}
 
-          {/* Contact Info Header */}
-          <View className="mb-6 rounded-2xl bg-surface p-6 shadow-sm">
-            <View className="items-center">
-              {contact.avatarUri ? (
-                <View className="h-20 w-20 overflow-hidden rounded-full">
-                  <Image
-                    source={{ uri: contact.avatarUri }}
-                    className="h-full w-full"
-                    resizeMode="cover"
-                  />
-                </View>
-              ) : (
-                <View className="h-20 w-20 items-center justify-center rounded-full bg-sage">
-                  <Text className="text-3xl font-semibold text-white">{initial}</Text>
-                </View>
-              )}
-
-              <Text className="mt-3 text-2xl font-semibold text-warmgray">{contact.name}</Text>
-              {contact.phone && (
-                <Text className="mt-1 text-base text-warmgray-muted">{formatPhoneNumber(contact.phone)}</Text>
-              )}
-              {contact.birthday && (
-                <View className="mt-1 flex-row items-center">
-                  <Ionicons name="gift-outline" size={14} color="#9CA986" />
-                  <Text className="ml-1 text-base text-warmgray-muted">
-                    {formatBirthdayDisplay(contact.birthday)}
-                    {hasYear(contact.birthday) && `, ${getYear(contact.birthday)}`}
-                  </Text>
-                </View>
-              )}
-
-              {/* Schedule summary */}
-              <View className="mt-5 w-full rounded-2xl border border-border bg-cream px-4 py-4">
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-xs font-semibold uppercase tracking-wider text-warmgray-muted">
-                    Remind me
-                  </Text>
-                  <Text className="text-sm font-semibold text-warmgray">
-                    {getBucketLabel(contact.bucket, contact.customIntervalDays)}
-                  </Text>
-                </View>
-
-                <View className="my-3 h-px w-full bg-border" />
-
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-xs font-semibold uppercase tracking-wider text-warmgray-muted">
-                    Last connected
-                  </Text>
-                  <Text className="text-sm font-semibold text-warmgray">
-                    {formatLastConnected(contact.lastContactedAt)}
-                  </Text>
-                </View>
-
-                <View className="my-3 h-px w-full bg-border" />
-
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-xs font-semibold uppercase tracking-wider text-warmgray-muted">
-                    Next check-in
-                  </Text>
-                  <Text className="text-sm font-semibold text-warmgray">
-                    {formatNextReminder(contact.nextContactDate)}
-                  </Text>
-                </View>
-
-                {!contact.nextContactDate && (
-                  <Text className="mt-2 text-xs text-warmgray-muted">
-                    Set a cadence to schedule your next reminder.
-                  </Text>
-                )}
-              </View>
-            </View>
-          </View>
+          <ConnectionProfileSection
+            avatarUri={contact.avatarUri}
+            name={contact.name}
+            relationship={contact.relationship || 'Connection'}
+            lastConnected={formatLastConnected(contact.lastContactedAt)}
+            isFavorite={contact.relationship?.toLowerCase().includes('partner') || contact.relationship?.toLowerCase().includes('spouse')}
+          />
 
           {/* Quick Actions Row */}
           <View className="mb-6 flex-row gap-2">
