@@ -136,7 +136,7 @@ export function ConnectionTile({
   }
 
   // Build accessibility hint for testing (NativeWind converts className to style)
-  const accessibilityHintParts = [variant];
+  const accessibilityHintParts: string[] = [variant];
   if (size === 'large') {
     accessibilityHintParts.push('large');
   }
