@@ -2,25 +2,27 @@
 module.exports = {
   content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        sage: {
-          DEFAULT: '#9CA986',
-          100: '#E6E9E1',
-        },
-        terracotta: {
-          DEFAULT: '#D4896A',
-          100: '#F6E6DE',
-        },
-        cream: '#F3F0E6',
-        surface: '#FDFBF7',
-        // Warm text colors (use instead of Tailwind's blue-gray slate)
-        warmgray: {
-          DEFAULT: '#5C6356',  // primary text
-          muted: '#8B9678',    // secondary text
-        },
-        border: '#E8E4DA',
+        primary: '#9DBEBB',
+        secondary: '#F4ACB7',
+        accent: '#FFE5D9',
+        'background-light': '#F9FBFA',
+        'background-dark': '#121414',
+      },
+      fontFamily: {
+        display: ['Quicksand_400Regular', 'Quicksand_500Medium', 'Quicksand_600SemiBold', 'Quicksand_700Bold'],
+        body: ['Outfit_300Light', 'Outfit_400Regular', 'Outfit_500Medium', 'Outfit_600SemiBold'],
+      },
+      borderRadius: {
+        DEFAULT: '24px',
+        xl: '32px',
+        '2xl': '40px',
+      },
+      boxShadow: {
+        soft: '0 10px 25px -5px rgba(0, 0, 0, 0.05)',
       },
     },
   },
