@@ -61,7 +61,8 @@ describe('ConnectionTile', () => {
       <ConnectionTile contact={baseContact} variant="secondary" onPress={mockOnPress} />
     );
     const tile = getByTestId('connection-tile');
-    expect(tile.props.className).toContain('secondary');
+    // NativeWind converts className to style, so we check the accessibilityHint for variant info
+    expect(tile.props.accessibilityHint).toContain('secondary');
   });
 
   it('applies primary variant styling', () => {
@@ -70,7 +71,8 @@ describe('ConnectionTile', () => {
       <ConnectionTile contact={familyContact} variant="primary" onPress={mockOnPress} />
     );
     const tile = getByTestId('connection-tile');
-    expect(tile.props.className).toContain('primary');
+    // NativeWind converts className to style, so we check the accessibilityHint for variant info
+    expect(tile.props.accessibilityHint).toContain('primary');
   });
 
   it('renders large size with larger styling', () => {
@@ -78,7 +80,8 @@ describe('ConnectionTile', () => {
       <ConnectionTile contact={baseContact} size="large" onPress={mockOnPress} />
     );
     const tile = getByTestId('connection-tile');
-    expect(tile.props.className).toContain('large');
+    // NativeWind converts className to style, so we check the accessibilityHint for size info
+    expect(tile.props.accessibilityHint).toContain('large');
   });
 
   it('renders birthday indicator when isBirthday is true', () => {
