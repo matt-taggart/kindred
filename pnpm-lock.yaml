@@ -11,6 +11,12 @@ importers:
       '@babel/runtime':
         specifier: ^7.28.4
         version: 7.28.4
+      '@expo-google-fonts/outfit':
+        specifier: ^0.4.3
+        version: 0.4.3
+      '@expo-google-fonts/quicksand':
+        specifier: ^0.4.1
+        version: 0.4.1
       '@expo/metro-runtime':
         specifier: ^6.1.2
         version: 6.1.2(expo@54.0.30)(react-dom@19.1.0(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -826,6 +832,12 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@expo-google-fonts/outfit@0.4.3':
+    resolution: {integrity: sha512-2uQmDVJencWLllxds6SG92E+SjxyZfvg7eZKZ5XLHggmm5AuUyQK7lzMAFOUzT6kheq2kJ7BAiubMdjKT32fJg==}
+
+  '@expo-google-fonts/quicksand@0.4.1':
+    resolution: {integrity: sha512-LpGdmY+CDm/GTv29qDPy8Nz1a3idWO1R6Bb+ty7flS6vfHXsdOQTRKNz93SFHdXQj0FSvVhvMLe3wTtMgf312A==}
 
   '@expo/cli@54.0.20':
     resolution: {integrity: sha512-cwsXmhftvS0p9NNYOhXGnicBAZl9puWwRt19Qq5eQ6njLnaj8WvcR+kDZyADtgZxBsZiyVlrKXvnjt43HXywQA==}
@@ -5638,6 +5650,10 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.2':
     optional: true
+
+  '@expo-google-fonts/outfit@0.4.3': {}
+
+  '@expo-google-fonts/quicksand@0.4.1': {}
 
   '@expo/cli@54.0.20(expo-router@6.0.21)(expo@54.0.30)(graphql@15.8.0)(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@12.3.6)(@types/react@19.1.17)(react@19.1.0))':
     dependencies:

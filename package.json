@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
+    "@expo-google-fonts/outfit": "^0.4.3",
+    "@expo-google-fonts/quicksand": "^0.4.1",
     "@expo/metro-runtime": "^6.1.2",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "~2.2.0",
