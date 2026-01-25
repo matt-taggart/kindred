@@ -10,6 +10,7 @@ export const contacts = sqliteTable('contacts', {
   lastContactedAt: integer('lastContactedAt', { mode: 'number' }),
   nextContactDate: integer('nextContactDate', { mode: 'number' }),
   birthday: text('birthday'), // Format: YYYY-MM-DD or MM-DD
+  relationship: text('relationship'), // e.g., partner, spouse, family, friend, colleague
   isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
 });
 
