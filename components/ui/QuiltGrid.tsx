@@ -16,7 +16,8 @@ export function QuiltGrid({ className = '', children, ...props }: QuiltGridProps
         if (!React.isValidElement(child)) return child;
 
         // Check if child has size="large" prop for full width
-        const isLarge = child.props.size === 'large';
+        const childProps = child.props as { size?: string };
+        const isLarge = childProps.size === 'large';
 
         return (
           <View style={{ width: isLarge ? '100%' : '48%' }}>
