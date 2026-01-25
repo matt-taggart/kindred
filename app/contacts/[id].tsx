@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, Scroll
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, archiveContact, unarchiveContact } from '@/services/contactService';
+import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import { ConnectionDetailHeader, ConnectionProfileSection, ConnectionNotesCard, QuickActionTile, SharedMomentsSection } from '@/components';
 import type { Moment } from '@/components';
@@ -32,7 +32,6 @@ export default function ContactDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [savingCadence, setSavingCadence] = useState(false);
   const [unarchiving, setUnarchiving] = useState(false);
   const [notes, setNotes] = useState('');
 
@@ -117,34 +116,6 @@ export default function ContactDetailScreen() {
     Alert.alert('Coming soon', 'Write later reminders will be available in a future update.');
   }, []);
 
-  const handleDeleteInteraction = useCallback(
-    (interactionId: string) => {
-      Alert.alert(
-        'Delete Interaction?',
-        'This cannot be undone.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                await deleteInteraction(interactionId);
-                // Defer to next frame to let navigation context stabilize
-                requestAnimationFrame(() => {
-                  loadContactData();
-                });
-              } catch (error) {
-                Alert.alert('Error', error instanceof Error ? error.message : 'Failed to delete interaction.');
-              }
-            },
-          },
-        ],
-      );
-    },
-    [loadContactData],
-  );
-
   const handleEditInteraction = useCallback(
     (interaction: Interaction) => {
       router.push({ pathname: '/modal', params: { interactionId: interaction.id, contactId: id } });
@@ -190,7 +161,6 @@ export default function ContactDetailScreen() {
     async (newBucket: Contact['bucket'], customIntervalDays?: number | null, birthday?: string | null, nextContactDate?: number | null) => {
       if (!contact) return;
 
-      setSavingCadence(true);
       try {
         if (birthday !== undefined) {
           await updateContact(contact.id, { birthday });
@@ -200,8 +170,6 @@ export default function ContactDetailScreen() {
         loadContactData();
       } catch (error) {
         Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update contact reminders.');
-      } finally {
-        setSavingCadence(false);
       }
     },
     [contact, loadContactData],
