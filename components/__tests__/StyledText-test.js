@@ -1,3 +1,4 @@
+/* global it, expect */
 import * as React from 'react';
 import renderer, { act } from 'react-test-renderer';
 

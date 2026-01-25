@@ -317,7 +317,7 @@ export default function ContactDetailScreen() {
                 <Text className="ml-2 text-base font-semibold text-amber-800">Archived connection</Text>
               </View>
               <Text className="text-sm text-amber-700 mb-3">
-                This connection is archived and won't appear in your regular lists. Restore it to receive reminders again.
+                This connection is archived and will not appear in your regular lists. Restore it to receive reminders again.
               </Text>
               <TouchableOpacity
                 className="flex-row items-center justify-center gap-2 rounded-xl bg-amber-600 py-3"

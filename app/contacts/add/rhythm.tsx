@@ -266,7 +266,7 @@ export default function AddConnectionRhythmScreen() {
 
                       {isCustomValid && derivedCustomDays && (
                         <Text className="mt-3 text-sm text-warmgray-muted">
-                          We'll remind you{" "}
+                          {"We'll remind you "}
                           <Text className="font-semibold text-sage">
                             {formatCustomSummary(derivedCustomDays)}
                           </Text>

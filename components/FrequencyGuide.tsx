@@ -100,7 +100,7 @@ export default function FrequencyGuide({ visible, onClose }: FrequencyGuideProps
             <View className="mt-4 rounded-2xl border border-sage-200 bg-white p-4">
               <Text className="text-sm font-semibold text-sage">💡 Pro tip</Text>
               <Text className="mt-2 text-base text-slate-700">
-                You can always adjust these later in each contact's settings. Start with what feels right!
+                {"You can always adjust these later in each contact's settings. Start with what feels right!"}
               </Text>
             </View>
           </ScrollView>

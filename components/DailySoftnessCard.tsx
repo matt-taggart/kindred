@@ -24,7 +24,7 @@ export function DailySoftnessCard({ quote, onReflectPress }: DailySoftnessCardPr
         </View>
 
         <Body size="sm" muted className="mb-4 italic">
-          "{quote}"
+          {`"${quote}"`}
         </Body>
 
         <TouchableOpacity

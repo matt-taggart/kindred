@@ -356,7 +356,7 @@ export default function EditContactModal({
 
                       {isCustomValid && derivedCustomDays && (
                         <Text className="mt-3 text-sm text-warmgray-muted">
-                          We'll remind you{' '}
+                          {"We'll remind you "}
                           <Text className="font-semibold text-sage">
                             {formatCustomSummary(derivedCustomDays)}
                           </Text>
@@ -414,7 +414,7 @@ export default function EditContactModal({
                   </View>
 
                   <Text className="mt-3 text-xs text-warmgray-muted text-center">
-                    We'll prioritize this over regular reminders on their birthday.
+                    {"We'll prioritize this over regular reminders on their birthday."}
                   </Text>
                 </>
               ) : birthday ? (

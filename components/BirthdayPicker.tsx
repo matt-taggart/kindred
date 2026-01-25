@@ -243,7 +243,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
         >
           {yearUnknown && <Ionicons name="checkmark" size={16} color="#fff" />}
         </View>
-        <Text className="text-base text-warmgray">I don't know the year</Text>
+        <Text className="text-base text-warmgray">{"I don't know the year"}</Text>
       </Pressable>
 
       {/* Calendar */}

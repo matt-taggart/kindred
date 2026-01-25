@@ -174,7 +174,7 @@ export default function LogInteractionModal() {
         </View>
 
         <Text className="mt-6 text-base text-warmgray">
-          Anything you'd like to remember?
+          {"Anything you'd like to remember?"}
         </Text>
 
         <TextInput
