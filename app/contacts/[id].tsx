@@ -8,8 +8,9 @@ import { Contact, Interaction } from '@/db/schema';
 import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, archiveContact, unarchiveContact, snoozeContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import InteractionListItem from '@/components/InteractionListItem';
-import { ConnectionDetailHeader, ConnectionProfileSection } from '@/components';
-import { formatPhoneNumber, formatPhoneUrl } from '@/utils/phone';
+import { ConnectionDetailHeader, ConnectionProfileSection, ConnectionNotesCard, QuickActionTile } from '@/components';
+import { QuiltGrid } from '@/components/ui/QuiltGrid';
+import { formatPhoneUrl } from '@/utils/phone';
 import { formatLastConnected } from '@/utils/timeFormatting';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -58,6 +59,7 @@ export default function ContactDetailScreen() {
   const [savingCadence, setSavingCadence] = useState(false);
   const [unarchiving, setUnarchiving] = useState(false);
   const [snoozing, setSnoozing] = useState(false);
+  const [notes, setNotes] = useState(contact?.notes || '');
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -66,6 +68,7 @@ export default function ContactDetailScreen() {
       const contactsList = getContacts({ includeArchived: true });
       const foundContact = contactsList.find((c) => c.id === id);
       setContact(foundContact || null);
+      setNotes(foundContact?.notes || '');
 
       if (foundContact) {
         const history = getInteractionHistory(foundContact.id);
@@ -166,6 +169,22 @@ export default function ContactDetailScreen() {
       ],
     );
   }, [contact]);
+
+  const handleNotesChange = useCallback((text: string) => {
+    setNotes(text);
+    // Debounced save could be added later
+    if (contact) {
+      updateContact(contact.id, { notes: text }).catch(console.warn);
+    }
+  }, [contact]);
+
+  const handleVoiceNote = useCallback(() => {
+    Alert.alert('Coming soon', 'Voice notes will be available in a future update.');
+  }, []);
+
+  const handleWriteLater = useCallback(() => {
+    Alert.alert('Coming soon', 'Write later reminders will be available in a future update.');
+  }, []);
 
   const handleDeleteInteraction = useCallback(
     (interactionId: string) => {
@@ -343,67 +362,23 @@ export default function ContactDetailScreen() {
             isFavorite={contact.relationship?.toLowerCase().includes('partner') || contact.relationship?.toLowerCase().includes('spouse')}
           />
 
-          {/* Quick Actions Row */}
-          <View className="mb-6 flex-row gap-2">
-            {contact.phone && (
-              <>
-                <TouchableOpacity
-                  className={`flex-row items-center justify-center gap-1.5 rounded-full px-4 py-2 ${
-                    contact.isArchived ? 'bg-gray-100 border border-gray-300' : 'border border-sage bg-surface'
-                  }`}
-                  onPress={handleCall}
-                  disabled={contact.isArchived}
-                  activeOpacity={contact.isArchived ? 1 : 0.85}
-                >
-                  <Ionicons name="call-outline" size={18} color={contact.isArchived ? '#9ca3af' : '#9CA986'} />
-                  <Text className={`text-base font-medium ${contact.isArchived ? 'text-gray-400' : 'text-sage'}`}>
-                    Call
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className={`flex-row items-center justify-center gap-1.5 rounded-full px-4 py-2 ${
-                    contact.isArchived ? 'bg-gray-100 border border-gray-300' : 'border border-sage bg-surface'
-                  }`}
-                  onPress={handleText}
-                  disabled={contact.isArchived}
-                  activeOpacity={contact.isArchived ? 1 : 0.85}
-                >
-                  <Ionicons name="chatbubble-outline" size={18} color={contact.isArchived ? '#9ca3af' : '#9CA986'} />
-                  <Text className={`text-base font-medium ${contact.isArchived ? 'text-gray-400' : 'text-sage'}`}>
-                    Text
-                  </Text>
-                </TouchableOpacity>
-              </>
-            )}
-
+          {/* Notes Card */}
+          <View className="mb-6">
+            <ConnectionNotesCard
+              notes={notes}
+              onChangeNotes={handleNotesChange}
+            />
           </View>
 
-          {/* Mark Done / Snooze Actions */}
-          {!contact.isArchived && (
-            <View className="mb-6 flex-row gap-3">
-              <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-2 border-sage py-3"
-                onPress={handleMarkDone}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="checkmark-circle-outline" size={24} color="#9CA986" />
-                <Text className="text-lg font-semibold text-sage">Reached out</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-2 border-sage py-3"
-                onPress={handleSnooze}
-                disabled={snoozing}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="alarm-outline" size={24} color="#9CA986" />
-                <Text className="text-lg font-semibold text-sage">
-                  {snoozing ? 'Later...' : 'Later'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          {/* Quick Actions Grid */}
+          <View className="mb-6">
+            <QuiltGrid>
+              <QuickActionTile variant="call" onPress={handleCall} />
+              <QuickActionTile variant="text" onPress={handleText} />
+              <QuickActionTile variant="voice" onPress={handleVoiceNote} />
+              <QuickActionTile variant="later" onPress={handleWriteLater} />
+            </QuiltGrid>
+          </View>
 
           {/* Shared Moments */}
           <View>
