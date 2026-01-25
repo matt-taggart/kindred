@@ -84,7 +84,7 @@ export function SharedMomentsSection({
 
               {/* Content */}
               <View className="flex-1 min-w-0">
-                <Body weight="semibold" numberOfLines={1}>
+                <Body weight="medium" numberOfLines={1}>
                   {moment.title}
                 </Body>
                 <Caption muted numberOfLines={1}>

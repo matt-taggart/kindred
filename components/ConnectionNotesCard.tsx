@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Caption } from './ui/Caption';
 
 type ConnectionNotesCardProps = {
@@ -17,8 +17,8 @@ export function ConnectionNotesCard({
   return (
     <View className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-soft">
       <View className="flex-row items-center gap-2 mb-3">
-        <MaterialCommunityIcons
-          name="auto-awesome"
+        <Ionicons
+          name="sparkles"
           size={18}
           color="#fbbf24"
         />

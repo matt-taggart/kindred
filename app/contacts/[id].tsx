@@ -5,47 +5,23 @@ import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, Scroll
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, archiveContact, unarchiveContact, snoozeContact } from '@/services/contactService';
+import { getContacts, getInteractionHistory, deleteInteraction, updateContact, updateContactCadence, archiveContact, unarchiveContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
-import InteractionListItem from '@/components/InteractionListItem';
-import { ConnectionDetailHeader, ConnectionProfileSection, ConnectionNotesCard, QuickActionTile } from '@/components';
+import { ConnectionDetailHeader, ConnectionProfileSection, ConnectionNotesCard, QuickActionTile, SharedMomentsSection } from '@/components';
+import type { Moment } from '@/components';
 import { QuiltGrid } from '@/components/ui/QuiltGrid';
 import { formatPhoneUrl } from '@/utils/phone';
 import { formatLastConnected } from '@/utils/timeFormatting';
 
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-const bucketLabelMap: Record<Contact['bucket'], string> = {
-  daily: 'Every day',
-  weekly: 'Every week',
-  'bi-weekly': 'Every 2 weeks',
-  'every-three-weeks': 'Every 3 weeks',
-  monthly: 'Once a month',
-  'every-six-months': 'Seasonally',
-  yearly: 'Once a year',
-  custom: 'Custom rhythm',
-};
-
-const formatCustomLabel = (customIntervalDays?: number | null) => {
-  if (!customIntervalDays || customIntervalDays < 1) return 'Only when I choose';
-
-  if (customIntervalDays % 30 === 0) {
-    const months = customIntervalDays / 30;
-    return months === 1 ? 'Every month' : `Every ${months} months`;
-  }
-
-  if (customIntervalDays % 7 === 0) {
-    const weeks = customIntervalDays / 7;
-    return weeks === 1 ? 'Every week' : `Every ${weeks} weeks`;
-  }
-
-  if (customIntervalDays === 1) return 'Daily reminders';
-  return `Every ${customIntervalDays} days`;
-};
-
-const getBucketLabel = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
-  if (bucket === 'custom') return formatCustomLabel(customIntervalDays);
-  return bucketLabelMap[bucket];
+const mapInteractionsToMoments = (interactions: Interaction[]): Moment[] => {
+  return interactions.slice(0, 5).map((interaction) => ({
+    id: interaction.id,
+    title: interaction.notes || 'Interaction',
+    date: new Date(interaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    description: interaction.type || '',
+    iconBgColor: 'bg-emerald-50',
+    icon: 'chatbubble-outline',
+  }));
 };
 
 export default function ContactDetailScreen() {
@@ -58,8 +34,7 @@ export default function ContactDetailScreen() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [savingCadence, setSavingCadence] = useState(false);
   const [unarchiving, setUnarchiving] = useState(false);
-  const [snoozing, setSnoozing] = useState(false);
-  const [notes, setNotes] = useState(contact?.notes || '');
+  const [notes, setNotes] = useState('');
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -68,7 +43,6 @@ export default function ContactDetailScreen() {
       const contactsList = getContacts({ includeArchived: true });
       const foundContact = contactsList.find((c) => c.id === id);
       setContact(foundContact || null);
-      setNotes(foundContact?.notes || '');
 
       if (foundContact) {
         const history = getInteractionHistory(foundContact.id);
@@ -88,46 +62,6 @@ export default function ContactDetailScreen() {
     useCallback(() => {
       loadContactData();
     }, [loadContactData]),
-  );
-
-  const handleMarkDone = useCallback(() => {
-    if (!id) return;
-    router.push({ pathname: '/modal', params: { contactId: id } });
-  }, [router, id]);
-
-  const handleSnooze = useCallback(async () => {
-    if (!contact) return;
-
-    const now = Date.now();
-    
-    Alert.alert(
-      'Remind me later',
-      'When would you like a gentle reminder?',
-      [
-        { text: '1 hour', onPress: () => handleSnoozeContact(now + 60 * 60 * 1000) },
-        { text: 'Tomorrow', onPress: () => handleSnoozeContact(now + DAY_IN_MS) },
-        { text: '3 days', onPress: () => handleSnoozeContact(now + 3 * DAY_IN_MS) },
-        { text: '1 week', onPress: () => handleSnoozeContact(now + 7 * DAY_IN_MS) },
-        { text: 'Cancel', style: 'cancel' },
-      ],
-    );
-  }, [contact]);
-
-  const handleSnoozeContact = useCallback(
-    async (untilDate: number) => {
-      if (!contact) return;
-      
-      setSnoozing(true);
-      try {
-        await snoozeContact(contact.id, untilDate);
-        loadContactData();
-      } catch (error) {
-        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to snooze contact.');
-      } finally {
-        setSnoozing(false);
-      }
-    },
-    [contact, loadContactData],
   );
 
   const handleCall = useCallback(() => {
@@ -172,11 +106,8 @@ export default function ContactDetailScreen() {
 
   const handleNotesChange = useCallback((text: string) => {
     setNotes(text);
-    // Debounced save could be added later
-    if (contact) {
-      updateContact(contact.id, { notes: text }).catch(console.warn);
-    }
-  }, [contact]);
+    // TODO: Implement notes persistence when schema supports it
+  }, []);
 
   const handleVoiceNote = useCallback(() => {
     Alert.alert('Coming soon', 'Voice notes will be available in a future update.');
@@ -294,7 +225,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-background-light">
-          <Text className="text-warmgray">Loading…</Text>
+          <Text className="text-slate-700 dark:text-slate-300">Loading…</Text>
         </SafeAreaView>
       </>
     );
@@ -305,7 +236,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-background-light">
-          <Text className="text-warmgray">Connection not found</Text>
+          <Text className="text-slate-700 dark:text-slate-300">Connection not found</Text>
         </SafeAreaView>
       </>
     );
@@ -381,38 +312,33 @@ export default function ContactDetailScreen() {
           </View>
 
           {/* Shared Moments */}
-          <View>
-            <View className="mb-3 flex-row items-center justify-between">
-              <Text className="text-xl font-bold text-warmgray">Notes</Text>
-              <TouchableOpacity 
-                className="flex-row items-center gap-1 rounded-full bg-surface border border-sage px-3 py-1.5"
-                onPress={handleAddNote}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="add" size={16} color="#9CA986" />
-                <Text className="text-sm font-medium text-sage">Add note</Text>
-              </TouchableOpacity>
-            </View>
+          <SharedMomentsSection
+            moments={mapInteractionsToMoments(interactions)}
+            onViewAll={interactions.length > 5 ? handleAddNote : undefined}
+            onMomentPress={(moment) => {
+              const interaction = interactions.find(i => i.id === moment.id);
+              if (interaction) handleEditInteraction(interaction);
+            }}
+          />
 
-            {/* Stable outer View prevents full unmount/remount during list→empty transition */}
-            <View className="flex flex-col gap-4">
-              {interactions.length === 0 ? (
-                <View className="items-center justify-center rounded-2xl bg-surface border border-border p-8">
-                  <Ionicons name="bookmarks-outline" size={48} color="#8B9678" />
-                  <Text className="mt-3 text-base text-warmgray">Your notes will appear here</Text>
-                </View>
-              ) : (
-                interactions.map((interaction) => (
-                  <InteractionListItem
-                    key={interaction.id}
-                    interaction={interaction}
-                    onEdit={handleEditInteraction}
-                    onDelete={() => handleDeleteInteraction(interaction.id)}
-                  />
-                ))
-              )}
+          {/* Empty state when no moments */}
+          {interactions.length === 0 && (
+            <View className="mt-8">
+              <View className="items-center justify-center rounded-3xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-8">
+                <Ionicons name="heart-outline" size={48} color="#9DBEBB" />
+                <Text className="mt-3 text-base text-slate-500 dark:text-slate-400 text-center">
+                  Your shared moments will appear here
+                </Text>
+                <TouchableOpacity
+                  className="mt-4 px-6 py-3 rounded-full bg-primary/20"
+                  onPress={handleAddNote}
+                  activeOpacity={0.7}
+                >
+                  <Text className="text-sm font-semibold text-primary">Add a moment</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          )}
         </ScrollView>
       </SafeAreaView>
 
