@@ -1,4 +1,16 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import {
+  Quicksand_400Regular,
+  Quicksand_500Medium,
+  Quicksand_600SemiBold,
+  Quicksand_700Bold,
+} from '@expo-google-fonts/quicksand';
+import {
+  Outfit_300Light,
+  Outfit_400Regular,
+  Outfit_500Medium,
+  Outfit_600SemiBold,
+} from '@expo-google-fonts/outfit';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
@@ -21,37 +33,37 @@ Notifications.setNotificationHandler({
 });
 
 export {
-  // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync().catch(() => {
-  /* reloading the app might trigger some race conditions, ignore them */
-});
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
+    Quicksand_400Regular,
+    Quicksand_500Medium,
+    Quicksand_600SemiBold,
+    Quicksand_700Bold,
+    Outfit_300Light,
+    Outfit_400Regular,
+    Outfit_500Medium,
+    Outfit_600SemiBold,
   });
   const [dbReady, setDbReady] = useState(false);
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
     if (loaded && dbReady) {
-      SplashScreen.hideAsync().catch(() => {
-        // Ignore errors if the splash screen is already hidden
-      });
+      SplashScreen.hideAsync().catch(() => {});
     }
   }, [loaded, dbReady]);
 
@@ -85,7 +97,7 @@ export default function RootLayout() {
   }, [loaded]);
 
   if (!loaded || !dbReady) {
-    return <View style={{ flex: 1, backgroundColor: '#F3F0E6' }} />;
+    return <View style={{ flex: 1, backgroundColor: '#F9FBFA' }} />;
   }
 
   return <RootLayoutNav />;
@@ -100,7 +112,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="modal"
-          options={{ presentation: 'modal', headerShown: false, contentStyle: { backgroundColor: '#F3F0E6' } }}
+          options={{ presentation: 'modal', headerShown: false, contentStyle: { backgroundColor: '#F9FBFA' } }}
         />
       </Stack>
     </ThemeProvider>
