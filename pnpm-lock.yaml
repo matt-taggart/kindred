@@ -14,6 +14,9 @@ importers:
       '@expo-google-fonts/outfit':
         specifier: ^0.4.3
         version: 0.4.3
+      '@expo-google-fonts/playfair-display':
+        specifier: ^0.4.2
+        version: 0.4.2
       '@expo-google-fonts/quicksand':
         specifier: ^0.4.1
         version: 0.4.1
@@ -888,6 +891,9 @@ packages:
 
   '@expo-google-fonts/outfit@0.4.3':
     resolution: {integrity: sha512-2uQmDVJencWLllxds6SG92E+SjxyZfvg7eZKZ5XLHggmm5AuUyQK7lzMAFOUzT6kheq2kJ7BAiubMdjKT32fJg==}
+
+  '@expo-google-fonts/playfair-display@0.4.2':
+    resolution: {integrity: sha512-mWhBV59RUjSS3aYpytUb7UyHHTnXcHh7epAn7gq+M4XAEh5PuMKUrP8eiUfkJLb6UwHZCi7EhQpUzxHu5OL96w==}
 
   '@expo-google-fonts/quicksand@0.4.1':
     resolution: {integrity: sha512-LpGdmY+CDm/GTv29qDPy8Nz1a3idWO1R6Bb+ty7flS6vfHXsdOQTRKNz93SFHdXQj0FSvVhvMLe3wTtMgf312A==}
@@ -6478,6 +6484,8 @@ snapshots:
       levn: 0.4.1
 
   '@expo-google-fonts/outfit@0.4.3': {}
+
+  '@expo-google-fonts/playfair-display@0.4.2': {}
 
   '@expo-google-fonts/quicksand@0.4.1': {}
 

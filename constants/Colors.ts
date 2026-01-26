@@ -2,6 +2,11 @@ const primary = '#9DBEBB';
 const secondary = '#F4ACB7';
 const brandNavy = '#2D3648';
 
+// New design system colors
+const sageLight = '#E8EFEA';
+const offWhite = '#FDFCFB';
+const textSoft = '#5C635C';
+
 export default {
   light: {
     text: '#1f2937',
@@ -22,4 +27,7 @@ export default {
   secondary,
   accent: '#FFE5D9',
   brandNavy,
+  sageLight,
+  offWhite,
+  textSoft,
 };

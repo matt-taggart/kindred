@@ -11,6 +11,11 @@ import {
   Outfit_500Medium,
   Outfit_600SemiBold,
 } from '@expo-google-fonts/outfit';
+import {
+  PlayfairDisplay_500Medium,
+  PlayfairDisplay_600SemiBold,
+  PlayfairDisplay_500Medium_Italic,
+} from '@expo-google-fonts/playfair-display';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
@@ -54,6 +59,9 @@ export default function RootLayout() {
     Outfit_400Regular,
     Outfit_500Medium,
     Outfit_600SemiBold,
+    PlayfairDisplay_500Medium,
+    PlayfairDisplay_600SemiBold,
+    PlayfairDisplay_500Medium_Italic,
   });
   const [dbReady, setDbReady] = useState(false);
 

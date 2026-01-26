@@ -1,53 +1,101 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View, Modal } from 'react-native';
+import { Alert, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
+import Colors from '@/constants/Colors';
 import { useUserStore } from '@/lib/userStore';
 import { resetDatabase } from '@/services/contactService';
-import { EnhancedPaywallModal } from '@/components/EnhancedPaywallModal';
 import { cancelAllReminders } from '@/services/notificationService';
 
 type SettingsRowProps = {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  onPress: () => void;
-  showChevron?: boolean;
+  onPress?: () => void;
+  variant?: 'default' | 'destructive';
   rightElement?: React.ReactNode;
+  showChevron?: boolean;
 };
 
-function SettingsRow({ icon, label, onPress, showChevron = true, rightElement }: SettingsRowProps) {
-  return (
-    <TouchableOpacity
-      className="flex-row items-center justify-between bg-surface px-4 py-4"
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View className="flex-row items-center gap-3">
-        <Ionicons name={icon} size={22} color="#5C6356" />
-        <Text className="text-base text-warmgray">{label}</Text>
-      </View>
-      {rightElement ?? (showChevron && <Ionicons name="chevron-forward" size={20} color="#8B9678" />)}
-    </TouchableOpacity>
-  );
-}
+function SettingsRow({
+  icon,
+  label,
+  onPress,
+  variant = 'default',
+  rightElement,
+  showChevron = true,
+}: SettingsRowProps) {
+  const isDestructive = variant === 'destructive';
+  const iconBgColor = isDestructive ? 'bg-red-50' : 'bg-sage-light';
+  const iconColor = isDestructive ? '#EF4444' : Colors.primary;
+  const textColor = isDestructive ? 'text-red-400' : 'text-slate-700';
 
-function SettingsSection({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
-  return (
-    <View className="mb-6">
-      <Text className="mb-1 px-4 text-sm font-semibold uppercase tracking-wide text-warmgray-muted">
-        {title}
-      </Text>
-      {description && (
-        <Text className="mb-2 px-4 text-sm text-warmgray-muted">{description}</Text>
-      )}
-      <View className="overflow-hidden rounded-2xl border border-border">{children}</View>
+  const content = (
+    <View className="flex-row items-center justify-between px-6 py-5">
+      <View className="flex-row items-center gap-4">
+        <View className={`h-10 w-10 items-center justify-center rounded-full ${iconBgColor}`}>
+          <Ionicons name={icon} size={22} color={iconColor} />
+        </View>
+        <Text className={`text-[15px] font-medium ${textColor}`} style={{ fontFamily: 'Outfit_500Medium' }}>
+          {label}
+        </Text>
+      </View>
+      {rightElement ?? (showChevron && <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />)}
     </View>
   );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return content;
 }
 
-function Divider() {
-  return <View className="ml-12 h-px bg-border" />;
+function SettingsDivider() {
+  return <View className="mx-6 border-t border-slate-100" />;
+}
+
+type SettingsSectionProps = {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+};
+
+function SettingsSection({ title, description, children }: SettingsSectionProps) {
+  return (
+    <View className="mb-10">
+      <View className="mb-4 px-4">
+        <Text
+          className="mb-1 text-[10px] font-semibold uppercase tracking-[3px] text-primary/70"
+          style={{ fontFamily: 'Outfit_600SemiBold' }}
+        >
+          {title}
+        </Text>
+        {description && (
+          <Text className="text-[13px] text-text-soft/80" style={{ fontFamily: 'Outfit_400Regular' }}>
+            {description}
+          </Text>
+        )}
+      </View>
+      <View
+        className="overflow-hidden rounded-pill border border-slate-50 bg-card-white"
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.03,
+          shadowRadius: 20,
+          elevation: 2,
+        }}
+      >
+        {children}
+      </View>
+    </View>
+  );
 }
 
 export default function SettingsScreen() {
@@ -111,14 +159,14 @@ export default function SettingsScreen() {
                 Alert.alert('Done', 'Pro status has been reset.');
               },
             },
-          ],
+          ]
         );
       }
     : undefined;
 
   const confirmDeleteAllData = async () => {
     if (deleteConfirmText !== 'DELETE') return;
-    
+
     setIsDeleting(true);
     try {
       await resetDatabase();
@@ -133,90 +181,132 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-cream">
-      <ScrollView className="flex-1 px-4 pt-6" contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-        <Text className="mb-8 text-3xl font-semibold text-warmgray">Settings</Text>
+    <SafeAreaView className="flex-1 bg-off-white">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View className="items-center px-8 pb-4 pt-8">
+          <View className="mb-6 h-12 w-12 items-center justify-center rounded-full bg-sage-light">
+            <Ionicons name="heart" size={28} color={Colors.primary} />
+          </View>
+          <Text
+            className="text-3xl tracking-tight text-slate-900"
+            style={{ fontFamily: 'PlayfairDisplay_500Medium' }}
+          >
+            Settings
+          </Text>
+          <Text
+            className="mt-1 text-sm italic text-text-soft"
+            style={{ fontFamily: 'Outfit_300Light' }}
+          >
+            Your peaceful space
+          </Text>
+        </View>
 
-        <SettingsSection title="Reminders" description="Choose when Kindred gently nudges you">
-          <SettingsRow
-            icon="notifications-outline"
-            label="Reminder Schedule"
-            onPress={handleNotifications}
-          />
+        {/* Content */}
+        <View className="px-5 pt-4">
+          {/* Nurturing Preferences */}
+          <SettingsSection
+            title="Nurturing Preferences"
+            description="Choose when Kindred gently nudges you"
+          >
+            <SettingsRow
+              icon="notifications-outline"
+              label="Reminder Schedule"
+              onPress={handleNotifications}
+            />
+          </SettingsSection>
+
+          {/* Support */}
+          <SettingsSection title="Support">
+            {!isPro && (
+              <>
+                <SettingsRow
+                  icon="sparkles-outline"
+                  label="Upgrade to Pro"
+                  onPress={handleUpgrade}
+                />
+                <SettingsDivider />
+              </>
+            )}
+            <SettingsRow
+              icon="refresh-outline"
+              label="Restore Purchases"
+              onPress={handleRestorePurchase}
+              showChevron={false}
+              rightElement={
+                purchaseState.isRestoring ? (
+                  <Text className="text-sm text-text-soft" style={{ fontFamily: 'Outfit_400Regular' }}>
+                    Restoring...
+                  </Text>
+                ) : null
+              }
+            />
+            {isPro && (
+              <>
+                <SettingsDivider />
+                <SettingsRow
+                  icon="checkmark-circle"
+                  label="Kindred Pro"
+                  showChevron={false}
+                  rightElement={
+                    <Text className="text-sm font-medium text-primary" style={{ fontFamily: 'Outfit_500Medium' }}>
+                      Active
+                    </Text>
+                  }
+                />
+              </>
+            )}
+          </SettingsSection>
+
+          {/* Data */}
+          <SettingsSection title="Data">
+            <SettingsRow
+              icon="trash-outline"
+              label="Delete All Data"
+              onPress={handleDeleteAllData}
+              variant="destructive"
+              showChevron={false}
+            />
+          </SettingsSection>
+
+          {/* Debug (dev only) */}
           {__DEV__ && (
-            <>
-              <Divider />
+            <SettingsSection title="Debug">
               <SettingsRow
                 icon="close-circle-outline"
-                label="Clear All Notifications (Debug)"
+                label="Clear All Notifications"
                 onPress={handleClearAllNotifications}
               />
-            </>
+              {resetProStatus && (
+                <>
+                  <SettingsDivider />
+                  <SettingsRow
+                    icon="refresh-circle-outline"
+                    label="Reset Pro Status"
+                    onPress={resetProStatus}
+                  />
+                </>
+              )}
+            </SettingsSection>
           )}
-        </SettingsSection>
 
-        <SettingsSection title="About">
-          {!isPro && (
-            <>
-              <SettingsRow
-                icon="sparkles-outline"
-                label="Upgrade to Pro"
-                onPress={handleUpgrade}
-              />
-              <Divider />
-            </>
-          )}
-          <SettingsRow
-            icon="refresh-outline"
-            label="Restore Purchases"
-            onPress={handleRestorePurchase}
-            showChevron={false}
-            rightElement={
-              purchaseState.isRestoring ? (
-                <Text className="text-sm text-warmgray-muted">Restoring...</Text>
-              ) : null
-            }
-          />
-          {isPro && (
-            <>
-              <Divider />
-              <View className="flex-row items-center justify-between bg-surface px-4 py-4">
-                <View className="flex-row items-center gap-3">
-                  <Ionicons name="checkmark-circle" size={22} color="#9CA986" />
-                  <Text className="text-base text-warmgray">Kindred Pro</Text>
-                </View>
-                <Text className="text-sm font-medium text-sage">Active</Text>
-              </View>
-            </>
-          )}
-        </SettingsSection>
-
-        <SettingsSection title="Data Management">
-          {__DEV__ && resetProStatus && (
-            <>
-              <SettingsRow
-                icon="refresh-circle-outline"
-                label="Reset Pro Status"
-                onPress={resetProStatus}
-              />
-              <Divider />
-            </>
-          )}
-          <TouchableOpacity
-            className="flex-row items-center justify-between bg-surface px-4 py-4"
-            onPress={handleDeleteAllData}
-            activeOpacity={0.7}
+          {/* Version Footer */}
+          <Text
+            className="mt-2 text-center text-[11px] text-text-soft/40"
+            style={{ fontFamily: 'Outfit_400Regular' }}
           >
-            <View className="flex-row items-center gap-3">
-              <Ionicons name="trash-outline" size={22} color="#D4896A" />
-              <Text className="text-base text-terracotta">Delete All Data</Text>
-            </View>
-          </TouchableOpacity>
-        </SettingsSection>
+            Version 2.4.0 — Made with love
+          </Text>
+        </View>
       </ScrollView>
 
       <EnhancedPaywallModal visible={showPaywall} onClose={() => setShowPaywall(false)} />
 
+      {/* Delete Confirmation Modal */}
       <Modal
         visible={showDeleteModal}
         transparent
@@ -224,28 +314,46 @@ export default function SettingsScreen() {
         onRequestClose={() => setShowDeleteModal(false)}
       >
         <View className="flex-1 items-center justify-center bg-black/50 px-6">
-          <View className="w-full rounded-2xl bg-surface p-6 shadow-lg">
+          <View
+            className="w-full rounded-pill bg-card-white p-6"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 20,
+              elevation: 5,
+            }}
+          >
             <View className="mb-4 items-center">
-              <View className="h-12 w-12 items-center justify-center rounded-full bg-terracotta-100">
-                <Ionicons name="warning" size={24} color="#D4896A" />
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-red-50">
+                <Ionicons name="warning" size={24} color="#EF4444" />
               </View>
             </View>
 
-            <Text className="mb-2 text-center text-lg font-bold text-warmgray">
+            <Text
+              className="mb-2 text-center text-lg text-slate-900"
+              style={{ fontFamily: 'PlayfairDisplay_600SemiBold' }}
+            >
               Delete All Data?
             </Text>
-            <Text className="mb-4 text-center text-sm text-warmgray-muted">
+            <Text
+              className="mb-4 text-center text-sm text-text-soft"
+              style={{ fontFamily: 'Outfit_400Regular' }}
+            >
               This will permanently delete all your contacts and interaction history. This action cannot be undone.
             </Text>
 
-            <Text className="mb-2 text-sm font-medium text-warmgray">
+            <Text
+              className="mb-2 text-sm text-slate-700"
+              style={{ fontFamily: 'Outfit_500Medium' }}
+            >
               Type DELETE to confirm:
             </Text>
-            <View className="mb-4 min-h-12 rounded-xl border border-border bg-cream px-4 flex-row items-center">
+            <View className="mb-4 min-h-12 flex-row items-center rounded-inner-pill border border-slate-100 bg-off-white px-4">
               <TextInput
-                className="flex-1 text-base leading-5 text-warmgray"
-                style={{ marginTop: -2 }}
-                placeholderTextColor="#8B9678"
+                className="flex-1 text-base leading-5 text-slate-700"
+                style={{ fontFamily: 'Outfit_400Regular', marginTop: -2 }}
+                placeholderTextColor="#94A3B8"
                 value={deleteConfirmText}
                 onChangeText={setDeleteConfirmText}
                 placeholder="DELETE"
@@ -257,26 +365,34 @@ export default function SettingsScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 items-center rounded-xl bg-cream py-3"
+                className="flex-1 items-center rounded-inner-pill bg-slate-100 py-3"
                 onPress={() => {
                   setShowDeleteModal(false);
                   setDeleteConfirmText('');
                 }}
                 activeOpacity={0.7}
               >
-                <Text className="font-semibold text-warmgray-muted">Cancel</Text>
+                <Text
+                  className="text-text-soft"
+                  style={{ fontFamily: 'Outfit_600SemiBold' }}
+                >
+                  Cancel
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className={`flex-1 items-center rounded-xl py-3 ${
-                  deleteConfirmText === 'DELETE' && !isDeleting ? 'bg-terracotta' : 'bg-terracotta-100'
+                className={`flex-1 items-center rounded-inner-pill py-3 ${
+                  deleteConfirmText === 'DELETE' && !isDeleting ? 'bg-red-500' : 'bg-red-100'
                 }`}
                 onPress={confirmDeleteAllData}
                 activeOpacity={0.7}
                 disabled={deleteConfirmText !== 'DELETE' || isDeleting}
               >
-                <Text className={`font-semibold ${
-                  deleteConfirmText === 'DELETE' && !isDeleting ? 'text-white' : 'text-terracotta/50'
-                }`}>
+                <Text
+                  className={`${
+                    deleteConfirmText === 'DELETE' && !isDeleting ? 'text-white' : 'text-red-300'
+                  }`}
+                  style={{ fontFamily: 'Outfit_600SemiBold' }}
+                >
                   {isDeleting ? 'Deleting...' : 'Delete'}
                 </Text>
               </TouchableOpacity>
