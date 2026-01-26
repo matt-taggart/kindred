@@ -55,12 +55,12 @@ export default function TabLayout() {
         <Tabs.Screen
           name="two"
           options={{
-            title: 'Moments',
+            title: 'Connections',
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons 
-                name={focused ? "calendar" : "calendar-outline"} 
-                size={28} 
-                color={color} 
+              <MaterialCommunityIcons
+                name={focused ? "account-multiple" : "account-multiple-outline"}
+                size={28}
+                color={color}
               />
             ),
           }}

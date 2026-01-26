@@ -7,6 +7,7 @@ import { getNextContactDate } from '../utils/scheduler';
 import { scheduleReminder } from './notificationService';
 
 export const CONTACT_LIMIT = 5;
+export const RECENTLY_CONNECTED_DAYS = 14;
 
 export class LimitReachedError extends Error {
   constructor(message = 'Contact limit reached') {
@@ -210,6 +211,23 @@ export const getDueContactsGrouped = (): GroupedDueContacts => {
   });
 
   return { birthdays, reconnect };
+};
+
+export const getRecentlyConnectedContacts = (): Contact[] => {
+  const db = getDb();
+  const cutoffMs = Date.now() - RECENTLY_CONNECTED_DAYS * 24 * 60 * 60 * 1000;
+
+  return db
+    .select()
+    .from(contacts)
+    .where(
+      and(
+        eq(contacts.isArchived, false),
+        lte(cutoffMs, contacts.lastContactedAt)
+      )
+    )
+    .orderBy(desc(contacts.lastContactedAt))
+    .all();
 };
 
 export const archiveContact = async (contactId: Contact['id']): Promise<Contact> => {
@@ -612,4 +630,39 @@ export const getReminderPriority = (contact: Contact, today: Date = new Date()):
     return 'birthday';
   }
   return 'standard';
+};
+
+export type FilterCounts = {
+  all: number;
+  due: number;
+  archived: number;
+};
+
+export const getFilterCounts = (): FilterCounts => {
+  const db = getDb();
+  const now = new Date();
+  const nowMs = now.getTime();
+
+  // Get all contacts
+  const allContacts: Contact[] = db.select().from(contacts).all();
+
+  // Count non-archived contacts
+  const activeContacts = allContacts.filter((c) => !c.isArchived);
+  const all = activeContacts.length;
+
+  // Count due contacts: non-archived where nextContactDate <= now OR birthday is today
+  // Exclude contacts that were contacted today (same logic as getDueContacts)
+  const due = activeContacts.filter((contact) => {
+    if (contact.lastContactedAt && isSameDay(new Date(contact.lastContactedAt), now)) {
+      return false; // Exclude contacts contacted today
+    }
+    const isDue = contact.nextContactDate !== null && contact.nextContactDate <= nowMs;
+    const isBirthday = isBirthdayToday(contact, now);
+    return isDue || isBirthday;
+  }).length;
+
+  // Count archived contacts
+  const archived = allContacts.filter((c) => c.isArchived).length;
+
+  return { all, due, archived };
 };

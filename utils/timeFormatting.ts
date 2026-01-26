@@ -57,3 +57,18 @@ export function formatNextReminder(
   const weeks = Math.floor(days / 7);
   return `In ${weeks} weeks`;
 }
+
+const RHYTHM_LABELS: Record<string, string> = {
+  daily: 'Every day',
+  weekly: 'Every week',
+  'bi-weekly': 'Every two weeks',
+  'every-three-weeks': 'Every three weeks',
+  monthly: 'Monthly check-in',
+  'every-six-months': 'Twice a year',
+  yearly: 'Once a year',
+  custom: 'Custom schedule',
+};
+
+export function formatRhythmLabel(bucket: string): string {
+  return RHYTHM_LABELS[bucket] ?? bucket;
+}
