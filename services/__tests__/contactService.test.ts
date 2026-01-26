@@ -62,6 +62,8 @@ import {
   addContact as addContactService,
   archiveContact as archiveContactService,
   getRecentlyConnectedContacts,
+  getFilterCounts,
+  FilterCounts,
 } from '../contactService';
 
 describe('getRecentlyConnectedContacts', () => {
@@ -265,5 +267,174 @@ describe('contact sorting', () => {
 
     expect(sorted[0].id).toBe('old');
     expect(sorted[1].id).toBe('recent');
+  });
+});
+
+describe('getFilterCounts', () => {
+  let mockContacts: Contact[];
+
+  beforeEach(() => {
+    mockContacts = [];
+    jest.clearAllMocks();
+
+    // Create a mock database that stores contacts in memory
+    const mockDb = {
+      select: jest.fn(() => ({
+        from: jest.fn(() => ({
+          where: jest.fn(() => ({
+            all: jest.fn(() => mockContacts),
+          })),
+          all: jest.fn(() => mockContacts),
+        })),
+      })),
+    };
+
+    (getDb as jest.Mock).mockReturnValue(mockDb);
+  });
+
+  it('returns correct counts for mixed contacts', () => {
+    const now = Date.now();
+    const today = new Date();
+
+    // Active contact, not due
+    mockContacts.push(
+      createContact({
+        id: 'active-not-due',
+        name: 'Active Not Due',
+        isArchived: false,
+        nextContactDate: now + 7 * 24 * 60 * 60 * 1000, // 7 days in future
+      })
+    );
+
+    // Active contact, due (past nextContactDate)
+    mockContacts.push(
+      createContact({
+        id: 'active-due',
+        name: 'Active Due',
+        isArchived: false,
+        nextContactDate: now - 24 * 60 * 60 * 1000, // 1 day in past
+      })
+    );
+
+    // Archived contact
+    mockContacts.push(
+      createContact({
+        id: 'archived',
+        name: 'Archived Contact',
+        isArchived: true,
+        nextContactDate: now - 24 * 60 * 60 * 1000,
+      })
+    );
+
+    const counts = getFilterCounts();
+
+    expect(counts.all).toBe(2); // Non-archived contacts
+    expect(counts.due).toBe(1); // Active + due
+    expect(counts.archived).toBe(1); // Archived contacts
+  });
+
+  it('due includes contacts with nextContactDate in past', () => {
+    const now = Date.now();
+
+    // Contact with nextContactDate in the past
+    mockContacts.push(
+      createContact({
+        id: 'overdue',
+        name: 'Overdue Contact',
+        isArchived: false,
+        nextContactDate: now - 3 * 24 * 60 * 60 * 1000, // 3 days ago
+      })
+    );
+
+    // Contact with nextContactDate in the future
+    mockContacts.push(
+      createContact({
+        id: 'future',
+        name: 'Future Contact',
+        isArchived: false,
+        nextContactDate: now + 3 * 24 * 60 * 60 * 1000, // 3 days in future
+      })
+    );
+
+    const counts = getFilterCounts();
+
+    expect(counts.due).toBe(1); // Only overdue contact
+    expect(counts.all).toBe(2); // Both active contacts
+  });
+
+  it('due includes birthday contacts', () => {
+    const now = Date.now();
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayBirthday = `1990-${month}-${day}`;
+
+    // Contact with birthday today (not otherwise due)
+    mockContacts.push(
+      createContact({
+        id: 'birthday',
+        name: 'Birthday Contact',
+        isArchived: false,
+        birthday: todayBirthday,
+        nextContactDate: now + 30 * 24 * 60 * 60 * 1000, // 30 days in future
+      })
+    );
+
+    // Contact without birthday, not due
+    mockContacts.push(
+      createContact({
+        id: 'regular',
+        name: 'Regular Contact',
+        isArchived: false,
+        birthday: null,
+        nextContactDate: now + 7 * 24 * 60 * 60 * 1000, // 7 days in future
+      })
+    );
+
+    const counts = getFilterCounts();
+
+    expect(counts.due).toBe(1); // Only birthday contact
+    expect(counts.all).toBe(2); // Both active contacts
+  });
+
+  it('handles empty database', () => {
+    // mockContacts is empty
+
+    const counts = getFilterCounts();
+
+    expect(counts.all).toBe(0);
+    expect(counts.due).toBe(0);
+    expect(counts.archived).toBe(0);
+  });
+
+  it('due excludes contacts contacted today', () => {
+    const now = Date.now();
+
+    // Contact that is due but was contacted today
+    mockContacts.push(
+      createContact({
+        id: 'contacted-today',
+        name: 'Contacted Today',
+        isArchived: false,
+        nextContactDate: now - 24 * 60 * 60 * 1000, // Due yesterday
+        lastContactedAt: now - 1000, // Contacted 1 second ago (today)
+      })
+    );
+
+    // Contact that is due and was NOT contacted today
+    mockContacts.push(
+      createContact({
+        id: 'not-contacted-today',
+        name: 'Not Contacted Today',
+        isArchived: false,
+        nextContactDate: now - 24 * 60 * 60 * 1000, // Due yesterday
+        lastContactedAt: now - 2 * 24 * 60 * 60 * 1000, // Contacted 2 days ago
+      })
+    );
+
+    const counts = getFilterCounts();
+
+    expect(counts.all).toBe(2); // Both active contacts
+    expect(counts.due).toBe(1); // Only the one NOT contacted today
   });
 });

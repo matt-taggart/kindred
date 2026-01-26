@@ -631,3 +631,38 @@ export const getReminderPriority = (contact: Contact, today: Date = new Date()):
   }
   return 'standard';
 };
+
+export type FilterCounts = {
+  all: number;
+  due: number;
+  archived: number;
+};
+
+export const getFilterCounts = (): FilterCounts => {
+  const db = getDb();
+  const now = new Date();
+  const nowMs = now.getTime();
+
+  // Get all contacts
+  const allContacts: Contact[] = db.select().from(contacts).all();
+
+  // Count non-archived contacts
+  const activeContacts = allContacts.filter((c) => !c.isArchived);
+  const all = activeContacts.length;
+
+  // Count due contacts: non-archived where nextContactDate <= now OR birthday is today
+  // Exclude contacts that were contacted today (same logic as getDueContacts)
+  const due = activeContacts.filter((contact) => {
+    if (contact.lastContactedAt && isSameDay(new Date(contact.lastContactedAt), now)) {
+      return false; // Exclude contacts contacted today
+    }
+    const isDue = contact.nextContactDate !== null && contact.nextContactDate <= nowMs;
+    const isBirthday = isBirthdayToday(contact, now);
+    return isDue || isBirthday;
+  }).length;
+
+  // Count archived contacts
+  const archived = allContacts.filter((c) => c.isArchived).length;
+
+  return { all, due, archived };
+};
