@@ -11,3 +11,5 @@ export type { Moment } from './SharedMomentsSection';
 export { AddFlowProgressBar } from './AddFlowProgressBar';
 export { RelationshipTypePicker } from './RelationshipTypePicker';
 export { AddFlowLayout } from './AddFlowLayout';
+export { MomentSectionDivider } from './MomentSectionDivider';
+export { MomentCard } from './MomentCard';
