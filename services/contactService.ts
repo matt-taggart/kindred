@@ -7,6 +7,7 @@ import { getNextContactDate } from '../utils/scheduler';
 import { scheduleReminder } from './notificationService';
 
 export const CONTACT_LIMIT = 5;
+export const RECENTLY_CONNECTED_DAYS = 14;
 
 export class LimitReachedError extends Error {
   constructor(message = 'Contact limit reached') {
@@ -210,6 +211,23 @@ export const getDueContactsGrouped = (): GroupedDueContacts => {
   });
 
   return { birthdays, reconnect };
+};
+
+export const getRecentlyConnectedContacts = (): Contact[] => {
+  const db = getDb();
+  const cutoffMs = Date.now() - RECENTLY_CONNECTED_DAYS * 24 * 60 * 60 * 1000;
+
+  return db
+    .select()
+    .from(contacts)
+    .where(
+      and(
+        eq(contacts.isArchived, false),
+        lte(cutoffMs, contacts.lastContactedAt)
+      )
+    )
+    .orderBy(desc(contacts.lastContactedAt))
+    .all();
 };
 
 export const archiveContact = async (contactId: Contact['id']): Promise<Contact> => {
