@@ -20,6 +20,21 @@ export type CalendarContact = Contact & {
   isBirthday?: boolean;
 };
 
+export type MomentContact = {
+  contact: Contact;
+  timeLabel: string;
+  isUrgent: boolean;
+  isResting: boolean;
+  emoji: string;
+  rhythmLabel: string;
+};
+
+export type UpcomingMoments = {
+  thisWeek: MomentContact[];
+  nextWeek: MomentContact[];
+  laterThisSeason: MomentContact[];
+};
+
 const formatToDateKey = (timestamp: number): string => {
   const date = new Date(timestamp);
   const year = date.getFullYear();
@@ -155,7 +170,7 @@ export const getContactsByDate = (dateKey: string): CalendarContact[] => {
 
 export const getMonthsDueContacts = (year: number, month: number): number => {
   const contacts = getContacts({ includeArchived: false });
-  
+
   return contacts.filter((contact) => {
     let matches = false;
 
@@ -165,7 +180,7 @@ export const getMonthsDueContacts = (year: number, month: number): number => {
         matches = true;
       }
     }
-    
+
     if (!matches && contact.birthday) {
       const parts = getBirthdayParts(contact.birthday);
       // Month in getBirthdayParts is 1-based (from parsing string)
@@ -174,7 +189,137 @@ export const getMonthsDueContacts = (year: number, month: number): number => {
         matches = true;
       }
     }
-    
+
     return matches;
   }).length;
+};
+
+const getEmojiForRelationship = (relationship: string | null): string => {
+  switch (relationship) {
+    case 'partner':
+    case 'spouse':
+      return '🌸';
+    case 'family':
+      return '🌿';
+    case 'friend':
+      return '☀️';
+    case 'group':
+      return '☕️';
+    default:
+      return '🌊';
+  }
+};
+
+const getRhythmLabel = (bucket: Contact['bucket']): string => {
+  switch (bucket) {
+    case 'daily':
+      return 'Returning daily';
+    case 'weekly':
+      return 'Weekly rest & return';
+    case 'bi-weekly':
+      return 'Fortnightly nurture';
+    case 'every-three-weeks':
+      return 'Every few weeks';
+    case 'monthly':
+      return 'Monthly check-in';
+    case 'every-six-months':
+      return 'Seasonally gathering';
+    case 'yearly':
+      return 'Yearly celebration';
+    case 'custom':
+      return 'Custom rhythm';
+    default:
+      return 'At your pace';
+  }
+};
+
+const getTimeLabel = (timestamp: number): string => {
+  const now = new Date();
+  const date = new Date(timestamp);
+
+  // Reset to start of day for comparison
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const diffDays = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return 'Today';
+  }
+  if (diffDays === 1) {
+    return 'Tomorrow';
+  }
+  if (diffDays <= 7) {
+    // Return weekday name
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  }
+  // Return "Mon 12" format
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+  const day = date.getDate();
+  return `${weekday} ${day}`;
+};
+
+export const getUpcomingMoments = (): UpcomingMoments => {
+  const contacts = getContacts({ includeArchived: false });
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayMs = today.getTime();
+
+  const thisWeek: MomentContact[] = [];
+  const nextWeek: MomentContact[] = [];
+  const laterThisSeason: MomentContact[] = [];
+
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const sevenDaysMs = 7 * oneDayMs;
+  const fourteenDaysMs = 14 * oneDayMs;
+  const ninetyDaysMs = 90 * oneDayMs;
+
+  contacts.forEach((contact) => {
+    if (!contact.nextContactDate) return;
+
+    const contactDate = new Date(contact.nextContactDate);
+    const contactDateStart = new Date(
+      contactDate.getFullYear(),
+      contactDate.getMonth(),
+      contactDate.getDate()
+    );
+    const diffMs = contactDateStart.getTime() - todayMs;
+
+    // Skip if in the past or beyond 90 days
+    if (diffMs < 0 || diffMs > ninetyDaysMs) return;
+
+    const isUrgent = diffMs <= oneDayMs;
+    const isResting = contact.bucket === 'every-six-months' || contact.bucket === 'yearly';
+
+    const momentContact: MomentContact = {
+      contact,
+      timeLabel: getTimeLabel(contact.nextContactDate),
+      isUrgent,
+      isResting,
+      emoji: getEmojiForRelationship(contact.relationship),
+      rhythmLabel: getRhythmLabel(contact.bucket),
+    };
+
+    if (diffMs <= sevenDaysMs) {
+      thisWeek.push(momentContact);
+    } else if (diffMs <= fourteenDaysMs) {
+      nextWeek.push(momentContact);
+    } else {
+      laterThisSeason.push(momentContact);
+    }
+  });
+
+  // Sort each array by nextContactDate
+  const sortByDate = (a: MomentContact, b: MomentContact) =>
+    (a.contact.nextContactDate || 0) - (b.contact.nextContactDate || 0);
+
+  thisWeek.sort(sortByDate);
+  nextWeek.sort(sortByDate);
+  laterThisSeason.sort(sortByDate);
+
+  return {
+    thisWeek,
+    nextWeek,
+    laterThisSeason,
+  };
 };
