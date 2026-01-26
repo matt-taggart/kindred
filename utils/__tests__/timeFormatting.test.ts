@@ -1,4 +1,4 @@
-import { formatLastConnected, formatNextReminder, getClockColor } from '../timeFormatting';
+import { formatLastConnected, formatNextReminder, formatRhythmLabel, getClockColor } from '../timeFormatting';
 
 describe('formatLastConnected - specific days', () => {
   const NOW = new Date('2026-01-15T12:00:00Z').getTime();
@@ -126,5 +126,43 @@ describe('getClockColor', () => {
 
   it('returns amber for null (never contacted)', () => {
     expect(getClockColor(null, NOW)).toBe('amber');
+  });
+});
+
+describe('formatRhythmLabel', () => {
+  it('formats daily bucket', () => {
+    expect(formatRhythmLabel('daily')).toBe('Every day');
+  });
+
+  it('formats weekly bucket', () => {
+    expect(formatRhythmLabel('weekly')).toBe('Every week');
+  });
+
+  it('formats bi-weekly bucket', () => {
+    expect(formatRhythmLabel('bi-weekly')).toBe('Every two weeks');
+  });
+
+  it('formats every-three-weeks bucket', () => {
+    expect(formatRhythmLabel('every-three-weeks')).toBe('Every three weeks');
+  });
+
+  it('formats monthly bucket', () => {
+    expect(formatRhythmLabel('monthly')).toBe('Monthly check-in');
+  });
+
+  it('formats every-six-months bucket', () => {
+    expect(formatRhythmLabel('every-six-months')).toBe('Twice a year');
+  });
+
+  it('formats yearly bucket', () => {
+    expect(formatRhythmLabel('yearly')).toBe('Once a year');
+  });
+
+  it('formats custom bucket', () => {
+    expect(formatRhythmLabel('custom')).toBe('Custom schedule');
+  });
+
+  it('returns original value for unknown bucket', () => {
+    expect(formatRhythmLabel('unknown-rhythm')).toBe('unknown-rhythm');
   });
 });
