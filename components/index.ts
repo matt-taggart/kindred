@@ -8,3 +8,6 @@ export { ConnectionNotesCard } from './ConnectionNotesCard';
 export { QuickActionTile } from './QuickActionTile';
 export { SharedMomentsSection } from './SharedMomentsSection';
 export type { Moment } from './SharedMomentsSection';
+export { AddFlowProgressBar } from './AddFlowProgressBar';
+export { RelationshipTypePicker } from './RelationshipTypePicker';
+export { AddFlowLayout } from './AddFlowLayout';
