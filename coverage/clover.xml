@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1769368512621" clover="3.2.0">
+  <project timestamp="1769368512622" name="All files">
+    <metrics statements="2" coveredstatements="2" conditionals="13" coveredconditionals="10" methods="1" coveredmethods="1" elements="16" coveredelements="13" complexity="0" loc="2" ncloc="2" packages="1" files="1" classes="1"/>
+    <file name="PrimaryButton.tsx" path="/Users/mtaggart/Documents/kindred/components/ui/PrimaryButton.tsx">
+      <metrics statements="2" coveredstatements="2" conditionals="13" coveredconditionals="10" methods="1" coveredmethods="1"/>
+      <line num="21" count="3" type="cond" truecount="2" falsecount="0"/>
+      <line num="23" count="3" type="stmt"/>
+    </file>
+  </project>
+</coverage>

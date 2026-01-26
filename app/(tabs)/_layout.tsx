@@ -1,72 +1,125 @@
 import React from 'react';
-import { Platform } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
+import { Platform, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Tabs, useRouter } from 'expo-router';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={24} {...props} />;
-}
-
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  const isDark = colorScheme === 'dark';
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarInactiveTintColor: '#8B9678',
-        tabBarStyle: {
-          height: Platform.OS === 'ios' ? 88 : 68,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
-          paddingTop: 8,
-          backgroundColor: colorScheme === 'dark' ? '#000' : '#FDFBF7',
-          borderTopWidth: 1,
-          borderTopColor: colorScheme === 'dark' ? '#333' : '#E8E4DA',
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-          marginTop: 4,
-        },
-        headerShown: false,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Today',
-          tabBarIcon: ({ color }) => <TabBarIcon name="sun-o" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Connections',
-          tabBarIcon: ({ color }) => <TabBarIcon name="address-book" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="calendar"
-        options={{
-          title: 'Calendar',
-          tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
-        }}
-      />
-    </Tabs>
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          tabBarInactiveTintColor: isDark ? '#64748b' : '#94a3b8',
+          tabBarStyle: {
+            height: Platform.OS === 'ios' ? 104 : 84,
+            paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+            paddingTop: 16,
+            backgroundColor: isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.95)',
+            borderTopWidth: 1,
+            borderTopColor: isDark ? '#1e293b' : '#f1f5f9',
+            elevation: 0,
+            shadowOpacity: 0,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+          },
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '700',
+            marginTop: 4,
+          },
+          headerShown: false,
+        }}>
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons 
+                name={focused ? "home" : "home-outline"} 
+                size={28} 
+                color={color} 
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="two"
+          options={{
+            title: 'Moments',
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons 
+                name={focused ? "calendar" : "calendar-outline"} 
+                size={28} 
+                color={color} 
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="calendar"
+          options={{
+            title: 'Journal',
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons 
+                name={focused ? "book-open-variant" : "book-open-variant-outline"} 
+                size={28} 
+                color={color} 
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: 'Growth',
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons 
+                name={focused ? "cog" : "cog-outline"} 
+                size={28} 
+                color={color} 
+              />
+            ),
+          }}
+        />
+      </Tabs>
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => router.push('/contacts/add')}
+        style={styles.fab}
+      >
+        <MaterialCommunityIcons name="heart-plus" size={28} color="white" />
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  fab: {
+    position: 'absolute',
+    bottom: 96,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#9DBEBB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#9DBEBB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+    zIndex: 100,
+  },
+});

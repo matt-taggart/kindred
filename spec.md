@@ -1,6 +1,5 @@
 # Task 
-Please use the frontend-design to determine an optimal UX for the home page of my todo app.
+Please conduct a full-fledged redesign of the app, adhering to the design, colors, flow, and messaging found in the REDESIGN.md file.
 
-Please ask me for feedback if anything is unclear or you need my input anything.
-
+The design should incorporate our current logic, but adapted to the redesigned screens. Please keep any UI elements in the redesign code that hasn't had logic implemented yet in our existing app that you feel would improve the overall experience of the app and fit in beautifully with our app's branding.
 

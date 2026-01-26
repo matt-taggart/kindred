@@ -9,7 +9,8 @@ module.exports = {
         primary: '#9DBEBB',
         secondary: '#F4ACB7',
         accent: '#FFE5D9',
-        'background-light': '#F9FBFA',
+        'brand-navy': '#2D3648',
+        'background-light': '#FFFFFF',
         'background-dark': '#121414',
       },
       fontFamily: {
