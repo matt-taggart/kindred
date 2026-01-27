@@ -6,17 +6,24 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#9DBEBB',
+        primary: '#79947D',
         secondary: '#F4ACB7',
         accent: '#FFE5D9',
         'brand-navy': '#2D3648',
-        'background-light': '#FFFFFF',
-        'background-dark': '#121414',
+        'background-light': '#FDFBF7',
+        'background-dark': '#1A1C19',
         // New design system colors
         'sage-light': '#E8EFEA',
+        'accent-sage': '#E6EBE6',
+        'accent-dark-sage': '#2D352E',
         'off-white': '#FDFCFB',
+        'soft-sand': '#F5EDE3',
+        'quilt-pink': '#F8E9E9',
         'text-soft': '#5C635C',
         'card-white': '#FFFFFF',
+        'accent-warm': '#E8D5C4',
+        'card-light': '#FFFFFF',
+        'card-dark': '#2D2D2A',
       },
       fontFamily: {
         display: ['PlayfairDisplay_500Medium'],
@@ -29,7 +36,8 @@ module.exports = {
         DEFAULT: '24px',
         xl: '32px',
         '2xl': '40px',
-        'pill': '32px',
+        '3xl': '24px',
+        'pill': '100px',
         'inner-pill': '24px',
       },
       boxShadow: {
