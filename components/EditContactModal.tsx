@@ -209,14 +209,20 @@ export default function EditContactModal({
             <View className="w-12" />
           </View>
 
-          <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-            <Text className="mb-2 text-lg font-bold text-warmgray">
+          {/* Profile Section */}
+          <View className="items-center my-6">
+            <View className="w-12 h-12 bg-primary/10 rounded-full items-center justify-center mb-4">
+              <Ionicons name="heart" size={28} color="#79947D" />
+            </View>
+            <Text className="text-2xl font-display text-slate-800 dark:text-white mb-2">
               {contact.name}
             </Text>
-            <Text className="mb-6 text-base text-warmgray-muted">
-              How often would you like a gentle reminder to connect?
+            <Text className="text-slate-500 dark:text-slate-400 italic">
+              Every relationship has its own rhythm.
             </Text>
+          </View>
 
+          <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
             {/* Reminder Rhythm Section */}
             <View className="mb-4 flex gap-2">
               {(
