@@ -196,13 +196,14 @@ export default function EditContactModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-cream">
-        <View className="flex-1 px-6 pb-4 pt-6">
-          <View className="mb-6 flex-row items-center justify-between">
+      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+        <View className="flex-1 px-6 pb-6">
+          {/* Header */}
+          <View className="py-4 flex-row items-center justify-between">
             <Pressable onPress={onClose}>
-              <Text className="font-semibold text-warmgray-muted">Cancel</Text>
+              <Text className="text-primary font-medium text-lg">Cancel</Text>
             </Pressable>
-            <Text className="text-lg font-bold text-warmgray">
+            <Text className="text-xl font-semibold text-slate-800 dark:text-white">
               Connection settings
             </Text>
             <View className="w-12" />
