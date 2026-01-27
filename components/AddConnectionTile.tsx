@@ -14,7 +14,7 @@ export function AddConnectionTile({ onPress }: AddConnectionTileProps) {
       accessibilityHint="dashed border button"
       onPress={onPress}
       activeOpacity={0.7}
-      className="border-2 border-dashed border-slate-200 dark:border-slate-700 p-6 rounded-3xl flex-col items-center justify-center gap-2"
+      className="border-2 border-dashed border-slate-300 dark:border-slate-600 p-6 rounded-3xl flex-col items-center justify-center gap-2 min-h-[160px] bg-slate-50/50 dark:bg-slate-800/20"
     >
       <View
         testID="add-icon"

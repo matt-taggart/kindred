@@ -123,6 +123,7 @@ export function ConnectionTile({
     'rounded-3xl',
     'flex-col',
     'justify-between',
+    'min-h-[160px]',
   ];
 
   if (size === 'large') {
