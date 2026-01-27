@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   SafeAreaView,
@@ -8,17 +8,30 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-import { Contact, Interaction, NewInteraction } from "@/db/schema";
+import { NewInteraction } from "@/db/schema";
 import {
   addNoteOnly,
-  getContacts,
   getInteractionHistory,
   updateInteraction,
   updateInteractionNote,
 } from "@/services/contactService";
 
 type InteractionType = NewInteraction["type"];
+
+type ConnectionTypeConfig = {
+  type: InteractionType;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+};
+
+const CONNECTION_TYPES: ConnectionTypeConfig[] = [
+  { type: "call", label: "Call", icon: "call" },
+  { type: "text", label: "Text", icon: "chatbubble-outline" },
+  { type: "email", label: "Voice", icon: "mic-outline" },
+  { type: "meet", label: "In person", icon: "person-outline" },
+];
 
 export default function LogInteractionModal() {
   const router = useRouter();
@@ -32,11 +45,6 @@ export default function LogInteractionModal() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [interactionType, setInteractionType] =
     useState<InteractionType>("call");
-
-  const contact: Contact | undefined = useMemo(() => {
-    if (!contactId || Array.isArray(contactId)) return undefined;
-    return getContacts().find((item) => item.id === contactId);
-  }, [contactId]);
 
   useEffect(() => {
     if (
@@ -63,7 +71,7 @@ export default function LogInteractionModal() {
 
   const handleSave = async () => {
     if (!contactId || Array.isArray(contactId)) {
-      Alert.alert('Missing connection', 'No connection was selected.');
+      Alert.alert("Missing connection", "No connection was selected.");
       return;
     }
 
@@ -86,7 +94,7 @@ export default function LogInteractionModal() {
         await updateInteraction(
           contactId,
           interactionType,
-          note.trim() || undefined,
+          note.trim() || undefined
         );
       }
 
@@ -94,7 +102,7 @@ export default function LogInteractionModal() {
     } catch (error) {
       Alert.alert(
         "Error",
-        error instanceof Error ? error.message : "Failed to save interaction.",
+        error instanceof Error ? error.message : "Failed to save interaction."
       );
     } finally {
       setSaving(false);
@@ -105,111 +113,141 @@ export default function LogInteractionModal() {
     router.back();
   };
 
-  const handleSkip = async () => {
-    if (!contactId || Array.isArray(contactId)) {
-      Alert.alert('Missing connection', 'No connection was selected.');
-      return;
-    }
-
-    try {
-      setSaving(true);
-      await updateInteraction(contactId, "call", undefined);
-      router.back();
-    } catch (error) {
-      Alert.alert(
-        "Error",
-        error instanceof Error ? error.message : "Failed to skip interaction.",
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const renderTypeButton = (type: InteractionType, label: string) => {
-    const isSelected = interactionType === type;
+  const renderConnectionTypeButton = (config: ConnectionTypeConfig) => {
+    const isSelected = interactionType === config.type;
     return (
       <TouchableOpacity
-        onPress={() => setInteractionType(type)}
-        className={`flex-1 items-center rounded-xl border py-3 ${
-          isSelected ? 'border-sage bg-sage' : 'border-border bg-surface'
-        }`}
+        key={config.type}
+        onPress={() => setInteractionType(config.type)}
+        className="flex-col items-center gap-3"
+        activeOpacity={0.7}
       >
-        <Text
-          className={`font-medium ${isSelected ? 'text-white' : 'text-warmgray-muted'}`}
+        <View
+          className={`w-16 h-16 rounded-full items-center justify-center ${
+            isSelected
+              ? "bg-primary/10 dark:bg-primary/20"
+              : "bg-sage-light dark:bg-accent-dark-sage"
+          }`}
+          style={
+            isSelected
+              ? {
+                  borderWidth: 2,
+                  borderColor: "#7D9D7A",
+                  // Ring offset simulation
+                  shadowColor: "#FDFBF7",
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                }
+              : undefined
+          }
         >
-          {label}
+          <Ionicons
+            name={config.icon}
+            size={24}
+            color="#7D9D7A"
+          />
+        </View>
+        <Text
+          className={`text-sm ${
+            isSelected
+              ? "font-semibold text-primary"
+              : "font-medium text-slate-500 dark:text-slate-400"
+          }`}
+        >
+          {config.label}
         </Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-cream">
-      <View className="flex-1 px-6 pb-8 pt-6">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-2xl font-bold text-warmgray">
-            {isEditMode ? 'Edit note' : 'Add a note'}
-          </Text>
+    <SafeAreaView className="flex-1 bg-off-white dark:bg-background-dark">
+      <View className="flex-1 px-6 pt-4">
+        {/* Header */}
+        <View className="flex-row items-center justify-between mb-8">
           <TouchableOpacity
             onPress={handleClose}
             activeOpacity={0.7}
-            className="py-2 pl-4"
+            className="p-2 -ml-2"
           >
-            <Text className="text-base font-semibold text-warmgray-muted">
-              Cancel
+            <Ionicons
+              name="close"
+              size={24}
+              color="#9CA3AF"
+            />
+          </TouchableOpacity>
+
+          <View className="flex-row items-center gap-1">
+            <Ionicons
+              name="leaf"
+              size={28}
+              color="#7D9D7A"
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={handleSave}
+            activeOpacity={0.85}
+            disabled={saving}
+            className="px-4 py-1.5 rounded-full bg-sage-light dark:bg-accent-dark-sage"
+          >
+            <Text className="font-medium text-primary">
+              {saving ? "Saving..." : "Save"}
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View className="mt-6">
-          <Text className="mb-3 text-base font-medium text-warmgray">
+        {/* Title */}
+        <Text className="text-2xl font-light text-center text-slate-900 dark:text-white mb-8">
+          {isEditMode ? "Edit memory" : "Nurture a memory"}
+        </Text>
+
+        {/* Connection Type Section */}
+        <View className="mb-10">
+          <Text className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-6 text-center">
             How did you connect?
           </Text>
-          <View className="flex-row gap-3">
-            {renderTypeButton("call", "Call")}
-            {renderTypeButton("text", "Text")}
-            {renderTypeButton("email", "Email")}
-            {renderTypeButton("meet", "Meet")}
+          <View className="flex-row justify-between items-start">
+            {CONNECTION_TYPES.map(renderConnectionTypeButton)}
           </View>
         </View>
 
-        <Text className="mt-6 text-base text-warmgray">
-          {"Anything you'd like to remember?"}
-        </Text>
+        {/* Notes Section */}
+        <View className="flex-1">
+          <Text className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4 text-center">
+            Anything to remember?
+          </Text>
 
-        <TextInput
-          className="mt-4 min-h-[140px] rounded-2xl border border-border bg-surface px-4 py-3 text-base text-warmgray"
-          multiline
-          placeholder={`Add a note for ${contact?.name ?? 'them'}...`}
-          value={note}
-          onChangeText={setNote}
-          // autoFocus // Removed autoFocus to prevent keyboard from popping up immediately over the type selection
-          placeholderTextColor="#8B9678"
-        />
+          <View className="flex-1 min-h-[200px]">
+            <TextInput
+              className="flex-1 bg-transparent text-lg leading-relaxed text-slate-700 dark:text-slate-300 p-0"
+              multiline
+              placeholder="Type your heart out..."
+              value={note}
+              onChangeText={setNote}
+              placeholderTextColor="#D1D5DB"
+              textAlignVertical="top"
+              style={{ minHeight: 150 }}
+            />
 
-        <View className="mt-6 gap-4">
-          <View className="flex-row gap-2">
-            {!isEditMode && noteOnly !== "true" && (
-              <TouchableOpacity
-                className="flex-1 items-center rounded-2xl bg-surface border border-border py-4"
-                onPress={handleSkip}
-                activeOpacity={0.85}
-                disabled={saving}
-              >
-                <Text className="font-semibold text-warmgray">Not now</Text>
-              </TouchableOpacity>
-            )}
+            {/* Dashed Separator */}
+            <View
+              className="mt-4 mb-2 border-b-2 border-dashed"
+              style={{ borderColor: "rgba(125, 157, 122, 0.3)" }}
+            />
 
-            <TouchableOpacity
-              className="flex-1 items-center rounded-2xl bg-sage py-4"
-              onPress={handleSave}
-              activeOpacity={0.85}
-              disabled={saving}
-            >
-              <Text className="font-semibold text-white">
-                {saving ? "Saving..." : "Save"}
+            {/* Privacy Note */}
+            <View className="flex-row items-center justify-center gap-1">
+              <Ionicons
+                name="sparkles"
+                size={12}
+                color="#9CA3AF"
+              />
+              <Text className="text-[10px] text-slate-400 dark:text-slate-600">
+                Kindred thoughts are kept private
               </Text>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
