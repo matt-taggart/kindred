@@ -366,24 +366,29 @@ export default function EditContactModal({
               })}
             </View>
 
-            {/* Birthday Section - Collapsible */}
-            <View className="mb-4 rounded-2xl bg-surface p-4 shadow-sm border border-border">
+            {/* Birthday Section */}
+            <View className="mb-4 p-6 bg-accent-warm/20 dark:bg-primary/5 rounded-[32px] border border-accent-warm/30 dark:border-primary/20">
               {/* Header Row */}
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
-                    <Text className="text-lg">🎂</Text>
+              <View className="flex-row items-start justify-between mb-4">
+                <View className="flex-row items-center gap-3">
+                  <Text className="text-3xl">🎂</Text>
+                  <View>
+                    <Text className="text-lg font-semibold text-slate-800 dark:text-white">
+                      Birthday
+                    </Text>
+                    {birthday && !isBirthdayExpanded && (
+                      <Text className="text-xs text-primary font-medium uppercase tracking-wider">
+                        A gentle reminder is coming up
+                      </Text>
+                    )}
                   </View>
-                  <Text className="text-base font-semibold text-warmgray">
-                    Birthday
-                  </Text>
                 </View>
                 {isBirthdayExpanded ? (
                   <Pressable
                     onPress={() => setIsBirthdayExpanded(false)}
                     className="active:opacity-60"
                   >
-                    <Text className="text-sm font-medium text-warmgray-muted">
+                    <Text className="text-sm font-medium text-slate-500">
                       Cancel
                     </Text>
                   </Pressable>
@@ -392,7 +397,7 @@ export default function EditContactModal({
                     onPress={() => setIsBirthdayExpanded(true)}
                     className="active:opacity-60"
                   >
-                    <Text className="text-sm font-medium text-sage">
+                    <Text className="text-sm font-bold text-primary">
                       Edit
                     </Text>
                   </Pressable>
@@ -401,33 +406,31 @@ export default function EditContactModal({
 
               {/* Content */}
               {isBirthdayExpanded ? (
-                /* Expanded: Show BirthdayPicker */
                 <>
-                  <View className="py-2 mt-2">
+                  <View className="py-2">
                     <BirthdayPicker
                       value={birthday}
                       onChange={setBirthday}
                     />
                   </View>
-
-                  <Text className="mt-3 text-xs text-warmgray-muted text-center">
+                  <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
                     {"We'll prioritize this over regular reminders on their birthday."}
                   </Text>
                 </>
               ) : birthday ? (
-                /* Collapsed with birthday set: Show formatted date */
-                <Text className="text-base text-warmgray text-center py-4">
-                  {formatBirthdayDisplay(birthday)}
-                </Text>
+                <View className="py-2">
+                  <Text className="text-xl font-display text-slate-700 dark:text-slate-300 text-center">
+                    {formatBirthdayDisplay(birthday)}
+                  </Text>
+                </View>
               ) : (
-                /* Collapsed without birthday: Show Add button */
                 <Pressable
                   onPress={() => setIsBirthdayExpanded(true)}
-                  className="py-4 items-center active:opacity-60"
+                  className="py-2 items-center active:opacity-60"
                 >
-                  <View className="flex-row items-center gap-2 bg-sage-100 px-4 py-2 rounded-full">
-                    <Ionicons name="add" size={18} color="#8B9678" />
-                    <Text className="text-sm font-medium text-sage">
+                  <View className="flex-row items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+                    <Ionicons name="add" size={18} color="#79947D" />
+                    <Text className="text-sm font-medium text-primary">
                       Add Birthday
                     </Text>
                   </View>
