@@ -1,4 +1,4 @@
-import { Modal, Pressable, TouchableOpacity, Platform } from "react-native";
+import { Modal, Pressable, Platform } from "react-native";
 import { SafeAreaView, ScrollView, Text, TextInput, View, Alert } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -494,34 +494,54 @@ export default function EditContactModal({
             </View>
           </ScrollView>
 
-          <Pressable
-            onPress={handleSave}
-            disabled={saveDisabled}
-            className={`flex-row items-center justify-center rounded-2xl py-4 mt-5 ${
-              saveDisabled ? 'bg-border' : 'bg-sage'
-            }`}
-          >
-            <Text
-              className={`text-lg font-semibold ${
-                saveDisabled ? 'text-warmgray-muted' : 'text-white'
+          {/* Action Buttons */}
+          <View className="mt-6">
+            <Pressable
+              onPress={handleSave}
+              disabled={saveDisabled}
+              className={`w-full py-4 rounded-full items-center justify-center ${
+                saveDisabled
+                  ? 'bg-slate-200 dark:bg-slate-700'
+                  : 'bg-primary'
               }`}
+              style={!saveDisabled ? {
+                shadowColor: "#79947D",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.2,
+                shadowRadius: 8,
+                elevation: 4,
+              } : undefined}
             >
-              Save changes
-            </Text>
-          </Pressable>
-
-          {onArchive && !contact.isArchived && (
-            <TouchableOpacity
-              onPress={handleArchive}
-              className="flex-row items-center justify-center gap-2 py-3"
-              activeOpacity={0.85}
-            >
-              <Ionicons name="archive-outline" size={20} color="#8B9678" />
-              <Text className="text-base text-warmgray-muted">
-                Archive connection
+              <Text
+                className={`text-lg font-semibold ${
+                  saveDisabled
+                    ? 'text-slate-400 dark:text-slate-500'
+                    : 'text-white'
+                }`}
+              >
+                Save changes
               </Text>
-            </TouchableOpacity>
-          )}
+            </Pressable>
+
+            {onArchive && !contact.isArchived && (
+              <Pressable
+                onPress={handleArchive}
+                className="flex-row items-center justify-center gap-3 mt-8 active:opacity-70"
+              >
+                <View className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center">
+                  <Ionicons name="archive-outline" size={20} color="#94a3b8" />
+                </View>
+                <View>
+                  <Text className="text-slate-600 dark:text-slate-400 font-medium">
+                    Archive connection
+                  </Text>
+                  <Text className="text-[10px] text-slate-400 dark:text-slate-500 italic">
+                    This connection has been resting
+                  </Text>
+                </View>
+              </Pressable>
+            )}
+          </View>
         </View>
       </SafeAreaView>
     </Modal>
