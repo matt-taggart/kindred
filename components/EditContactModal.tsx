@@ -223,8 +223,8 @@ export default function EditContactModal({
           </View>
 
           <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-            {/* Reminder Rhythm Section */}
-            <View className="mb-4 flex gap-2">
+            {/* Rhythm Selection Cards */}
+            <View className="space-y-4 mb-8">
               {(
                 [
                   "daily",
@@ -233,147 +233,137 @@ export default function EditContactModal({
                   "yearly",
                   "custom",
                 ] as Contact["bucket"][]
-              ).map((bucket) => (
-                <View key={bucket}>
-                  <Pressable
-                    className={`border-2 p-4 ${
-                      selectedBucket === bucket
-                        ? 'border-sage bg-sage-100'
-                        : 'border-border bg-surface'
-                    } ${
-                      bucket === "custom" && selectedBucket === "custom"
-                        ? "rounded-t-2xl border-b-0"
-                        : "rounded-2xl"
-                    }`}
-                    onPress={() => {
-                      setSelectedBucket(bucket);
-                      if (bucket === "custom") {
-                        const derived = deriveCustomUnitAndValue(
-                          contact.customIntervalDays,
-                        );
-                        setCustomState(derived);
-                      }
-                    }}
-                  >
-                    <View className="flex-row items-center justify-between">
-                      <View className="flex-1">
-                        <Text
-                          className={`text-base font-semibold ${
-                            selectedBucket === bucket
-                              ? 'text-warmgray'
-                              : 'text-warmgray'
+              ).map((bucket) => {
+                const isSelected = selectedBucket === bucket;
+                const isCustomSelected = bucket === "custom" && isSelected;
+
+                return (
+                  <View key={bucket}>
+                    <Pressable
+                      className={`p-5 bg-card-light dark:bg-card-dark rounded-3xl shadow-sm border-2 ${
+                        isSelected
+                          ? 'border-primary'
+                          : 'border-transparent'
+                      } ${isCustomSelected ? 'rounded-b-none' : ''}`}
+                      onPress={() => {
+                        setSelectedBucket(bucket);
+                        if (bucket === "custom") {
+                          const derived = deriveCustomUnitAndValue(
+                            contact.customIntervalDays,
+                          );
+                          setCustomState(derived);
+                        }
+                      }}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-1">
+                          <Text className="text-lg font-semibold text-slate-800 dark:text-white">
+                            {bucketLabels[bucket]}
+                          </Text>
+                          <Text className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            {bucket === "custom"
+                              ? formatCustomSummary(
+                                  derivedCustomDays ?? contact.customIntervalDays,
+                                )
+                              : bucketDescriptions[bucket]}
+                          </Text>
+                        </View>
+                        {/* Radio Indicator */}
+                        <View
+                          className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                            isSelected
+                              ? "bg-primary border-primary"
+                              : "border-slate-200 dark:border-slate-700"
                           }`}
                         >
-                          {bucketLabels[bucket]}
-                        </Text>
-                        <Text className="mt-1 text-sm text-warmgray-muted">
-                          {bucket === "custom"
-                            ? formatCustomSummary(
-                                derivedCustomDays ?? contact.customIntervalDays,
-                              )
-                            : bucketDescriptions[bucket]}
-                        </Text>
-                      </View>
-                      <View
-                        className={`h-6 w-6 rounded-full border-2 ${
-                          selectedBucket === bucket
-                            ? "border-sage bg-sage"
-                            : 'border-border'
-                        }`}
-                      />
-                    </View>
-                  </Pressable>
-
-                  {bucket === "custom" && selectedBucket === "custom" && (
-                    <View className="rounded-b-2xl border-x-2 border-b-2 border-sage bg-surface px-4 pb-4 pt-2">
-                      <View className="mt-2 flex-col gap-3">
-                        <View>
-                          <Text className="text-xs font-medium text-warmgray-muted mb-1">
-                            Frequency
-                          </Text>
-                          <View className="h-12 flex-row items-center rounded-xl border border-border bg-cream px-3">
-                            <TextInput
-                              value={customValue}
-                              onChangeText={(text) =>
-                                setCustomState({
-                                  customUnit,
-                                  customValue: text.replace(/[^0-9]/g, ""),
-                                })
-                              }
-                              keyboardType="number-pad"
-                              className="flex-1 text-base leading-5 text-warmgray"
-                              placeholder="e.g., 30"
-                              placeholderTextColor="#8B9678"
-                              style={{ marginTop: -2 }}
-                            />
-                          </View>
+                          {isSelected && (
+                            <View className="w-2.5 h-2.5 bg-white rounded-full" />
+                          )}
                         </View>
-                        <View>
-                          <Text className="text-xs font-medium text-warmgray-muted mb-1">
-                            Unit
-                          </Text>
-                          <View className="flex-row gap-1 bg-cream border border-border p-1 rounded-xl">
-                            {(["days", "weeks", "months"] as CustomUnit[]).map(
-                              (unit) => (
-                                <Pressable
-                                  key={unit}
-                                  onPress={() =>
-                                    setCustomState({
-                                      customUnit: unit,
-                                      customValue,
-                                    })
-                                  }
-                                  className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
-                                    customUnit === unit ? 'bg-surface' : ''
-                                  }`}
-                                  style={
-                                    customUnit === unit
-                                      ? {
-                                          shadowColor: "#000",
-                                          shadowOffset: { width: 0, height: 1 },
-                                          shadowOpacity: 0.05,
-                                          shadowRadius: 2,
-                                          elevation: 1,
-                                        }
-                                      : undefined
-                                  }
-                                >
-                                  <Text
-                                    className={`text-sm font-medium ${
+                      </View>
+                    </Pressable>
+
+                    {/* Custom Rhythm Expansion */}
+                    {isCustomSelected && (
+                      <View className="bg-slate-50 dark:bg-slate-800 rounded-b-3xl border-2 border-t-0 border-primary px-5 pb-5 pt-3">
+                        <View className="gap-4">
+                          <View>
+                            <Text className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
+                              Frequency
+                            </Text>
+                            <View className="h-12 flex-row items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3">
+                              <TextInput
+                                value={customValue}
+                                onChangeText={(text) =>
+                                  setCustomState({
+                                    customUnit,
+                                    customValue: text.replace(/[^0-9]/g, ""),
+                                  })
+                                }
+                                keyboardType="number-pad"
+                                className="flex-1 text-base text-slate-800 dark:text-white"
+                                placeholder="e.g., 30"
+                                placeholderTextColor="#94a3b8"
+                              />
+                            </View>
+                          </View>
+                          <View>
+                            <Text className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
+                              Unit
+                            </Text>
+                            <View className="flex-row gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-1 rounded-xl">
+                              {(["days", "weeks", "months"] as CustomUnit[]).map(
+                                (unit) => (
+                                  <Pressable
+                                    key={unit}
+                                    onPress={() =>
+                                      setCustomState({
+                                        customUnit: unit,
+                                        customValue,
+                                      })
+                                    }
+                                    className={`flex-1 items-center justify-center rounded-lg py-2 ${
                                       customUnit === unit
-                                        ? 'text-warmgray'
-                                        : 'text-warmgray-muted'
+                                        ? 'bg-slate-100 dark:bg-slate-700'
+                                        : ''
                                     }`}
                                   >
-                                    {unit.charAt(0).toUpperCase() +
-                                      unit.slice(1)}
-                                  </Text>
-                                </Pressable>
-                              ),
-                            )}
+                                    <Text
+                                      className={`text-sm font-medium ${
+                                        customUnit === unit
+                                          ? 'text-slate-800 dark:text-white'
+                                          : 'text-slate-500 dark:text-slate-400'
+                                      }`}
+                                    >
+                                      {unit.charAt(0).toUpperCase() + unit.slice(1)}
+                                    </Text>
+                                  </Pressable>
+                                ),
+                              )}
+                            </View>
                           </View>
                         </View>
-                      </View>
 
-                      {!isCustomValid && (
-                        <Text className="mt-3 text-sm text-terracotta font-medium">
-                          Please enter a valid duration (1-365 days)
-                        </Text>
-                      )}
-
-                      {isCustomValid && derivedCustomDays && (
-                        <Text className="mt-3 text-sm text-warmgray-muted">
-                          {"We'll remind you "}
-                          <Text className="font-semibold text-sage">
-                            {formatCustomSummary(derivedCustomDays)}
+                        {!isCustomValid && (
+                          <Text className="mt-4 text-sm text-red-500 font-medium">
+                            Please enter a valid duration (1-365 days)
                           </Text>
-                          .
-                        </Text>
-                      )}
-                    </View>
-                  )}
-                </View>
-              ))}
+                        )}
+
+                        {isCustomValid && derivedCustomDays && (
+                          <Text className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+                            {"We'll remind you "}
+                            <Text className="font-semibold text-primary">
+                              {formatCustomSummary(derivedCustomDays)}
+                            </Text>
+                            .
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
             </View>
 
             {/* Birthday Section - Collapsible */}
