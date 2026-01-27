@@ -4,7 +4,6 @@ import { View, Text, TouchableOpacity } from 'react-native';
 const RELATIONSHIP_TYPES = [
   'Friend',
   'Family',
-  'Chosen family',
   'Mentor',
   'Other',
 ] as const;

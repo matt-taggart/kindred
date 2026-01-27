@@ -2,10 +2,10 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { RelationshipTypePicker } from './RelationshipTypePicker';
 
-const RELATIONSHIP_TYPES = ['Friend', 'Family', 'Chosen family', 'Mentor', 'Other'];
+const RELATIONSHIP_TYPES = ['Friend', 'Family', 'Mentor', 'Other'];
 
 describe('RelationshipTypePicker', () => {
-  it('renders all 5 relationship types', () => {
+  it('renders all 4 relationship types', () => {
     const onSelect = jest.fn();
     const { getByText } = render(
       <RelationshipTypePicker selected={null} onSelect={onSelect} />
