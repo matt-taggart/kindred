@@ -19,7 +19,10 @@ export function ConnectionsHeader({ onSearchPress }: ConnectionsHeaderProps) {
               KINDRED
             </Text>
           </View>
-          <Text className="text-4xl font-semibold tracking-tight text-warmgray dark:text-white">
+          <Text
+            className="text-4xl tracking-tight text-warmgray dark:text-white"
+            style={{ fontFamily: 'PlayfairDisplay_500Medium' }}
+          >
             Connections
           </Text>
         </View>

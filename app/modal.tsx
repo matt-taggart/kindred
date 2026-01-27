@@ -162,7 +162,7 @@ export default function LogInteractionModal() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-off-white dark:bg-background-dark">
+    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
       <View className="flex-1 px-6 pt-4">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-8">

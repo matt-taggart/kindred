@@ -206,14 +206,14 @@ export default function ConnectionsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-cream">
+      <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
         <ActivityIndicator size="large" color="#9DBEBB" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-cream">
+    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
       <FlatList
         data={listData}
         keyExtractor={(item) => item.key}

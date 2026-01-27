@@ -205,7 +205,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-off-white">
+    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 120 }}

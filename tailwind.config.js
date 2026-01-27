@@ -12,6 +12,8 @@ module.exports = {
         'brand-navy': '#2D3648',
         'background-light': '#FDFBF7',
         'background-dark': '#1A1C19',
+        'brand-surface': '#FDFBF7',
+        'cream': '#F3F0E6',
         // New design system colors
         'sage-light': '#E8EFEA',
         'accent-sage': '#E6EBE6',
