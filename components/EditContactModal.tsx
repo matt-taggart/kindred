@@ -439,31 +439,34 @@ export default function EditContactModal({
             </View>
 
             {/* Next Reminder Section */}
-            <View className="mb-4 rounded-2xl bg-surface p-4 shadow-sm border border-border">
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                className="flex-row items-center justify-between"
-                activeOpacity={0.7}
-              >
+            <View className="mb-4 p-6 bg-accent-warm/20 dark:bg-primary/5 rounded-[32px] border border-accent-warm/30 dark:border-primary/20">
+              <View className="flex-row items-start justify-between mb-4">
                 <View className="flex-row items-center gap-3">
-                  <View className="h-8 w-8 items-center justify-center rounded-full bg-sage-100">
-                    <Ionicons name="calendar-outline" size={18} color="#8B9678" />
+                  <View className="w-10 h-10 bg-primary/10 rounded-full items-center justify-center">
+                    <Ionicons name="calendar-outline" size={20} color="#79947D" />
                   </View>
-                  <View>
-                    <Text className="text-base font-semibold text-warmgray">Next Reminder</Text>
-                    <Text className="text-sm text-warmgray-muted">{getDateLabel(startDate.getTime())}</Text>
-                  </View>
+                  <Text className="text-lg font-semibold text-slate-800 dark:text-white">
+                    Next Reminder
+                  </Text>
                 </View>
-                <Text className="text-sm font-medium text-sage">Edit</Text>
-              </TouchableOpacity>
+                <Pressable
+                  onPress={() => setShowDatePicker(!showDatePicker)}
+                  className="active:opacity-60"
+                >
+                  <Text className="text-sm font-bold text-primary">
+                    {showDatePicker ? 'Done' : 'Edit'}
+                  </Text>
+                </Pressable>
+              </View>
+
+              <View className="py-2">
+                <Text className="text-xl font-display text-slate-700 dark:text-slate-300 text-center">
+                  {getDateLabel(startDate.getTime())}
+                </Text>
+              </View>
 
               {showDatePicker && Platform.OS === 'ios' && (
-                <View className="mt-4 pt-4 border-t border-border">
-                  <View className="flex-row justify-end mb-2">
-                    <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                      <Text className="text-sm font-medium text-sage">Done</Text>
-                    </TouchableOpacity>
-                  </View>
+                <View className="mt-4">
                   <DateTimePicker
                     value={startDate}
                     mode="date"
@@ -471,7 +474,7 @@ export default function EditContactModal({
                     minimumDate={new Date()}
                     onChange={(_e, date) => date && setStartDate(date)}
                     themeVariant="light"
-                    accentColor="#9CA986"
+                    accentColor="#79947D"
                   />
                 </View>
               )}
