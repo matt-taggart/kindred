@@ -146,7 +146,7 @@ export default function HomeScreen() {
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <View className="flex-1 px-6 pt-6">
           <HomeHeader
-            userName="Friend"
+            userName="friend"
             onAvatarPress={handleAvatarPress}
           />
           <EmptyContactsState />
@@ -170,7 +170,7 @@ export default function HomeScreen() {
         <View className="h-3" />
 
         <HomeHeader
-          userName="Friend"
+          userName="friend"
           onAvatarPress={handleAvatarPress}
         />
 

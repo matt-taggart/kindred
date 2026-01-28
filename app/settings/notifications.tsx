@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Platform,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   Text,
   View,
+  ImageBackground,
 } from "react-native";
 
 import { NotificationFrequency, useUserStore } from "@/lib/userStore";
@@ -44,6 +45,7 @@ function formatDisplayTime(timeStr: string): string {
 }
 
 export default function NotificationSettingsScreen() {
+  const router = useRouter();
   const { notificationSettings, setNotificationFrequency, setReminderTime } =
     useUserStore();
   const { frequency, reminderTimes } = notificationSettings;
@@ -87,35 +89,46 @@ export default function NotificationSettingsScreen() {
   const previewText = (() => {
     const times = reminderTimes.slice(0, frequency).map(formatDisplayTime);
     if (times.length === 1) {
-      return `You'll receive a gentle reminder at ${times[0]} on days when connections are ready.`;
+      return `We’ll gently remind you to check in at ${times[0]} on days when connections are ready—no pressure.`;
     }
     if (times.length === 2) {
-      return `You'll receive gentle reminders at ${times[0]} and ${times[1]} on days when connections are ready.`;
+      return `We’ll gently remind you to check in at ${times[0]} and ${times[1]} on days when connections are ready—no pressure.`;
     }
-    return `You'll receive gentle reminders at ${times[0]}, ${times[1]}, and ${times[2]} on days when connections are ready.`;
+    return `We’ll gently remind you to check in at ${times[0]}, ${times[1]}, and ${times[2]} on days when connections are ready—no pressure.`;
   })();
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: "Reminders",
-          headerBackTitle: "Settings",
-          headerShown: true,
+          headerShown: false,
         }}
       />
-      <SafeAreaView className="flex-1 bg-cream">
+      <SafeAreaView className="flex-1 bg-background-light">
+        {/* Header */}
+        <View className="px-6 pb-4 pt-4 flex-row items-center justify-between">
+          <Pressable 
+            onPress={() => router.back()}
+            className="flex-row items-center"
+          >
+            <Ionicons name="chevron-back" size={24} color="#79947D" />
+            <Text className="text-[#79947D] font-heading font-semibold text-lg ml-1">Settings</Text>
+          </Pressable>
+          <Text className="text-lg font-bold font-heading text-[#1A1C19]">Reminders</Text>
+          <View className="w-20" /> {/* Spacer for centering */}
+        </View>
+
         <ScrollView
-          className="flex-1 px-4 pt-6"
-          contentContainerStyle={{ paddingBottom: 32 }}
+          className="flex-1 px-6 pt-6"
+          contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
           {/* Frequency Section */}
-          <View className="mb-8">
-            <Text className="mb-2 text-lg font-bold text-warmgray">
+          <View className="mb-10">
+            <Text className="text-xl font-display font-semibold text-[#1A1C19] mb-1">
               Reminder frequency
             </Text>
-            <Text className="mb-4 text-base text-warmgray-muted">
+            <Text className="text-[#5C635C] font-heading text-sm mb-4">
               How many times per day would you like a reminder?
             </Text>
 
@@ -124,17 +137,17 @@ export default function NotificationSettingsScreen() {
                 <Pressable
                   key={option.value}
                   onPress={() => handleFrequencyChange(option.value)}
-                  className={`flex-1 items-center justify-center rounded-2xl border-2 py-4 ${
+                  className={`flex-1 items-center justify-center rounded-[24px] border-2 py-4 ${
                     frequency === option.value
-                      ? "border-sage bg-sage"
-                      : "border-border bg-surface"
+                      ? "border-primary bg-primary"
+                      : "border-slate-100 bg-white"
                   }`}
                 >
                   <Text
-                    className={`text-xl font-bold ${
+                    className={`text-lg font-bold font-heading ${
                       frequency === option.value
                         ? "text-white"
-                        : "text-warmgray"
+                        : "text-[#1A1C19]"
                     }`}
                   >
                     {option.label}
@@ -145,11 +158,11 @@ export default function NotificationSettingsScreen() {
           </View>
 
           {/* Times Section */}
-          <View className="mb-8">
-            <Text className="mb-2 text-lg font-bold text-warmgray">
+          <View className="mb-10">
+            <Text className="text-xl font-display font-semibold text-[#1A1C19] mb-1">
               Reminder times
             </Text>
-            <Text className="mb-4 text-base text-warmgray-muted">
+            <Text className="text-[#5C635C] font-heading text-sm mb-4">
               Choose times that feel supportive.
             </Text>
 
@@ -158,22 +171,22 @@ export default function NotificationSettingsScreen() {
                 <Pressable
                   key={index}
                   onPress={() => handleTimePress(index)}
-                  className="flex-row items-center justify-between rounded-2xl border border-border bg-surface px-4 py-4"
+                  className="flex-row items-center justify-between rounded-pill bg-white px-5 py-5 border border-slate-50 shadow-sm"
                 >
                   <View className="flex-row items-center gap-3">
-                    <Ionicons name="time-outline" size={22} color="#5C6356" />
-                    <Text className="text-base text-warmgray">
+                    <Ionicons name="time" size={22} color="#94A3B8" />
+                    <Text className="text-base font-medium font-heading text-[#5C635C]">
                       {timeLabels[index]}
                     </Text>
                   </View>
                   <View className="flex-row items-center gap-2">
-                    <Text className="text-base font-semibold text-sage">
+                    <Text className="text-lg font-bold font-heading text-[#1A1C19]">
                       {formatDisplayTime(reminderTimes[index])}
                     </Text>
                     <Ionicons
                       name="chevron-forward"
                       size={18}
-                      color="#8B9678"
+                      color="#CBD5E1"
                     />
                   </View>
                 </Pressable>
@@ -182,33 +195,52 @@ export default function NotificationSettingsScreen() {
           </View>
 
           {/* Preview Section */}
-          <View className="rounded-2xl border border-sage/20 bg-sage-100 p-4">
-            <View className="mb-2 flex-row items-center gap-2">
-              <Ionicons
-                name="information-circle-outline"
-                size={20}
-                color="#9CA986"
-              />
-              <Text className="text-sm font-semibold text-sage">Preview</Text>
+          <View className="rounded-[32px] bg-soft-sand p-7 border border-slate-200/50 overflow-hidden relative">
+            <View className="absolute -right-4 -top-4 opacity-[0.05]">
+               <Ionicons name="heart" size={120} color="#79947D" />
             </View>
-            <Text className="text-base text-warmgray">{previewText}</Text>
+            
+            <View className="relative z-10">
+              <View className="flex-row items-center gap-2 mb-3">
+                <Ionicons
+                  name="information-circle"
+                  size={18}
+                  color="#79947D"
+                />
+                <Text className="text-xs font-bold font-heading text-[#79947D] uppercase tracking-wider">Gentle Preview</Text>
+              </View>
+              <Text className="font-display-italic text-[17px] text-[#1A1C19] leading-relaxed">
+                "{previewText}"
+              </Text>
+            </View>
           </View>
         </ScrollView>
 
+        {/* Footer with Save Button */}
+        <View className="absolute bottom-0 left-0 right-0 p-6 bg-background-light/80">
+          <Pressable 
+            onPress={() => router.back()}
+            className="w-full bg-primary py-5 rounded-full items-center justify-center shadow-lg shadow-primary/20"
+          >
+            <Text className="text-white font-bold text-lg font-heading">Save Rhythm</Text>
+          </Pressable>
+          <View className="h-1.5 w-32 bg-slate-200 rounded-full self-center mt-4 mb-2" />
+        </View>
+
         {/* iOS Time Picker Modal */}
         {Platform.OS === "ios" && editingIndex !== null && tempTime && (
-          <View className="border-t border-border bg-surface px-4 pb-8 pt-4">
+          <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pb-10 pt-4 rounded-t-[32px] shadow-2xl border-t border-slate-100 z-50">
             <View className="mb-4 flex-row items-center justify-between">
               <Pressable onPress={handleTimeCancel}>
-                <Text className="text-base font-semibold text-warmgray-muted">
+                <Text className="text-base font-semibold font-heading text-slate-400">
                   Cancel
                 </Text>
               </Pressable>
-              <Text className="text-base font-bold text-warmgray">
+              <Text className="text-base font-bold font-heading text-[#1A1C19]">
                 {timeLabels[editingIndex]}
               </Text>
               <Pressable onPress={handleTimeConfirm}>
-                <Text className="text-base font-semibold text-sage">Done</Text>
+                <Text className="text-base font-semibold font-heading text-primary">Done</Text>
               </Pressable>
             </View>
             <DateTimePicker
@@ -216,8 +248,7 @@ export default function NotificationSettingsScreen() {
               mode="time"
               display="spinner"
               onChange={handleTimeChange}
-              accentColor="#9CA986"
-              themeVariant="light"
+              accentColor="#79947D"
             />
           </View>
         )}
@@ -229,7 +260,7 @@ export default function NotificationSettingsScreen() {
             mode="time"
             display="default"
             onChange={handleTimeChange}
-            accentColor="#9CA986"
+            accentColor="#79947D"
           />
         )}
       </SafeAreaView>

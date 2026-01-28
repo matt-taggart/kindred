@@ -33,7 +33,7 @@ export function HomeHeader({
         </Body>
         <View className="flex-row items-center mt-1">
           <Image 
-            source={require('../assets/images/logo.png')} 
+            source={require('../assets/images/logo-in-app.png')} 
             style={{ width: 24, height: 24, marginRight: 8 }} 
             resizeMode="contain"
           />
