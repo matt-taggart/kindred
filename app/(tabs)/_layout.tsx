@@ -5,10 +5,12 @@ import { Tabs, useRouter } from "expo-router";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
+import { AddConnectionSheet } from "@/components";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const [isAddSheetVisible, setIsAddSheetVisible] = React.useState(false);
 
   const isDark = colorScheme === "dark";
 
@@ -96,9 +98,14 @@ export default function TabLayout() {
         />
       </Tabs>
 
+      <AddConnectionSheet
+        visible={isAddSheetVisible}
+        onClose={() => setIsAddSheetVisible(false)}
+      />
+
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => router.push("/contacts/add")}
+        onPress={() => setIsAddSheetVisible(true)}
         style={styles.fab}
       >
         <MaterialCommunityIcons name="heart-plus" size={28} color="white" />

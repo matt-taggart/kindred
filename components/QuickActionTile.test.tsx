@@ -23,20 +23,6 @@ describe('QuickActionTile', () => {
     expect(getByText('Text')).toBeTruthy();
   });
 
-  it('renders voice variant correctly', () => {
-    const { getByText } = render(
-      <QuickActionTile variant="voice" onPress={mockOnPress} />
-    );
-    expect(getByText('Voice Note')).toBeTruthy();
-  });
-
-  it('renders later variant correctly', () => {
-    const { getByText } = render(
-      <QuickActionTile variant="later" onPress={mockOnPress} />
-    );
-    expect(getByText('Write Later')).toBeTruthy();
-  });
-
   it('calls onPress when pressed', () => {
     const { getByLabelText } = render(
       <QuickActionTile variant="call" onPress={mockOnPress} />
@@ -57,19 +43,5 @@ describe('QuickActionTile', () => {
       <QuickActionTile variant="text" onPress={mockOnPress} />
     );
     expect(getByA11yHint('variant-text')).toBeTruthy();
-  });
-
-  it('has correct accessibility hint for voice variant', () => {
-    const { getByA11yHint } = render(
-      <QuickActionTile variant="voice" onPress={mockOnPress} />
-    );
-    expect(getByA11yHint('variant-voice')).toBeTruthy();
-  });
-
-  it('has correct accessibility hint for later variant', () => {
-    const { getByA11yHint } = render(
-      <QuickActionTile variant="later" onPress={mockOnPress} />
-    );
-    expect(getByA11yHint('variant-later')).toBeTruthy();
   });
 });

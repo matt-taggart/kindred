@@ -42,7 +42,7 @@ function getRingColor(relationship: string): string {
     return 'border-accent/30';
   }
 
-  return 'border-slate-200';
+  return 'border-slate-200 dark:border-slate-800';
 }
 
 export function ConnectionProfileSection({
@@ -68,20 +68,20 @@ export function ConnectionProfileSection({
           />
         ) : (
           <View
-            className="w-full h-full rounded-full bg-primary/20 items-center justify-center"
+            className="w-full h-full rounded-full bg-sage-light dark:bg-accent-dark-sage items-center justify-center"
             testID="profile-initials"
           >
-            <Body className="text-2xl font-medium text-primary">{initials}</Body>
+            <Body className="text-2xl font-semibold text-primary">{initials}</Body>
           </View>
         )}
 
         {/* Favorite badge */}
         {isFavorite && (
           <View
-            className="absolute bottom-1 right-1 bg-white dark:bg-slate-800 p-1.5 rounded-full shadow-md"
+            className="absolute bottom-1 right-1 bg-white dark:bg-card-dark p-1.5 rounded-full shadow-md border border-slate-100 dark:border-slate-800"
             testID="favorite-badge"
           >
-            <Ionicons name="heart" size={16} color="#9DBEBB" />
+            <Ionicons name="heart" size={16} color="#79947D" />
           </View>
         )}
       </View>

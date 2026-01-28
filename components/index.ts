@@ -13,3 +13,4 @@ export { RelationshipTypePicker } from './RelationshipTypePicker';
 export { AddFlowLayout } from './AddFlowLayout';
 export { MomentSectionDivider } from './MomentSectionDivider';
 export { MomentCard } from './MomentCard';
+export { default as AddConnectionSheet } from './AddConnectionSheet';

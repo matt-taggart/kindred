@@ -31,9 +31,16 @@ export function HomeHeader({
         <Body size="sm" muted>
           {greeting}, {userName}
         </Body>
-        <Heading size={1} className="mt-1">
-          Kindred
-        </Heading>
+        <View className="flex-row items-center mt-1">
+          <Image 
+            source={require('../assets/images/logo.png')} 
+            style={{ width: 24, height: 24, marginRight: 8 }} 
+            resizeMode="contain"
+          />
+          <Heading size={1}>
+            Kindred
+          </Heading>
+        </View>
       </View>
 
       <TouchableOpacity

@@ -19,7 +19,6 @@ import {
 } from "react-native";
 
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
-import FrequencyBadge from "@/components/FrequencyBadge";
 import { formatPhoneNumber } from "@/utils/phone";
 import { formatBirthdayDisplay } from "@/utils/formatters";
 
@@ -141,56 +140,64 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className="mb-3 rounded-2xl border border-border bg-surface p-4 shadow-sm"
+      className={`mb-4 rounded-[40px] border-2 p-5 flex-row items-start gap-4 transition-all ${
+        selected ? 'border-primary bg-primary/5' : 'border-border bg-card-white'
+      }`}
       onPress={onToggle}
       activeOpacity={0.85}
     >
-      <View className="flex-row items-center gap-3">
+      <View className={`h-12 w-12 items-center justify-center rounded-full ${
+        selected ? 'bg-primary/10' : 'bg-slate-50'
+      }`}>
         {contact.avatarUri ? (
           <Image
             source={{ uri: contact.avatarUri }}
-            className="h-10 w-10 rounded-full"
+            className="h-12 w-12 rounded-full"
           />
         ) : (
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-sage">
-            <Text className="text-sm font-semibold text-white">{initial}</Text>
-          </View>
+          <Text className={`text-base font-medium italic ${selected ? 'text-primary' : 'text-slate-400'}`}>
+            {initial}
+          </Text>
         )}
+      </View>
 
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-warmgray">
+      <View className="flex-1">
+        <View className="flex-row items-center gap-2">
+          <Text className="text-base font-semibold text-brand-navy">
             {contact.name}
           </Text>
-          <Text className="text-sm text-warmgray-muted">
-            {formatPhoneNumber(contact.phone)}
-          </Text>
           {contact.birthday && (
-            <Text className="text-xs text-warmgray-muted mt-0.5">
-              🎂 {formatBirthdayDisplay(contact.birthday, { includeYear: true })}
-            </Text>
+            <View className="flex-row items-center gap-0.5 mt-0.5">
+              <Ionicons name="cake-outline" size={10} color="#94a3b8" />
+              <Text className="text-[11px] text-slate-400">
+                {formatBirthdayDisplay(contact.birthday, { includeYear: false })}
+              </Text>
+            </View>
           )}
         </View>
 
-        <FrequencyBadge
-          bucket={frequency}
+        <TouchableOpacity 
           onPress={() => onFrequencyChange(frequency)}
-        />
-
-        <TouchableOpacity
-          className="h-6 w-6 items-center justify-center rounded border border-border bg-surface"
-          onPress={onToggle}
-          activeOpacity={0.7}
+          className={`mt-3 w-full flex-row items-center justify-between px-4 py-2.5 rounded-full border ${
+            selected ? 'bg-primary/5 border-primary/20' : 'bg-slate-50 border-border'
+          }`}
         >
-          <View
-            className={`h-5 w-5 items-center justify-center rounded ${
-              selected ? 'bg-sage' : 'bg-surface'
-            }`}
-          >
-            {selected ? (
-              <Text className="text-xs font-bold text-white">✓</Text>
-            ) : null}
-          </View>
+          <Text className={`text-xs font-medium ${selected ? 'text-primary' : 'text-slate-600'}`}>
+            {bucketLabels[frequency]}
+          </Text>
+          <Ionicons name="chevron-down" size={14} color={selected ? "#79947D" : "#94a3b8"} />
         </TouchableOpacity>
+      </View>
+
+      <View className="pt-1">
+        <View 
+          className={`h-6 w-6 items-center justify-center rounded-full border ${
+            selected ? 'bg-primary border-primary' : 'border-slate-300'
+          }`}
+          style={!selected ? { borderRadius: 12, borderStyle: 'solid' } : undefined}
+        >
+          {selected && <Ionicons name="checkmark" size={16} color="white" />}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -491,25 +498,38 @@ export default function ImportContactsScreen() {
   }, [contacts, router, selected, contactFrequencies, customIntervals]);
 
   return (
-    <SafeAreaView className="flex-1 bg-cream">
+    <SafeAreaView className="flex-1 bg-background-light">
       <Stack.Screen
         options={{
-          title: 'Import from contacts',
-          headerBackTitle: 'Connections',
+          headerTitle: "",
+          headerLeft: () => (
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              className="flex-row items-center ml-2"
+            >
+              <Ionicons name="chevron-back" size={24} color="#79947D" />
+              <Text className="text-primary font-medium text-base ml-1">Back</Text>
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity className="mr-4">
+              <Ionicons name="heart" size={24} color="#79947D" />
+            </TouchableOpacity>
+          ),
           headerShadowVisible: false,
-          headerTitleStyle: { fontSize: 18, fontWeight: "700" },
+          headerStyle: { backgroundColor: '#FDFBF7' },
         }}
       />
 
       {loading ? (
         <View className="flex-1 items-center justify-center px-4">
-          <ActivityIndicator size="large" color="#9CA986" />
-          <Text className="mt-3 text-sm font-semibold text-warmgray">
+          <ActivityIndicator size="large" color="#79947D" />
+          <Text className="mt-3 text-sm font-semibold text-text-soft">
             Fetching contacts…
           </Text>
         </View>
       ) : (
-        <View className="flex-1 px-4 pt-4">
+        <View className="flex-1">
           <FlatList
             data={contacts}
             keyExtractor={(item) => item.id}
@@ -523,139 +543,95 @@ export default function ImportContactsScreen() {
               />
             )}
             ListHeaderComponent={
-              <View className="pb-3">
-                <View className="mb-6 rounded-2xl border border-border bg-surface p-5 shadow-sm">
-                  <Text className="text-xs font-semibold uppercase tracking-wide text-sage">
-                    Import
-                  </Text>
-                  <Text className="mt-1 text-xl font-bold text-warmgray">
-                    {contacts.length > 0
-                      ? 'Select who to import'
-                      : 'Bring your people to Kindred'}
-                  </Text>
-                  <Text className="mt-2 text-sm text-warmgray-muted">
-                    {contacts.length > 0
-                      ? 'Choose which connections you’d like to add.'
-                      : 'Give permission, pick who you’d like to bring in, and save them to Kindred.'}
-                  </Text>
+              <View className="px-6 pt-4 pb-3">
+                <Text className="font-display text-4xl text-brand-navy mb-2 leading-tight">
+                  Gather your connections
+                </Text>
+                <Text className="text-text-soft text-lg mb-8 font-body">
+                  Choose the people you’d like to nurture.
+                </Text>
 
-                  {contacts.length === 0 ? (
-                    <TouchableOpacity
-                      className="mt-4 items-center rounded-xl bg-sage py-4"
-                      onPress={handleImportPress}
-                      activeOpacity={0.9}
-                    >
-                      <Text className="text-base font-semibold text-white">
-                        Import from contacts
-                      </Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      className="mt-4 items-center rounded-xl border-2 border-sage bg-transparent py-4"
-                      onPress={handleAddMoreContacts}
-                      activeOpacity={0.9}
-                    >
-                      <Text className="text-base font-semibold text-sage">
-                        Add more contacts
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
+                <TouchableOpacity
+                  className="w-full py-4 px-6 bg-primary/10 border border-primary/20 rounded-pill flex-row items-center justify-center gap-2 mb-8"
+                  onPress={contacts.length === 0 ? handleImportPress : handleAddMoreContacts}
+                  activeOpacity={0.9}
+                >
+                  <Ionicons name="person-add" size={20} color="#79947D" />
+                  <Text className="font-semibold text-primary text-base">
+                    Add more contacts
+                  </Text>
+                </TouchableOpacity>
 
                 {contacts.length > 0 && (
                   <TouchableOpacity
-                    className="mb-2 flex-row items-center justify-between rounded-2xl border border-border bg-surface p-4 shadow-sm"
+                    className="flex-row items-center justify-between px-6 py-4 mb-6 border border-border rounded-pill bg-card-white shadow-sm"
                     onPress={handleSelectAll}
                     activeOpacity={0.7}
                   >
-                    <Text className="text-base font-semibold text-warmgray">
-                      Select all
-                    </Text>
-                    <View
-                      className={`h-6 w-6 items-center justify-center rounded border border-border ${
-                        selected.size === contacts.length
-                          ? "bg-sage border-sage"
-                          : 'bg-surface'
+                    <Text className="font-semibold text-brand-navy text-base">Select all</Text>
+                    <View 
+                      className={`h-6 w-6 items-center justify-center rounded-full border ${
+                        selected.size === contacts.length ? 'bg-primary border-primary' : 'border-slate-300'
                       }`}
                     >
-                      <View
-                        className={`h-5 w-5 items-center justify-center rounded ${
-                          selected.size === contacts.length
-                            ? "bg-sage"
-                            : 'bg-surface'
-                        }`}
-                      >
-                        {selected.size === contacts.length ? (
-                          <Text className="text-xs font-bold text-white">
-                            ✓
-                          </Text>
-                        ) : null}
-                      </View>
+                      {selected.size === contacts.length && <Ionicons name="checkmark" size={16} color="white" />}
                     </View>
                   </TouchableOpacity>
                 )}
 
-                {permissionDenied ? (
-                  <View className="rounded-2xl border border-red-200 bg-red-50 p-4">
+                {permissionDenied && (
+                  <View className="rounded-2xl border border-red-200 bg-red-50 p-4 mb-4">
                     <Text className="text-sm font-semibold text-red-700">
                       Permission denied
                     </Text>
                     <Text className="mt-1 text-sm text-red-600">
-                      Enable contact access in Settings to import from your
-                      address book.
+                      Enable contact access in Settings to import from your address book.
                     </Text>
                   </View>
-                ) : null}
+                )}
               </View>
+            }
+            ListFooterComponent={
+              contacts.length > 0 ? (
+                <View className="mt-8 mb-12 flex-row justify-center opacity-20">
+                  <Ionicons name="leaf" size={60} color="#79947D" />
+                </View>
+              ) : null
             }
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center px-6 py-14">
-                <View
-                  className="mb-6 items-center justify-center"
-                  accessibilityElementsHidden
-                  importantForAccessibility="no-hide-descendants"
-                >
-                  <View className="relative">
-                    <Ionicons name="people-outline" size={80} color="#9CA986" />
-                    <View className="absolute -bottom-1 -right-1 rounded-full bg-cream p-1">
-                      <Ionicons name="heart" size={24} color="#C4A484" />
-                    </View>
-                  </View>
-                </View>
-
-                <Text className="text-2xl font-semibold text-warmgray text-center leading-tight mb-2">
-                  {permissionDenied
-                    ? "Contacts access needed"
-                    : "Your contacts will show up here"}
+                <Ionicons name="people-outline" size={80} color="#79947D" />
+                <Text className="text-2xl font-semibold text-brand-navy text-center leading-tight mb-2 mt-4 font-heading">
+                  {permissionDenied ? "Contacts access needed" : "Your contacts will show up here"}
                 </Text>
-                <Text className="text-base text-center text-warmgray-muted">
+                <Text className="text-base text-center text-text-soft font-body">
                   {permissionDenied
                     ? "Enable contact access in Settings to import from your address book."
-                    : "Tap “Import from contacts” above to choose who you’d like to bring into Kindred."}
+                    : "Tap “Add more contacts” above to choose who you’d like to bring into Kindred."}
                 </Text>
               </View>
             }
             contentContainerStyle={{
-              paddingHorizontal: 16,
               paddingBottom: 140,
-              paddingTop: 4,
               flexGrow: contacts.length === 0 ? 1 : undefined,
             }}
+            className="flex-1"
+            style={{ paddingHorizontal: 0 }}
           />
         </View>
       )}
 
-      <View className="border-t border-border bg-surface px-4 pb-4 pt-3">
+      <View className="absolute bottom-0 left-0 right-0 bg-background-light/90 border-t border-border px-6 pb-10 pt-4">
         <TouchableOpacity
-          className={`items-center rounded-xl py-4 ${selected.size > 0 ? 'bg-sage' : 'bg-border'}`}
+          className={`w-full py-5 rounded-pill items-center justify-center shadow-lg transition-all ${
+            selected.size > 0 ? 'bg-primary shadow-primary/20' : 'bg-slate-200'
+          }`}
           onPress={handleSave}
           activeOpacity={0.9}
           disabled={selected.size === 0}
         >
-          <Text
-            className={`text-base font-semibold ${selected.size > 0 ? 'text-white' : 'text-warmgray-muted'}`}
-          >
-            {`Import and Review (${selected.size})`}
+          <Text className={`text-lg font-bold ${selected.size > 0 ? 'text-white' : 'text-slate-400'}`}>
+            Bring into your quilt ({selected.size})
           </Text>
         </TouchableOpacity>
       </View>

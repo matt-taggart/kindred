@@ -48,6 +48,8 @@ export default function ConnectionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<FilterOption>("all");
   const [counts, setCounts] = useState({ all: 0, due: 0, archived: 0 });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   const loadContacts = useCallback(() => {
     try {
@@ -76,8 +78,11 @@ export default function ConnectionsScreen() {
   const listData = useMemo((): ListItem[] => {
     const items: ListItem[] = [];
 
+    const matchesSearch = (contact: Contact) => 
+      !searchQuery || contact.name.toLowerCase().includes(searchQuery.toLowerCase());
+
     if (filter === "archived") {
-      const archivedContacts = contacts.filter((c) => c.isArchived);
+      const archivedContacts = contacts.filter((c) => c.isArchived && matchesSearch(c));
       archivedContacts.forEach((contact) => {
         items.push({ type: 'archived-row', contact, key: `archived-${contact.id}` });
       });
@@ -86,7 +91,7 @@ export default function ConnectionsScreen() {
 
     // Due contacts (Connections to nurture)
     const dueContacts = contacts.filter(
-      (c) => !c.isArchived && isContactDue(c)
+      (c) => !c.isArchived && isContactDue(c) && matchesSearch(c)
     );
 
     if (filter === "due") {
@@ -109,7 +114,7 @@ export default function ConnectionsScreen() {
 
     // Recently connected (exclude those already in due)
     const dueIds = new Set(dueContacts.map((c) => c.id));
-    const recentNotDue = recentContacts.filter((c) => !dueIds.has(c.id));
+    const recentNotDue = recentContacts.filter((c) => !dueIds.has(c.id) && matchesSearch(c));
 
     if (recentNotDue.length > 0) {
       items.push({ type: 'section-header', title: 'Recently connected', key: 'header-recent' });
@@ -119,7 +124,7 @@ export default function ConnectionsScreen() {
     }
 
     return items;
-  }, [contacts, recentContacts, filter]);
+  }, [contacts, recentContacts, filter, searchQuery]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -157,8 +162,11 @@ export default function ConnectionsScreen() {
   );
 
   const handleSearchPress = useCallback(() => {
-    // TODO: Implement search
-  }, []);
+    setIsSearching(prev => !prev);
+    if (isSearching) {
+      setSearchQuery("");
+    }
+  }, [isSearching]);
 
   const renderItem = useCallback(
     ({ item }: { item: ListItem }) => {
@@ -229,7 +237,12 @@ export default function ConnectionsScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View className="mb-4">
-            <ConnectionsHeader onSearchPress={handleSearchPress} />
+            <ConnectionsHeader 
+              onSearchPress={handleSearchPress}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              isSearching={isSearching}
+            />
             <FilterPills
               selected={filter}
               counts={counts}

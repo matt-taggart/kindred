@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Pressable, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-type QuickActionVariant = 'call' | 'text' | 'voice' | 'later';
+type QuickActionVariant = 'call' | 'text';
 
 type QuickActionTileProps = {
   variant: QuickActionVariant;
@@ -22,34 +22,18 @@ const variantConfigs: Record<QuickActionVariant, VariantConfig> = {
   call: {
     icon: 'call',
     label: 'Call',
-    bgColor: 'bg-secondary/20',
-    iconBgColor: 'bg-secondary',
-    textColor: 'text-pink-600 dark:text-pink-300',
-    iconColor: '#ffffff',
+    bgColor: 'bg-primary/10 dark:bg-primary/20',
+    iconBgColor: 'bg-primary/20 dark:bg-primary/30',
+    textColor: 'text-primary dark:text-primary',
+    iconColor: '#79947D',
   },
   text: {
     icon: 'chatbubble-outline',
     label: 'Text',
-    bgColor: 'bg-primary/20',
-    iconBgColor: 'bg-primary',
-    textColor: 'text-emerald-600 dark:text-emerald-300',
-    iconColor: '#1e293b',
-  },
-  voice: {
-    icon: 'mic',
-    label: 'Voice Note',
-    bgColor: 'bg-accent/20',
-    iconBgColor: 'bg-accent',
-    textColor: 'text-amber-600 dark:text-amber-300',
-    iconColor: '#1e293b',
-  },
-  later: {
-    icon: 'create-outline',
-    label: 'Write Later',
-    bgColor: 'bg-slate-100 dark:bg-slate-800',
-    iconBgColor: 'bg-white dark:bg-slate-700',
-    textColor: 'text-slate-500 dark:text-slate-400',
-    iconColor: '#94a3b8',
+    bgColor: 'bg-sage-light dark:bg-accent-dark-sage',
+    iconBgColor: 'bg-white dark:bg-card-dark',
+    textColor: 'text-primary dark:text-primary',
+    iconColor: '#79947D',
   },
 };
 
@@ -61,15 +45,15 @@ export function QuickActionTile({ variant, onPress }: QuickActionTileProps) {
       onPress={onPress}
       accessibilityLabel={config.label}
       accessibilityHint={`variant-${variant}`}
-      className={`p-6 rounded-3xl flex-col items-center justify-center gap-3 ${config.bgColor} active:scale-95`}
+      className={`p-6 rounded-3xl flex-col items-center justify-center gap-3 ${config.bgColor} active:scale-95 border border-slate-100 dark:border-slate-800`}
     >
       <View
-        className={`w-12 h-12 rounded-2xl items-center justify-center ${config.iconBgColor}`}
+        className={`w-12 h-12 rounded-2xl items-center justify-center ${config.iconBgColor} border border-primary/20`}
       >
         <Ionicons name={config.icon} size={24} color={config.iconColor} />
       </View>
       <Text
-        className={`font-body font-semibold text-base ${config.textColor}`}
+        className={`font-body font-bold text-base uppercase tracking-widest ${config.textColor}`}
       >
         {config.label}
       </Text>
