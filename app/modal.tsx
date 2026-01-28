@@ -220,25 +220,25 @@ export default function LogInteractionModal() {
           </Text>
 
           <View className="flex-1 min-h-[200px]">
-            <TextInput
-              className="flex-1 bg-transparent text-lg leading-relaxed text-slate-700 dark:text-slate-300 p-0"
-              multiline
-              placeholder="Type your heart out..."
-              value={note}
-              onChangeText={setNote}
-              placeholderTextColor="#D1D5DB"
-              textAlignVertical="top"
-              style={{ minHeight: 150 }}
-            />
-
-            {/* Dashed Separator */}
             <View
-              className="mt-4 mb-2 border-b-2 border-dashed"
+              className="flex-1 border-2 border-dashed rounded-3xl p-4"
               style={{ borderColor: "rgba(125, 157, 122, 0.3)" }}
-            />
+            >
+              <TextInput
+                className="flex-1 bg-transparent text-lg leading-relaxed text-slate-700 dark:text-slate-300 p-0"
+                multiline
+                placeholder="Type your heart out..."
+                value={note}
+                onChangeText={setNote}
+                placeholderTextColor="#D1D5DB"
+                textAlignVertical="top"
+                style={{ minHeight: 150 }}
+              />
+            </View>
 
             {/* Privacy Note */}
-            <View className="flex-row items-center justify-center gap-1">
+            <View className="flex-row items-center justify-center gap-1 mt-4">
+
               <Ionicons
                 name="sparkles"
                 size={12}

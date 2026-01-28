@@ -5,8 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   Animated,
   Dimensions,
@@ -126,10 +124,7 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
       onRequestClose={handleClose}
     >
       <Pressable className="flex-1 bg-black/30" onPress={handleClose}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="flex-1 justify-end"
-        >
+        <View className="flex-1 justify-end">
           <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
             <Pressable
               className="bg-background-light dark:bg-background-dark rounded-t-[40px] px-6 pb-12 pt-8"
@@ -140,7 +135,6 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
 
               {/* Header */}
               <View className="flex-row items-center justify-between mb-8">
-
                 <TouchableOpacity
                   onPress={handleClose}
                   activeOpacity={0.7}
@@ -191,7 +185,10 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
                   Anything to remember?
                 </Text>
 
-                <View className="min-h-[150px]">
+                <View
+                  className="min-h-[150px] border-2 border-dashed rounded-3xl p-4"
+                  style={{ borderColor: "rgba(125, 157, 122, 0.3)" }}
+                >
                   <TextInput
                     className="bg-transparent text-lg leading-relaxed text-slate-700 dark:text-slate-300 p-0"
                     multiline
@@ -202,31 +199,26 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
                     textAlignVertical="top"
                     style={{ minHeight: 120 }}
                   />
+                </View>
 
-                  {/* Dashed Separator */}
-                  <View
-                    className="mt-4 mb-2 border-b-2 border-dashed"
-                    style={{ borderColor: "rgba(125, 157, 122, 0.3)" }}
+                {/* Privacy Note */}
+                <View className="flex-row items-center justify-center gap-1 mt-4">
+                  <Ionicons
+                    name="sparkles"
+                    size={12}
+                    color="#9CA3AF"
                   />
-
-                  {/* Privacy Note */}
-                  <View className="flex-row items-center justify-center gap-1">
-                    <Ionicons
-                      name="sparkles"
-                      size={12}
-                      color="#9CA3AF"
-                    />
-                    <Text className="text-[10px] text-slate-400 dark:text-slate-600">
-                      Kindred thoughts are kept private
-                    </Text>
-                  </View>
+                  <Text className="text-[10px] text-slate-400 dark:text-slate-600">
+                    Kindred thoughts are kept private
+                  </Text>
                 </View>
               </View>
             </Pressable>
           </Animated.View>
-        </KeyboardAvoidingView>
+        </View>
       </Pressable>
     </Modal>
   );
 }
+
 

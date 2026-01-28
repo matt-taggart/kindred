@@ -40,14 +40,14 @@ export function FilterPills({ selected, counts, onSelect }: FilterPillsProps) {
             activeOpacity={0.85}
             className={`px-6 py-2 rounded-full ${
               isActive
-                ? 'bg-slate-800 dark:bg-white'
+                ? 'bg-primary dark:bg-primary'
                 : 'bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800'
             }`}
           >
             <Text
               className={`text-sm font-medium ${
                 isActive
-                  ? 'text-white dark:text-slate-900'
+                  ? 'text-white'
                   : 'text-slate-600 dark:text-slate-400'
               }`}
             >
