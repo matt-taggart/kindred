@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, Image } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Heading, Body } from './ui';
 
@@ -26,17 +26,12 @@ export function HomeHeader({
   const greeting = getGreeting();
 
   return (
-    <View className="flex-row justify-between items-center mb-8">
+    <View className="flex-row justify-between items-center">
       <View>
         <Body size="sm" muted>
           {greeting}, {userName}
         </Body>
         <View className="flex-row items-center mt-1">
-          <Image 
-            source={require('../assets/images/logo-in-app.png')} 
-            style={{ width: 24, height: 24, marginRight: 8 }} 
-            resizeMode="contain"
-          />
           <Heading size={1}>
             Kindred
           </Heading>

@@ -20,7 +20,7 @@ export function ConnectionsHeader({
       <View className="flex-row justify-between items-start mb-2">
         <View>
           <View className="flex-row items-center gap-2 mb-1">
-            <View className="w-8 h-8 items-center justify-center bg-primary/10 rounded-full">
+            <View className="w-8 h-8 items-center justify-center">
               <Ionicons name="heart" size={16} color="#9DBEBB" />
             </View>
             <Text className="text-xs font-semibold tracking-widest uppercase text-primary/70">

@@ -167,8 +167,6 @@ export default function HomeScreen() {
         }
         showsVerticalScrollIndicator={false}
       >
-        <View className="h-3" />
-
         <HomeHeader
           userName="friend"
           onAvatarPress={handleAvatarPress}

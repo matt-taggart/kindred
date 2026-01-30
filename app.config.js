@@ -8,9 +8,9 @@ export default {
     scheme: "myapp",
     userInterfaceStyle: "light",
     splash: {
-      image: "./assets/images/splash.png",
+      image: "./assets/images/splash-cream.png",
       resizeMode: "contain",
-      backgroundColor: "#FFFFFF",
+      backgroundColor: "#F3F0E6",
     },
     assetBundlePatterns: ["**/*"],
     ios: {

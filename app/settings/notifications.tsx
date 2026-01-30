@@ -210,7 +210,7 @@ export default function NotificationSettingsScreen() {
                 <Text className="text-xs font-bold font-heading text-[#79947D] uppercase tracking-wider">Gentle Preview</Text>
               </View>
               <Text className="font-display-italic text-[17px] text-[#1A1C19] leading-relaxed">
-                "{previewText}"
+                &quot;{previewText}&quot;
               </Text>
             </View>
           </View>
