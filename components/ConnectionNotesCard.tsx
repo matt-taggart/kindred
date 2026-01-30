@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Caption } from './ui/Caption';
+import Colors from '@/constants/Colors';
 
 type ConnectionNotesCardProps = {
   notes: string;
@@ -20,7 +21,7 @@ export function ConnectionNotesCard({
         <Ionicons
           name="sparkles"
           size={18}
-          color="#79947D"
+          color={Colors.primary}
         />
         <Caption uppercase className="tracking-wider font-semibold text-primary/70">
           Notes

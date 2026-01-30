@@ -8,6 +8,7 @@ import { hasYear, getMonthDay } from '@/utils/birthdayValidation';
 import { getDateLabel } from '@/utils/scheduler';
 
 import { Contact } from "@/db/schema";
+import Colors from '@/constants/Colors';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -212,7 +213,7 @@ export default function EditContactModal({
           {/* Profile Section */}
           <View className="items-center my-6">
             <View className="w-12 h-12 bg-primary/10 rounded-full items-center justify-center mb-4">
-              <Ionicons name="heart" size={28} color="#79947D" />
+              <Ionicons name="heart" size={28} color={Colors.primary} />
             </View>
             <Text className="text-2xl font-display text-slate-800 dark:text-white mb-2">
               {contact.name}
@@ -429,7 +430,7 @@ export default function EditContactModal({
                   className="py-2 items-center active:opacity-60"
                 >
                   <View className="flex-row items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
-                    <Ionicons name="add" size={18} color="#79947D" />
+                    <Ionicons name="add" size={18} color={Colors.primary} />
                     <Text className="text-sm font-medium text-primary">
                       Add Birthday
                     </Text>
@@ -443,7 +444,7 @@ export default function EditContactModal({
               <View className="flex-row items-start justify-between mb-4">
                 <View className="flex-row items-center gap-3">
                   <View className="w-10 h-10 bg-primary/10 rounded-full items-center justify-center">
-                    <Ionicons name="calendar-outline" size={20} color="#79947D" />
+                    <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
                   </View>
                   <Text className="text-lg font-semibold text-slate-800 dark:text-white">
                     Next Reminder
@@ -474,7 +475,7 @@ export default function EditContactModal({
                     minimumDate={new Date()}
                     onChange={(_e, date) => date && setStartDate(date)}
                     themeVariant="light"
-                    accentColor="#79947D"
+                    accentColor={Colors.primary}
                   />
                 </View>
               )}
@@ -505,7 +506,7 @@ export default function EditContactModal({
                   : 'bg-primary'
               }`}
               style={!saveDisabled ? {
-                shadowColor: "#79947D",
+                shadowColor: Colors.primary,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.2,
                 shadowRadius: 8,

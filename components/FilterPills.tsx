@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, ScrollView } from 'react-native';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
+import { Body } from './ui';
 
 export type FilterOption = 'all' | 'due' | 'archived';
 
@@ -44,15 +45,17 @@ export function FilterPills({ selected, counts, onSelect }: FilterPillsProps) {
                 : 'bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800'
             }`}
           >
-            <Text
-              className={`text-sm font-medium ${
+            <Body
+              size="sm"
+              weight="medium"
+              className={
                 isActive
                   ? 'text-white'
                   : 'text-slate-600 dark:text-slate-400'
-              }`}
+              }
             >
               {filterLabels[filter]} · {count}
-            </Text>
+            </Body>
           </TouchableOpacity>
         );
       })}

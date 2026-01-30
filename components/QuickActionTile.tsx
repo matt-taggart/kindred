@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Pressable, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Colors from '@/constants/Colors';
 
 type QuickActionVariant = 'call' | 'text';
 
@@ -25,7 +26,7 @@ const variantConfigs: Record<QuickActionVariant, VariantConfig> = {
     bgColor: 'bg-primary/10 dark:bg-primary/20',
     iconBgColor: 'bg-primary/20 dark:bg-primary/30',
     textColor: 'text-primary dark:text-primary',
-    iconColor: '#79947D',
+    iconColor: Colors.primary,
   },
   text: {
     icon: 'chatbubble-outline',
@@ -33,7 +34,7 @@ const variantConfigs: Record<QuickActionVariant, VariantConfig> = {
     bgColor: 'bg-sage-light dark:bg-accent-dark-sage',
     iconBgColor: 'bg-white dark:bg-card-dark',
     textColor: 'text-primary dark:text-primary',
-    iconColor: '#79947D',
+    iconColor: Colors.primary,
   },
 };
 

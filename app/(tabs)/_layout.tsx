@@ -1,6 +1,6 @@
 import React from "react";
 import { Platform, View, TouchableOpacity, StyleSheet } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 
 import Colors from "@/constants/Colors";
@@ -49,9 +49,9 @@ export default function TabLayout() {
           options={{
             title: "Home",
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons
+              <Ionicons
                 name={focused ? "home" : "home-outline"}
-                size={28}
+                size={26}
                 color={color}
               />
             ),
@@ -62,9 +62,9 @@ export default function TabLayout() {
           options={{
             title: "Connections",
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons
-                name={focused ? "account-multiple" : "account-multiple-outline"}
-                size={28}
+              <Ionicons
+                name={focused ? "people" : "people-outline"}
+                size={26}
                 color={color}
               />
             ),
@@ -75,9 +75,9 @@ export default function TabLayout() {
           options={{
             title: "Moments",
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons
-                name={focused ? "calendar-heart" : "calendar-heart-outline"}
-                size={28}
+              <Ionicons
+                name={focused ? "calendar" : "calendar-outline"}
+                size={26}
                 color={color}
               />
             ),
@@ -88,9 +88,9 @@ export default function TabLayout() {
           options={{
             title: "Preferences",
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons
-                name={focused ? "cog" : "cog-outline"}
-                size={28}
+              <Ionicons
+                name={focused ? "settings" : "settings-outline"}
+                size={26}
                 color={color}
               />
             ),
@@ -108,7 +108,7 @@ export default function TabLayout() {
         onPress={() => setIsAddSheetVisible(true)}
         style={styles.fab}
       >
-        <MaterialCommunityIcons name="heart-plus" size={28} color="white" />
+        <Ionicons name="heart" size={26} color="white" />
       </TouchableOpacity>
     </View>
   );
@@ -122,10 +122,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#9DBEBB",
+    backgroundColor: Colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#9DBEBB",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

@@ -12,6 +12,7 @@ import type { Moment } from '@/components';
 import { QuiltGrid } from '@/components/ui/QuiltGrid';
 import { formatPhoneUrl } from '@/utils/phone';
 import { formatLastConnected } from '@/utils/timeFormatting';
+import Colors from '@/constants/Colors';
 
 const mapInteractionsToMoments = (interactions: Interaction[]): Moment[] => {
   return interactions.slice(0, 5).map((interaction) => ({
@@ -185,7 +186,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
-          <ActivityIndicator size="large" color="#79947D" />
+          <ActivityIndicator size="large" color={Colors.primary} />
         </SafeAreaView>
       </>
     );
@@ -215,7 +216,7 @@ export default function ContactDetailScreen() {
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#79947D" />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
           showsVerticalScrollIndicator={false}
         >
           {contact.isArchived && (
@@ -284,7 +285,7 @@ export default function ContactDetailScreen() {
             <View className="mt-8">
               <View className="items-center justify-center rounded-3xl bg-white dark:bg-card-dark border border-slate-100 dark:border-slate-800 p-8 shadow-soft">
                 <View className="w-16 h-16 rounded-full bg-sage-light dark:bg-accent-dark-sage items-center justify-center mb-4 border border-primary/10">
-                  <Ionicons name="heart" size={32} color="#79947D" />
+                  <Ionicons name="heart" size={32} color={Colors.primary} />
                 </View>
                 <Text className="text-lg font-display text-slate-800 dark:text-slate-100 text-center mb-2">
                   No shared moments yet

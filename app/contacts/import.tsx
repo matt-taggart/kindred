@@ -21,6 +21,7 @@ import {
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import { formatPhoneNumber } from "@/utils/phone";
 import { formatBirthdayDisplay } from "@/utils/formatters";
+import Colors from "@/constants/Colors";
 
 type Bucket = "daily" | "weekly" | "monthly" | "yearly" | "custom";
 
@@ -185,7 +186,7 @@ const ContactRow = ({
           <Text className={`text-xs font-medium ${selected ? 'text-primary' : 'text-slate-600'}`}>
             {bucketLabels[frequency]}
           </Text>
-          <Ionicons name="chevron-down" size={14} color={selected ? "#79947D" : "#94a3b8"} />
+          <Ionicons name="chevron-down" size={14} color={selected ? Colors.primary : "#94a3b8"} />
         </TouchableOpacity>
       </View>
 
@@ -507,13 +508,13 @@ export default function ImportContactsScreen() {
               onPress={() => router.back()}
               className="flex-row items-center ml-2"
             >
-              <Ionicons name="chevron-back" size={24} color="#79947D" />
+              <Ionicons name="chevron-back" size={24} color={Colors.primary} />
               <Text className="text-primary font-medium text-base ml-1">Back</Text>
             </TouchableOpacity>
           ),
           headerRight: () => (
             <TouchableOpacity className="mr-4">
-              <Ionicons name="heart" size={24} color="#79947D" />
+              <Ionicons name="heart" size={24} color={Colors.primary} />
             </TouchableOpacity>
           ),
           headerShadowVisible: false,
@@ -523,7 +524,7 @@ export default function ImportContactsScreen() {
 
       {loading ? (
         <View className="flex-1 items-center justify-center px-4">
-          <ActivityIndicator size="large" color="#79947D" />
+          <ActivityIndicator size="large" color={Colors.primary} />
           <Text className="mt-3 text-sm font-semibold text-text-soft">
             Fetching contacts…
           </Text>
@@ -556,7 +557,7 @@ export default function ImportContactsScreen() {
                   onPress={contacts.length === 0 ? handleImportPress : handleAddMoreContacts}
                   activeOpacity={0.9}
                 >
-                  <Ionicons name="person-add" size={20} color="#79947D" />
+                  <Ionicons name="person-add" size={20} color={Colors.primary} />
                   <Text className="font-semibold text-primary text-base">
                     Add more contacts
                   </Text>
@@ -594,13 +595,13 @@ export default function ImportContactsScreen() {
             ListFooterComponent={
               contacts.length > 0 ? (
                 <View className="mt-8 mb-12 flex-row justify-center opacity-20">
-                  <Ionicons name="leaf" size={60} color="#79947D" />
+                  <Ionicons name="leaf" size={60} color={Colors.primary} />
                 </View>
               ) : null
             }
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center px-6 py-14">
-                <Ionicons name="people-outline" size={80} color="#79947D" />
+                <Ionicons name="people-outline" size={80} color={Colors.primary} />
                 <Text className="text-2xl font-semibold text-brand-navy text-center leading-tight mb-2 mt-4 font-heading">
                   {permissionDenied ? "Contacts access needed" : "Your contacts will show up here"}
                 </Text>

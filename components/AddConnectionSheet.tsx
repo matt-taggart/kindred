@@ -9,7 +9,7 @@ import {
   Dimensions,
   StyleSheet,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -91,13 +91,13 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
                   style={styles.softShadow}
                 >
                   <View className="w-12 h-12 rounded-2xl bg-[#8E9B97]/10 flex items-center justify-center">
-                    <MaterialCommunityIcons name="account-plus" size={24} color="#8E9B97" />
+                    <Ionicons name="person-add-outline" size={24} color="#8E9B97" />
                   </View>
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Add manually</Text>
                     <Text className="text-xs text-slate-400">Enter details from scratch</Text>
                   </View>
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#cbd5e1" />
+                  <Ionicons name="chevron-forward" size={24} color="#cbd5e1" />
                 </TouchableOpacity>
 
                 <TouchableOpacity 
@@ -107,13 +107,13 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
                   style={styles.softShadow}
                 >
                   <View className="w-12 h-12 rounded-2xl bg-[#D4A3A1]/10 flex items-center justify-center">
-                    <MaterialCommunityIcons name="contact-outline" size={24} color="#D4A3A1" />
+                    <Ionicons name="people-outline" size={24} color="#D4A3A1" />
                   </View>
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Import from contacts</Text>
                     <Text className="text-xs text-slate-400">Sync with your address book</Text>
                   </View>
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#cbd5e1" />
+                  <Ionicons name="chevron-forward" size={24} color="#cbd5e1" />
                 </TouchableOpacity>
               </View>
 

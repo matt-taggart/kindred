@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Heading, Body, Caption } from './ui';
+import Colors from '@/constants/Colors';
 
 export interface Moment {
   id: string;
@@ -20,10 +21,10 @@ type SharedMomentsSectionProps = {
 };
 
 const ICON_COLORS: Record<string, string> = {
-  'bg-amber-50': '#79947D',
-  'bg-emerald-50': '#79947D',
-  'bg-pink-50': '#79947D',
-  'bg-sky-50': '#79947D',
+  'bg-amber-50': Colors.primary,
+  'bg-emerald-50': Colors.primary,
+  'bg-pink-50': Colors.primary,
+  'bg-sky-50': Colors.primary,
 };
 
 export function SharedMomentsSection({
@@ -52,7 +53,7 @@ export function SharedMomentsSection({
       {/* Moments list */}
       <View>
         {moments.map((moment) => {
-          const iconColor = '#79947D';
+          const iconColor = Colors.primary;
           const iconName = (moment.icon || 'heart-outline') as keyof typeof Ionicons.glyphMap;
           const subtitle = moment.description
             ? `${moment.date} • ${moment.description}`

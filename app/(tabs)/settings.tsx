@@ -13,6 +13,8 @@ import {
 } from "react-native";
 
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
+import { PageHeader } from "@/components/PageHeader";
+import { Body, Caption } from "@/components/ui";
 import Colors from "@/constants/Colors";
 import { useUserStore } from "@/lib/userStore";
 import { resetDatabase } from "@/services/contactService";
@@ -36,9 +38,9 @@ function SettingsRow({
   showChevron = true,
 }: SettingsRowProps) {
   const isDestructive = variant === "destructive";
-  const iconBgColor = isDestructive ? "bg-red-50" : "bg-sage-light";
-  const iconColor = isDestructive ? "#EF4444" : Colors.primary;
-  const textColor = isDestructive ? "text-red-400" : "text-slate-700";
+  const iconBgColor = isDestructive ? "bg-rose-50" : "bg-sage-light";
+  const iconColor = isDestructive ? "#F87171" : Colors.primary;
+  const textColor = isDestructive ? "text-red-300" : "text-slate-700";
 
   const content = (
     <View className="flex-row items-center justify-between px-6 py-5">
@@ -48,12 +50,9 @@ function SettingsRow({
         >
           <Ionicons name={icon} size={22} color={iconColor} />
         </View>
-        <Text
-          className={`text-[15px] font-medium ${textColor}`}
-          style={{ fontFamily: "Outfit_500Medium" }}
-        >
+        <Body weight="medium" className={textColor}>
           {label}
-        </Text>
+        </Body>
       </View>
       {rightElement ??
         (showChevron && (
@@ -91,19 +90,13 @@ function SettingsSection({
   return (
     <View className="mb-10">
       <View className="mb-4 px-4">
-        <Text
-          className="mb-1 text-[10px] font-semibold uppercase tracking-[3px] text-primary/70"
-          style={{ fontFamily: "Outfit_600SemiBold" }}
-        >
+        <Caption uppercase muted={false} className="mb-1 font-semibold tracking-[3px] text-primary/70">
           {title}
-        </Text>
+        </Caption>
         {description && (
-          <Text
-            className="text-[13px] text-text-soft/80"
-            style={{ fontFamily: "Outfit_400Regular" }}
-          >
+          <Body size="sm" className="text-text-soft/80">
             {description}
-          </Text>
+          </Body>
         )}
       </View>
       <View
@@ -208,30 +201,16 @@ export default function SettingsScreen() {
     <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View className="items-center px-8 pb-4 pt-8">
-          <View className="mb-6 h-12 w-12 items-center justify-center rounded-full bg-sage-light">
-            <Ionicons name="heart" size={28} color={Colors.primary} />
-          </View>
-          <Text
-            className="text-3xl tracking-tight text-slate-900"
-            style={{ fontFamily: "PlayfairDisplay_500Medium" }}
-          >
-            Settings
-          </Text>
-          <Text
-            className="mt-1 text-sm italic text-text-soft"
-            style={{ fontFamily: "Outfit_300Light" }}
-          >
-            Your peaceful space
-          </Text>
-        </View>
+        <PageHeader
+          title="Preferences"
+          subtitle="Your peaceful space"
+        />
 
         {/* Content */}
-        <View className="px-5 pt-4">
+        <View>
           {/* Nurturing Preferences */}
           <SettingsSection
             title="Nurturing Preferences"
@@ -263,12 +242,9 @@ export default function SettingsScreen() {
               showChevron={false}
               rightElement={
                 purchaseState.isRestoring ? (
-                  <Text
-                    className="text-sm text-text-soft"
-                    style={{ fontFamily: "Outfit_400Regular" }}
-                  >
+                  <Body size="sm" className="text-text-soft">
                     Restoring...
-                  </Text>
+                  </Body>
                 ) : null
               }
             />
@@ -280,12 +256,9 @@ export default function SettingsScreen() {
                   label="Kindred Pro"
                   showChevron={false}
                   rightElement={
-                    <Text
-                      className="text-sm font-medium text-primary"
-                      style={{ fontFamily: "Outfit_500Medium" }}
-                    >
+                    <Body size="sm" weight="medium" className="text-primary">
                       Active
-                    </Text>
+                    </Body>
                   }
                 />
               </>
@@ -325,12 +298,9 @@ export default function SettingsScreen() {
           )}
 
           {/* Version Footer */}
-          <Text
-            className="mt-2 text-center text-[11px] text-text-soft/40"
-            style={{ fontFamily: "Outfit_400Regular" }}
-          >
+          <Caption muted className="mt-2 text-center text-text-soft/40">
             Version 2.4.0
-          </Text>
+          </Caption>
         </View>
       </ScrollView>
 
@@ -358,31 +328,22 @@ export default function SettingsScreen() {
             }}
           >
             <View className="mb-4 items-center">
-              <View className="h-12 w-12 items-center justify-center rounded-full bg-red-50">
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-rose-50">
                 <Ionicons name="warning" size={24} color="#EF4444" />
               </View>
             </View>
 
-            <Text
-              className="mb-2 text-center text-lg text-slate-900"
-              style={{ fontFamily: "PlayfairDisplay_600SemiBold" }}
-            >
+            <Body size="lg" className="mb-2 text-center font-display font-semibold text-slate-900">
               Delete All Data?
-            </Text>
-            <Text
-              className="mb-4 text-center text-sm text-text-soft"
-              style={{ fontFamily: "Outfit_400Regular" }}
-            >
+            </Body>
+            <Body size="sm" className="mb-4 text-center text-text-soft">
               This will permanently delete all your contacts and interaction
               history. This action cannot be undone.
-            </Text>
+            </Body>
 
-            <Text
-              className="mb-2 text-sm text-slate-700"
-              style={{ fontFamily: "Outfit_500Medium" }}
-            >
+            <Body size="sm" weight="medium" className="mb-2">
               Type DELETE to confirm:
-            </Text>
+            </Body>
             <View className="mb-4 min-h-12 flex-row items-center rounded-inner-pill border border-slate-100 bg-off-white px-4">
               <TextInput
                 className="flex-1 text-base leading-5 text-slate-700"

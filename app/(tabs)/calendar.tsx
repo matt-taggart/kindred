@@ -8,9 +8,9 @@ import {
   ScrollView,
   View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-
-import { Heading, Body, Caption } from '@/components/ui';
+import Colors from '@/constants/Colors';
+import { PageHeader } from '@/components/PageHeader';
+import { EmptyState } from '@/components/EmptyState';
 import { MomentCard, MomentSectionDivider } from '@/components';
 import { getUpcomingMoments, UpcomingMoments } from '@/services/calendarService';
 
@@ -63,7 +63,7 @@ export default function MomentsScreen() {
   if (loading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
-        <ActivityIndicator size="large" color="#9DBEBB" />
+        <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
   }
@@ -72,31 +72,21 @@ export default function MomentsScreen() {
     <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 32 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View className="pt-2 mb-8">
-          <Heading size={1} className="text-brand-navy dark:text-slate-100 mb-2">
-            Upcoming Moments
-          </Heading>
-          <Caption muted className="italic">
-            A gentle pace for meaningful returns.
-          </Caption>
-        </View>
+        <PageHeader
+          title="Moments"
+          subtitle="A gentle pace for meaningful returns."
+        />
 
         {isEmpty ? (
-          /* Empty State */
-          <View className="items-center py-16 px-6">
-            <Ionicons name="sunny-outline" size={72} color="#9DBEBB" />
-            <Heading size={3} className="mt-6 text-center text-brand-navy dark:text-slate-100">
-              All caught up!
-            </Heading>
-            <Body className="mt-3 text-center opacity-60">
-              No moments on the horizon. Enjoy the stillness.
-            </Body>
-          </View>
+          <EmptyState
+            icon="sunny-outline"
+            title="All caught up!"
+            subtitle="No moments on the horizon. Enjoy the stillness."
+          />
         ) : (
           <View className="space-y-10">
             {/* This Week Section */}

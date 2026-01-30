@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { View, TouchableOpacity, Image } from 'react-native';
 import { Heading, Body } from './ui';
+import Colors from '@/constants/Colors';
 
 const EmptyIllustration = () => (
   <View className="relative mb-8 items-center justify-center">
@@ -21,7 +22,7 @@ const ActionButton = ({ icon, label, onPress }: { icon: any; label: string; onPr
   >
     <View className="flex-row items-center">
       <View className="w-10 h-10 bg-primary/10 rounded-full items-center justify-center mr-3">
-        <Ionicons name={icon} size={20} color="#79947D" />
+        <Ionicons name={icon} size={20} color={Colors.primary} />
       </View>
       <Body weight="medium">{label}</Body>
     </View>

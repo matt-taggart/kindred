@@ -9,16 +9,19 @@ import {
   RefreshControl,
   SafeAreaView,
   ScrollView,
+  TouchableOpacity,
   UIManager,
   View,
 } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+import Colors from '@/constants/Colors';
 import { Contact } from '@/db/schema';
 import { getDueContactsGrouped, GroupedDueContacts, isBirthdayToday, updateInteraction, getContactCount } from '@/services/contactService';
 import EmptyContactsState from '@/components/EmptyContactsState';
 import CelebrationStatus from '@/components/CelebrationStatus';
 import ReachedOutSheet from '@/components/ReachedOutSheet';
-import { HomeHeader } from '@/components/HomeHeader';
+import { PageHeader } from '@/components/PageHeader';
 import { DailySoftnessCard } from '@/components/DailySoftnessCard';
 import { ConnectionTile } from '@/components/ConnectionTile';
 import { AddConnectionTile } from '@/components/AddConnectionTile';
@@ -133,10 +136,18 @@ export default function HomeScreen() {
     loadContacts();
   }, [loadContacts]);
 
+  const getGreeting = (): string => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+  const greeting = getGreeting();
+
   if (loading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
-        <ActivityIndicator size="large" color="#9DBEBB" />
+        <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
   }
@@ -145,9 +156,19 @@ export default function HomeScreen() {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <View className="flex-1 px-6 pt-6">
-          <HomeHeader
-            userName="friend"
-            onAvatarPress={handleAvatarPress}
+          <PageHeader
+            title="Kindred"
+            subtitle={`${greeting}, friend`}
+            showBranding={false}
+            rightElement={
+              <TouchableOpacity onPress={handleAvatarPress} className="relative">
+                <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
+                  <View className="w-full h-full bg-primary items-center justify-center">
+                    <Ionicons name="person" size={24} color="white" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            }
           />
           <EmptyContactsState />
         </View>
@@ -161,15 +182,25 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 128 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         showsVerticalScrollIndicator={false}
       >
-        <HomeHeader
-          userName="friend"
-          onAvatarPress={handleAvatarPress}
+        <PageHeader
+          title="Kindred"
+          subtitle={`${greeting}, friend`}
+          showBranding={false}
+          rightElement={
+            <TouchableOpacity onPress={handleAvatarPress} className="relative">
+              <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
+                <View className="w-full h-full bg-primary items-center justify-center">
+                  <Ionicons name="person" size={24} color="white" />
+                </View>
+              </View>
+            </TouchableOpacity>
+          }
         />
 
         <DailySoftnessCard

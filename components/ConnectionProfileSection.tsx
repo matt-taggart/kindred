@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Body } from './ui';
+import Colors from '@/constants/Colors';
 
 interface ConnectionProfileSectionProps {
   avatarUri: string | null;
@@ -81,7 +82,7 @@ export function ConnectionProfileSection({
             className="absolute bottom-1 right-1 bg-white dark:bg-card-dark p-1.5 rounded-full shadow-md border border-slate-100 dark:border-slate-800"
             testID="favorite-badge"
           >
-            <Ionicons name="heart" size={16} color="#79947D" />
+            <Ionicons name="heart" size={16} color={Colors.primary} />
           </View>
         )}
       </View>

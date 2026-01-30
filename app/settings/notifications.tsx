@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 import { NotificationFrequency, useUserStore } from "@/lib/userStore";
+import Colors from "@/constants/Colors";
 
 const frequencyOptions: { value: NotificationFrequency; label: string }[] = [
   { value: 1, label: "1x" },
@@ -111,8 +112,8 @@ export default function NotificationSettingsScreen() {
             onPress={() => router.back()}
             className="flex-row items-center"
           >
-            <Ionicons name="chevron-back" size={24} color="#79947D" />
-            <Text className="text-[#79947D] font-heading font-semibold text-lg ml-1">Settings</Text>
+            <Ionicons name="chevron-back" size={24} color={Colors.primary} />
+            <Text className="text-primary font-heading font-semibold text-lg ml-1">Settings</Text>
           </Pressable>
           <Text className="text-lg font-bold font-heading text-[#1A1C19]">Reminders</Text>
           <View className="w-20" /> {/* Spacer for centering */}
@@ -197,7 +198,7 @@ export default function NotificationSettingsScreen() {
           {/* Preview Section */}
           <View className="rounded-[32px] bg-soft-sand p-7 border border-slate-200/50 overflow-hidden relative">
             <View className="absolute -right-4 -top-4 opacity-[0.05]">
-               <Ionicons name="heart" size={120} color="#79947D" />
+               <Ionicons name="heart" size={120} color={Colors.primary} />
             </View>
             
             <View className="relative z-10">
@@ -205,9 +206,9 @@ export default function NotificationSettingsScreen() {
                 <Ionicons
                   name="information-circle"
                   size={18}
-                  color="#79947D"
+                  color={Colors.primary}
                 />
-                <Text className="text-xs font-bold font-heading text-[#79947D] uppercase tracking-wider">Gentle Preview</Text>
+                <Text className="text-xs font-bold font-heading text-primary uppercase tracking-wider">Gentle Preview</Text>
               </View>
               <Text className="font-display-italic text-[17px] text-[#1A1C19] leading-relaxed">
                 &quot;{previewText}&quot;
@@ -248,7 +249,7 @@ export default function NotificationSettingsScreen() {
               mode="time"
               display="spinner"
               onChange={handleTimeChange}
-              accentColor="#79947D"
+              accentColor={Colors.primary}
             />
           </View>
         )}
@@ -260,7 +261,7 @@ export default function NotificationSettingsScreen() {
             mode="time"
             display="default"
             onChange={handleTimeChange}
-            accentColor="#79947D"
+            accentColor={Colors.primary}
           />
         )}
       </SafeAreaView>

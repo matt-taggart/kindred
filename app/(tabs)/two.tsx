@@ -7,16 +7,20 @@ import {
   FlatList,
   RefreshControl,
   SafeAreaView,
+  TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 
+import Colors from "@/constants/Colors";
 import type { Contact } from "@/db/schema";
-import { ConnectionsHeader } from "@/components/ConnectionsHeader";
+import { PageHeader } from '@/components/PageHeader';
+import { EmptyState } from '@/components/EmptyState';
 import { FilterPills, FilterOption } from "@/components/FilterPills";
 import { ConnectionCard } from "@/components/ConnectionCard";
 import { RecentConnectionRow } from "@/components/RecentConnectionRow";
 import { SectionHeader } from "@/components/SectionHeader";
-import { ExpandableFAB } from "@/components/ExpandableFAB";
 import {
   getContacts,
   getRecentlyConnectedContacts,
@@ -131,14 +135,6 @@ export default function ConnectionsScreen() {
     loadContacts();
   }, [loadContacts]);
 
-  const handleAddManually = useCallback(() => {
-    router.push("/contacts/add");
-  }, [router]);
-
-  const handleImportContacts = useCallback(() => {
-    router.push({ pathname: "/contacts/import", params: { autoRequest: "1" } });
-  }, [router]);
-
   const handleContactPress = useCallback(
     (contactId: string) => {
       router.push(`/contacts/${contactId}`);
@@ -215,7 +211,7 @@ export default function ConnectionsScreen() {
   if (loading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
-        <ActivityIndicator size="large" color="#9DBEBB" />
+        <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
   }
@@ -235,14 +231,59 @@ export default function ConnectionsScreen() {
           paddingTop: 16,
         }}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          counts.all === 0 ? (
+            <EmptyState
+              icon="people-outline"
+              title="Your connections will appear here"
+              subtitle="Add someone you'd like to stay close to"
+              actions={[
+                {
+                  icon: 'people-outline',
+                  label: 'Import from contacts',
+                  onPress: () => router.push({ pathname: "/contacts/import", params: { autoRequest: "1" } }),
+                },
+                {
+                  icon: 'person-add-outline',
+                  label: 'Add manually',
+                  onPress: () => router.push("/contacts/add"),
+                },
+              ]}
+            />
+          ) : undefined
+        }
         ListHeaderComponent={
           <View className="mb-4">
-            <ConnectionsHeader 
-              onSearchPress={handleSearchPress}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              isSearching={isSearching}
+            <PageHeader
+              title="Connections"
+              subtitle={isSearching ? undefined : "Stay close to the people who matter most."}
+              rightElement={
+                <TouchableOpacity
+                  testID="search-button"
+                  onPress={handleSearchPress}
+                  accessibilityLabel={isSearching ? "Close search" : "Search connections"}
+                  accessibilityRole="button"
+                  className="p-3 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name={isSearching ? "close" : "search"} size={20} color="#94a3b8" />
+                </TouchableOpacity>
+              }
             />
+            {isSearching && (
+              <View className="mb-4">
+                <TextInput
+                  className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-4 text-slate-900 dark:text-slate-100 text-lg"
+                  placeholder="Search by name..."
+                  placeholderTextColor="#94a3b8"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  autoFocus
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            )}
             <FilterPills
               selected={filter}
               counts={counts}
@@ -250,10 +291,6 @@ export default function ConnectionsScreen() {
             />
           </View>
         }
-      />
-      <ExpandableFAB
-        onAddManually={handleAddManually}
-        onImportContacts={handleImportContacts}
       />
     </SafeAreaView>
   );
