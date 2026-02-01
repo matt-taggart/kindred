@@ -7,7 +7,6 @@ import {
   Pressable,
   Animated,
   Dimensions,
-  StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -60,13 +59,13 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
       <Pressable className="flex-1 bg-brand-navy/30" onPress={handleClose}>
         <View className="flex-1 justify-end">
           <Animated.View 
+            className="w-full"
             style={[
-              styles.sheetContainer,
               { transform: [{ translateY: slideAnim }] }
             ]}
           >
             <Pressable
-              className="bg-[#F9F8F6] dark:bg-slate-900 rounded-t-[40px] px-6 pb-10 pt-3 shadow-2xl"
+              className="bg-off-white dark:bg-slate-900 rounded-t-2xl px-6 pb-10 pt-3 shadow-2xl"
               onPress={(e) => e.stopPropagation?.()}
             >
               {/* Handle bar */}
@@ -74,10 +73,10 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
 
               {/* Header */}
               <View className="text-center mb-8 items-center">
-                <Text className="text-2xl font-serif text-brand-navy dark:text-slate-100 italic" style={styles.serifFont}>
+                <Text className="text-3xl font-display-italic text-brand-navy dark:text-slate-100">
                   Add a connection
                 </Text>
-                <Text className="text-sm text-slate-500 mt-2 font-body text-center">
+                <Text className="text-sm text-text-soft mt-2 font-body text-center">
                   Who would you like to nurture today?
                 </Text>
               </View>
@@ -87,15 +86,14 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
                 <TouchableOpacity 
                   onPress={onAddManually}
                   activeOpacity={0.9}
-                  className="w-full bg-white dark:bg-slate-800 p-5 rounded-[28px] flex-row items-center gap-4 soft-shadow border border-white dark:border-slate-700"
-                  style={styles.softShadow}
+                  className="w-full bg-white dark:bg-slate-800 p-5 rounded-xl flex-row items-center gap-4 shadow-soft border border-white dark:border-slate-700"
                 >
                   <View className="w-12 h-12 rounded-2xl bg-[#8E9B97]/10 flex items-center justify-center">
                     <Ionicons name="person-add-outline" size={24} color="#8E9B97" />
                   </View>
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Add manually</Text>
-                    <Text className="text-xs text-slate-400">Enter details from scratch</Text>
+                    <Text className="text-xs text-text-soft">Enter details from scratch</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={24} color="#cbd5e1" />
                 </TouchableOpacity>
@@ -103,15 +101,14 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
                 <TouchableOpacity 
                   onPress={onImportContacts}
                   activeOpacity={0.9}
-                  className="w-full bg-white dark:bg-slate-800 p-5 rounded-[28px] flex-row items-center gap-4 soft-shadow border border-white dark:border-slate-700"
-                  style={styles.softShadow}
+                  className="w-full bg-white dark:bg-slate-800 p-5 rounded-xl flex-row items-center gap-4 shadow-soft border border-white dark:border-slate-700"
                 >
                   <View className="w-12 h-12 rounded-2xl bg-[#D4A3A1]/10 flex items-center justify-center">
                     <Ionicons name="people-outline" size={24} color="#D4A3A1" />
                   </View>
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Import from contacts</Text>
-                    <Text className="text-xs text-slate-400">Sync with your address book</Text>
+                    <Text className="text-xs text-text-soft">Sync with your address book</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={24} color="#cbd5e1" />
                 </TouchableOpacity>
@@ -134,18 +131,3 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  sheetContainer: {
-    width: '100%',
-  },
-  serifFont: {
-    fontFamily: 'PlayfairDisplay_500Medium_Italic', // Best fit for the requested italic serif
-  },
-  softShadow: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.04,
-    shadowRadius: 30,
-    elevation: 2,
-  }
-});
