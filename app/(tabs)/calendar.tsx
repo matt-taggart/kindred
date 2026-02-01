@@ -78,7 +78,7 @@ export default function MomentsScreen() {
       >
         <PageHeader
           title="Moments"
-          subtitle="A gentle pace for meaningful returns."
+          subtitle="A gentle pace for meaningful connections."
         />
 
         {isEmpty ? (

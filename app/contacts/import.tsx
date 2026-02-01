@@ -141,8 +141,8 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className={`mb-4 rounded-[40px] border-2 p-5 flex-row items-start gap-4 transition-all ${
-        selected ? 'border-primary bg-primary/5' : 'border-border bg-card-white'
+      className={`mx-6 mb-4 rounded-[40px] border py-4 px-5 flex-row items-start gap-4 transition-all ${
+        selected ? 'border-2 border-primary bg-white' : 'border-slate-100 bg-white'
       }`}
       onPress={onToggle}
       activeOpacity={0.85}
@@ -163,21 +163,23 @@ const ContactRow = ({
       </View>
 
       <View className="flex-1">
+        <Text className="text-base font-semibold text-brand-navy mb-1">
+          {contact.name}
+        </Text>
+        <Text className="text-sm text-slate-500 mb-3">
+          {formatPhoneNumber(contact.phone)}
+        </Text>
         <View className="flex-row items-center gap-2">
-          <Text className="text-base font-semibold text-brand-navy">
-            {contact.name}
-          </Text>
           {contact.birthday && (
-            <View className="flex-row items-center gap-0.5 mt-0.5">
-              <Ionicons name="cake-outline" size={10} color="#94a3b8" />
+            <View className="flex-row items-center gap-0.5">
+              <Ionicons name="gift-outline" size={10} color="#94a3b8" />
               <Text className="text-[11px] text-slate-400">
                 {formatBirthdayDisplay(contact.birthday, { includeYear: false })}
               </Text>
             </View>
           )}
         </View>
-
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => onFrequencyChange(frequency)}
           className={`mt-3 w-full flex-row items-center justify-between px-4 py-2.5 rounded-full border ${
             selected ? 'bg-primary/5 border-primary/20' : 'bg-slate-50 border-border'
@@ -191,7 +193,7 @@ const ContactRow = ({
       </View>
 
       <View className="pt-1">
-        <View 
+        <View
           className={`h-6 w-6 items-center justify-center rounded-full border ${
             selected ? 'bg-primary border-primary' : 'border-slate-300'
           }`}
@@ -499,12 +501,12 @@ export default function ImportContactsScreen() {
   }, [contacts, router, selected, contactFrequencies, customIntervals]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
+    <>
       <Stack.Screen
         options={{
           headerTitle: "",
           headerLeft: () => (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => router.back()}
               className="flex-row items-center ml-2"
             >
@@ -521,6 +523,8 @@ export default function ImportContactsScreen() {
           headerStyle: { backgroundColor: '#FDFBF7' },
         }}
       />
+
+      <SafeAreaView className="flex-1 bg-background-light">
 
       {loading ? (
         <View className="flex-1 items-center justify-center px-4">
@@ -565,12 +569,14 @@ export default function ImportContactsScreen() {
 
                 {contacts.length > 0 && (
                   <TouchableOpacity
-                    className="flex-row items-center justify-between px-6 py-4 mb-6 border border-border rounded-pill bg-card-white shadow-sm"
+                    className={`flex-row items-center justify-between px-6 py-4 mb-6 rounded-pill ${
+                      selected.size === contacts.length ? 'border-2 border-primary bg-white' : 'border border-slate-100 bg-white'
+                    }`}
                     onPress={handleSelectAll}
                     activeOpacity={0.7}
                   >
                     <Text className="font-semibold text-brand-navy text-base">Select all</Text>
-                    <View 
+                    <View
                       className={`h-6 w-6 items-center justify-center rounded-full border ${
                         selected.size === contacts.length ? 'bg-primary border-primary' : 'border-slate-300'
                       }`}
@@ -624,8 +630,8 @@ export default function ImportContactsScreen() {
 
       <View className="absolute bottom-0 left-0 right-0 bg-background-light/90 border-t border-border px-6 pb-10 pt-4">
         <TouchableOpacity
-          className={`w-full py-5 rounded-pill items-center justify-center shadow-lg transition-all ${
-            selected.size > 0 ? 'bg-primary shadow-primary/20' : 'bg-slate-200'
+          className={`w-full py-5 rounded-pill items-center justify-center transition-all ${
+            selected.size > 0 ? 'bg-primary' : 'bg-slate-200'
           }`}
           onPress={handleSave}
           activeOpacity={0.9}
@@ -644,7 +650,7 @@ export default function ImportContactsScreen() {
         onRequestClose={() => setShowFrequencySelector(false)}
       >
         <View className="flex-1 items-center justify-center bg-black/50 px-6">
-          <View className="w-full rounded-2xl bg-surface p-6 shadow-lg">
+          <View className="w-full rounded-2xl bg-surface p-6">
             <Text className="mb-2 text-lg font-bold text-warmgray">
               Reminder rhythm
             </Text>
@@ -806,6 +812,7 @@ export default function ImportContactsScreen() {
         visible={showPaywall}
         onClose={() => setShowPaywall(false)}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 }

@@ -108,7 +108,7 @@ export default function NotificationSettingsScreen() {
       <SafeAreaView className="flex-1 bg-background-light">
         {/* Header */}
         <View className="px-6 pb-4 pt-4 flex-row items-center justify-between">
-          <Pressable 
+          <Pressable
             onPress={() => router.back()}
             className="flex-row items-center"
           >
@@ -116,7 +116,8 @@ export default function NotificationSettingsScreen() {
             <Text className="text-primary font-heading font-semibold text-lg ml-1">Settings</Text>
           </Pressable>
           <Text className="text-lg font-bold font-heading text-[#1A1C19]">Reminders</Text>
-          <View className="w-20" /> {/* Spacer for centering */}
+          {/* Spacer for centering */}
+          <View className="w-20" />
         </View>
 
         <ScrollView
