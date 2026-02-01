@@ -84,31 +84,31 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
               {/* Buttons */}
               <View className="gap-y-4">
                 <TouchableOpacity 
-                  onPress={onAddManually}
+                  onPress={onImportContacts}
                   activeOpacity={0.9}
                   className="w-full bg-white dark:bg-slate-800 p-5 rounded-xl flex-row items-center gap-4 shadow-soft border border-white dark:border-slate-700"
                 >
-                  <View className="w-12 h-12 rounded-2xl bg-[#8E9B97]/10 flex items-center justify-center">
-                    <Ionicons name="person-add-outline" size={24} color="#8E9B97" />
+                  <View className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <Ionicons name="people-outline" size={24} color="#9DBEBB" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Add manually</Text>
-                    <Text className="text-xs text-text-soft">Enter details from scratch</Text>
+                    <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Import from contacts</Text>
+                    <Text className="text-xs text-text-soft">Sync with your address book</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={24} color="#cbd5e1" />
                 </TouchableOpacity>
 
                 <TouchableOpacity 
-                  onPress={onImportContacts}
+                  onPress={onAddManually}
                   activeOpacity={0.9}
                   className="w-full bg-white dark:bg-slate-800 p-5 rounded-xl flex-row items-center gap-4 shadow-soft border border-white dark:border-slate-700"
                 >
-                  <View className="w-12 h-12 rounded-2xl bg-[#D4A3A1]/10 flex items-center justify-center">
-                    <Ionicons name="people-outline" size={24} color="#D4A3A1" />
+                  <View className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <Ionicons name="person-add-outline" size={24} color="#9DBEBB" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Import from contacts</Text>
-                    <Text className="text-xs text-text-soft">Sync with your address book</Text>
+                    <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Add manually</Text>
+                    <Text className="text-xs text-text-soft">Enter details from scratch</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={24} color="#cbd5e1" />
                 </TouchableOpacity>
