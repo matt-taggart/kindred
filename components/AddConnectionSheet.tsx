@@ -65,7 +65,7 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
             ]}
           >
             <Pressable
-              className="bg-off-white dark:bg-slate-900 rounded-t-2xl px-6 pb-10 pt-3 shadow-2xl"
+              className="bg-background-light dark:bg-slate-900 rounded-t-2xl px-6 pb-10 pt-3 shadow-2xl"
               onPress={(e) => e.stopPropagation?.()}
             >
               {/* Handle bar */}
@@ -73,7 +73,7 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
 
               {/* Header */}
               <View className="text-center mb-8 items-center">
-                <Text className="text-3xl font-display-italic text-brand-navy dark:text-slate-100">
+                <Text className="text-3xl font-display text-brand-navy dark:text-slate-100">
                   Add a connection
                 </Text>
                 <Text className="text-sm text-text-soft mt-2 font-body text-center">
