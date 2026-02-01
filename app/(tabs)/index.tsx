@@ -155,7 +155,7 @@ export default function HomeScreen() {
   if (totalContactCount === 0) {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
-        <View className="flex-1 px-6 pt-6">
+        <View className="flex-1 px-6 pt-10">
           <PageHeader
             title="Kindred"
             subtitle={`${greeting}, friend`}

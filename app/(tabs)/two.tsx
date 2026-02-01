@@ -258,19 +258,21 @@ export default function ConnectionsScreen() {
               title="Connections"
               subtitle={isSearching ? undefined : "Stay close to the people who matter most."}
               rightElement={
-                <TouchableOpacity
-                  testID="search-button"
-                  onPress={handleSearchPress}
-                  accessibilityLabel={isSearching ? "Close search" : "Search connections"}
-                  accessibilityRole="button"
-                  className="p-3 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name={isSearching ? "close" : "search"} size={20} color="#94a3b8" />
-                </TouchableOpacity>
+                counts.all > 0 ? (
+                  <TouchableOpacity
+                    testID="search-button"
+                    onPress={handleSearchPress}
+                    accessibilityLabel={isSearching ? "Close search" : "Search connections"}
+                    accessibilityRole="button"
+                    className="p-3 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name={isSearching ? "close" : "search"} size={20} color="#94a3b8" />
+                  </TouchableOpacity>
+                ) : undefined
               }
             />
-            {isSearching && (
+            {isSearching && counts.all > 0 && (
               <View className="mb-4">
                 <TextInput
                   className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-4 text-slate-900 dark:text-slate-100 text-lg"
@@ -284,11 +286,11 @@ export default function ConnectionsScreen() {
                 />
               </View>
             )}
-            <FilterPills
+            {counts.all > 0 && <FilterPills
               selected={filter}
               counts={counts}
               onSelect={setFilter}
-            />
+            />}
           </View>
         }
       />

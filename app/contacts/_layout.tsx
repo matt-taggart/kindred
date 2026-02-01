@@ -2,10 +2,13 @@ import { Stack } from "expo-router";
 
 export default function ContactsLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="[id]" />
+      <Stack.Screen name="import" />
+      <Stack.Screen name="review-schedule" />
+      <Stack.Screen name="add/index" />
+      <Stack.Screen name="add/birthday" />
+      <Stack.Screen name="add/rhythm" />
+    </Stack>
   );
 }

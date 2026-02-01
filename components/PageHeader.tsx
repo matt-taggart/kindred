@@ -8,6 +8,7 @@ type PageHeaderProps = {
   title: string;
   subtitle?: string;
   rightElement?: React.ReactNode;
+  leftElement?: React.ReactNode;
   showBranding?: boolean;
 };
 
@@ -15,23 +16,30 @@ export function PageHeader({
   title,
   subtitle,
   rightElement,
+  leftElement,
   showBranding = true,
 }: PageHeaderProps) {
   return (
-    <View className="mb-6">
-      <View className="flex-row justify-between items-start mb-2">
-        <View className="flex-1">
-          {showBranding && (
-            <View className="flex-row items-center gap-2 mb-1">
-              <View className="w-8 h-8 items-center justify-center">
-                <Ionicons name="heart" size={16} color={Colors.primary} />
-              </View>
-              <Caption uppercase muted={false} className="text-primary/70 font-semibold tracking-[3px]">
-                KINDRED
-              </Caption>
+    <View className="mb-4">
+      {showBranding && (
+        <View className="flex-row items-center gap-2 mb-2">
+          <View className="w-8 h-8 items-center justify-center">
+            <Ionicons name="heart" size={16} color={Colors.primary} />
+          </View>
+          <Caption uppercase muted={false} className="text-primary/70 font-semibold tracking-[3px]">
+            KINDRED
+          </Caption>
+        </View>
+      )}
+      
+      <View className="flex-row justify-between items-center mb-2">
+        <View className="flex-1 flex-row items-center gap-3">
+          {leftElement && (
+            <View>
+              {leftElement}
             </View>
           )}
-          <Heading size={1} className="text-brand-navy dark:text-slate-100">
+          <Heading size={1} className="text-brand-navy dark:text-slate-100 flex-1">
             {title}
           </Heading>
         </View>

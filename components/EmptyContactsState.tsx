@@ -34,7 +34,7 @@ export default function EmptyContactsState() {
   const router = useRouter();
 
   return (
-    <View className="flex-1 items-center justify-center px-8">
+    <View className="flex-1 items-center justify-center px-8 -mt-24">
       <EmptyIllustration />
 
       <Heading size={1} className="text-center mb-4 leading-tight">

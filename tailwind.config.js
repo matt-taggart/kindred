@@ -26,6 +26,22 @@ module.exports = {
         'accent-warm': '#E8D5C4',
         'card-light': '#FFFFFF',
         'card-dark': '#2D2D2A',
+        // Added sage variants for contacts screen
+        sage: {
+          50: '#f6f8f7',
+          100: '#e8efe9',
+          200: '#d1e0d3',
+          500: '#6b9c7c',
+          700: '#436850',
+        },
+        stone: {
+          50: '#fafaf9',
+          100: '#f5f5f4',
+          200: '#e7e5e4',
+          300: '#d6d3d1',
+          400: '#a8a29e',
+          500: '#78716c',
+        }
       },
       fontFamily: {
         display: ['PlayfairDisplay_500Medium'],

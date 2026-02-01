@@ -1,6 +1,6 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as Contacts from "expo-contacts";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,6 +19,7 @@ import {
 } from "react-native";
 
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
+import { PageHeader } from "@/components/PageHeader";
 import { formatPhoneNumber } from "@/utils/phone";
 import { formatBirthdayDisplay } from "@/utils/formatters";
 import Colors from "@/constants/Colors";
@@ -26,10 +27,10 @@ import Colors from "@/constants/Colors";
 type Bucket = "daily" | "weekly" | "monthly" | "yearly" | "custom";
 
 const bucketLabels: Record<Bucket, string> = {
-  daily: "Every day",
-  weekly: "Every week",
-  monthly: "Once a month",
-  yearly: "Once a year",
+  daily: "Daily rhythm",
+  weekly: "Weekly rhythm",
+  monthly: "Monthly rhythm",
+  yearly: "Yearly rhythm",
   custom: "Custom rhythm",
 };
 
@@ -141,14 +142,16 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className={`mx-6 mb-4 rounded-[40px] border py-4 px-5 flex-row items-start gap-4 transition-all ${
-        selected ? 'border-2 border-primary bg-white' : 'border-slate-100 bg-white'
+      className={`mx-6 mb-3 rounded-3xl p-4 flex-row items-start gap-4 transition-all ${
+        selected 
+          ? 'bg-sage-50 border border-sage-200 shadow-sm' 
+          : 'bg-white border border-stone-100'
       }`}
       onPress={onToggle}
-      activeOpacity={0.85}
+      activeOpacity={0.9}
     >
       <View className={`h-12 w-12 items-center justify-center rounded-full ${
-        selected ? 'bg-primary/10' : 'bg-slate-50'
+        selected ? 'bg-sage-100' : 'bg-stone-50'
       }`}>
         {contact.avatarUri ? (
           <Image
@@ -156,50 +159,50 @@ const ContactRow = ({
             className="h-12 w-12 rounded-full"
           />
         ) : (
-          <Text className={`text-base font-medium italic ${selected ? 'text-primary' : 'text-slate-400'}`}>
+          <Text className={`text-base font-medium font-serif ${selected ? 'text-sage-700' : 'text-stone-400'}`}>
             {initial}
           </Text>
         )}
       </View>
 
       <View className="flex-1">
-        <Text className="text-base font-semibold text-brand-navy mb-1">
+        <Text className="text-base font-medium text-brand-navy mb-0.5">
           {contact.name}
         </Text>
-        <Text className="text-sm text-slate-500 mb-3">
+        <Text className="text-sm text-stone-500 mb-3">
           {formatPhoneNumber(contact.phone)}
         </Text>
         <View className="flex-row items-center gap-2">
           {contact.birthday && (
             <View className="flex-row items-center gap-0.5">
               <Ionicons name="gift-outline" size={10} color="#94a3b8" />
-              <Text className="text-[11px] text-slate-400">
+              <Text className="text-[11px] text-stone-400">
                 {formatBirthdayDisplay(contact.birthday, { includeYear: false })}
               </Text>
             </View>
           )}
         </View>
-        <TouchableOpacity
-          onPress={() => onFrequencyChange(frequency)}
-          className={`mt-3 w-full flex-row items-center justify-between px-4 py-2.5 rounded-full border ${
-            selected ? 'bg-primary/5 border-primary/20' : 'bg-slate-50 border-border'
-          }`}
-        >
-          <Text className={`text-xs font-medium ${selected ? 'text-primary' : 'text-slate-600'}`}>
-            {bucketLabels[frequency]}
-          </Text>
-          <Ionicons name="chevron-down" size={14} color={selected ? Colors.primary : "#94a3b8"} />
-        </TouchableOpacity>
+        
+        {selected && (
+          <TouchableOpacity
+            onPress={() => onFrequencyChange(frequency)}
+            className="mt-2 w-full flex-row items-center justify-between px-3 py-2 rounded-xl bg-white/60 border border-sage-200/50"
+          >
+            <Text className="text-xs font-medium text-sage-700">
+              {bucketLabels[frequency]}
+            </Text>
+            <Ionicons name="chevron-down" size={12} color={Colors.primary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View className="pt-1">
         <View
           className={`h-6 w-6 items-center justify-center rounded-full border ${
-            selected ? 'bg-primary border-primary' : 'border-slate-300'
+            selected ? 'bg-sage-500 border-sage-500' : 'border-stone-300'
           }`}
-          style={!selected ? { borderRadius: 12, borderStyle: 'solid' } : undefined}
         >
-          {selected && <Ionicons name="checkmark" size={16} color="white" />}
+          {selected && <Ionicons name="checkmark" size={14} color="white" />}
         </View>
       </View>
     </TouchableOpacity>
@@ -501,30 +504,22 @@ export default function ImportContactsScreen() {
   }, [contacts, router, selected, contactFrequencies, customIntervals]);
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerTitle: "",
-          headerLeft: () => (
-            <TouchableOpacity
+    <SafeAreaView className="flex-1 bg-background-light">
+      <View className="px-6 pt-2 pb-0">
+        <PageHeader 
+          title="Gather your connections" 
+          subtitle="The people you care about will gather here." 
+          showBranding={false}
+          rightElement={
+             <TouchableOpacity
               onPress={() => router.back()}
-              className="flex-row items-center ml-2"
+              className="p-2"
             >
-              <Ionicons name="chevron-back" size={24} color={Colors.primary} />
-              <Text className="text-primary font-medium text-base ml-1">Back</Text>
+              <Ionicons name="close" size={24} color={Colors.textSoft} />
             </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity className="mr-4">
-              <Ionicons name="heart" size={24} color={Colors.primary} />
-            </TouchableOpacity>
-          ),
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: '#FDFBF7' },
-        }}
-      />
-
-      <SafeAreaView className="flex-1 bg-background-light">
+          }
+        />
+      </View>
 
       {loading ? (
         <View className="flex-1 items-center justify-center px-4">
@@ -548,42 +543,36 @@ export default function ImportContactsScreen() {
               />
             )}
             ListHeaderComponent={
-              <View className="px-6 pt-4 pb-3">
-                <Text className="font-display text-4xl text-brand-navy mb-2 leading-tight">
-                  Gather your connections
-                </Text>
-                <Text className="text-text-soft text-lg mb-8 font-body">
-                  Choose the people you’d like to nurture.
-                </Text>
+              <View className="px-6 pt-2 pb-3">
 
                 <TouchableOpacity
-                  className="w-full py-4 px-6 bg-primary/10 border border-primary/20 rounded-pill flex-row items-center justify-center gap-2 mb-8"
+                  className="w-full py-4 px-6 bg-white border border-stone-200 border-dashed rounded-2xl flex-row items-center justify-center gap-2 mb-8 active:bg-stone-50"
                   onPress={contacts.length === 0 ? handleImportPress : handleAddMoreContacts}
                   activeOpacity={0.9}
                 >
                   <Ionicons name="person-add" size={20} color={Colors.primary} />
-                  <Text className="font-semibold text-primary text-base">
+                  <Text className="font-medium text-brand-navy text-base">
                     Add more contacts
                   </Text>
                 </TouchableOpacity>
 
                 {contacts.length > 0 && (
+                  <View className="flex-row items-center justify-end px-2 mb-4">
                   <TouchableOpacity
-                    className={`flex-row items-center justify-between px-6 py-4 mb-6 rounded-pill ${
-                      selected.size === contacts.length ? 'border-2 border-primary bg-white' : 'border border-slate-100 bg-white'
-                    }`}
+                    className="flex-row items-center gap-2"
                     onPress={handleSelectAll}
                     activeOpacity={0.7}
                   >
-                    <Text className="font-semibold text-brand-navy text-base">Select all</Text>
+                    <Text className="font-medium text-stone-500 text-sm">Select all</Text>
                     <View
-                      className={`h-6 w-6 items-center justify-center rounded-full border ${
-                        selected.size === contacts.length ? 'bg-primary border-primary' : 'border-slate-300'
+                      className={`h-5 w-5 items-center justify-center rounded-full border ${
+                        selected.size === contacts.length ? 'bg-sage-500 border-sage-500' : 'border-stone-300'
                       }`}
                     >
-                      {selected.size === contacts.length && <Ionicons name="checkmark" size={16} color="white" />}
+                      {selected.size === contacts.length && <Ionicons name="checkmark" size={12} color="white" />}
                     </View>
                   </TouchableOpacity>
+                  </View>
                 )}
 
                 {permissionDenied && (
@@ -609,9 +598,9 @@ export default function ImportContactsScreen() {
               <View className="flex-1 items-center justify-center px-6 py-14">
                 <Ionicons name="people-outline" size={80} color={Colors.primary} />
                 <Text className="text-2xl font-semibold text-brand-navy text-center leading-tight mb-2 mt-4 font-heading">
-                  {permissionDenied ? "Contacts access needed" : "Your contacts will show up here"}
+                  {permissionDenied ? "Contacts access needed" : "Your connections will gather here"}
                 </Text>
-                <Text className="text-base text-center text-text-soft font-body">
+                <Text className="text-base text-center text-text-soft font-body max-w-[280px]">
                   {permissionDenied
                     ? "Enable contact access in Settings to import from your address book."
                     : "Tap “Add more contacts” above to choose who you’d like to bring into Kindred."}
@@ -628,19 +617,22 @@ export default function ImportContactsScreen() {
         </View>
       )}
 
-      <View className="absolute bottom-0 left-0 right-0 bg-background-light/90 border-t border-border px-6 pb-10 pt-4">
-        <TouchableOpacity
-          className={`w-full py-5 rounded-pill items-center justify-center transition-all ${
-            selected.size > 0 ? 'bg-primary' : 'bg-slate-200'
-          }`}
-          onPress={handleSave}
-          activeOpacity={0.9}
-          disabled={selected.size === 0}
-        >
-          <Text className={`text-lg font-bold ${selected.size > 0 ? 'text-white' : 'text-slate-400'}`}>
-            Bring into your quilt ({selected.size})
-          </Text>
-        </TouchableOpacity>
+      <View className="absolute bottom-0 left-0 right-0">
+        <View className="h-12 bg-gradient-to-t from-background-light to-transparent" />
+        <View className="bg-background-light/95 border-t border-stone-100 px-6 pb-10 pt-4">
+          <TouchableOpacity
+            className={`w-full py-4 rounded-full items-center justify-center transition-all shadow-sm ${
+              selected.size > 0 ? 'bg-brand-navy' : 'bg-stone-200'
+            }`}
+            onPress={handleSave}
+            activeOpacity={0.9}
+            disabled={selected.size === 0}
+          >
+            <Text className={`text-lg font-semibold ${selected.size > 0 ? 'text-white' : 'text-stone-400'}`}>
+              Bring into your quilt ({selected.size})
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal
@@ -813,6 +805,5 @@ export default function ImportContactsScreen() {
         onClose={() => setShowPaywall(false)}
       />
       </SafeAreaView>
-    </>
   );
 }
