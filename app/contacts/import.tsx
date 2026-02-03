@@ -142,13 +142,14 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className={`mx-6 mb-3 rounded-3xl p-4 flex-row items-start gap-4 transition-all ${
-        selected 
-          ? 'bg-sage-50 border border-sage-200 shadow-sm' 
+      className={`mx-6 mb-3 rounded-3xl p-4 flex-row items-start gap-4 ${
+        selected
+          ? 'bg-sage-50 border border-sage-200'
           : 'bg-white border border-stone-100'
       }`}
       onPress={onToggle}
       activeOpacity={0.9}
+      style={selected ? { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 } : undefined}
     >
       <View className={`h-12 w-12 items-center justify-center rounded-full ${
         selected ? 'bg-sage-100' : 'bg-stone-50'
@@ -186,7 +187,8 @@ const ContactRow = ({
         {selected && (
           <TouchableOpacity
             onPress={() => onFrequencyChange(frequency)}
-            className="mt-2 w-full flex-row items-center justify-between px-3 py-2 rounded-xl bg-white/60 border border-sage-200/50"
+            className="mt-2 w-full flex-row items-center justify-between px-3 py-2 rounded-xl border"
+            style={{ backgroundColor: 'rgba(255,255,255,0.6)', borderColor: 'rgba(157,190,187,0.5)' }}
           >
             <Text className="text-xs font-medium text-sage-700">
               {bucketLabels[frequency]}
@@ -589,7 +591,7 @@ export default function ImportContactsScreen() {
             }
             ListFooterComponent={
               contacts.length > 0 ? (
-                <View className="mt-8 mb-12 flex-row justify-center opacity-20">
+                <View className="mt-8 mb-12 flex-row justify-center" style={{ opacity: 0.2 }}>
                   <Ionicons name="leaf" size={60} color={Colors.primary} />
                 </View>
               ) : null
@@ -618,12 +620,13 @@ export default function ImportContactsScreen() {
       )}
 
       <View className="absolute bottom-0 left-0 right-0">
-        <View className="h-12 bg-gradient-to-t from-background-light to-transparent" />
-        <View className="bg-background-light/95 border-t border-stone-100 px-6 pb-10 pt-4">
+        <View className="h-12" style={{ backgroundColor: 'transparent' }} />
+        <View className="border-t border-stone-100 px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(249,251,250,0.95)' }}>
           <TouchableOpacity
-            className={`w-full py-4 rounded-full items-center justify-center transition-all shadow-sm ${
+            className={`w-full py-4 rounded-full items-center justify-center ${
               selected.size > 0 ? 'bg-brand-navy' : 'bg-stone-200'
             }`}
+            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}
             onPress={handleSave}
             activeOpacity={0.9}
             disabled={selected.size === 0}
@@ -641,7 +644,7 @@ export default function ImportContactsScreen() {
         animationType="fade"
         onRequestClose={() => setShowFrequencySelector(false)}
       >
-        <View className="flex-1 items-center justify-center bg-black/50 px-6">
+        <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <View className="w-full rounded-2xl bg-surface p-6">
             <Text className="mb-2 text-lg font-bold text-warmgray">
               Reminder rhythm
@@ -711,7 +714,7 @@ export default function ImportContactsScreen() {
 
                   {bucket === "custom" &&
                     contactFrequencies[editingContactId || ""] === "custom" && (
-                      <View className="mt-2 rounded-xl border border-sage/20 bg-surface px-4 pb-4 pt-2">
+                      <View className="mt-2 rounded-xl border bg-surface px-4 pb-4 pt-2" style={{ borderColor: 'rgba(157,190,187,0.2)' }}>
                         <View className="mt-2 flex-col gap-3">
                           <View>
                             <Text className="mb-1 text-xs font-medium text-warmgray-muted">

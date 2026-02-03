@@ -118,6 +118,8 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="contacts" />
+        <Stack.Screen name="settings/notifications" />
         <Stack.Screen
           name="modal"
           options={{ presentation: 'modal', contentStyle: { backgroundColor: '#F9FBFA' } }}
