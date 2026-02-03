@@ -12,6 +12,7 @@ import BirthdayPicker from '@/components/BirthdayPicker';
 import { AddFlowLayout } from '@/components';
 import { formatBirthdayDisplay } from '@/utils/formatters';
 import { getDateLabel } from '@/utils/scheduler';
+import Colors from '@/constants/Colors';
 
 export default function AddConnectionBirthdayScreen() {
   const router = useRouter();
@@ -111,7 +112,7 @@ export default function AddConnectionBirthdayScreen() {
               disabled={saving}
             >
               <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center mr-3">
-                <Ionicons name="calendar-outline" size={20} color="#6366f1" />
+                <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
               </View>
               <Text className={birthday ? 'text-lg text-slate-800' : 'text-lg text-slate-400'}>
                 {birthday ? formatBirthdayDisplay(birthday) : 'Select a date...'}
@@ -147,7 +148,7 @@ export default function AddConnectionBirthdayScreen() {
           >
             <View className="flex-row items-center">
               <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center mr-3">
-                <Ionicons name="time-outline" size={20} color="#6366f1" />
+                <Ionicons name="time-outline" size={20} color={Colors.primary} />
               </View>
               <View>
                 <Text className="text-base font-semibold text-slate-800">Start Reminders</Text>
@@ -171,7 +172,7 @@ export default function AddConnectionBirthdayScreen() {
                 minimumDate={new Date()}
                 onChange={(_e, date) => date && setStartDate(date)}
                 themeVariant="light"
-                accentColor="#6366f1"
+                accentColor={Colors.primary}
               />
             </View>
           )}
