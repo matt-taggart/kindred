@@ -147,7 +147,7 @@ export default function AddConnectionRhythmScreen() {
             return (
               <View key={option.label}>
                 <TouchableOpacity
-                  className={`bg-white rounded-2xl border p-4 ${
+                  className={`bg-white rounded-2xl border p-4 pl-6 ${
                     active ? "border-primary bg-primary/5" : "border-slate-100"
                   }`}
                   onPress={() => {
