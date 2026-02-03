@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, Text, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Contact } from '@/db/schema';
+import Colors from '@/constants/Colors';
 
 type RecentConnectionRowProps = {
   contact: Contact;
@@ -46,7 +47,7 @@ export function RecentConnectionRow({
         testID="check-icon"
         name="checkmark-circle"
         size={18}
-        color="#cbd5e1"
+        color={Colors.primary}
       />
     </TouchableOpacity>
   );

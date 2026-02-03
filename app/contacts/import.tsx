@@ -640,17 +640,26 @@ export default function ImportContactsScreen() {
 
       <Modal
         visible={showFrequencySelector}
-        transparent
-        animationType="fade"
+        animationType="slide"
+        presentationStyle="pageSheet"
         onRequestClose={() => setShowFrequencySelector(false)}
       >
-        <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <View className="w-full rounded-2xl bg-surface p-6">
-            <Text className="mb-2 text-lg font-bold text-warmgray">
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+          <View style={{ flex: 1, backgroundColor: '#FFFFFF', paddingHorizontal: 24 }}>
+            <View style={{ paddingTop: 16, paddingBottom: 8 }}>
+              <TouchableOpacity
+                onPress={() => setShowFrequencySelector(false)}
+                style={{ alignSelf: 'flex-end', padding: 8 }}
+              >
+                <Ionicons name="close" size={24} color={Colors.textSoft} />
+              </TouchableOpacity>
+            </View>
+            <View style={{ backgroundColor: '#FFFFFF' }}>
+            <Text className="mb-2 text-lg font-bold text-brand-navy">
               Reminder rhythm
             </Text>
             {editingContactId && (
-              <Text className="mb-4 text-base text-warmgray-muted">
+              <Text className="mb-4 text-base text-text-soft">
                 How often would you like a gentle reminder to connect with{' '}
                 {contacts.find((c) => c.id === editingContactId)?.name}?
               </Text>
@@ -670,8 +679,8 @@ export default function ImportContactsScreen() {
                   <TouchableOpacity
                     className={`rounded-2xl border-2 p-4 ${
                       contactFrequencies[editingContactId || ""] === bucket
-                        ? 'border-sage bg-sage-100'
-                        : 'border-border bg-surface'
+                        ? 'border-sage-500 bg-sage-100'
+                        : 'border-stone-200 bg-white'
                     }`}
                     onPress={() => handleSelectFrequency(bucket)}
                     activeOpacity={0.7}
@@ -682,13 +691,13 @@ export default function ImportContactsScreen() {
                           className={`text-base font-semibold ${
                             contactFrequencies[editingContactId || ""] ===
                             bucket
-                              ? 'text-warmgray'
-                              : 'text-warmgray'
+                              ? 'text-brand-navy'
+                              : 'text-brand-navy'
                           }`}
                         >
                           {bucketLabels[bucket]}
                         </Text>
-                        <Text className="mt-1 text-sm text-warmgray-muted">
+                        <Text className="mt-1 text-sm text-text-soft">
                           {bucket === "custom"
                             ? contactFrequencies[editingContactId || ""] ===
                                 "custom" &&
@@ -705,8 +714,8 @@ export default function ImportContactsScreen() {
                       <View
                         className={`h-6 w-6 rounded-full border-2 ${
                           contactFrequencies[editingContactId || ""] === bucket
-                            ? "border-sage bg-sage"
-                            : 'border-border'
+                            ? "border-sage-500 bg-sage-500"
+                            : 'border-stone-200'
                         }`}
                       />
                     </View>
@@ -714,20 +723,20 @@ export default function ImportContactsScreen() {
 
                   {bucket === "custom" &&
                     contactFrequencies[editingContactId || ""] === "custom" && (
-                      <View className="mt-2 rounded-xl border bg-surface px-4 pb-4 pt-2" style={{ borderColor: 'rgba(157,190,187,0.2)' }}>
+                      <View className="mt-2 rounded-xl border bg-white px-4 pb-4 pt-2 border-stone-200">
                         <View className="mt-2 flex-col gap-3">
                           <View>
-                            <Text className="mb-1 text-xs font-medium text-warmgray-muted">
+                            <Text className="mb-1 text-xs font-medium text-text-soft">
                               Frequency
                             </Text>
-                            <View className="h-12 flex-row items-center rounded-xl border border-border bg-cream px-3">
+                            <View className="h-12 flex-row items-center rounded-xl border border-stone-200 bg-cream px-3">
                               <TextInput
                                 value={customValue}
                                 onChangeText={(text) =>
                                   setCustomValue(text.replace(/[^0-9]/g, ""))
                                 }
                                 keyboardType="number-pad"
-                                className="flex-1 text-base leading-5 text-warmgray"
+                                className="flex-1 text-base leading-5 text-brand-navy"
                                 placeholder="e.g., 30"
                                 placeholderTextColor="#94a3b8"
                                 autoFocus
@@ -736,10 +745,10 @@ export default function ImportContactsScreen() {
                             </View>
                           </View>
                           <View>
-                            <Text className="mb-1 text-xs font-medium text-warmgray-muted">
+                            <Text className="mb-1 text-xs font-medium text-text-soft">
                               Unit
                             </Text>
-                            <View className="flex-row gap-1 rounded-xl bg-cream p-1 border border-border">
+                            <View className="flex-row gap-1 rounded-xl bg-cream p-1 border border-stone-200">
                               {(
                                 ["days", "weeks", "months"] as CustomUnit[]
                               ).map((unit) => (
@@ -747,7 +756,7 @@ export default function ImportContactsScreen() {
                                   key={unit}
                                   onPress={() => setCustomUnit(unit)}
                                   className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
-                                    customUnit === unit ? 'bg-surface' : ''
+                                    customUnit === unit ? 'bg-white' : ''
                                   }`}
                                   style={
                                     customUnit === unit
@@ -764,8 +773,8 @@ export default function ImportContactsScreen() {
                                   <Text
                                     className={`text-sm font-medium ${
                                       customUnit === unit
-                                        ? 'text-warmgray'
-                                        : 'text-warmgray-muted'
+                                        ? 'text-brand-navy'
+                                        : 'text-text-soft'
                                     }`}
                                   >
                                     {unit.charAt(0).toUpperCase() +
@@ -785,22 +794,23 @@ export default function ImportContactsScreen() {
 
             <View className="mt-4 flex-col gap-3">
               <TouchableOpacity
-                className="items-center rounded-xl bg-sage py-3"
+                className="items-center rounded-xl bg-sage-500 py-3"
                 onPress={handleSaveFrequencyChange}
                 activeOpacity={0.9}
               >
                 <Text className="font-semibold text-white">Save Changes</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="items-center rounded-xl bg-cream border border-border py-3"
+                className="items-center rounded-xl bg-cream border border-stone-200 py-3"
                 onPress={() => setShowFrequencySelector(false)}
                 activeOpacity={0.7}
               >
-                <Text className="font-semibold text-warmgray-muted">Cancel</Text>
+                <Text className="font-semibold text-text-soft">Cancel</Text>
               </TouchableOpacity>
             </View>
+            </View>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
 
       <EnhancedPaywallModal

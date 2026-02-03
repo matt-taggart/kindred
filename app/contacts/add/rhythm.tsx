@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { AddFlowLayout } from "@/components";
 import type { Contact } from "@/db/schema";
+import Colors from "@/constants/Colors";
 
 type RhythmOption = {
   label: string;
@@ -128,22 +129,6 @@ export default function AddConnectionRhythmScreen() {
     });
   };
 
-  const handleSkip = () => {
-    if (!connectionName) {
-      router.replace("/contacts/add");
-      return;
-    }
-    // Use default weekly rhythm when skipping
-    router.push({
-      pathname: "/contacts/add/birthday",
-      params: {
-        name: connectionName,
-        relationship: relationship || "",
-        bucket: "weekly",
-      },
-    });
-  };
-
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -152,9 +137,9 @@ export default function AddConnectionRhythmScreen() {
         title="Choose your rhythm"
         subtitle="How often do you want to connect?"
         onBack={() => router.back()}
-        onSkip={handleSkip}
         onNext={handleNext}
         nextDisabled={!canProceed}
+        showBackButton
       >
         <View className="gap-3">
           {RHYTHMS.map((option) => {
@@ -189,7 +174,7 @@ export default function AddConnectionRhythmScreen() {
                       <Ionicons
                         name="checkmark-circle"
                         size={24}
-                        color="#7c3aed"
+                        color={Colors.primary}
                       />
                     )}
                   </View>

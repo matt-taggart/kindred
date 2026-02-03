@@ -28,9 +28,9 @@ export default function AddConnectionNameScreen() {
         title="Add a connection"
         subtitle="Every relationship has its own rhythm..."
         onBack={() => router.back()}
-        onSkip={canContinue ? navigateToRhythm : undefined}
         onNext={navigateToRhythm}
         nextDisabled={!canContinue}
+        showBackButton
       >
         {/* Name Input */}
         <Text className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-2">

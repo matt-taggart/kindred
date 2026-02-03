@@ -22,6 +22,7 @@ type AddFlowLayoutProps = {
   nextLabel?: string;
   nextDisabled?: boolean;
   children: ReactNode;
+  showBackButton?: boolean;
 };
 
 export function AddFlowLayout({
@@ -34,6 +35,7 @@ export function AddFlowLayout({
   nextLabel = 'Next',
   nextDisabled = false,
   children,
+  showBackButton = false,
 }: AddFlowLayoutProps) {
   const colorScheme = useColorScheme();
   const iconColor = Colors.primary;
@@ -75,7 +77,7 @@ export function AddFlowLayout({
       {/* Bottom Bar */}
       <View className="absolute bottom-0 left-0 right-0 bg-background-light dark:bg-background-dark px-6 pb-8 pt-4 border-t border-slate-100 dark:border-slate-800">
         <View className="flex-row justify-between items-center">
-          {/* Skip Button */}
+          {/* Skip/Back Button */}
           {onSkip ? (
             <TouchableOpacity
               onPress={onSkip}
@@ -84,6 +86,16 @@ export function AddFlowLayout({
             >
               <Text className="text-slate-500 dark:text-slate-400 font-medium text-base">
                 Skip
+              </Text>
+            </TouchableOpacity>
+          ) : showBackButton ? (
+            <TouchableOpacity
+              onPress={onBack}
+              accessibilityLabel="Back"
+              accessibilityRole="button"
+            >
+              <Text className="text-slate-500 dark:text-slate-400 font-medium text-base">
+                Back
               </Text>
             </TouchableOpacity>
           ) : (

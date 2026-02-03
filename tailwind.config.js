@@ -14,6 +14,10 @@ module.exports = {
         'background-dark': '#1A1C19',
         'brand-surface': '#FDFBF7',
         'cream': '#F3F0E6',
+        surface: '#FFFFFF',
+        warmgray: '#2D3648',
+        'warmgray-muted': '#5C635C',
+        border: '#e7e5e4',
         // New design system colors
         'sage-light': '#E8EFEA',
         'accent-sage': '#E6EBE6',
