@@ -42,7 +42,7 @@ export default function AddConnectionNameScreen() {
             onChangeText={setName}
             placeholder="Type a name..."
             placeholderTextColor="#94a3b8"
-            className="text-xl text-slate-800"
+            className="text-xl text-slate-800 leading-6 pt-0 pb-0"
             autoCapitalize="words"
             returnKeyType="done"
           />
