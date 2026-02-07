@@ -122,6 +122,16 @@ const toImportable = (contact: Contacts.Contact & { id: string }): ImportableCon
   };
 };
 
+const avatarPalette = [
+  { bg: '#E8EFEA', text: '#436850' },  // sage
+  { bg: '#F8E9E9', text: '#8B5E5E' },  // quilt-pink
+  { bg: '#FFE5D9', text: '#8B6B5C' },  // accent warm
+  { bg: '#F3F0E6', text: '#6B6352' },  // cream
+];
+
+const getAvatarColor = (initial: string) =>
+  avatarPalette[initial.charCodeAt(0) % avatarPalette.length];
+
 const ContactRow = ({
   contact,
   selected,
@@ -142,25 +152,31 @@ const ContactRow = ({
 
   return (
     <TouchableOpacity
-      className={`mx-6 mb-3 rounded-3xl p-4 flex-row items-start gap-4 ${
+      className={`mx-6 rounded-2xl p-4 flex-row items-start gap-4 ${
         selected
-          ? 'bg-sage-50 border border-sage-200'
-          : 'bg-white border border-stone-100'
+          ? 'mb-3 bg-sage-50 border border-sage-200'
+          : 'mb-2 bg-white border border-stone-100'
       }`}
       onPress={onToggle}
       activeOpacity={0.9}
       style={selected ? { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 } : undefined}
     >
-      <View className={`h-12 w-12 items-center justify-center rounded-full ${
-        selected ? 'bg-sage-100' : 'bg-stone-50'
-      }`}>
+      <View
+        className={`h-12 w-12 items-center justify-center rounded-full ${
+          selected ? 'border-2 border-white overflow-hidden' : ''
+        }`}
+        style={!contact.avatarUri ? { backgroundColor: getAvatarColor(initial).bg } : undefined}
+      >
         {contact.avatarUri ? (
           <Image
             source={{ uri: contact.avatarUri }}
             className="h-12 w-12 rounded-full"
           />
         ) : (
-          <Text className={`text-base font-medium font-serif ${selected ? 'text-sage-700' : 'text-stone-400'}`}>
+          <Text
+            className="text-base font-medium font-serif"
+            style={{ color: getAvatarColor(initial).text }}
+          >
             {initial}
           </Text>
         )}
@@ -170,27 +186,29 @@ const ContactRow = ({
         <Text className="text-base font-medium text-brand-navy mb-0.5">
           {contact.name}
         </Text>
-        <Text className="text-sm text-stone-500 mb-3">
-          {formatPhoneNumber(contact.phone)}
-        </Text>
-        <View className="flex-row items-center gap-2">
+        <View className="flex-row items-center flex-wrap">
+          <Text className="text-sm text-stone-500">
+            {formatPhoneNumber(contact.phone)}
+          </Text>
           {contact.birthday && (
-            <View className="flex-row items-center gap-0.5">
-              <Ionicons name="gift-outline" size={10} color="#94a3b8" />
-              <Text className="text-[11px] text-stone-400">
-                {formatBirthdayDisplay(contact.birthday, { includeYear: false })}
-              </Text>
-            </View>
+            <>
+              <Text className="text-stone-300 mx-1.5">·</Text>
+              <View className="flex-row items-center gap-1">
+                <Ionicons name="gift-outline" size={11} color="#a8a29e" />
+                <Text className="text-xs text-stone-500">
+                  {formatBirthdayDisplay(contact.birthday, { includeYear: false })}
+                </Text>
+              </View>
+            </>
           )}
         </View>
         
         {selected && (
           <TouchableOpacity
             onPress={() => onFrequencyChange(frequency)}
-            className="mt-2 w-full flex-row items-center justify-between px-3 py-2 rounded-xl border"
-            style={{ backgroundColor: 'rgba(255,255,255,0.6)', borderColor: 'rgba(157,190,187,0.5)' }}
+            className="mt-2 w-full flex-row items-center justify-between px-3 py-2.5 rounded-xl border border-sage-200 bg-cream"
           >
-            <Text className="text-xs font-medium text-sage-700">
+            <Text className="text-xs font-medium text-sage-700 font-heading">
               {bucketLabels[frequency]}
             </Text>
             <Ionicons name="chevron-down" size={12} color={Colors.primary} />
@@ -198,10 +216,10 @@ const ContactRow = ({
         )}
       </View>
 
-      <View className="pt-1">
+      <View className={selected ? 'mt-1' : ''}>
         <View
           className={`h-6 w-6 items-center justify-center rounded-full border ${
-            selected ? 'bg-sage-500 border-sage-500' : 'border-stone-300'
+            selected ? 'bg-primary border-primary' : 'border-stone-300'
           }`}
         >
           {selected && <Ionicons name="checkmark" size={14} color="white" />}
@@ -548,7 +566,7 @@ export default function ImportContactsScreen() {
               <View className="px-6 pt-2 pb-3">
 
                 <TouchableOpacity
-                  className="w-full py-4 px-6 bg-white border border-stone-200 border-dashed rounded-2xl flex-row items-center justify-center gap-2 mb-8 active:bg-stone-50"
+                  className="w-full py-4 px-6 bg-white border border-stone-200 border-dashed rounded-2xl flex-row items-center justify-center gap-2 mb-4 active:bg-stone-50"
                   onPress={contacts.length === 0 ? handleImportPress : handleAddMoreContacts}
                   activeOpacity={0.9}
                 >
@@ -568,7 +586,7 @@ export default function ImportContactsScreen() {
                     <Text className="font-medium text-stone-500 text-sm">Select all</Text>
                     <View
                       className={`h-5 w-5 items-center justify-center rounded-full border ${
-                        selected.size === contacts.length ? 'bg-sage-500 border-sage-500' : 'border-stone-300'
+                        selected.size === contacts.length ? 'bg-primary border-primary' : 'border-stone-300'
                       }`}
                     >
                       {selected.size === contacts.length && <Ionicons name="checkmark" size={12} color="white" />}
@@ -621,17 +639,20 @@ export default function ImportContactsScreen() {
 
       <View className="absolute bottom-0 left-0 right-0">
         <View className="h-12" style={{ backgroundColor: 'transparent' }} />
-        <View className="border-t border-stone-100 px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(249,251,250,0.95)' }}>
+        <View className="border-t border-stone-100 px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}>
           <TouchableOpacity
             className={`w-full py-4 rounded-full items-center justify-center ${
-              selected.size > 0 ? 'bg-brand-navy' : 'bg-stone-200'
+              selected.size > 0 ? 'bg-primary' : 'bg-sage-50 border border-stone-200'
             }`}
-            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}
+            style={selected.size > 0
+              ? { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10, elevation: 4 }
+              : { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }
+            }
             onPress={handleSave}
             activeOpacity={0.9}
             disabled={selected.size === 0}
           >
-            <Text className={`text-lg font-semibold ${selected.size > 0 ? 'text-white' : 'text-stone-400'}`}>
+            <Text className={`text-lg font-semibold ${selected.size > 0 ? 'text-white' : 'text-stone-300'}`}>
               Add selected ({selected.size})
             </Text>
           </TouchableOpacity>
@@ -677,10 +698,10 @@ export default function ImportContactsScreen() {
               ).map((bucket) => (
                 <View key={bucket} className="mb-3">
                   <TouchableOpacity
-                    className={`rounded-2xl border-2 p-4 ${
+                    className={`rounded-xl border-2 px-6 py-4 ${
                       contactFrequencies[editingContactId || ""] === bucket
-                        ? 'border-sage-500 bg-sage-100'
-                        : 'border-stone-200 bg-white'
+                        ? 'border-primary bg-sage-50'
+                        : 'border-stone-200 bg-background-light'
                     }`}
                     onPress={() => handleSelectFrequency(bucket)}
                     activeOpacity={0.7}
@@ -714,7 +735,7 @@ export default function ImportContactsScreen() {
                       <View
                         className={`h-6 w-6 rounded-full border-2 ${
                           contactFrequencies[editingContactId || ""] === bucket
-                            ? "border-sage-500 bg-sage-500"
+                            ? "border-primary bg-primary"
                             : 'border-stone-200'
                         }`}
                       />
@@ -723,13 +744,13 @@ export default function ImportContactsScreen() {
 
                   {bucket === "custom" &&
                     contactFrequencies[editingContactId || ""] === "custom" && (
-                      <View className="mt-2 rounded-xl border bg-white px-4 pb-4 pt-2 border-stone-200">
+                      <View className="mt-2 rounded-xl border bg-sage-50 px-5 pb-5 pt-3 border-sage-200">
                         <View className="mt-2 flex-col gap-3">
                           <View>
                             <Text className="mb-1 text-xs font-medium text-text-soft">
                               Frequency
                             </Text>
-                            <View className="h-12 flex-row items-center rounded-xl border border-stone-200 bg-cream px-3">
+                            <View className="h-12 flex-row items-center rounded-lg border border-stone-200 bg-white px-3">
                               <TextInput
                                 value={customValue}
                                 onChangeText={(text) =>
@@ -748,7 +769,7 @@ export default function ImportContactsScreen() {
                             <Text className="mb-1 text-xs font-medium text-text-soft">
                               Unit
                             </Text>
-                            <View className="flex-row gap-1 rounded-xl bg-cream p-1 border border-stone-200">
+                            <View className="flex-row gap-1 rounded-lg bg-background-light p-1 border border-stone-200">
                               {(
                                 ["days", "weeks", "months"] as CustomUnit[]
                               ).map((unit) => (
@@ -794,7 +815,7 @@ export default function ImportContactsScreen() {
 
             <View className="mt-4 flex-col gap-3">
               <TouchableOpacity
-                className="items-center rounded-xl bg-sage-500 py-3"
+                className="items-center rounded-full bg-primary py-3"
                 onPress={handleSaveFrequencyChange}
                 activeOpacity={0.9}
               >
