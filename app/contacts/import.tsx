@@ -632,7 +632,7 @@ export default function ImportContactsScreen() {
             disabled={selected.size === 0}
           >
             <Text className={`text-lg font-semibold ${selected.size > 0 ? 'text-white' : 'text-stone-400'}`}>
-              Bring into your quilt ({selected.size})
+              Add selected ({selected.size})
             </Text>
           </TouchableOpacity>
         </View>

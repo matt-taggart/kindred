@@ -97,10 +97,10 @@ export default function AddConnectionBirthdayScreen() {
         title="Add their birthday"
         subtitle="We'll remind you when it's coming up"
         onBack={() => router.back()}
-        onSkip={handleSkip}
         onNext={handleDone}
         nextLabel="Save"
         nextDisabled={saving}
+        showBackButton
       >
         {/* Birthday Card */}
         <View className="bg-white rounded-2xl border border-slate-100 p-4">
