@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -17,6 +17,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import BirthdayPicker from "@/components/BirthdayPicker";
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import FrequencyBadge from "@/components/FrequencyBadge";
+import { PageHeader } from "@/components/PageHeader";
+import Colors from "@/constants/Colors";
 
 import {
   CONTACT_LIMIT,
@@ -291,22 +293,30 @@ export default function ReviewScheduleScreen() {
 
   if (distributedContacts.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-cream items-center justify-center">
-        <ActivityIndicator size="large" color="#9CA986" />
+      <SafeAreaView className="flex-1 bg-background-light items-center justify-center">
+        <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-cream">
-      <Stack.Screen
-        options={{
-          title: "Review",
-          headerBackTitle: "Back",
-          headerShadowVisible: false,
-          headerTitleStyle: { fontSize: 18, fontWeight: "700" },
-        }}
-      />
+    <SafeAreaView className="flex-1 bg-background-light">
+      <View className="px-6 pt-2 pb-0">
+        <PageHeader
+          title="Review schedule"
+          subtitle="Tap any connection to adjust their start date."
+          showBranding={false}
+          leftElement={
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white border border-stone-200"
+              activeOpacity={0.7}
+            >
+              <Ionicons name="chevron-back" size={20} color={Colors.brandNavy} />
+            </TouchableOpacity>
+          }
+        />
+      </View>
 
       <FlatList
         data={groupedByDate}
@@ -319,7 +329,7 @@ export default function ReviewScheduleScreen() {
         ListHeaderComponent={
           <View className="mb-4">
             {!isPro && distributedContacts.length > availableSlots && (
-              <View className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <View className="mb-4 border border-amber-100 bg-amber-50 p-5" style={{ borderRadius: 16 }}>
                 <Text className="text-base font-bold text-amber-800">
                   Free plan limit reached
                 </Text>
@@ -331,23 +341,23 @@ export default function ReviewScheduleScreen() {
               </View>
             )}
 
-            <View className="rounded-2xl border border-border bg-surface p-5 shadow-sm mb-4">
-              <Text className="text-xs font-semibold uppercase tracking-wide text-sage">
+            <View className="border border-stone-200 bg-white p-5 shadow-sm mb-4" style={{ borderRadius: 16 }}>
+              <Text className="text-xs font-semibold uppercase tracking-wider text-stone-400">
                 Schedule preview
               </Text>
-              <Text className="mt-1 text-lg font-semibold text-warmgray">
+              <Text className="mt-1 text-lg font-semibold text-brand-navy">
                 Kindred has spread out your reminders.
               </Text>
-              <Text className="mt-2 text-sm text-warmgray-muted">
-                Kindred has distributed your {distributedContacts.length}{" "}
-                connections across {stats.totalDays} days. Tap any connection to adjust their start date.
+              <Text className="mt-2 text-sm text-text-soft">
+                Your {distributedContacts.length}{" "}
+                connections have been distributed across {stats.totalDays} days.
               </Text>
             </View>
           </View>
         }
         renderItem={({ item: [dateKey, contacts] }) => (
           <View className="mb-4">
-            <Text className="text-sm font-semibold text-warmgray mb-2 px-1">
+            <Text className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">
               {getDateLabel(new Date(dateKey).getTime())}
             </Text>
             {contacts.map((contact) => {
@@ -357,51 +367,50 @@ export default function ReviewScheduleScreen() {
               return (
                 <View
                   key={contact.id}
-                  className="mb-2 rounded-2xl border border-border bg-surface overflow-hidden"
+                  className="mb-2 border border-stone-200 bg-white"
+                  style={{ borderRadius: 16 }}
                 >
                   <TouchableOpacity
-                    className="p-4"
+                    className="px-5 py-4"
                     onPress={() => handleEdit(contact.id, "startDate")}
                     activeOpacity={0.7}
                   >
                     <View className="flex-row items-center justify-between">
                       <View className="flex-1">
-                        <Text className="text-base font-semibold text-warmgray">
+                        <Text className="text-base font-semibold text-brand-navy">
                           {contact.name}
                         </Text>
-                        <Text className="text-sm text-warmgray-muted">
+                        <Text className="text-sm text-text-soft mt-0.5">
                           {bucketLabels[contact.bucket]}
                         </Text>
                       </View>
                       <View className="flex-row items-center gap-2">
-                        <Text className="text-xs text-sage">Tap to edit</Text>
+                        <Text className="text-xs text-stone-400">Tap to edit</Text>
                       </View>
                     </View>
                   </TouchableOpacity>
                   
                   <TouchableOpacity
-                    className={`px-4 py-3 border-t border-border/50 flex-row items-center justify-between ${
-                      !originalContact?.birthday ? "bg-surface" : ""
-                    }`}
+                    className="px-5 py-3 border-t border-stone-100 flex-row items-center justify-between"
                     onPress={() => handleEdit(contact.id, "birthday")}
                     activeOpacity={0.7}
                   >
                     {originalContact?.birthday ? (
                       <>
                         <View>
-                          <Text className="text-xs font-medium text-warmgray-muted uppercase tracking-wide mb-1">
+                          <Text className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-1">
                             Birthday
                           </Text>
-                          <Text className="text-sm text-warmgray">
+                          <Text className="text-sm text-brand-navy">
                             🎂 {formatBirthdayDisplay(originalContact.birthday, { includeYear: true })}
                           </Text>
                         </View>
-                        <Ionicons name="pencil" size={14} color="#9CA986" />
+                        <Ionicons name="pencil" size={14} color={Colors.primary} />
                       </>
                     ) : (
                       <View className="flex-row items-center gap-2">
-                        <Ionicons name="add-circle-outline" size={18} color="#9CA986" />
-                        <Text className="text-sm font-medium text-sage">
+                        <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
+                        <Text className="text-sm font-medium text-primary">
                           Add birthday
                         </Text>
                       </View>
@@ -414,15 +423,16 @@ export default function ReviewScheduleScreen() {
         )}
       />
 
-      <View className="border-t border-border bg-surface px-4 pb-4 pt-3">
+      <View className="border-t border-stone-100 px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}>
         <TouchableOpacity
-          className={`items-center rounded-xl py-4 ${!saving ? "bg-sage" : "bg-border"}`}
+          className={`items-center rounded-full py-4 ${!saving ? "bg-primary" : "bg-stone-200"}`}
           onPress={handleImport}
           activeOpacity={0.9}
           disabled={saving}
+          style={!saving ? { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10, elevation: 4 } : undefined}
         >
           <Text
-            className={`text-base font-semibold ${!saving ? "text-white" : "text-warmgray-muted"}`}
+            className={`text-base font-bold ${!saving ? "text-white" : "text-stone-400"}`}
           >
             {saving ? "Importing…" : "Looks good — import all"}
           </Text>
@@ -431,7 +441,7 @@ export default function ReviewScheduleScreen() {
 
       {/* iOS Start Date Picker - Bottom Sheet */}
       {Platform.OS === "ios" && showDatePicker && editingState?.field === "startDate" && (
-        <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-surface px-4 pb-8 pt-4">
+        <View className="absolute bottom-0 left-0 right-0 border-t border-stone-100 bg-white px-4 pb-8 pt-4">
           <View className="mb-2 flex-row items-center justify-between">
             <TouchableOpacity
               onPress={() => {
@@ -439,17 +449,17 @@ export default function ReviewScheduleScreen() {
                 setEditingState(null);
               }}
             >
-              <Text className="text-base font-semibold text-warmgray-muted">
+              <Text className="text-base font-semibold text-text-soft">
                 Cancel
               </Text>
             </TouchableOpacity>
-            <Text className="text-base font-bold text-warmgray">
+            <Text className="text-base font-bold text-brand-navy">
               {editingContactName
                 ? `${editingContactName}'s Start Date`
                 : "Adjust Start Date"}
             </Text>
             <TouchableOpacity onPress={handleConfirmDate}>
-              <Text className="text-base font-semibold text-sage">Done</Text>
+              <Text className="text-base font-semibold text-primary">Done</Text>
             </TouchableOpacity>
           </View>
           <DateTimePicker
@@ -459,7 +469,7 @@ export default function ReviewScheduleScreen() {
             minimumDate={new Date()}
             maximumDate={maxStartDate}
             onChange={(_e, date) => date && setSelectedDate(date)}
-            accentColor="#9CA986"
+            accentColor={Colors.primary}
             themeVariant="light"
           />
         </View>
@@ -469,7 +479,7 @@ export default function ReviewScheduleScreen() {
       {Platform.OS === "ios" && showDatePicker && editingState?.field === "birthday" && (
         <KeyboardAvoidingView
           behavior="padding"
-          className="absolute bottom-0 left-0 right-0 border-t border-border bg-surface px-4 pb-8 pt-4"
+          className="absolute bottom-0 left-0 right-0 border-t border-stone-100 bg-white px-4 pb-8 pt-4"
         >
           <View className="mb-2 flex-row items-center justify-between">
             <TouchableOpacity
@@ -478,15 +488,15 @@ export default function ReviewScheduleScreen() {
                 setEditingState(null);
               }}
             >
-              <Text className="text-base font-semibold text-warmgray-muted">
+              <Text className="text-base font-semibold text-text-soft">
                 Cancel
               </Text>
             </TouchableOpacity>
-            <Text className="text-base font-bold text-warmgray">
+            <Text className="text-base font-bold text-brand-navy">
               Set Birthday
             </Text>
             <TouchableOpacity onPress={handleConfirmBirthday}>
-              <Text className="text-base font-semibold text-sage">Done</Text>
+              <Text className="text-base font-semibold text-primary">Done</Text>
             </TouchableOpacity>
           </View>
           <View className="py-4">
@@ -507,25 +517,25 @@ export default function ReviewScheduleScreen() {
           minimumDate={new Date()}
           maximumDate={maxStartDate}
           onChange={handleDateChange}
-          accentColor="#9CA986"
+          accentColor={Colors.primary}
         />
       )}
 
       {/* Android Birthday Input */}
       {Platform.OS === "android" && showDatePicker && editingState?.field === "birthday" && (
         <View className="absolute bottom-0 left-0 right-0 top-0 bg-black/50 items-center justify-center p-4">
-          <View className="bg-surface p-6 rounded-2xl w-full max-w-sm">
-            <Text className="text-lg font-bold text-warmgray mb-4">Set Birthday</Text>
+          <View className="bg-white p-6 rounded-2xl w-full max-w-sm">
+            <Text className="text-lg font-bold text-brand-navy mb-4">Set Birthday</Text>
             <BirthdayPicker
               value={birthdayInput}
               onChange={setBirthdayInput}
             />
             <View className="flex-row justify-end gap-4 mt-4">
               <TouchableOpacity onPress={() => { setShowDatePicker(false); setEditingState(null); }}>
-                <Text className="text-base font-medium text-warmgray-muted">Cancel</Text>
+                <Text className="text-base font-medium text-text-soft">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={handleConfirmBirthday}>
-                <Text className="text-base font-bold text-sage">Save</Text>
+                <Text className="text-base font-bold text-primary">Save</Text>
               </TouchableOpacity>
             </View>
           </View>

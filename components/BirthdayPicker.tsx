@@ -21,17 +21,17 @@ const YEARS = Array.from({ length: CURRENT_YEAR - 1920 + 1 }, (_, i) => CURRENT_
 const DEFAULT_DISPLAY_DATE = '1990-01-01';
 
 const calendarTheme = {
-  calendarBackground: '#FDFBF7',
-  textSectionTitleColor: '#8B9678',
-  selectedDayBackgroundColor: '#9CA986',
+  calendarBackground: '#FFFFFF',
+  textSectionTitleColor: '#a8a29e',
+  selectedDayBackgroundColor: '#9DBEBB',
   selectedDayTextColor: '#ffffff',
-  todayTextColor: '#9CA986',
-  dayTextColor: '#5C6356',
-  textDisabledColor: '#8B9678',
-  dotColor: '#9CA986',
+  todayTextColor: '#9DBEBB',
+  dayTextColor: '#2D3648',
+  textDisabledColor: '#d6d3d1',
+  dotColor: '#9DBEBB',
   selectedDotColor: '#ffffff',
-  arrowColor: '#9CA986',
-  monthTextColor: '#5C6356',
+  arrowColor: '#9DBEBB',
+  monthTextColor: '#2D3648',
   textDayFontFamily: 'System',
   textMonthFontFamily: 'System',
   textDayHeaderFontFamily: 'System',
@@ -191,7 +191,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     return {
       [selectedDate]: {
         selected: true,
-        selectedColor: '#9CA986',
+        selectedColor: '#9DBEBB',
         selectedTextColor: '#ffffff',
       },
     };
@@ -212,7 +212,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
 
     if (yearUnknown) {
       return (
-        <Text className="text-base font-semibold text-warmgray">
+        <Text className="text-base font-semibold text-brand-navy">
           {month}
         </Text>
       );
@@ -220,7 +220,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
 
     return (
       <Pressable onPress={() => setShowYearPicker(true)} testID="date-header-selector">
-        <Text className="text-base font-semibold text-sage underline">
+        <Text className="text-base font-semibold text-primary underline">
           {month} {year}
         </Text>
       </Pressable>
@@ -238,16 +238,16 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
       >
         <View
           className={`h-6 w-6 rounded-md border-2 items-center justify-center ${
-            yearUnknown ? 'bg-sage border-sage' : 'border-border bg-surface'
+            yearUnknown ? 'bg-primary border-primary' : 'border-stone-300 bg-white'
           }`}
         >
           {yearUnknown && <Ionicons name="checkmark" size={16} color="#fff" />}
         </View>
-        <Text className="text-base text-warmgray">{"I don't know the year"}</Text>
+        <Text className="text-base text-brand-navy">{"I don't know the year"}</Text>
       </Pressable>
 
       {/* Calendar */}
-      <View className="rounded-2xl overflow-hidden bg-surface border border-border" style={{ height: 340 }}>
+      <View className="overflow-hidden bg-white border border-stone-200" style={{ height: 360, borderRadius: 16 }}>
         <Calendar
           key={`calendar-${displayDate?.slice(0, 7) || 'default'}-${yearUnknown}`}
           current={displayDate || undefined}
@@ -273,10 +273,11 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
           onPress={() => setShowYearPicker(false)}
         >
           <Pressable
-            className="bg-surface rounded-2xl w-64 max-h-80 overflow-hidden"
+            className="bg-white w-64 max-h-80 overflow-hidden"
+            style={{ borderRadius: 16 }}
             onPress={(e) => e.stopPropagation?.()}
           >
-            <Text className="text-center py-3 text-base font-semibold text-warmgray border-b border-border">
+            <Text className="text-center py-3 text-base font-semibold text-brand-navy border-b border-stone-200">
               Select Year
             </Text>
             <ScrollView ref={yearScrollViewRef} onLayout={handleYearListLayout}>
@@ -286,14 +287,14 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
                   onPress={() => handleYearSelect(year)}
                   onLayout={year === YEARS[0] ? handleYearRowLayout : undefined}
                   className={`py-3 px-4 ${
-                    selectedDate?.startsWith(String(year)) ? 'bg-sage/20' : ''
+                    selectedDate?.startsWith(String(year)) ? 'bg-primary/10' : ''
                   }`}
                   testID={`year-option-${year}`}
                 >
                   <Text className={`text-center text-base ${
                     selectedDate?.startsWith(String(year))
-                      ? 'text-sage font-semibold'
-                      : 'text-warmgray'
+                      ? 'text-primary font-semibold'
+                      : 'text-brand-navy'
                   }`}>
                     {year}
                   </Text>
@@ -311,7 +312,7 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
         activeOpacity={selectedDate ? 0.7 : 1}
         disabled={!selectedDate}
       >
-        <Text className={`text-sm font-medium ${selectedDate ? 'text-warmgray-muted' : 'text-transparent'}`}>
+        <Text className={`text-sm font-medium ${selectedDate ? 'text-text-soft' : 'text-transparent'}`}>
           {selectedDate ? 'Clear' : '\u00A0'}
         </Text>
       </TouchableOpacity>
