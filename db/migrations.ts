@@ -15,6 +15,7 @@ const CONTACT_TABLE_SQL = `
     lastContactedAt INTEGER,
     nextContactDate INTEGER,
     birthday TEXT,
+    relationship TEXT,
     isArchived INTEGER NOT NULL DEFAULT 0
   );
 `;
@@ -91,9 +92,10 @@ const recreateContactsTableIfNeeded = () => {
 
       const hasCustomColumn = tableSql.includes('customIntervalDays');
       const hasBirthdayColumn = tableSql.includes('birthday');
+      const hasRelationshipColumn = tableSql.includes('relationship');
       const allowsCustomBucket = tableSql.includes("'custom'");
       const hasExpandedBuckets = tableSql.includes('bi-weekly') && tableSql.includes('every-three-weeks') && tableSql.includes('every-six-months');
-      const needsMigration = !hasCustomColumn || !hasBirthdayColumn || !allowsCustomBucket || !hasExpandedBuckets;
+      const needsMigration = !hasCustomColumn || !hasBirthdayColumn || !hasRelationshipColumn || !allowsCustomBucket || !hasExpandedBuckets;
 
       if (needsMigration) {
         console.log('Migrating contacts table to support new features...');
@@ -117,10 +119,11 @@ const recreateContactsTableIfNeeded = () => {
               const lastContactedAt = row.lastContactedAt ?? 'NULL';
               const nextContactDate = row.nextContactDate ?? 'NULL';
               const birthday = row.birthday ? `'${row.birthday.replace(/'/g, "''")}'` : 'NULL';
+              const relationship = row.relationship ? `'${row.relationship.replace(/'/g, "''")}'` : 'NULL';
               const isArchived = row.isArchived ?? 0;
 
               sqlite.execSync(
-                `INSERT INTO contacts (id, name, phone, avatarUri, bucket, customIntervalDays, lastContactedAt, nextContactDate, birthday, isArchived) VALUES ('${id}', '${name}', '${phone}', '${avatarUri}', '${bucket}', ${customIntervalDays ?? 'NULL'}, ${lastContactedAt}, ${nextContactDate}, ${birthday}, ${isArchived});`
+                `INSERT INTO contacts (id, name, phone, avatarUri, bucket, customIntervalDays, lastContactedAt, nextContactDate, birthday, relationship, isArchived) VALUES ('${id}', '${name}', '${phone}', '${avatarUri}', '${bucket}', ${customIntervalDays ?? 'NULL'}, ${lastContactedAt}, ${nextContactDate}, ${birthday}, ${relationship}, ${isArchived});`
               );
             }
           }
@@ -159,6 +162,7 @@ export const runMigrations = () => {
       lastContactedAt INTEGER,
       nextContactDate INTEGER,
       birthday TEXT,
+      relationship TEXT,
       isArchived INTEGER NOT NULL DEFAULT 0
     );
     ${INTERACTIONS_TABLE_SQL.replace('CREATE TABLE interactions', 'CREATE TABLE IF NOT EXISTS interactions')}
