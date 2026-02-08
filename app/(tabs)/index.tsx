@@ -22,13 +22,11 @@ import EmptyContactsState from '@/components/EmptyContactsState';
 import CelebrationStatus from '@/components/CelebrationStatus';
 import ReachedOutSheet from '@/components/ReachedOutSheet';
 import { PageHeader } from '@/components/PageHeader';
-import { DailySoftnessCard } from '@/components/DailySoftnessCard';
 import { ConnectionTile } from '@/components/ConnectionTile';
 import { AddConnectionTile } from '@/components/AddConnectionTile';
 import { QuiltGrid } from '@/components/ui';
 import { Heading, Body, Caption } from '@/components/ui';
 import { getTileVariant, getTileSize } from '@/utils/tileVariant';
-import { getDailyQuote } from '@/constants/quotes';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -44,8 +42,6 @@ export default function HomeScreen() {
   const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
   const [completionCount, setCompletionCount] = useState(0);
   const [totalContactCount, setTotalContactCount] = useState<number | null>(null);
-
-  const dailyQuote = useMemo(() => getDailyQuote(), []);
 
   const loadContacts = useCallback(() => {
     try {
@@ -122,11 +118,6 @@ export default function HomeScreen() {
     router.push('/(tabs)/two');
   }, [router]);
 
-  const handleReflect = useCallback(() => {
-    // TODO: Implement reflect feature
-    Alert.alert('Reflect', dailyQuote);
-  }, [dailyQuote]);
-
   const handleAvatarPress = useCallback(() => {
     router.push('/settings');
   }, [router]);
@@ -201,11 +192,6 @@ export default function HomeScreen() {
               </View>
             </TouchableOpacity>
           }
-        />
-
-        <DailySoftnessCard
-          quote={dailyQuote}
-          onReflectPress={handleReflect}
         />
 
         {/* Connections Section */}
