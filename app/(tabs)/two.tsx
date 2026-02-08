@@ -108,7 +108,7 @@ export default function ConnectionsScreen() {
       return items;
     }
 
-    // All filter: show due + recently connected
+    // All filter: show due + recently connected + remaining active connections
     if (dueContacts.length > 0) {
       items.push({ type: 'section-header', title: 'Connections to nurture', key: 'header-due' });
       dueContacts.forEach((contact) => {
@@ -124,6 +124,19 @@ export default function ConnectionsScreen() {
       items.push({ type: 'section-header', title: 'Recently connected', key: 'header-recent' });
       recentNotDue.forEach((contact) => {
         items.push({ type: 'recent-row', contact, key: `recent-${contact.id}` });
+      });
+    }
+
+    // Remaining active contacts that are neither due nor recently connected
+    const includedIds = new Set([...dueIds, ...recentNotDue.map((c) => c.id)]);
+    const otherActiveContacts = contacts.filter(
+      (c) => !c.isArchived && !includedIds.has(c.id) && matchesSearch(c)
+    );
+
+    if (otherActiveContacts.length > 0) {
+      items.push({ type: 'section-header', title: 'All connections', key: 'header-all' });
+      otherActiveContacts.forEach((contact) => {
+        items.push({ type: 'connection-card', contact, key: `all-${contact.id}` });
       });
     }
 
@@ -227,8 +240,8 @@ export default function ConnectionsScreen() {
         }
         contentContainerStyle={{
           paddingHorizontal: 24,
-          paddingBottom: 140,
-          paddingTop: 16,
+          paddingBottom: 164,
+          paddingTop: 18,
         }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -253,7 +266,7 @@ export default function ConnectionsScreen() {
           ) : undefined
         }
         ListHeaderComponent={
-          <View className="mb-4">
+          <View className="mb-5">
             <PageHeader
               title="Connections"
               subtitle={isSearching ? undefined : "Stay close to the people who matter most."}
@@ -264,20 +277,20 @@ export default function ConnectionsScreen() {
                     onPress={handleSearchPress}
                     accessibilityLabel={isSearching ? "Close search" : "Search connections"}
                     accessibilityRole="button"
-                    className="p-3 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
+                    className="p-3.5 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
                     activeOpacity={0.7}
                   >
-                    <Ionicons name={isSearching ? "close" : "search"} size={20} color="#94a3b8" />
+                    <Ionicons name={isSearching ? "close" : "search"} size={22} color="#7A879A" />
                   </TouchableOpacity>
                 ) : undefined
               }
             />
             {isSearching && counts.all > 0 && (
-              <View className="mb-4">
+              <View className="mb-5">
                 <TextInput
-                  className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-4 text-slate-900 dark:text-slate-100 text-lg"
+                  className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-4.5 text-slate-900 dark:text-slate-100 text-xl"
                   placeholder="Search by name..."
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor="#8A98AC"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   autoFocus

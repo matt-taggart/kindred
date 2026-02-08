@@ -23,7 +23,7 @@ export function FilterPills({ selected, counts, onSelect }: FilterPillsProps) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      className="mb-8"
+      className="mb-7"
       contentContainerStyle={{ gap: 8, paddingBottom: 8 }}
     >
       {filters.map((filter) => {
@@ -39,19 +39,19 @@ export function FilterPills({ selected, counts, onSelect }: FilterPillsProps) {
             accessibilityLabel={`Filter by ${filterLabels[filter].toLowerCase()}, ${count} connections`}
             accessibilityState={{ selected: isActive }}
             activeOpacity={0.85}
-            className={`px-6 py-2 rounded-full ${
+            className={`px-6 py-2.5 min-h-11 rounded-full ${
               isActive
                 ? 'bg-primary dark:bg-primary'
                 : 'bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800'
             }`}
           >
             <Body
-              size="sm"
+              size="base"
               weight="medium"
               className={
                 isActive
                   ? 'text-white'
-                  : 'text-slate-600 dark:text-slate-400'
+                  : 'text-slate-700 dark:text-slate-300'
               }
             >
               {filterLabels[filter]} · {count}

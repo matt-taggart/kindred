@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, isNull, lte, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, isNull, or } from 'drizzle-orm';
 
 import { getDb } from '../db/client';
 import { Contact, Interaction, NewContact, NewInteraction, contacts, interactions } from '../db/schema';
@@ -223,7 +223,7 @@ export const getRecentlyConnectedContacts = (): Contact[] => {
     .where(
       and(
         eq(contacts.isArchived, false),
-        lte(cutoffMs, contacts.lastContactedAt)
+        gte(contacts.lastContactedAt, cutoffMs)
       )
     )
     .orderBy(desc(contacts.lastContactedAt))

@@ -28,10 +28,10 @@ export function ConnectionCard({
       accessibilityRole="button"
       onPress={onPress}
       activeOpacity={0.7}
-      className="bg-white dark:bg-slate-900/50 p-4 rounded-2xl flex-row items-center border border-slate-100 dark:border-slate-800/50 shadow-soft mb-3"
+      className="bg-white dark:bg-slate-900/50 px-4 py-5 rounded-3xl flex-row items-center border border-slate-100 dark:border-slate-800/50 shadow-soft mb-4"
     >
       {/* Avatar */}
-      <View className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center mr-3 overflow-hidden">
+      <View className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center mr-3.5 overflow-hidden">
         {contact.avatarUri ? (
           <Image
             source={{ uri: contact.avatarUri }}
@@ -45,37 +45,37 @@ export function ConnectionCard({
       {/* Content */}
       <View className="flex-1">
         {/* Name and Rhythm */}
-        <View className="flex-row items-center mb-1">
-          <Text className="font-bold text-base text-slate-800 dark:text-slate-100 font-display">
+        <View className="flex-row items-center mb-2">
+          <Text className="font-semibold text-lg text-slate-800 dark:text-slate-100 font-display leading-6">
             {contact.name}
           </Text>
           {isReady && (
-            <View className="ml-2 bg-primary/20 px-2 py-0.5 rounded-full">
-              <Text className="text-[10px] font-bold text-primary uppercase tracking-tight">
+            <View className="ml-2 bg-primary/20 px-2.5 py-1 rounded-full">
+              <Text className="text-[11px] font-semibold text-primary uppercase tracking-wide">
                 READY
               </Text>
             </View>
           )}
         </View>
-        <Text className="text-xs text-slate-500 dark:text-slate-400 font-body mb-2">
+        <Text className="text-sm text-slate-600 dark:text-slate-300 font-body mb-3 leading-5">
           {rhythmLabel}
         </Text>
 
         {/* Labels Row */}
-        <View className="flex-row gap-4">
-          <View>
-            <Text className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-body">
+        <View className="flex-row gap-4 mt-0.5">
+          <View className="flex-1">
+            <Text className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-[1px] font-body leading-4">
               Last Connected
             </Text>
-            <Text className="text-xs text-slate-600 dark:text-slate-300 font-body">
+            <Text className="text-sm text-slate-700 dark:text-slate-200 font-body leading-5">
               {lastConnectedLabel}
             </Text>
           </View>
-          <View>
-            <Text className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-body">
+          <View className="flex-1">
+            <Text className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-[1px] font-body leading-4">
               Next Reminder
             </Text>
-            <Text className="text-xs text-slate-600 dark:text-slate-300 font-body">
+            <Text className="text-sm text-slate-700 dark:text-slate-200 font-body leading-5">
               {nextReminderLabel}
             </Text>
           </View>
@@ -83,7 +83,7 @@ export function ConnectionCard({
       </View>
 
       {/* Chevron */}
-      <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+      <Ionicons name="chevron-forward" size={20} color="#A3AFBF" />
     </TouchableOpacity>
   );
 }
