@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import { Body } from './ui';
 
-type QuickActionVariant = 'call' | 'text';
+type QuickActionVariant = 'call' | 'text' | 'moment';
 
 type QuickActionTileProps = {
   variant: QuickActionVariant;
@@ -36,6 +36,14 @@ const variantConfigs: Record<QuickActionVariant, VariantConfig> = {
     iconBgColor: 'bg-white dark:bg-card-dark',
     textColor: 'text-primary dark:text-primary',
     iconColor: Colors.primary,
+  },
+  moment: {
+    icon: 'leaf-outline',
+    label: 'Log a Moment',
+    bgColor: 'bg-secondary/10 dark:bg-secondary/20',
+    iconBgColor: 'bg-secondary/20 dark:bg-secondary/30',
+    textColor: 'text-secondary dark:text-secondary',
+    iconColor: '#D4896A',
   },
 };
 

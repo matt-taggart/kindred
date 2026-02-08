@@ -1,4 +1,3 @@
-export { DailySoftnessCard } from './DailySoftnessCard';
 export { ConnectionTile } from './ConnectionTile';
 export { AddConnectionTile } from './AddConnectionTile';
 export { ConnectionDetailHeader } from './ConnectionDetailHeader';
