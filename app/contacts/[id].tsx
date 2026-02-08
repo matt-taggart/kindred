@@ -5,8 +5,9 @@ import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, Scroll
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact } from '@/services/contactService';
+import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact, updateInteraction } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
+import ReachedOutSheet from '@/components/ReachedOutSheet';
 import { ConnectionDetailHeader, ConnectionProfileSection, QuickActionTile, SharedMomentsSection } from '@/components';
 import { Body, Caption, Heading } from '@/components/ui';
 import type { Moment } from '@/components';
@@ -36,6 +37,7 @@ export default function ContactDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [unarchiving, setUnarchiving] = useState(false);
+  const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -119,6 +121,23 @@ export default function ContactDetailScreen() {
   const handleAddNote = useCallback(() => {
     router.push({ pathname: '/modal', params: { contactId: id, noteOnly: 'true' } });
   }, [router, id]);
+
+  const handleLogMoment = useCallback(() => {
+    setShowReachedOutSheet(true);
+  }, []);
+
+  const handleReachedOutSubmit = useCallback(async (type: any, note: string) => {
+    if (!contact) return;
+
+    try {
+      await updateInteraction(contact.id, type, note || undefined);
+      loadContactData();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save. Please try again.');
+    } finally {
+      setShowReachedOutSheet(false);
+    }
+  }, [contact, loadContactData]);
 
   const handleUnarchive = useCallback(async () => {
     if (!contact) return;
@@ -259,6 +278,7 @@ export default function ContactDetailScreen() {
             <QuiltGrid>
               <QuickActionTile variant="call" onPress={handleCall} />
               <QuickActionTile variant="text" onPress={handleText} />
+              <QuickActionTile variant="moment" onPress={handleLogMoment} />
             </QuiltGrid>
           </View>
 
@@ -309,6 +329,13 @@ export default function ContactDetailScreen() {
           onArchive={handleArchive}
         />
       )}
+
+      <ReachedOutSheet
+        visible={showReachedOutSheet}
+        contact={contact}
+        onClose={() => setShowReachedOutSheet(false)}
+        onSubmit={handleReachedOutSubmit}
+      />
     </>
   );
 }
