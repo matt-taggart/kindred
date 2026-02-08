@@ -3,24 +3,19 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  LayoutAnimation,
-  Platform,
   RefreshControl,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  UIManager,
   View,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import { Contact } from '@/db/schema';
-import { getDueContactsGrouped, GroupedDueContacts, isBirthdayToday, updateInteraction, getContactCount } from '@/services/contactService';
+import { getDueContactsGrouped, GroupedDueContacts, isBirthdayToday, getContactCount } from '@/services/contactService';
 import EmptyContactsState from '@/components/EmptyContactsState';
 import CelebrationStatus from '@/components/CelebrationStatus';
-import ReachedOutSheet from '@/components/ReachedOutSheet';
 import { PageHeader } from '@/components/PageHeader';
 import { ConnectionTile } from '@/components/ConnectionTile';
 import { AddConnectionTile } from '@/components/AddConnectionTile';
@@ -28,18 +23,11 @@ import { QuiltGrid } from '@/components/ui';
 import { Heading, Body, Caption } from '@/components/ui';
 import { getTileVariant, getTileSize } from '@/utils/tileVariant';
 
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
 export default function HomeScreen() {
   const router = useRouter();
   const [groupedContacts, setGroupedContacts] = useState<GroupedDueContacts>({ birthdays: [], reconnect: [] });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
   const [completionCount, setCompletionCount] = useState(0);
   const [totalContactCount, setTotalContactCount] = useState<number | null>(null);
 
@@ -90,25 +78,8 @@ export default function HomeScreen() {
   }, [groupedContacts]);
 
   const handleContactPress = useCallback((contact: Contact) => {
-    setSelectedContact(contact);
-    setShowReachedOutSheet(true);
-  }, []);
-
-  const handleReachedOutSubmit = useCallback(async (type: any, note: string) => {
-    if (!selectedContact) return;
-
-    try {
-      await updateInteraction(selectedContact.id, type, note || undefined);
-      setCompletionCount(prev => prev + 1);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      loadContacts();
-    } catch (error) {
-      Alert.alert('Error', 'Failed to save. Please try again.');
-    } finally {
-      setShowReachedOutSheet(false);
-      setSelectedContact(null);
-    }
-  }, [selectedContact, loadContacts]);
+    router.push(`/contacts/${contact.id}`);
+  }, [router]);
 
   const handleAddConnection = useCallback(() => {
     router.push('/contacts/add');
@@ -240,16 +211,6 @@ export default function HomeScreen() {
           </Body>
         )}
       </ScrollView>
-
-      <ReachedOutSheet
-        visible={showReachedOutSheet}
-        contact={selectedContact}
-        onClose={() => {
-          setShowReachedOutSheet(false);
-          setSelectedContact(null);
-        }}
-        onSubmit={handleReachedOutSubmit}
-      />
     </SafeAreaView>
   );
 }
