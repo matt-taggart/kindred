@@ -57,9 +57,9 @@ export function ConnectionProfileSection({
   const initials = getInitials(name);
 
   return (
-    <View className="items-center py-8" testID="connection-profile-section">
+    <View className="items-center pt-4 pb-6" testID="connection-profile-section">
       {/* Avatar wrapper with ring */}
-      <View className={`w-32 h-32 rounded-full border-4 p-1.5 ${ringColor}`}>
+      <View className={`w-32 h-32 rounded-full border-[3px] p-1.5 ${ringColor}`}>
         {avatarUri ? (
           <Image
             source={{ uri: avatarUri }}
@@ -72,7 +72,7 @@ export function ConnectionProfileSection({
             className="w-full h-full rounded-full bg-sage-light dark:bg-accent-dark-sage items-center justify-center"
             testID="profile-initials"
           >
-            <Body className="text-2xl font-semibold text-primary">{initials}</Body>
+            <Body className="text-4xl font-semibold tracking-tight text-primary">{initials}</Body>
           </View>
         )}
 

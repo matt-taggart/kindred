@@ -206,7 +206,7 @@ export default function ContactDetailScreen() {
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 48 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: 48 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
           showsVerticalScrollIndicator={false}
         >

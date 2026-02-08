@@ -1,7 +1,7 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { PageHeader } from './PageHeader';
+import { Body, Heading } from './ui';
 import Colors from '@/constants/Colors';
 
 type ConnectionDetailHeaderProps = {
@@ -18,30 +18,35 @@ export function ConnectionDetailHeader({
   onMorePress,
 }: ConnectionDetailHeaderProps) {
   return (
-    <PageHeader
-      title={name}
-      subtitle={relationship}
-      showBranding={false}
-      leftElement={(
+    <View className="mb-2">
+      <View className="flex-row items-center justify-between">
         <TouchableOpacity
           onPress={onBackPress}
           accessibilityLabel="Go back"
           accessibilityRole="button"
-          className="p-3.5 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
+          className="w-10 h-10 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
         >
-          <Ionicons name="chevron-back" size={22} color={Colors.textSoft} />
+          <Ionicons name="chevron-back" size={18} color={Colors.textSoft} />
         </TouchableOpacity>
-      )}
-      rightElement={(
+
         <TouchableOpacity
           onPress={onMorePress}
           accessibilityLabel="More options"
           accessibilityRole="button"
-          className="p-3.5 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
+          className="w-10 h-10 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
         >
-          <Ionicons name="ellipsis-horizontal" size={22} color={Colors.textSoft} />
+          <Ionicons name="ellipsis-horizontal" size={18} color={Colors.textSoft} />
         </TouchableOpacity>
-      )}
-    />
+      </View>
+
+      <View className="mt-3">
+        <Heading size={1} className="text-brand-navy dark:text-slate-100">
+          {name}
+        </Heading>
+        <Body size="base" className="text-slate-500 dark:text-slate-400 mt-1">
+          {relationship}
+        </Body>
+      </View>
+    </View>
   );
 }
