@@ -6,6 +6,8 @@ const brandNavy = '#2D3648';
 const sageLight = '#E8EFEA';
 const offWhite = '#FDFCFB';
 const textSoft = '#5C635C';
+const warning = '#d97706';
+const warningDark = '#fbbf24';
 
 export default {
   light: {
@@ -30,4 +32,6 @@ export default {
   sageLight,
   offWhite,
   textSoft,
+  warning,
+  warningDark,
 };

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Pressable, Text } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
+import { Body } from './ui';
 
 type QuickActionVariant = 'call' | 'text';
 
@@ -53,11 +54,9 @@ export function QuickActionTile({ variant, onPress }: QuickActionTileProps) {
       >
         <Ionicons name={config.icon} size={24} color={config.iconColor} />
       </View>
-      <Text
-        className={`font-body font-bold text-base uppercase tracking-widest ${config.textColor}`}
-      >
+      <Body weight="medium" className={`text-base ${config.textColor}`}>
         {config.label}
-      </Text>
+      </Body>
     </Pressable>
   );
 }

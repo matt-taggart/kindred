@@ -1,37 +1,51 @@
-import { Modal, Pressable, Platform } from "react-native";
-import { SafeAreaView, ScrollView, Text, TextInput, View, Alert } from "react-native";
+import { Modal, Pressable } from "react-native";
+import {
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+  Alert,
+} from "react-native";
 import { useEffect, useMemo, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from '@react-native-community/datetimepicker';
-import BirthdayPicker from '@/components/BirthdayPicker';
-import { hasYear, getMonthDay } from '@/utils/birthdayValidation';
-import { getDateLabel } from '@/utils/scheduler';
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import BirthdayPicker from "@/components/BirthdayPicker";
+import { hasYear, getMonthDay } from "@/utils/birthdayValidation";
 
 import { Contact } from "@/db/schema";
-import Colors from '@/constants/Colors';
+import Colors from "@/constants/Colors";
+import { Body, Caption, Heading } from "@/components/ui";
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 const formatBirthdayDisplay = (birthday: string): string => {
-  if (!birthday) return '';
+  if (!birthday) return "";
 
   let month: number;
   let day: number;
   let year: number | null = null;
 
   if (hasYear(birthday)) {
-    // Format: YYYY-MM-DD
-    const parts = birthday.split('-');
+    const parts = birthday.split("-");
     year = parseInt(parts[0], 10);
     month = parseInt(parts[1], 10);
     day = parseInt(parts[2], 10);
   } else {
-    // Format: MM-DD
     const monthDay = getMonthDay(birthday);
-    const parts = monthDay.split('-');
+    const parts = monthDay.split("-");
     month = parseInt(parts[0], 10);
     day = parseInt(parts[1], 10);
   }
@@ -77,6 +91,14 @@ const bucketDescriptions: Record<Contact["bucket"], string> = {
   yearly: "For long-distance friends",
   custom: "Choose your own rhythm",
 };
+
+const EDITABLE_BUCKETS: Contact["bucket"][] = [
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+  "custom",
+];
 
 type CustomUnit = "days" | "weeks" | "months";
 
@@ -127,20 +149,15 @@ export default function EditContactModal({
   );
   const [birthday, setBirthday] = useState<string>(contact.birthday || "");
   const [isBirthdayExpanded, setIsBirthdayExpanded] = useState(false);
-  const [startDate, setStartDate] = useState(contact.nextContactDate ? new Date(contact.nextContactDate) : new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setSelectedBucket(contact.bucket);
-      const derived = deriveCustomUnitAndValue(contact.customIntervalDays);
-      setCustomState(derived);
+      setCustomState(deriveCustomUnitAndValue(contact.customIntervalDays));
       setBirthday(contact.birthday || "");
       setIsBirthdayExpanded(false);
-      setStartDate(contact.nextContactDate ? new Date(contact.nextContactDate) : new Date());
-      setShowDatePicker(false);
     }
-  }, [visible, contact.bucket, contact.customIntervalDays, contact.birthday, contact.nextContactDate]);
+  }, [visible, contact.bucket, contact.customIntervalDays, contact.birthday]);
 
   const derivedCustomDays = useMemo(() => {
     const numericValue = Number(customValue);
@@ -154,12 +171,12 @@ export default function EditContactModal({
     (derivedCustomDays !== null &&
       derivedCustomDays >= 1 &&
       derivedCustomDays <= 365);
+
   const hasChanges =
     selectedBucket !== contact.bucket ||
     (isCustom && derivedCustomDays !== contact.customIntervalDays) ||
     (!isCustom && contact.bucket === "custom") ||
-    birthday !== (contact.birthday || "") ||
-    startDate.getTime() !== (contact.nextContactDate || 0);
+    birthday !== (contact.birthday || "");
 
   const saveDisabled = !isCustomValid || !hasChanges;
 
@@ -167,7 +184,12 @@ export default function EditContactModal({
     if (!isCustomValid) return;
     const customDays = selectedBucket === "custom" ? derivedCustomDays : null;
     if (hasChanges) {
-      onSave(selectedBucket, customDays ?? null, birthday || null, startDate.getTime());
+      onSave(
+        selectedBucket,
+        customDays ?? null,
+        birthday || null,
+        contact.nextContactDate ?? null,
+      );
     }
     onClose();
   };
@@ -198,102 +220,236 @@ export default function EditContactModal({
       onRequestClose={onClose}
     >
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
-        <View className="flex-1 px-6 pb-6">
-          {/* Header */}
+        <View className="flex-1 px-6 pb-4">
           <View className="py-4 flex-row items-center justify-between">
-            <Pressable onPress={onClose}>
-              <Text className="text-primary font-medium text-lg">Cancel</Text>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel connection settings"
+            >
+              <Body size="lg" weight="medium" className="text-primary">
+                Cancel
+              </Body>
             </Pressable>
-            <Text className="text-xl font-semibold text-slate-800 dark:text-white">
+            <Heading
+              size={3}
+              weight="semibold"
+              className="text-brand-navy dark:text-white"
+            >
               Connection settings
-            </Text>
+            </Heading>
             <View className="w-12" />
           </View>
 
-          {/* Profile Section */}
-          <View className="items-center my-6">
-            <View className="w-12 h-12 bg-primary/10 rounded-full items-center justify-center mb-4">
-              <Ionicons name="heart" size={28} color={Colors.primary} />
+          <View className="items-center mt-6 mb-6">
+            <View className="w-12 h-12 bg-primary/10 rounded-full items-center justify-center mb-3">
+              <Ionicons name="heart" size={26} color={Colors.primary} />
             </View>
-            <Text className="text-2xl font-display text-slate-800 dark:text-white mb-2">
+            <Heading
+              size={2}
+              weight="medium"
+              className="mb-1 text-brand-navy dark:text-white"
+            >
               {contact.name}
-            </Text>
-            <Text className="text-slate-500 dark:text-slate-400 italic">
+            </Heading>
+            <Body className="italic text-slate-600 dark:text-slate-300">
               Every relationship has its own rhythm.
-            </Text>
+            </Body>
           </View>
 
-          <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-            {/* Rhythm Selection Cards */}
-            <View className="space-y-4 mb-8">
-              {(
-                [
-                  "daily",
-                  "weekly",
-                  "monthly",
-                  "yearly",
-                  "custom",
-                ] as Contact["bucket"][]
-              ).map((bucket) => {
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 8 }}
+          >
+            <View
+              className={`p-4 rounded-3xl border mb-6 ${
+                isBirthdayExpanded
+                  ? "bg-card-light dark:bg-card-dark border-primary"
+                  : "bg-card-light dark:bg-card-dark border-slate-200 dark:border-slate-700"
+              }`}
+            >
+              <View className="flex-row items-start justify-between mb-1">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
+                    <MaterialCommunityIcons
+                      name="cake-variant"
+                      size={20}
+                      color="#FFFFFF"
+                    />
+                  </View>
+                  <View>
+                    <Body
+                      size="lg"
+                      weight="medium"
+                      className="text-slate-800 dark:text-white"
+                    >
+                      Birthday
+                    </Body>
+                  </View>
+                </View>
+
+                {isBirthdayExpanded ? (
+                  <Pressable
+                    onPress={() => setIsBirthdayExpanded(false)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Cancel birthday editing"
+                  >
+                    <Body
+                      size="sm"
+                      weight="medium"
+                      className="text-slate-600 dark:text-slate-300"
+                    >
+                      Cancel
+                    </Body>
+                  </Pressable>
+                ) : birthday ? (
+                  <Pressable
+                    onPress={() => setIsBirthdayExpanded(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit birthday"
+                  >
+                    <Body size="sm" weight="medium" className="text-primary">
+                      Edit
+                    </Body>
+                  </Pressable>
+                ) : null}
+              </View>
+
+              {isBirthdayExpanded ? (
+                <>
+                  <View className="py-1">
+                    <BirthdayPicker value={birthday} onChange={setBirthday} />
+                  </View>
+                  <Caption
+                    className="mt-3 text-center text-slate-600 dark:text-slate-300"
+                    muted={false}
+                  >
+                    {
+                      "We'll prioritize this over regular reminders on their birthday."
+                    }
+                  </Caption>
+                </>
+              ) : birthday ? (
+                <View className="pt-0.5 pb-3">
+                  <Heading
+                    size={3}
+                    weight="medium"
+                    className="text-slate-700 dark:text-slate-200 text-center"
+                  >
+                    {formatBirthdayDisplay(birthday)}
+                  </Heading>
+                </View>
+              ) : (
+                <Pressable
+                  onPress={() => setIsBirthdayExpanded(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Add birthday"
+                  className="py-2 items-center"
+                >
+                  <View className="flex-row items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+                    <Ionicons name="add" size={18} color={Colors.primary} />
+                    <Body size="sm" weight="medium" className="text-primary">
+                      Add Birthday
+                    </Body>
+                  </View>
+                </Pressable>
+              )}
+            </View>
+
+            <Caption
+              uppercase
+              muted={false}
+              className="text-primary/75 tracking-[2px] mb-3"
+            >
+              Reminder rhythm
+            </Caption>
+
+            <View className="gap-3 mb-4" accessibilityRole="radiogroup">
+              {EDITABLE_BUCKETS.map((bucket) => {
                 const isSelected = selectedBucket === bucket;
                 const isCustomSelected = bucket === "custom" && isSelected;
 
                 return (
                   <View key={bucket}>
                     <Pressable
-                      className={`p-5 bg-card-light dark:bg-card-dark rounded-3xl shadow-sm border-2 ${
+                      testID={`bucket-option-${bucket}`}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${bucketLabels[bucket]} rhythm`}
+                      accessibilityState={{ selected: isSelected }}
+                      className={`p-5 rounded-3xl border ${
                         isSelected
-                          ? 'border-primary'
-                          : 'border-transparent'
-                      } ${isCustomSelected ? 'rounded-b-none' : ''}`}
+                          ? "border-primary bg-card-light dark:bg-card-dark"
+                          : "border-slate-200 dark:border-slate-700 bg-card-light dark:bg-card-dark"
+                      } ${isCustomSelected ? "rounded-b-none" : ""}`}
+                      style={({ pressed }) =>
+                        pressed
+                          ? {
+                              opacity: 0.92,
+                            }
+                          : undefined
+                      }
                       onPress={() => {
                         setSelectedBucket(bucket);
                         if (bucket === "custom") {
-                          const derived = deriveCustomUnitAndValue(
-                            contact.customIntervalDays,
+                          setCustomState(
+                            deriveCustomUnitAndValue(
+                              contact.customIntervalDays,
+                            ),
                           );
-                          setCustomState(derived);
                         }
                       }}
                     >
                       <View className="flex-row items-center justify-between">
-                        <View className="flex-1">
-                          <Text className="text-lg font-semibold text-slate-800 dark:text-white">
+                        <View className="flex-1 pr-3">
+                          <Body
+                            size="lg"
+                            weight="medium"
+                            className="text-slate-800 dark:text-white"
+                          >
                             {bucketLabels[bucket]}
-                          </Text>
-                          <Text className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                          </Body>
+                          <Body
+                            size="sm"
+                            className="text-slate-600 dark:text-slate-300 mt-1"
+                          >
                             {bucket === "custom"
                               ? formatCustomSummary(
-                                  derivedCustomDays ?? contact.customIntervalDays,
+                                  derivedCustomDays ??
+                                    contact.customIntervalDays,
                                 )
                               : bucketDescriptions[bucket]}
-                          </Text>
+                          </Body>
                         </View>
-                        {/* Radio Indicator */}
+
                         <View
                           className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
                             isSelected
                               ? "bg-primary border-primary"
-                              : "border-slate-200 dark:border-slate-700"
+                              : "border-slate-300 dark:border-slate-600"
                           }`}
                         >
-                          {isSelected && (
+                          {isSelected ? (
                             <View className="w-2.5 h-2.5 bg-white rounded-full" />
-                          )}
+                          ) : null}
                         </View>
                       </View>
                     </Pressable>
 
-                    {/* Custom Rhythm Expansion */}
-                    {isCustomSelected && (
+                    {isCustomSelected ? (
                       <View className="bg-slate-50 dark:bg-slate-800 rounded-b-3xl border-2 border-t-0 border-primary px-5 pb-5 pt-3">
+                        <View className="h-px bg-slate-200 dark:bg-slate-700 mb-3" />
                         <View className="gap-4">
                           <View>
-                            <Text className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
+                            <Caption
+                              muted={false}
+                              className="text-slate-600 dark:text-slate-300 mb-2"
+                            >
                               Frequency
-                            </Text>
+                            </Caption>
                             <View className="h-12 flex-row items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3">
                               <TextInput
+                                testID="custom-frequency-input"
                                 value={customValue}
                                 onChangeText={(text) =>
                                   setCustomState({
@@ -305,243 +461,153 @@ export default function EditContactModal({
                                 className="flex-1 text-base text-slate-800 dark:text-white"
                                 placeholder="e.g., 30"
                                 placeholderTextColor="#94a3b8"
+                                accessibilityLabel="Custom rhythm frequency"
                               />
                             </View>
                           </View>
+
                           <View>
-                            <Text className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
+                            <Caption
+                              muted={false}
+                              className="text-slate-600 dark:text-slate-300 mb-2"
+                            >
                               Unit
-                            </Text>
+                            </Caption>
                             <View className="flex-row gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-1 rounded-xl">
-                              {(["days", "weeks", "months"] as CustomUnit[]).map(
-                                (unit) => (
-                                  <Pressable
-                                    key={unit}
-                                    onPress={() =>
-                                      setCustomState({
-                                        customUnit: unit,
-                                        customValue,
-                                      })
-                                    }
-                                    className={`flex-1 items-center justify-center rounded-lg py-2 ${
+                              {(
+                                ["days", "weeks", "months"] as CustomUnit[]
+                              ).map((unit) => (
+                                <Pressable
+                                  key={unit}
+                                  accessibilityRole="button"
+                                  accessibilityLabel={`Custom rhythm unit ${unit}`}
+                                  accessibilityState={{
+                                    selected: customUnit === unit,
+                                  }}
+                                  onPress={() =>
+                                    setCustomState({
+                                      customUnit: unit,
+                                      customValue,
+                                    })
+                                  }
+                                  className={`flex-1 items-center justify-center rounded-lg py-2 ${
+                                    customUnit === unit
+                                      ? "bg-slate-100 dark:bg-slate-700"
+                                      : ""
+                                  }`}
+                                >
+                                  <Body
+                                    size="sm"
+                                    weight="medium"
+                                    className={
                                       customUnit === unit
-                                        ? 'bg-slate-100 dark:bg-slate-700'
-                                        : ''
-                                    }`}
+                                        ? "text-slate-800 dark:text-white"
+                                        : "text-slate-600 dark:text-slate-300"
+                                    }
                                   >
-                                    <Text
-                                      className={`text-sm font-medium ${
-                                        customUnit === unit
-                                          ? 'text-slate-800 dark:text-white'
-                                          : 'text-slate-500 dark:text-slate-400'
-                                      }`}
-                                    >
-                                      {unit.charAt(0).toUpperCase() + unit.slice(1)}
-                                    </Text>
-                                  </Pressable>
-                                ),
-                              )}
+                                    {unit.charAt(0).toUpperCase() +
+                                      unit.slice(1)}
+                                  </Body>
+                                </Pressable>
+                              ))}
                             </View>
                           </View>
                         </View>
 
-                        {!isCustomValid && (
-                          <Text className="mt-4 text-sm text-red-500 font-medium">
+                        {!isCustomValid ? (
+                          <Body
+                            size="sm"
+                            weight="medium"
+                            className="mt-4 text-red-500"
+                          >
                             Please enter a valid duration (1-365 days)
-                          </Text>
-                        )}
+                          </Body>
+                        ) : null}
 
-                        {isCustomValid && derivedCustomDays && (
-                          <Text className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+                        {isCustomValid && derivedCustomDays ? (
+                          <Body
+                            size="sm"
+                            className="mt-4 text-slate-600 dark:text-slate-300"
+                          >
                             {"We'll remind you "}
                             <Text className="font-semibold text-primary">
                               {formatCustomSummary(derivedCustomDays)}
                             </Text>
                             .
-                          </Text>
-                        )}
+                          </Body>
+                        ) : null}
                       </View>
-                    )}
+                    ) : null}
                   </View>
                 );
               })}
             </View>
-
-            {/* Birthday Section */}
-            <View className="mb-4 p-6 bg-accent-warm/20 dark:bg-primary/5 rounded-[32px] border border-accent-warm/30 dark:border-primary/20">
-              {/* Header Row */}
-              <View className="flex-row items-start justify-between mb-4">
-                <View className="flex-row items-center gap-3">
-                  <Text className="text-3xl">🎂</Text>
-                  <View>
-                    <Text className="text-lg font-semibold text-slate-800 dark:text-white">
-                      Birthday
-                    </Text>
-                    {birthday && !isBirthdayExpanded && (
-                      <Text className="text-xs text-primary font-medium uppercase tracking-wider">
-                        A gentle reminder is coming up
-                      </Text>
-                    )}
-                  </View>
-                </View>
-                {isBirthdayExpanded ? (
-                  <Pressable
-                    onPress={() => setIsBirthdayExpanded(false)}
-                    className="active:opacity-60"
-                  >
-                    <Text className="text-sm font-medium text-slate-500">
-                      Cancel
-                    </Text>
-                  </Pressable>
-                ) : birthday ? (
-                  <Pressable
-                    onPress={() => setIsBirthdayExpanded(true)}
-                    className="active:opacity-60"
-                  >
-                    <Text className="text-sm font-bold text-primary">
-                      Edit
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
-
-              {/* Content */}
-              {isBirthdayExpanded ? (
-                <>
-                  <View className="py-2">
-                    <BirthdayPicker
-                      value={birthday}
-                      onChange={setBirthday}
-                    />
-                  </View>
-                  <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
-                    {"We'll prioritize this over regular reminders on their birthday."}
-                  </Text>
-                </>
-              ) : birthday ? (
-                <View className="py-2">
-                  <Text className="text-xl font-display text-slate-700 dark:text-slate-300 text-center">
-                    {formatBirthdayDisplay(birthday)}
-                  </Text>
-                </View>
-              ) : (
-                <Pressable
-                  onPress={() => setIsBirthdayExpanded(true)}
-                  className="py-2 items-center active:opacity-60"
-                >
-                  <View className="flex-row items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
-                    <Ionicons name="add" size={18} color={Colors.primary} />
-                    <Text className="text-sm font-medium text-primary">
-                      Add Birthday
-                    </Text>
-                  </View>
-                </Pressable>
-              )}
-            </View>
-
-            {/* Next Reminder Section */}
-            <View className="mb-4 p-6 bg-accent-warm/20 dark:bg-primary/5 rounded-[32px] border border-accent-warm/30 dark:border-primary/20">
-              <View className="flex-row items-start justify-between mb-4">
-                <View className="flex-row items-center gap-3">
-                  <View className="w-10 h-10 bg-primary/10 rounded-full items-center justify-center">
-                    <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
-                  </View>
-                  <Text className="text-lg font-semibold text-slate-800 dark:text-white">
-                    Next Reminder
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={() => setShowDatePicker(!showDatePicker)}
-                  className="active:opacity-60"
-                >
-                  <Text className="text-sm font-bold text-primary">
-                    {showDatePicker ? 'Done' : 'Edit'}
-                  </Text>
-                </Pressable>
-              </View>
-
-              <View className="py-2">
-                <Text className="text-xl font-display text-slate-700 dark:text-slate-300 text-center">
-                  {getDateLabel(startDate.getTime())}
-                </Text>
-              </View>
-
-              {showDatePicker && Platform.OS === 'ios' && (
-                <View className="mt-4">
-                  <DateTimePicker
-                    value={startDate}
-                    mode="date"
-                    display="spinner"
-                    minimumDate={new Date()}
-                    onChange={(_e, date) => date && setStartDate(date)}
-                    themeVariant="light"
-                    accentColor={Colors.primary}
-                  />
-                </View>
-              )}
-
-              {showDatePicker && Platform.OS === 'android' && (
-                <DateTimePicker
-                  value={startDate}
-                  mode="date"
-                  display="default"
-                  minimumDate={new Date()}
-                  onChange={(_e, date) => {
-                    setShowDatePicker(false);
-                    if (date) setStartDate(date);
-                  }}
-                />
-              )}
-            </View>
           </ScrollView>
 
-          {/* Action Buttons */}
-          <View className="mt-6">
+          <View className="mt-0 pt-4 border-t border-slate-100 dark:border-slate-800">
             <Pressable
+              testID="save-changes-button"
               onPress={handleSave}
               disabled={saveDisabled}
-              className={`w-full py-4 rounded-full items-center justify-center ${
-                saveDisabled
-                  ? 'bg-slate-200 dark:bg-slate-700'
-                  : 'bg-primary'
+              accessibilityRole="button"
+              accessibilityLabel="Save changes"
+              accessibilityState={{ disabled: saveDisabled }}
+              className={`w-full py-4 mt-4 rounded-full items-center justify-center ${
+                saveDisabled ? "bg-slate-200 dark:bg-slate-700" : "bg-primary"
               }`}
-              style={!saveDisabled ? {
-                shadowColor: Colors.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.2,
-                shadowRadius: 8,
-                elevation: 4,
-              } : undefined}
+              style={({ pressed }) => {
+                if (saveDisabled) return undefined;
+                return {
+                  shadowColor: Colors.primary,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 8,
+                  elevation: 4,
+                  opacity: pressed ? 0.92 : 1,
+                };
+              }}
             >
-              <Text
-                className={`text-lg font-semibold ${
+              <Body
+                size="lg"
+                weight="medium"
+                className={
                   saveDisabled
-                    ? 'text-slate-400 dark:text-slate-500'
-                    : 'text-white'
-                }`}
+                    ? "text-slate-500 dark:text-slate-400"
+                    : "text-white"
+                }
               >
                 Save changes
-              </Text>
+              </Body>
             </Pressable>
 
-            {onArchive && !contact.isArchived && (
+            {onArchive && !contact.isArchived ? (
               <Pressable
                 onPress={handleArchive}
-                className="flex-row items-center justify-center gap-3 mt-8 active:opacity-70"
+                accessibilityRole="button"
+                accessibilityLabel={`Archive ${contact.name}`}
+                className="flex-row items-center justify-center gap-3 mt-3 py-0.5 rounded-2xl"
+                style={({ pressed }) =>
+                  pressed
+                    ? {
+                        backgroundColor: "rgba(239, 68, 68, 0.08)",
+                      }
+                    : undefined
+                }
               >
                 <View className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center">
                   <Ionicons name="archive-outline" size={20} color="#94a3b8" />
                 </View>
                 <View>
-                  <Text className="text-slate-600 dark:text-slate-400 font-medium">
+                  <Body
+                    size="base"
+                    weight="medium"
+                    className="text-slate-700 dark:text-slate-300"
+                  >
                     Archive connection
-                  </Text>
-                  <Text className="text-[10px] text-slate-400 dark:text-slate-500 italic">
-                    This connection has been resting
-                  </Text>
+                  </Body>
                 </View>
               </Pressable>
-            )}
+            ) : null}
           </View>
         </View>
       </SafeAreaView>

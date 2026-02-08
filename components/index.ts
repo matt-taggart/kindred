@@ -3,7 +3,6 @@ export { ConnectionTile } from './ConnectionTile';
 export { AddConnectionTile } from './AddConnectionTile';
 export { ConnectionDetailHeader } from './ConnectionDetailHeader';
 export { ConnectionProfileSection } from './ConnectionProfileSection';
-export { ConnectionNotesCard } from './ConnectionNotesCard';
 export { QuickActionTile } from './QuickActionTile';
 export { SharedMomentsSection } from './SharedMomentsSection';
 export type { Moment } from './SharedMomentsSection';

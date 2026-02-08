@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Contact } from '@/db/schema';
+import Colors from '@/constants/Colors';
 
 type MomentCardProps = {
   contact: Contact;
-  emoji: string;
+  avatarIcon: keyof typeof Ionicons.glyphMap;
   rhythmLabel: string;
   timeLabel: string;
   isUrgent?: boolean;
@@ -14,7 +16,7 @@ type MomentCardProps = {
 
 export function MomentCard({
   contact,
-  emoji,
+  avatarIcon,
   rhythmLabel,
   timeLabel,
   isUrgent = false,
@@ -33,8 +35,6 @@ export function MomentCard({
       ? 'bg-secondary/20'
       : 'bg-primary/20';
 
-  const avatarOpacity = isResting ? 'opacity-50 grayscale' : '';
-
   // Build accessibility hint for testing
   const hintParts: string[] = [];
   if (isUrgent) hintParts.push('urgent');
@@ -50,7 +50,7 @@ export function MomentCard({
     >
       <View className="flex-row items-center gap-4">
         <View className={`w-12 h-12 rounded-2xl ${avatarBg} items-center justify-center`}>
-          <Text className={`text-xl ${avatarOpacity}`}>{emoji}</Text>
+          <Ionicons testID="moment-avatar-icon" name={avatarIcon} size={20} color={Colors.primary} style={isResting ? { opacity: 0.5 } : undefined} />
         </View>
         <View>
           <Text className="font-bold text-base text-slate-800 dark:text-slate-100 font-display">

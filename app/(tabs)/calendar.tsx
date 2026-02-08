@@ -98,7 +98,7 @@ export default function MomentsScreen() {
                     <MomentCard
                       key={moment.contact.id}
                       contact={moment.contact}
-                      emoji={moment.emoji}
+                      avatarIcon={moment.avatarIcon}
                       rhythmLabel={moment.rhythmLabel}
                       timeLabel={moment.timeLabel}
                       isUrgent={moment.isUrgent}
@@ -118,7 +118,7 @@ export default function MomentsScreen() {
                     <MomentCard
                       key={moment.contact.id}
                       contact={moment.contact}
-                      emoji={moment.emoji}
+                      avatarIcon={moment.avatarIcon}
                       rhythmLabel={moment.rhythmLabel}
                       timeLabel={moment.timeLabel}
                       onPress={() => handleContactPress(moment.contact.id)}
@@ -137,7 +137,7 @@ export default function MomentsScreen() {
                     <MomentCard
                       key={moment.contact.id}
                       contact={moment.contact}
-                      emoji={moment.emoji}
+                      avatarIcon={moment.avatarIcon}
                       rhythmLabel={moment.rhythmLabel}
                       timeLabel={moment.timeLabel}
                       isResting={moment.isResting}

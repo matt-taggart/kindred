@@ -1,13 +1,14 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction } from '@/db/schema';
 import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
-import { ConnectionDetailHeader, ConnectionProfileSection, ConnectionNotesCard, QuickActionTile, SharedMomentsSection } from '@/components';
+import { ConnectionDetailHeader, ConnectionProfileSection, QuickActionTile, SharedMomentsSection } from '@/components';
+import { Body, Caption, Heading } from '@/components/ui';
 import type { Moment } from '@/components';
 import { QuiltGrid } from '@/components/ui/QuiltGrid';
 import { formatPhoneUrl } from '@/utils/phone';
@@ -27,6 +28,7 @@ const mapInteractionsToMoments = (interactions: Interaction[]): Moment[] => {
 
 export default function ContactDetailScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [contact, setContact] = useState<Contact | null>(null);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
@@ -34,7 +36,6 @@ export default function ContactDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [unarchiving, setUnarchiving] = useState(false);
-  const [notes, setNotes] = useState('');
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -103,11 +104,6 @@ export default function ContactDetailScreen() {
       ],
     );
   }, [contact]);
-
-  const handleNotesChange = useCallback((text: string) => {
-    setNotes(text);
-    // TODO: Implement notes persistence when schema supports it
-  }, []);
 
   const handleEditInteraction = useCallback(
     (interaction: Interaction) => {
@@ -180,6 +176,7 @@ export default function ContactDetailScreen() {
     headerBackTitle: 'Back',
     headerShown: false,
   }), [contact]);
+  const archiveIconColor = colorScheme === 'dark' ? Colors.warningDark : Colors.warning;
 
   if (loading) {
     return (
@@ -197,7 +194,7 @@ export default function ContactDetailScreen() {
       <>
         <Stack.Screen options={screenOptions} />
         <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
-          <Text className="text-slate-700 dark:text-slate-300">Connection not found</Text>
+          <Body>Connection not found</Body>
         </SafeAreaView>
       </>
     );
@@ -207,29 +204,32 @@ export default function ContactDetailScreen() {
     <>
       <Stack.Screen options={screenOptions} />
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
-        <ConnectionDetailHeader
-          name={contact.name}
-          relationship={contact.relationship || 'Connection'}
-          onBackPress={() => router.back()}
-          onMorePress={handleEditContact}
-        />
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 48 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
           showsVerticalScrollIndicator={false}
         >
+          <ConnectionDetailHeader
+            name={contact.name}
+            relationship={contact.relationship || 'Connection'}
+            onBackPress={() => router.back()}
+            onMorePress={handleEditContact}
+          />
+
           {contact.isArchived && (
-            <View className="mb-6 rounded-3xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-6 shadow-soft">
+            <View className="mb-6 rounded-3xl bg-amber-50 dark:bg-amber-900/35 border border-amber-200 dark:border-amber-700 p-6 shadow-soft">
               <View className="flex-row items-center mb-3">
-                <Ionicons name="archive-outline" size={20} color="#d97706" />
-                <Text className="ml-2 text-base font-bold text-amber-800 dark:text-amber-200 uppercase tracking-widest">Archived connection</Text>
+                <Ionicons name="archive-outline" size={20} color={archiveIconColor} />
+                <Caption uppercase className="ml-2 text-amber-800 dark:text-amber-100 tracking-wider font-semibold">
+                  Archived connection
+                </Caption>
               </View>
-              <Text className="text-base text-amber-700 dark:text-amber-300 mb-4 font-body">
+              <Body className="text-amber-700 dark:text-amber-200 mb-4">
                 This connection is archived and will not appear in your regular lists. Restore it to receive reminders again.
-              </Text>
+              </Body>
               <TouchableOpacity
-                className="flex-row items-center justify-center gap-2 rounded-2xl bg-amber-600 py-4 shadow-sm"
+                className="flex-row items-center justify-center gap-2 rounded-2xl bg-amber-600 dark:bg-amber-500 py-4 shadow-sm"
                 onPress={handleUnarchive}
                 disabled={unarchiving}
                 activeOpacity={0.85}
@@ -239,9 +239,9 @@ export default function ContactDetailScreen() {
                 ) : (
                   <Ionicons name="refresh-outline" size={20} color="#fff" />
                 )}
-                <Text className="text-base font-bold text-white uppercase tracking-widest">
+                <Body weight="medium" className="text-white">
                   {unarchiving ? 'Restoring...' : 'Restore connection'}
-                </Text>
+                </Body>
               </TouchableOpacity>
             </View>
           )}
@@ -253,14 +253,6 @@ export default function ContactDetailScreen() {
             lastConnected={formatLastConnected(contact.lastContactedAt)}
             isFavorite={contact.relationship?.toLowerCase().includes('partner') || contact.relationship?.toLowerCase().includes('spouse')}
           />
-
-          {/* Notes Card */}
-          <View className="mb-6">
-            <ConnectionNotesCard
-              notes={notes}
-              onChangeNotes={handleNotesChange}
-            />
-          </View>
 
           {/* Quick Actions Grid */}
           <View className="mb-6">
@@ -287,18 +279,20 @@ export default function ContactDetailScreen() {
                 <View className="w-16 h-16 rounded-full bg-sage-light dark:bg-accent-dark-sage items-center justify-center mb-4 border border-primary/10">
                   <Ionicons name="heart" size={32} color={Colors.primary} />
                 </View>
-                <Text className="text-lg font-display text-slate-800 dark:text-slate-100 text-center mb-2">
+                <Heading size={3} className="text-center mb-2">
                   No shared moments yet
-                </Text>
-                <Text className="text-base text-slate-500 dark:text-slate-400 text-center mb-6 font-body">
-                  Your shared moments and notes will appear here.
-                </Text>
+                </Heading>
+                <Body className="text-slate-500 dark:text-slate-400 text-center mb-6">
+                  Your shared moments will appear here.
+                </Body>
                 <TouchableOpacity
                   className="px-8 py-4 rounded-2xl bg-primary shadow-sm"
                   onPress={handleAddNote}
                   activeOpacity={0.85}
                 >
-                  <Text className="text-base font-bold text-white uppercase tracking-widest">Add a moment</Text>
+                  <Body weight="medium" className="text-white">
+                    Add a moment
+                  </Body>
                 </TouchableOpacity>
               </View>
             </View>
@@ -318,4 +312,3 @@ export default function ContactDetailScreen() {
     </>
   );
 }
-

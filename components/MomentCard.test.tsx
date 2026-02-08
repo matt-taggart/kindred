@@ -28,7 +28,7 @@ describe('MomentCard', () => {
     const { getByText } = render(
       <MomentCard
         contact={baseContact}
-        emoji="🌸"
+        avatarIcon="heart-outline"
         rhythmLabel="Returning daily"
         timeLabel="Tomorrow"
         onPress={mockOnPress}
@@ -37,24 +37,24 @@ describe('MomentCard', () => {
     expect(getByText('Emma')).toBeTruthy();
   });
 
-  it('renders emoji', () => {
-    const { getByText } = render(
+  it('renders avatar icon', () => {
+    const { getByTestId } = render(
       <MomentCard
         contact={baseContact}
-        emoji="🌸"
+        avatarIcon="heart-outline"
         rhythmLabel="Returning daily"
         timeLabel="Tomorrow"
         onPress={mockOnPress}
       />
     );
-    expect(getByText('🌸')).toBeTruthy();
+    expect(getByTestId('moment-avatar-icon')).toBeTruthy();
   });
 
   it('renders rhythm label', () => {
     const { getByText } = render(
       <MomentCard
         contact={baseContact}
-        emoji="🌸"
+        avatarIcon="heart-outline"
         rhythmLabel="Returning daily"
         timeLabel="Tomorrow"
         onPress={mockOnPress}
@@ -67,7 +67,7 @@ describe('MomentCard', () => {
     const { getByText } = render(
       <MomentCard
         contact={baseContact}
-        emoji="🌸"
+        avatarIcon="heart-outline"
         rhythmLabel="Returning daily"
         timeLabel="Tomorrow"
         onPress={mockOnPress}
@@ -80,7 +80,7 @@ describe('MomentCard', () => {
     const { getByTestId } = render(
       <MomentCard
         contact={baseContact}
-        emoji="🌸"
+        avatarIcon="heart-outline"
         rhythmLabel="Returning daily"
         timeLabel="Tomorrow"
         onPress={mockOnPress}
@@ -94,7 +94,7 @@ describe('MomentCard', () => {
     const { getByTestId } = render(
       <MomentCard
         contact={baseContact}
-        emoji="🌸"
+        avatarIcon="heart-outline"
         rhythmLabel="Returning daily"
         timeLabel="Tomorrow"
         isUrgent
@@ -109,7 +109,7 @@ describe('MomentCard', () => {
     const { getByTestId } = render(
       <MomentCard
         contact={baseContact}
-        emoji="☕️"
+        avatarIcon="people-circle-outline"
         rhythmLabel="Seasonally gathering"
         timeLabel="Late June"
         isResting

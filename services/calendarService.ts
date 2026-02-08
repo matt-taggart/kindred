@@ -25,7 +25,7 @@ export type MomentContact = {
   timeLabel: string;
   isUrgent: boolean;
   isResting: boolean;
-  emoji: string;
+  avatarIcon: string;
   rhythmLabel: string;
 };
 
@@ -194,40 +194,40 @@ export const getMonthsDueContacts = (year: number, month: number): number => {
   }).length;
 };
 
-const getEmojiForRelationship = (relationship: string | null): string => {
+const getAvatarIconForRelationship = (relationship: string | null): string => {
   switch (relationship) {
     case 'partner':
     case 'spouse':
-      return '🌸';
+      return 'heart-outline';
     case 'family':
-      return '🌿';
+      return 'people-outline';
     case 'friend':
-      return '☀️';
+      return 'chatbubble-outline';
     case 'group':
-      return '☕️';
+      return 'people-circle-outline';
     default:
-      return '🌊';
+      return 'person-outline';
   }
 };
 
 const getRhythmLabel = (bucket: Contact['bucket']): string => {
   switch (bucket) {
     case 'daily':
-      return 'Returning daily';
+      return 'Daily check-in';
     case 'weekly':
-      return 'Weekly rest & return';
+      return 'Weekly check-in';
     case 'bi-weekly':
-      return 'Fortnightly nurture';
+      return 'Every 2 weeks';
     case 'every-three-weeks':
-      return 'Every few weeks';
+      return 'Every 3 weeks';
     case 'monthly':
       return 'Monthly check-in';
     case 'every-six-months':
-      return 'Seasonally gathering';
+      return 'Twice a year';
     case 'yearly':
-      return 'Yearly celebration';
+      return 'Yearly check-in';
     case 'custom':
-      return 'Custom rhythm';
+      return 'Custom schedule';
     default:
       return 'At your pace';
   }
@@ -296,7 +296,7 @@ export const getUpcomingMoments = (): UpcomingMoments => {
       timeLabel: getTimeLabel(contact.nextContactDate),
       isUrgent,
       isResting,
-      emoji: getEmojiForRelationship(contact.relationship),
+      avatarIcon: getAvatarIconForRelationship(contact.relationship),
       rhythmLabel: getRhythmLabel(contact.bucket),
     };
 

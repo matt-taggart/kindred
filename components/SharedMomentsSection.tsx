@@ -20,13 +20,6 @@ type SharedMomentsSectionProps = {
   onMomentPress?: (moment: Moment) => void;
 };
 
-const ICON_COLORS: Record<string, string> = {
-  'bg-amber-50': Colors.primary,
-  'bg-emerald-50': Colors.primary,
-  'bg-pink-50': Colors.primary,
-  'bg-sky-50': Colors.primary,
-};
-
 export function SharedMomentsSection({
   moments,
   onViewAll,
@@ -43,7 +36,7 @@ export function SharedMomentsSection({
         <Heading size={4} weight="semibold">Shared moments</Heading>
         {onViewAll && (
           <Pressable onPress={onViewAll}>
-            <Body size="sm" weight="medium" className="text-primary font-bold uppercase tracking-wider">
+            <Body size="sm" weight="medium" className="text-primary">
               View all
             </Body>
           </Pressable>
@@ -92,7 +85,7 @@ export function SharedMomentsSection({
               </View>
 
               {/* Chevron */}
-              <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+              <Ionicons name="chevron-forward" size={20} color={Colors.textSoft} />
             </Pressable>
           );
         })}
