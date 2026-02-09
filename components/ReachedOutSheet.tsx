@@ -25,7 +25,7 @@ type ConnectionTypeConfig = {
 const CONNECTION_TYPES: ConnectionTypeConfig[] = [
   { type: 'call', label: 'Call', icon: 'call' },
   { type: 'text', label: 'Text', icon: 'chatbubble-outline' },
-  { type: 'email', label: 'Voice', icon: 'mic-outline' },
+  { type: 'email', label: 'Email', icon: 'mail-outline' },
   { type: 'meet', label: 'In person', icon: 'person-outline' },
 ];
 
@@ -220,5 +220,4 @@ export default function ReachedOutSheet({ visible, contact, onClose, onSubmit }:
     </Modal>
   );
 }
-
 

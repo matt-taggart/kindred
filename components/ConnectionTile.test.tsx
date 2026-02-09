@@ -42,11 +42,11 @@ describe('ConnectionTile', () => {
     expect(mockOnPress).toHaveBeenCalledTimes(1);
   });
 
-  it('renders relationship type badge', () => {
-    const { getByText } = render(
+  it('does not render relationship text badge in compact layout', () => {
+    const { queryByText } = render(
       <ConnectionTile contact={baseContact} onPress={mockOnPress} />
     );
-    expect(getByText('PARTNER')).toBeTruthy();
+    expect(queryByText('PARTNER')).toBeNull();
   });
 
   it('renders status text', () => {

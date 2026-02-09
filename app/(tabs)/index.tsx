@@ -3,33 +3,41 @@ import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   RefreshControl,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
-import { Contact } from '@/db/schema';
-import { getDueContactsGrouped, GroupedDueContacts, isBirthdayToday, getContactCount } from '@/services/contactService';
+import { Contact, NewInteraction } from '@/db/schema';
+import { getDueContactsGrouped, GroupedDueContacts, isBirthdayToday, getContactCount, snoozeContact, updateInteraction } from '@/services/contactService';
 import EmptyContactsState from '@/components/EmptyContactsState';
 import CelebrationStatus from '@/components/CelebrationStatus';
 import { PageHeader } from '@/components/PageHeader';
 import { ConnectionTile } from '@/components/ConnectionTile';
-import { AddConnectionTile } from '@/components/AddConnectionTile';
+import ReachedOutSheet from '@/components/ReachedOutSheet';
+import { ConnectionQuickActionsSheet } from '@/components/ConnectionQuickActionsSheet';
 import { QuiltGrid } from '@/components/ui';
 import { Heading, Body, Caption } from '@/components/ui';
 import { getTileVariant, getTileSize } from '@/utils/tileVariant';
 
 export default function HomeScreen() {
+  type InteractionType = NewInteraction['type'];
   const router = useRouter();
+  const { width } = useWindowDimensions();
   const [groupedContacts, setGroupedContacts] = useState<GroupedDueContacts>({ birthdays: [], reconnect: [] });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [completionCount, setCompletionCount] = useState(0);
   const [totalContactCount, setTotalContactCount] = useState<number | null>(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [showQuickActions, setShowQuickActions] = useState(false);
+  const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
 
   const loadContacts = useCallback(() => {
     try {
@@ -98,6 +106,62 @@ export default function HomeScreen() {
     loadContacts();
   }, [loadContacts]);
 
+  const handleOpenActions = useCallback((contact: Contact) => {
+    setSelectedContact(contact);
+    setShowQuickActions(true);
+  }, []);
+
+  const closeQuickActions = useCallback(() => {
+    setShowQuickActions(false);
+    setSelectedContact(null);
+  }, []);
+
+  const handleQuickNote = useCallback(() => {
+    if (!selectedContact) return;
+    setShowQuickActions(false);
+    router.push({ pathname: '/modal', params: { contactId: selectedContact.id, noteOnly: 'true' } });
+    setSelectedContact(null);
+  }, [router, selectedContact]);
+
+  const handleMarkConnected = useCallback(() => {
+    setShowQuickActions(false);
+    setShowReachedOutSheet(true);
+  }, []);
+
+  const handleSnooze = useCallback(async (days: 1 | 3 | 7) => {
+    if (!selectedContact) return;
+
+    try {
+      const untilDate = Date.now() + days * 24 * 60 * 60 * 1000;
+      await snoozeContact(selectedContact.id, untilDate);
+      setShowQuickActions(false);
+      setSelectedContact(null);
+      loadContacts();
+    } catch (error) {
+      Alert.alert('Error', 'Unable to snooze this connection right now.');
+    }
+  }, [loadContacts, selectedContact]);
+
+  const handleReachedOutSubmit = useCallback(async (type: InteractionType, note: string) => {
+    if (!selectedContact) return;
+
+    try {
+      await updateInteraction(selectedContact.id, type, note || undefined);
+      setCompletionCount((count) => count + 1);
+      loadContacts();
+    } catch {
+      Alert.alert('Error', 'Failed to save this interaction.');
+    } finally {
+      setShowReachedOutSheet(false);
+      setSelectedContact(null);
+    }
+  }, [loadContacts, selectedContact]);
+
+  const closeReachedOutSheet = useCallback(() => {
+    setShowReachedOutSheet(false);
+    setSelectedContact(null);
+  }, []);
+
   const getGreeting = (): string => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -105,6 +169,7 @@ export default function HomeScreen() {
     return 'Good evening';
   };
   const greeting = getGreeting();
+  const isNarrowLayout = width < 390;
 
   if (loading) {
     return (
@@ -141,76 +206,103 @@ export default function HomeScreen() {
   const hasContacts = displayContacts.length > 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        showsVerticalScrollIndicator={false}
-      >
-        <PageHeader
-          title="Kindred"
-          subtitle={`${greeting}, friend`}
-          showBranding={false}
-          rightElement={
-            <TouchableOpacity onPress={handleAvatarPress} className="relative">
-              <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
-                <View className="w-full h-full bg-primary items-center justify-center">
-                  <Ionicons name="person" size={24} color="white" />
-                </View>
-              </View>
-            </TouchableOpacity>
+    <>
+      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-        />
+          showsVerticalScrollIndicator={false}
+        >
+          <PageHeader
+            title="Kindred"
+            subtitle={`${greeting}, friend`}
+            showBranding={false}
+            rightElement={
+              <TouchableOpacity onPress={handleAvatarPress} className="relative">
+                <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
+                  <View className="w-full h-full bg-primary items-center justify-center">
+                    <Ionicons name="person" size={24} color="white" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            }
+          />
 
-        {/* Connections Section */}
-        <View className="mb-6">
-          <View className="flex-row justify-between items-end mb-4">
-            <View>
-              <Heading size={2}>Your connections</Heading>
-              <Caption muted>Nurturing your inner circle</Caption>
+          {/* Connections Section */}
+          <View className="mb-6">
+            <View className="flex-row justify-between items-end mb-4">
+              <View>
+                <Heading size={2}>Your connections</Heading>
+                <Caption muted>Nurturing your inner circle</Caption>
+              </View>
+              {hasContacts && (
+                <Body
+                  size="sm"
+                  className="text-primary"
+                  onPress={handleSeeAll}
+                >
+                  See all
+                </Body>
+              )}
             </View>
-            {hasContacts && (
-              <Body
-                size="sm"
-                className="text-primary"
-                onPress={handleSeeAll}
-              >
-                See all
-              </Body>
+
+            {hasContacts ? (
+              <QuiltGrid columns={isNarrowLayout ? 1 : 2}>
+                {displayContacts.map((contact) => {
+                  const isBirthday = isBirthdayToday(contact);
+                  return (
+                    <ConnectionTile
+                      key={contact.id}
+                      contact={contact}
+                      variant={getTileVariant(contact, isBirthday)}
+                      size={getTileSize(contact)}
+                      isBirthday={isBirthday}
+                      onPress={() => handleContactPress(contact)}
+                      onOpenActions={() => handleOpenActions(contact)}
+                    />
+                  );
+                })}
+              </QuiltGrid>
+            ) : (
+              <CelebrationStatus completionCount={completionCount} />
             )}
+
+            <TouchableOpacity
+              onPress={handleAddConnection}
+              activeOpacity={0.85}
+              className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white/80 dark:bg-card-dark/90 flex-row items-center justify-center"
+            >
+              <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
+              <Body size="sm" weight="medium" className="ml-2 text-primary">
+                Add a connection
+              </Body>
+            </TouchableOpacity>
           </View>
 
-          {hasContacts ? (
-            <QuiltGrid>
-              {displayContacts.map((contact) => {
-                const isBirthday = isBirthdayToday(contact);
-                return (
-                  <ConnectionTile
-                    key={contact.id}
-                    contact={contact}
-                    variant={getTileVariant(contact, isBirthday)}
-                    size={getTileSize(contact)}
-                    isBirthday={isBirthday}
-                    onPress={() => handleContactPress(contact)}
-                  />
-                );
-              })}
-              <AddConnectionTile onPress={handleAddConnection} />
-            </QuiltGrid>
-          ) : (
-            <CelebrationStatus completionCount={completionCount} />
+          {completionCount > 0 && (
+            <Body muted className="text-center mt-6">
+              {completionCount} {completionCount === 1 ? 'connection' : 'connections'} nurtured today
+            </Body>
           )}
-        </View>
-
-        {completionCount > 0 && (
-          <Body muted className="text-center mt-6">
-            {completionCount} {completionCount === 1 ? 'connection' : 'connections'} nurtured today
-          </Body>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+      <ConnectionQuickActionsSheet
+        visible={showQuickActions}
+        contact={selectedContact}
+        onClose={closeQuickActions}
+        onLogConnection={handleMarkConnected}
+        onQuickNote={handleQuickNote}
+        onSnooze={handleSnooze}
+      />
+      <ReachedOutSheet
+        visible={showReachedOutSheet}
+        contact={selectedContact}
+        onClose={closeReachedOutSheet}
+        onSubmit={handleReachedOutSubmit}
+      />
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Heading, Caption, Body } from './ui';
+import { Heading, Body } from './ui';
 import Colors from '@/constants/Colors';
 
 // Extended Contact type for ConnectionTile (supports additional fields from test)
@@ -32,36 +32,33 @@ type ConnectionTileProps = {
   size?: 'standard' | 'large';
   isBirthday?: boolean;
   onPress: () => void;
+  onOpenActions?: () => void;
 };
 
 const variantStyles = {
   primary: {
-    bg: 'bg-primary/15 dark:bg-primary/20',
-    border: 'border-primary/20',
-    iconBg: 'bg-primary/30',
+    bg: 'bg-white dark:bg-card-dark',
+    border: 'border-primary/35 dark:border-primary/45',
+    iconBg: 'bg-primary/15 dark:bg-primary/20',
     iconColor: Colors.primary,
-    badgeColor: 'text-primary/70',
   },
   secondary: {
-    bg: 'bg-secondary/15 dark:bg-secondary/20',
-    border: 'border-secondary/20',
-    iconBg: 'bg-secondary/30',
+    bg: 'bg-white dark:bg-card-dark',
+    border: 'border-secondary/40 dark:border-secondary/50',
+    iconBg: 'bg-secondary/20 dark:bg-secondary/30',
     iconColor: Colors.secondary,
-    badgeColor: 'text-secondary/70',
   },
   accent: {
-    bg: 'bg-accent/40 dark:bg-accent/10',
-    border: 'border-accent/60',
-    iconBg: 'bg-accent/80 dark:bg-accent/20',
+    bg: 'bg-white dark:bg-card-dark',
+    border: 'border-accent/70 dark:border-accent/50',
+    iconBg: 'bg-accent/60 dark:bg-accent/20',
     iconColor: '#F97316',
-    badgeColor: 'text-orange-400/70',
   },
   neutral: {
-    bg: 'bg-slate-100 dark:bg-slate-800/50',
+    bg: 'bg-white dark:bg-card-dark',
     border: 'border-slate-200 dark:border-slate-700',
-    iconBg: 'bg-white dark:bg-slate-700',
+    iconBg: 'bg-slate-100 dark:bg-slate-700',
     iconColor: '#9ca3af',
-    badgeColor: 'text-slate-400',
   },
 };
 
@@ -70,7 +67,6 @@ const relationshipIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
   spouse: 'heart',
   family: 'home',
   friend: 'leaf',
-  mentor: 'school',
   colleague: 'briefcase',
   other: 'person',
 };
@@ -103,27 +99,27 @@ export function ConnectionTile({
   variant = 'neutral',
   size = 'standard',
   isBirthday = false,
-  onPress
+  onPress,
+  onOpenActions,
 }: ConnectionTileProps) {
   const styles = variantStyles[variant];
   const iconName = getRelationshipIcon(contact.relationship);
   const statusText = getStatusText(contact, isBirthday);
-  const relationshipLabel = contact.relationship?.toUpperCase() || 'CONNECTION';
 
   const iconSize = size === 'large' ? 'w-10 h-10' : 'w-8 h-8';
   const iconContainerSize = size === 'large' ? 'rounded-2xl' : 'rounded-xl';
-  const nameSize = size === 'large' ? 3 : 4;
+  const nameSize = size === 'large' ? 2 : 3;
 
   // Build className with variant and size markers for test assertions
   const classNames = [
     styles.bg,
     styles.border,
     'border',
-    'p-5',
+    size === 'large' ? 'p-5' : 'px-4 py-4',
     'rounded-3xl',
     'flex-col',
-    'justify-between',
-    'min-h-[160px]',
+    'min-h-[140px]',
+    'shadow-soft',
   ];
 
   if (size === 'large') {
@@ -161,15 +157,34 @@ export function ConnectionTile({
             color={styles.iconColor}
           />
         </View>
-        <Caption className={styles.badgeColor}>{relationshipLabel}</Caption>
+        <View>
+          {onOpenActions ? (
+            <Pressable
+              onPress={(event) => {
+                event.stopPropagation();
+                onOpenActions();
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={`Open quick actions for ${contact.name}`}
+              className="w-7 h-7 rounded-full bg-white/80 dark:bg-slate-700/80 items-center justify-center"
+            >
+              <Ionicons name="ellipsis-horizontal" size={14} color={styles.iconColor} />
+            </Pressable>
+          ) : null}
+        </View>
       </View>
 
-      <View className={size === 'large' ? 'mt-auto' : 'mt-3'}>
+      <View className={size === 'large' ? 'mt-4' : 'mt-3'}>
         <View className="flex-row items-center gap-1">
-          <Heading size={nameSize}>{contact.name}</Heading>
+          <Heading size={nameSize} className="text-brand-navy dark:text-slate-100">
+            {contact.name}
+          </Heading>
           {isBirthday && <Body>🎂</Body>}
         </View>
-        <Caption muted className="mt-1">{statusText}</Caption>
+        <Body size="sm" className="mt-1 text-slate-700 dark:text-slate-300">
+          {statusText}
+        </Body>
       </View>
     </TouchableOpacity>
   );
