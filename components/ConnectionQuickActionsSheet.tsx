@@ -12,8 +12,7 @@ type Props = {
   visible: boolean;
   contact: Contact | null;
   onClose: () => void;
-  onLogConnection: () => void;
-  onQuickNote: () => void;
+  onLogCheckIn: () => void;
   onSnooze: (days: SnoozeDays) => void;
 };
 
@@ -46,8 +45,7 @@ export function ConnectionQuickActionsSheet({
   visible,
   contact,
   onClose,
-  onLogConnection,
-  onQuickNote,
+  onLogCheckIn,
   onSnooze,
 }: Props) {
   if (!contact) return null;
@@ -68,8 +66,7 @@ export function ConnectionQuickActionsSheet({
           </Heading>
 
           <View className="gap-3">
-            <ActionButton icon="checkmark-circle-outline" label="Mark connected" onPress={onLogConnection} />
-            <ActionButton icon="document-text-outline" label="Quick note" onPress={onQuickNote} />
+            <ActionButton icon="checkmark-circle-outline" label="Mark as connected" onPress={onLogCheckIn} />
           </View>
 
           <View className="mt-6">

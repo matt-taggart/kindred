@@ -9,6 +9,7 @@ export interface Moment {
   title: string;
   date: string;
   description: string;
+  tag?: 'Connected' | 'Memory';
   imageUri?: string;
   icon?: string;
   iconBgColor?: string;
@@ -79,6 +80,13 @@ export function SharedMomentsSection({
                 <Body weight="medium" numberOfLines={1} className="text-slate-900 dark:text-slate-100">
                   {moment.title}
                 </Body>
+                {moment.tag ? (
+                  <View className="mt-1 self-start rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5">
+                    <Caption muted={false} className="text-[10px] text-slate-600 dark:text-slate-300">
+                      {moment.tag}
+                    </Caption>
+                  </View>
+                ) : null}
                 <Caption muted numberOfLines={1} className="font-medium">
                   {subtitle}
                 </Caption>

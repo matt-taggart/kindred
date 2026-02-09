@@ -1,19 +1,14 @@
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Body, Heading } from './ui';
 import Colors from '@/constants/Colors';
 
 type ConnectionDetailHeaderProps = {
-  name: string;
-  relationship: string;
   onBackPress: () => void;
   onMorePress: () => void;
 };
 
 export function ConnectionDetailHeader({
-  name,
-  relationship,
   onBackPress,
   onMorePress,
 }: ConnectionDetailHeaderProps) {
@@ -37,15 +32,6 @@ export function ConnectionDetailHeader({
         >
           <Ionicons name="ellipsis-horizontal" size={18} color={Colors.textSoft} />
         </TouchableOpacity>
-      </View>
-
-      <View className="mt-3">
-        <Heading size={1} className="text-brand-navy dark:text-slate-100">
-          {name}
-        </Heading>
-        <Body size="base" className="text-slate-500 dark:text-slate-400 mt-1">
-          {relationship}
-        </Body>
       </View>
     </View>
   );

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import { Body } from './ui';
 
-type QuickActionVariant = 'call' | 'text' | 'moment';
+type QuickActionVariant = 'call' | 'text' | 'checkin' | 'memory';
 
 type QuickActionTileProps = {
   variant: QuickActionVariant;
@@ -14,9 +14,9 @@ type QuickActionTileProps = {
 type VariantConfig = {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  bgColor: string;
-  iconBgColor: string;
-  textColor: string;
+  tileClassName: string;
+  iconWrapperClassName: string;
+  labelClassName: string;
   iconColor: string;
 };
 
@@ -24,26 +24,34 @@ const variantConfigs: Record<QuickActionVariant, VariantConfig> = {
   call: {
     icon: 'call',
     label: 'Call',
-    bgColor: 'bg-primary/10 dark:bg-primary/20',
-    iconBgColor: 'bg-primary/20 dark:bg-primary/30',
-    textColor: 'text-primary dark:text-primary',
+    tileClassName: 'bg-primary/10 dark:bg-primary/20 border border-primary/20',
+    iconWrapperClassName: 'bg-primary/20 dark:bg-primary/30 border border-primary/25',
+    labelClassName: 'text-primary dark:text-primary',
     iconColor: Colors.primary,
   },
   text: {
     icon: 'chatbubble-outline',
     label: 'Text',
-    bgColor: 'bg-sage-light dark:bg-accent-dark-sage',
-    iconBgColor: 'bg-white dark:bg-card-dark',
-    textColor: 'text-primary dark:text-primary',
+    tileClassName: 'bg-primary/10 dark:bg-primary/20 border border-primary/20',
+    iconWrapperClassName: 'bg-primary/20 dark:bg-primary/30 border border-primary/25',
+    labelClassName: 'text-primary dark:text-primary',
     iconColor: Colors.primary,
   },
-  moment: {
+  checkin: {
     icon: 'leaf-outline',
-    label: 'Log a Moment',
-    bgColor: 'bg-secondary/10 dark:bg-secondary/20',
-    iconBgColor: 'bg-secondary/20 dark:bg-secondary/30',
-    textColor: 'text-secondary dark:text-secondary',
-    iconColor: '#D4896A',
+    label: 'Mark as connected',
+    tileClassName: 'bg-transparent border border-primary/35 dark:border-primary/50',
+    iconWrapperClassName: 'bg-primary/10 dark:bg-primary/20 border border-primary/25',
+    labelClassName: 'text-primary dark:text-primary',
+    iconColor: Colors.primary,
+  },
+  memory: {
+    icon: 'document-text-outline',
+    label: 'Add memory',
+    tileClassName: 'bg-transparent border border-primary/35 dark:border-primary/50',
+    iconWrapperClassName: 'bg-primary/10 dark:bg-primary/20 border border-primary/25',
+    labelClassName: 'text-primary dark:text-primary',
+    iconColor: Colors.primary,
   },
 };
 
@@ -55,14 +63,12 @@ export function QuickActionTile({ variant, onPress }: QuickActionTileProps) {
       onPress={onPress}
       accessibilityLabel={config.label}
       accessibilityHint={`variant-${variant}`}
-      className={`p-6 rounded-3xl flex-col items-center justify-center gap-3 ${config.bgColor} active:scale-95 border border-slate-100 dark:border-slate-800`}
+      className={`p-6 rounded-3xl flex-col items-center justify-center gap-3 active:scale-95 ${config.tileClassName}`}
     >
-      <View
-        className={`w-12 h-12 rounded-2xl items-center justify-center ${config.iconBgColor} border border-primary/20`}
-      >
+      <View className={`w-12 h-12 rounded-2xl items-center justify-center ${config.iconWrapperClassName}`}>
         <Ionicons name={config.icon} size={24} color={config.iconColor} />
       </View>
-      <Body weight="medium" className={`text-base ${config.textColor}`}>
+      <Body weight="medium" className={`text-base ${config.labelClassName}`}>
         {config.label}
       </Body>
     </Pressable>

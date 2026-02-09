@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Body } from './ui';
+import { Body, Heading } from './ui';
 import Colors from '@/constants/Colors';
 
 interface ConnectionProfileSectionProps {
@@ -13,16 +13,11 @@ interface ConnectionProfileSectionProps {
 }
 
 /**
- * Get initials from a name string
- * Takes first letter of each word, uppercase, max 2 characters
+ * Get first initial from the first name token
  */
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+function getFirstInitial(name: string): string {
+  const firstName = name.trim().split(/\s+/)[0] ?? '';
+  return firstName.charAt(0).toUpperCase();
 }
 
 /**
@@ -54,10 +49,14 @@ export function ConnectionProfileSection({
   isFavorite = false,
 }: ConnectionProfileSectionProps) {
   const ringColor = getRingColor(relationship);
-  const initials = getInitials(name);
+  const initial = getFirstInitial(name);
 
   return (
     <View className="items-center pt-4 pb-6" testID="connection-profile-section">
+      <Heading size={2} className="text-brand-navy dark:text-slate-100 mb-4 text-center">
+        {name}
+      </Heading>
+
       {/* Avatar wrapper with ring */}
       <View className={`w-32 h-32 rounded-full border-[3px] p-1.5 ${ringColor}`}>
         {avatarUri ? (
@@ -72,7 +71,7 @@ export function ConnectionProfileSection({
             className="w-full h-full rounded-full bg-sage-light dark:bg-accent-dark-sage items-center justify-center"
             testID="profile-initials"
           >
-            <Body className="text-4xl font-semibold tracking-tight text-primary">{initials}</Body>
+            <Body className="text-4xl font-semibold tracking-tight text-primary">{initial}</Body>
           </View>
         )}
 

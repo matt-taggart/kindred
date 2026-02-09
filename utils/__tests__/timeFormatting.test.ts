@@ -77,6 +77,11 @@ describe('formatLastConnected - specific days', () => {
 describe('formatNextReminder', () => {
   const NOW = new Date('2026-01-13T12:00:00Z').getTime();
 
+  it('returns "Overdue" for prior calendar days', () => {
+    const timestamp = new Date('2026-01-12T23:59:59Z').getTime();
+    expect(formatNextReminder(timestamp, NOW)).toBe('Overdue');
+  });
+
   it('returns "Today" for same day', () => {
     const timestamp = NOW + 1000 * 60 * 60; // 1 hour from now
     expect(formatNextReminder(timestamp, NOW)).toBe('Today');

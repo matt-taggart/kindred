@@ -45,12 +45,16 @@ export function formatNextReminder(
 ): string {
   if (!timestamp) return 'Not scheduled';
 
+  const nowDate = new Date(now);
+  const startOfToday = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate()).getTime();
+  const startOfTomorrow = startOfToday + DAY_IN_MS;
+
+  if (timestamp < startOfToday) return 'Overdue';
+  if (timestamp < startOfTomorrow) return 'Today';
+
   const diff = timestamp - now;
-  if (diff <= 0) return 'Today';
 
   const days = Math.ceil(diff / DAY_IN_MS);
-  // If less than a full day away, it's still "Today"
-  if (days <= 1 && diff < DAY_IN_MS) return 'Today';
   if (days === 1) return 'Tomorrow';
   if (days < 14) return `In ${days} days`;
 

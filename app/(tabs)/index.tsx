@@ -15,12 +15,12 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import { Contact, NewInteraction } from '@/db/schema';
-import { getDueContactsGrouped, GroupedDueContacts, isBirthdayToday, getContactCount, snoozeContact, updateInteraction } from '@/services/contactService';
+import { getDueContactsGrouped, GroupedDueContacts, isBirthdayToday, getContactCount, snoozeContact, createInteraction } from '@/services/contactService';
 import EmptyContactsState from '@/components/EmptyContactsState';
 import CelebrationStatus from '@/components/CelebrationStatus';
 import { PageHeader } from '@/components/PageHeader';
 import { ConnectionTile } from '@/components/ConnectionTile';
-import ReachedOutSheet from '@/components/ReachedOutSheet';
+import InteractionComposerSheet, { InteractionKind } from '@/components/InteractionComposerSheet';
 import { ConnectionQuickActionsSheet } from '@/components/ConnectionQuickActionsSheet';
 import { QuiltGrid } from '@/components/ui';
 import { Heading, Body, Caption } from '@/components/ui';
@@ -37,7 +37,7 @@ export default function HomeScreen() {
   const [totalContactCount, setTotalContactCount] = useState<number | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showQuickActions, setShowQuickActions] = useState(false);
-  const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
+  const [showComposer, setShowComposer] = useState(false);
 
   const loadContacts = useCallback(() => {
     try {
@@ -116,16 +116,9 @@ export default function HomeScreen() {
     setSelectedContact(null);
   }, []);
 
-  const handleQuickNote = useCallback(() => {
-    if (!selectedContact) return;
+  const handleLogCheckIn = useCallback(() => {
     setShowQuickActions(false);
-    router.push({ pathname: '/modal', params: { contactId: selectedContact.id, noteOnly: 'true' } });
-    setSelectedContact(null);
-  }, [router, selectedContact]);
-
-  const handleMarkConnected = useCallback(() => {
-    setShowQuickActions(false);
-    setShowReachedOutSheet(true);
+    setShowComposer(true);
   }, []);
 
   const handleSnooze = useCallback(async (days: 1 | 3 | 7) => {
@@ -142,23 +135,25 @@ export default function HomeScreen() {
     }
   }, [loadContacts, selectedContact]);
 
-  const handleReachedOutSubmit = useCallback(async (type: InteractionType, note: string) => {
+  const handleComposerSubmit = useCallback(async ({ kind, type, note }: { kind: InteractionKind; type: InteractionType; note: string }) => {
     if (!selectedContact) return;
 
     try {
-      await updateInteraction(selectedContact.id, type, note || undefined);
-      setCompletionCount((count) => count + 1);
+      await createInteraction(selectedContact.id, type, note || undefined, kind);
+      if (kind === 'checkin') {
+        setCompletionCount((count) => count + 1);
+      }
       loadContacts();
     } catch {
       Alert.alert('Error', 'Failed to save this interaction.');
     } finally {
-      setShowReachedOutSheet(false);
+      setShowComposer(false);
       setSelectedContact(null);
     }
   }, [loadContacts, selectedContact]);
 
-  const closeReachedOutSheet = useCallback(() => {
-    setShowReachedOutSheet(false);
+  const closeComposer = useCallback(() => {
+    setShowComposer(false);
     setSelectedContact(null);
   }, []);
 
@@ -293,15 +288,15 @@ export default function HomeScreen() {
         visible={showQuickActions}
         contact={selectedContact}
         onClose={closeQuickActions}
-        onLogConnection={handleMarkConnected}
-        onQuickNote={handleQuickNote}
+        onLogCheckIn={handleLogCheckIn}
         onSnooze={handleSnooze}
       />
-      <ReachedOutSheet
-        visible={showReachedOutSheet}
+      <InteractionComposerSheet
+        visible={showComposer}
         contact={selectedContact}
-        onClose={closeReachedOutSheet}
-        onSubmit={handleReachedOutSubmit}
+        onClose={closeComposer}
+        onSubmit={handleComposerSubmit}
+        initialKind="checkin"
       />
     </>
   );

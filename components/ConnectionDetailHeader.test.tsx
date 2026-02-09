@@ -7,24 +7,12 @@ describe('ConnectionDetailHeader', () => {
   const mockOnMorePress = jest.fn();
 
   const defaultProps = {
-    name: 'Sarah Johnson',
-    relationship: 'Friend',
     onBackPress: mockOnBackPress,
     onMorePress: mockOnMorePress,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('renders contact name', () => {
-    const { getByText } = render(<ConnectionDetailHeader {...defaultProps} />);
-    expect(getByText('Sarah Johnson')).toBeTruthy();
-  });
-
-  it('renders relationship type', () => {
-    const { getByText } = render(<ConnectionDetailHeader {...defaultProps} />);
-    expect(getByText('Friend')).toBeTruthy();
   });
 
   it('calls onBackPress when back button pressed', () => {

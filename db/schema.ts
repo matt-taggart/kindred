@@ -21,6 +21,7 @@ export const interactions = sqliteTable('interactions', {
     .references(() => contacts.id, { onDelete: 'cascade' }),
   date: integer('date', { mode: 'number' }).notNull(),
   type: text('type', { enum: ['call', 'text', 'meet', 'email'] }).notNull(),
+  kind: text('kind', { enum: ['checkin', 'memory'] }).notNull().default('checkin'),
   notes: text('notes'),
 });
 

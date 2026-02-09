@@ -181,13 +181,14 @@ export default function CalendarScreen() {
               <Body muted>Nothing planned for this day</Body>
             </View>
           ) : (
-            <View className="space-y-3">
-              {agendaContacts.map((contact) => (
+            <View>
+              {agendaContacts.map((contact, index) => (
                 <TouchableOpacity
                   key={contact.id}
                   onPress={() => handleContactPress(contact.id)}
                   activeOpacity={0.7}
                   className="bg-white dark:bg-card-dark p-4 rounded-3xl flex-row items-center justify-between border border-slate-100 dark:border-slate-800 shadow-soft"
+                  style={{ marginBottom: index < agendaContacts.length - 1 ? 14 : 0 }}
                 >
                   <View className="flex-row items-center gap-4">
                     <View className={`w-10 h-10 rounded-2xl items-center justify-center ${

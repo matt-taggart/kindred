@@ -43,6 +43,7 @@ const generateId = () => {
 };
 
 type InteractionType = NewInteraction['type'];
+type InteractionKind = NewInteraction['kind'];
 type InsertableContact = Omit<NewContact, 'id'> & { id?: string };
 
 const isSameDay = (date1: Date, date2: Date) => {
@@ -323,6 +324,7 @@ export const updateInteraction = async (
       contactId,
       date: timestamp,
       type,
+      kind: 'checkin',
       notes,
     })
     .run();
@@ -534,6 +536,7 @@ export const addNoteOnly = async (
       contactId,
       date: timestamp,
       type,
+      kind: 'memory',
       notes,
     })
     .run();
@@ -550,6 +553,19 @@ export const addNoteOnly = async (
   }
 
   return inserted;
+};
+
+export const createInteraction = async (
+  contactId: Contact['id'],
+  type: InteractionType,
+  notes: string | undefined,
+  kind: InteractionKind,
+): Promise<Contact | Interaction> => {
+  if (kind === 'checkin') {
+    return updateInteraction(contactId, type, notes);
+  }
+
+  return addNoteOnly(contactId, notes || '', type);
 };
 
 export const resetDatabase = async (): Promise<void> => {

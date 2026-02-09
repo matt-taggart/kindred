@@ -4,10 +4,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Contact, Interaction } from '@/db/schema';
-import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact, updateInteraction } from '@/services/contactService';
+import { Contact, Interaction, NewInteraction } from '@/db/schema';
+import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact, createInteraction } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
-import ReachedOutSheet from '@/components/ReachedOutSheet';
+import InteractionComposerSheet, { InteractionKind } from '@/components/InteractionComposerSheet';
 import { ConnectionDetailHeader, ConnectionProfileSection, QuickActionTile, SharedMomentsSection } from '@/components';
 import { Body, Caption, Heading } from '@/components/ui';
 import type { Moment } from '@/components';
@@ -17,17 +17,34 @@ import { formatLastConnected } from '@/utils/timeFormatting';
 import Colors from '@/constants/Colors';
 
 const mapInteractionsToMoments = (interactions: Interaction[]): Moment[] => {
+  const formatInteractionType = (type: Interaction['type']) => {
+    switch (type) {
+      case 'call':
+        return 'Call';
+      case 'text':
+        return 'Text';
+      case 'email':
+        return 'Email';
+      case 'meet':
+        return 'In person';
+      default:
+        return '';
+    }
+  };
+
   return interactions.slice(0, 5).map((interaction) => ({
     id: interaction.id,
     title: interaction.notes || 'Interaction',
     date: new Date(interaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    description: interaction.type || '',
+    description: formatInteractionType(interaction.type),
+    tag: interaction.kind === 'memory' ? 'Memory' : 'Connected',
     iconBgColor: 'bg-emerald-50',
     icon: 'chatbubble-outline',
   }));
 };
 
 export default function ContactDetailScreen() {
+  type InteractionType = NewInteraction['type'];
   const router = useRouter();
   const colorScheme = useColorScheme();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -37,7 +54,8 @@ export default function ContactDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [unarchiving, setUnarchiving] = useState(false);
-  const [showReachedOutSheet, setShowReachedOutSheet] = useState(false);
+  const [showComposer, setShowComposer] = useState(false);
+  const [composerKind, setComposerKind] = useState<InteractionKind>('checkin');
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -118,24 +136,59 @@ export default function ContactDetailScreen() {
     setShowEditModal(true);
   }, []);
 
-  const handleAddNote = useCallback(() => {
-    router.push({ pathname: '/modal', params: { contactId: id, noteOnly: 'true' } });
-  }, [router, id]);
-
-  const handleLogMoment = useCallback(() => {
-    setShowReachedOutSheet(true);
+  const handleAddMemory = useCallback(() => {
+    setComposerKind('memory');
+    setShowComposer(true);
   }, []);
 
-  const handleReachedOutSubmit = useCallback(async (type: any, note: string) => {
+  const handleLogCheckIn = useCallback(() => {
+    setComposerKind('checkin');
+    setShowComposer(true);
+  }, []);
+
+  const handleComposerSubmit = useCallback(async ({ kind, type, note }: { kind: InteractionKind; type: InteractionType; note: string }) => {
     if (!contact) return;
 
+    const isDueTodayOrOverdue = typeof contact.nextContactDate === 'number' && contact.nextContactDate <= Date.now();
+
     try {
-      await updateInteraction(contact.id, type, note || undefined);
+      await createInteraction(contact.id, type, note || undefined, kind);
       loadContactData();
+      setShowComposer(false);
+
+      if (kind === 'checkin') {
+        Alert.alert(
+          'Add a memory?',
+          `Would you like to add a memory for ${contact.name}?`,
+          [
+            { text: 'Not now', style: 'cancel' },
+            {
+              text: 'Add memory',
+              onPress: () => {
+                setComposerKind('memory');
+                setShowComposer(true);
+              },
+            },
+          ],
+        );
+      } else if (isDueTodayOrOverdue) {
+        Alert.alert(
+          'Mark as connected?',
+          `${contact.name} is due for a check-in. Would you like to mark them as connected now?`,
+          [
+            { text: 'Not now', style: 'cancel' },
+            {
+              text: 'Mark as connected',
+              onPress: () => {
+                setComposerKind('checkin');
+                setShowComposer(true);
+              },
+            },
+          ],
+        );
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to save. Please try again.');
-    } finally {
-      setShowReachedOutSheet(false);
     }
   }, [contact, loadContactData]);
 
@@ -230,8 +283,6 @@ export default function ContactDetailScreen() {
           showsVerticalScrollIndicator={false}
         >
           <ConnectionDetailHeader
-            name={contact.name}
-            relationship={contact.relationship || 'Connection'}
             onBackPress={() => router.back()}
             onMorePress={handleEditContact}
           />
@@ -278,14 +329,14 @@ export default function ContactDetailScreen() {
             <QuiltGrid>
               <QuickActionTile variant="call" onPress={handleCall} />
               <QuickActionTile variant="text" onPress={handleText} />
-              <QuickActionTile variant="moment" onPress={handleLogMoment} />
+              <QuickActionTile variant="checkin" onPress={handleLogCheckIn} />
+              <QuickActionTile variant="memory" onPress={handleAddMemory} />
             </QuiltGrid>
           </View>
 
           {/* Shared Moments */}
           <SharedMomentsSection
             moments={mapInteractionsToMoments(interactions)}
-            onViewAll={interactions.length > 5 ? handleAddNote : undefined}
             onMomentPress={(moment) => {
               const interaction = interactions.find(i => i.id === moment.id);
               if (interaction) handleEditInteraction(interaction);
@@ -307,11 +358,11 @@ export default function ContactDetailScreen() {
                 </Body>
                 <TouchableOpacity
                   className="px-8 py-4 rounded-2xl bg-primary shadow-sm"
-                  onPress={handleAddNote}
+                  onPress={handleAddMemory}
                   activeOpacity={0.85}
                 >
                   <Body weight="medium" className="text-white">
-                    Add a moment
+                    Add memory
                   </Body>
                 </TouchableOpacity>
               </View>
@@ -330,11 +381,12 @@ export default function ContactDetailScreen() {
         />
       )}
 
-      <ReachedOutSheet
-        visible={showReachedOutSheet}
+      <InteractionComposerSheet
+        visible={showComposer}
         contact={contact}
-        onClose={() => setShowReachedOutSheet(false)}
-        onSubmit={handleReachedOutSubmit}
+        onClose={() => setShowComposer(false)}
+        onSubmit={handleComposerSubmit}
+        initialKind={composerKind}
       />
     </>
   );

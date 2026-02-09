@@ -17,7 +17,15 @@ describe('ConnectionProfileSection', () => {
     );
 
     expect(getByTestId('profile-initials')).toBeTruthy();
-    expect(getByText('MC')).toBeTruthy();
+    expect(getByText('M')).toBeTruthy();
+  });
+
+  it('renders contact name above the avatar', () => {
+    const { getByText } = render(
+      <ConnectionProfileSection {...defaultProps} />
+    );
+
+    expect(getByText('Maya Chen')).toBeTruthy();
   });
 
   it('renders avatar image when avatarUri provided', () => {

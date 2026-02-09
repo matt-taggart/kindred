@@ -1,6 +1,6 @@
 import { getSqlite } from './client';
 
-const MIGRATION_VERSION = '2';
+const MIGRATION_VERSION = '3';
 
 let hasRunMigrations = false;
 
@@ -26,6 +26,7 @@ const INTERACTIONS_TABLE_SQL = `
     contactId TEXT NOT NULL,
     date INTEGER NOT NULL,
     type TEXT NOT NULL CHECK (type IN ('call','text','meet','email')),
+    kind TEXT NOT NULL DEFAULT 'checkin' CHECK (kind IN ('checkin','memory')),
     notes TEXT,
     FOREIGN KEY (contactId) REFERENCES contacts(id) ON DELETE CASCADE
   );
@@ -40,9 +41,10 @@ const recreateInteractionsTableIfNeeded = () => {
     if (result && result.length > 0) {
       const tableSql = result[0].sql || '';
       const hasEmailType = tableSql.includes("'email'");
+      const hasKindColumn = tableSql.includes('kind');
 
-      if (!hasEmailType) {
-        console.log('Migrating interactions table to support email type...');
+      if (!hasEmailType || !hasKindColumn) {
+        console.log('Migrating interactions table to support interaction kinds...');
 
         sqlite.execSync('BEGIN TRANSACTION;');
 
@@ -60,9 +62,10 @@ const recreateInteractionsTableIfNeeded = () => {
               const date = row.date;
               const type = (row.type || '').replace(/'/g, "''");
               const notes = row.notes ? `'${row.notes.replace(/'/g, "''")}'` : 'NULL';
+              const kind = row.kind ? `'${String(row.kind).replace(/'/g, "''")}'` : "'checkin'";
 
               sqlite.execSync(
-                `INSERT INTO interactions (id, contactId, date, type, notes) VALUES ('${id}', '${contactId}', ${date}, '${type}', ${notes});`
+                `INSERT INTO interactions (id, contactId, date, type, kind, notes) VALUES ('${id}', '${contactId}', ${date}, '${type}', ${kind}, ${notes});`
               );
             }
           }
