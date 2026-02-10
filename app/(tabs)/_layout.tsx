@@ -109,7 +109,7 @@ export default function TabLayout() {
         onPress={() => setIsAddSheetVisible(true)}
         style={styles.fab}
       >
-        <Ionicons name="heart" size={26} color="white" />
+        <Ionicons name="person-add-outline" size={26} color="white" />
       </TouchableOpacity>
     </View>
   );
@@ -118,7 +118,7 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   fab: {
     position: "absolute",
-    bottom: 96,
+    bottom: 120,
     right: 24,
     width: 56,
     height: 56,

@@ -404,20 +404,6 @@ export default function HomeScreen() {
               })}
             </QuiltGrid>
 
-            <TouchableOpacity
-              onPress={handleAddConnection}
-              activeOpacity={0.85}
-              className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white dark:bg-card-dark/90 flex-row items-center justify-center"
-            >
-              <Ionicons
-                name="add-circle-outline"
-                size={18}
-                color={Colors.primary}
-              />
-              <Body size="sm" weight="medium" className="ml-2 text-primary">
-                Add a connection
-              </Body>
-            </TouchableOpacity>
           </View>
         </ScrollView>
       </SafeAreaView>
