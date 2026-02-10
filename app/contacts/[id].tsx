@@ -321,6 +321,7 @@ export default function ContactDetailScreen() {
             name={contact.name}
             relationship={contact.relationship || 'Connection'}
             lastConnected={formatLastConnected(contact.lastContactedAt)}
+            birthday={contact.birthday}
             isFavorite={contact.relationship?.toLowerCase().includes('partner') || contact.relationship?.toLowerCase().includes('spouse')}
           />
 

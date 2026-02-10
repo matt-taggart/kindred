@@ -458,9 +458,10 @@ export default function EditContactModal({
                                   })
                                 }
                                 keyboardType="number-pad"
-                                className="flex-1 text-base text-slate-800 dark:text-white"
+                                className="flex-1 h-full py-0 text-base leading-5 text-slate-800 dark:text-white"
                                 placeholder="e.g., 30"
                                 placeholderTextColor="#94a3b8"
+                                textAlignVertical="center"
                                 accessibilityLabel="Custom rhythm frequency"
                               />
                             </View>
@@ -473,7 +474,7 @@ export default function EditContactModal({
                             >
                               Unit
                             </Caption>
-                            <View className="flex-row gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-1 rounded-xl">
+                            <View className="flex-row gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-1.5 rounded-lg">
                               {(
                                 ["days", "weeks", "months"] as CustomUnit[]
                               ).map((unit) => (
@@ -490,7 +491,7 @@ export default function EditContactModal({
                                       customValue,
                                     })
                                   }
-                                  className={`flex-1 items-center justify-center rounded-lg py-2 ${
+                                  className={`flex-1 items-center justify-center rounded-md py-2 ${
                                     customUnit === unit
                                       ? "bg-slate-100 dark:bg-slate-700"
                                       : ""

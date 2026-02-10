@@ -193,13 +193,13 @@ export default function CalendarScreen() {
                   <View className="flex-row items-center gap-4">
                     <View className={`w-10 h-10 rounded-2xl items-center justify-center ${
                       contact.isBirthday
-                        ? 'bg-secondary/20'
+                        ? 'border border-accent-warm bg-soft-sand'
                         : 'bg-primary/20'
                     }`}>
                       <Ionicons
                         name={contact.isBirthday ? 'gift-outline' : 'notifications-outline'}
                         size={18}
-                        color={contact.isBirthday ? '#D4896A' : Colors.primary}
+                        color={Colors.primary}
                       />
                     </View>
                     <View>

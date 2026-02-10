@@ -8,6 +8,7 @@ describe('ConnectionProfileSection', () => {
     name: 'Maya Chen',
     relationship: 'Friend',
     lastConnected: 'Last connected 3 days ago',
+    birthday: null,
     isFavorite: false,
   };
 
@@ -72,6 +73,23 @@ describe('ConnectionProfileSection', () => {
     );
 
     expect(queryByTestId('favorite-badge')).toBeNull();
+  });
+
+  it('renders birthday pill when birthday is provided', () => {
+    const { getByTestId, getByText } = render(
+      <ConnectionProfileSection {...defaultProps} birthday="1990-03-15" />
+    );
+
+    expect(getByTestId('birthday-pill')).toBeTruthy();
+    expect(getByText('March 15')).toBeTruthy();
+  });
+
+  it('does not render birthday pill when birthday is null', () => {
+    const { queryByTestId } = render(
+      <ConnectionProfileSection {...defaultProps} birthday={null} />
+    );
+
+    expect(queryByTestId('birthday-pill')).toBeNull();
   });
 
   it('renders the connection profile section container', () => {

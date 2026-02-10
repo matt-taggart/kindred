@@ -309,16 +309,19 @@ export default function ConnectionsScreen() {
             />
             {isSearching && counts.all > 0 && (
               <View className="mb-5">
-                <TextInput
-                  className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-4.5 text-slate-900 dark:text-slate-100 text-xl"
-                  placeholder="Search by name..."
-                  placeholderTextColor="#8A98AC"
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  autoFocus
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
+                <View className="h-14 flex-row items-center bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl px-5">
+                  <TextInput
+                    className="flex-1 h-full py-0 text-base leading-5 text-slate-900 dark:text-slate-100"
+                    placeholder="Search by name..."
+                    placeholderTextColor="#8A98AC"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    autoFocus
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    textAlignVertical="center"
+                  />
+                </View>
               </View>
             )}
             {counts.all > 0 && <FilterPills

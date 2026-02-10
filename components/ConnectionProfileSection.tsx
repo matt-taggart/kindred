@@ -3,12 +3,14 @@ import { View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Body, Heading } from './ui';
 import Colors from '@/constants/Colors';
+import { formatBirthdayDisplay } from '@/utils/formatters';
 
 interface ConnectionProfileSectionProps {
   avatarUri: string | null;
   name: string;
   relationship: string;
   lastConnected: string | null;
+  birthday?: string | null;
   isFavorite?: boolean;
 }
 
@@ -46,10 +48,12 @@ export function ConnectionProfileSection({
   name,
   relationship,
   lastConnected,
+  birthday = null,
   isFavorite = false,
 }: ConnectionProfileSectionProps) {
   const ringColor = getRingColor(relationship);
   const initial = getFirstInitial(name);
+  const birthdayLabel = birthday ? formatBirthdayDisplay(birthday) : null;
 
   return (
     <View className="items-center pt-4 pb-6" testID="connection-profile-section">
@@ -91,6 +95,18 @@ export function ConnectionProfileSection({
         <Body size="sm" muted className="mt-4" testID="last-connected-text">
           {lastConnected}
         </Body>
+      )}
+
+      {birthdayLabel && (
+        <View
+          className="mt-3 flex-row items-center rounded-full border border-accent-warm bg-soft-sand px-3 py-1.5 dark:border-accent-warm/60 dark:bg-accent-warm/15"
+          testID="birthday-pill"
+        >
+          <Ionicons name="gift-outline" size={14} color={Colors.primary} />
+          <Body size="sm" className="ml-1.5 text-text-soft dark:text-slate-100">
+            {birthdayLabel}
+          </Body>
+        </View>
       )}
     </View>
   );

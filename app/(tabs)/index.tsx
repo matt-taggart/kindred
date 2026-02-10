@@ -23,7 +23,7 @@ import { ConnectionTile } from '@/components/ConnectionTile';
 import InteractionComposerSheet, { InteractionKind } from '@/components/InteractionComposerSheet';
 import { ConnectionQuickActionsSheet } from '@/components/ConnectionQuickActionsSheet';
 import { QuiltGrid } from '@/components/ui';
-import { Heading, Body, Caption } from '@/components/ui';
+import { Heading, Body } from '@/components/ui';
 import { getTileVariant, getTileSize } from '@/utils/tileVariant';
 
 export default function HomeScreen() {
@@ -200,6 +200,49 @@ export default function HomeScreen() {
 
   const hasContacts = displayContacts.length > 0;
 
+  if (!hasContacts) {
+    return (
+      <>
+        <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+          <View className="flex-1 px-6 pt-10">
+            <PageHeader
+              title="Kindred"
+              subtitle={`${greeting}, friend`}
+              showBranding={false}
+              rightElement={
+                <TouchableOpacity onPress={handleAvatarPress} className="relative">
+                  <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
+                    <View className="w-full h-full bg-primary items-center justify-center">
+                      <Ionicons name="person" size={24} color="white" />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              }
+            />
+
+            <View className="flex-1 justify-center pb-24">
+              <CelebrationStatus completionCount={completionCount} />
+            </View>
+          </View>
+        </SafeAreaView>
+        <ConnectionQuickActionsSheet
+          visible={showQuickActions}
+          contact={selectedContact}
+          onClose={closeQuickActions}
+          onLogCheckIn={handleLogCheckIn}
+          onSnooze={handleSnooze}
+        />
+        <InteractionComposerSheet
+          visible={showComposer}
+          contact={selectedContact}
+          onClose={closeComposer}
+          onSubmit={handleComposerSubmit}
+          initialKind="checkin"
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
@@ -227,53 +270,49 @@ export default function HomeScreen() {
           />
 
           {/* Connections Section */}
-          {hasContacts ? (
-            <View className="mb-6">
-              <View className="flex-row justify-between items-end mb-4">
-                <View>
-                  <Heading size={2}>Today's connections</Heading>
-                  <Body size="sm" className="text-text-soft dark:text-slate-400">Nurturing your inner circle</Body>
-                </View>
-                <Body
-                  size="sm"
-                  className="text-primary"
-                  onPress={handleSeeAll}
-                >
-                  See all
-                </Body>
+          <View className="mb-6">
+            <View className="flex-row justify-between items-end mb-4">
+              <View>
+                <Heading size={2}>Today's connections</Heading>
+                <Body size="sm" className="text-text-soft dark:text-slate-400">Nurturing your inner circle</Body>
               </View>
-
-              <QuiltGrid columns={isNarrowLayout ? 1 : 2}>
-                {displayContacts.map((contact) => {
-                  const isBirthday = isBirthdayToday(contact);
-                  return (
-                    <ConnectionTile
-                      key={contact.id}
-                      contact={contact}
-                      variant={getTileVariant(contact, isBirthday)}
-                      size={getTileSize(contact)}
-                      isBirthday={isBirthday}
-                      onPress={() => handleContactPress(contact)}
-                      onOpenActions={() => handleOpenActions(contact)}
-                    />
-                  );
-                })}
-              </QuiltGrid>
-
-              <TouchableOpacity
-                onPress={handleAddConnection}
-                activeOpacity={0.85}
-                className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white dark:bg-card-dark/90 flex-row items-center justify-center"
+              <Body
+                size="sm"
+                className="text-primary"
+                onPress={handleSeeAll}
               >
-                <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
-                <Body size="sm" weight="medium" className="ml-2 text-primary">
-                  Add a connection
-                </Body>
-              </TouchableOpacity>
+                See all
+              </Body>
             </View>
-          ) : (
-            <CelebrationStatus completionCount={completionCount} />
-          )}
+
+            <QuiltGrid columns={isNarrowLayout ? 1 : 2}>
+              {displayContacts.map((contact) => {
+                const isBirthday = isBirthdayToday(contact);
+                return (
+                  <ConnectionTile
+                    key={contact.id}
+                    contact={contact}
+                    variant={getTileVariant(contact, isBirthday)}
+                    size={getTileSize(contact)}
+                    isBirthday={isBirthday}
+                    onPress={() => handleContactPress(contact)}
+                    onOpenActions={() => handleOpenActions(contact)}
+                  />
+                );
+              })}
+            </QuiltGrid>
+
+            <TouchableOpacity
+              onPress={handleAddConnection}
+              activeOpacity={0.85}
+              className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white dark:bg-card-dark/90 flex-row items-center justify-center"
+            >
+              <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
+              <Body size="sm" weight="medium" className="ml-2 text-primary">
+                Add a connection
+              </Body>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
       <ConnectionQuickActionsSheet

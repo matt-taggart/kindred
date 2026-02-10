@@ -2,6 +2,10 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Alert,
+  InputAccessoryView,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   Text,
   TextInput,
@@ -11,6 +15,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import { getInteractionHistory, updateInteractionNote } from '@/services/contactService';
+
+const NOTE_ACCESSORY_ID = 'edit-note-toolbar';
 
 export default function EditInteractionModal() {
   const router = useRouter();
@@ -58,6 +64,10 @@ export default function EditInteractionModal() {
 
   return (
     <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <View className="flex-1 px-6 pt-4">
         <View className="flex-row items-center justify-between mb-8">
           <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7} className="p-2 -ml-2">
@@ -96,10 +106,22 @@ export default function EditInteractionModal() {
               placeholderTextColor="#D1D5DB"
               textAlignVertical="top"
               style={{ minHeight: 150 }}
+              inputAccessoryViewID={Platform.OS === 'ios' ? NOTE_ACCESSORY_ID : undefined}
             />
           </View>
         </View>
       </View>
+      </KeyboardAvoidingView>
+
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID={NOTE_ACCESSORY_ID}>
+          <View className="flex-row justify-end items-center px-4 py-2 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+            <TouchableOpacity onPress={Keyboard.dismiss} activeOpacity={0.7}>
+              <Text className="text-base font-semibold text-primary">Done</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      )}
     </SafeAreaView>
   );
 }

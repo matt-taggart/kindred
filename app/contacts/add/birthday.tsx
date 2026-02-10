@@ -111,7 +111,7 @@ export default function AddConnectionBirthdayScreen() {
               activeOpacity={0.7}
               disabled={saving}
             >
-              <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center mr-3">
+              <View className="w-10 h-10 rounded-full border border-accent-warm bg-soft-sand items-center justify-center mr-3">
                 <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
               </View>
               <Text className={birthday ? 'text-lg text-slate-800' : 'text-lg text-slate-400'}>

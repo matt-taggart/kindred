@@ -318,8 +318,9 @@ export default function SettingsScreen() {
       >
         <View className="flex-1 items-center justify-center bg-black/50 px-6">
           <View
-            className="w-full rounded-pill bg-card-white p-6"
+            className="w-full rounded-3xl bg-card-white p-6"
             style={{
+              maxWidth: 360,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.1,
