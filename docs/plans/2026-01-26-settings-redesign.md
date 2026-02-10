@@ -109,7 +109,7 @@ Optional description             13px, text-soft/80
 
 ## Sections Content
 
-### 1. Nurturing Preferences
+### 1. Notifications
 
 **Header:** "Choose when Kindred gently nudges you"
 

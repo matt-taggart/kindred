@@ -1,6 +1,6 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,31 +10,87 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
-} from 'react-native';
+} from "react-native";
 
-import { Ionicons } from '@expo/vector-icons';
-import Colors from '@/constants/Colors';
-import { Contact, NewInteraction } from '@/db/schema';
-import { getDueContactsGrouped, GroupedDueContacts, isBirthdayToday, getContactCount, snoozeContact, createInteraction } from '@/services/contactService';
-import EmptyContactsState from '@/components/EmptyContactsState';
-import CelebrationStatus from '@/components/CelebrationStatus';
-import { PageHeader } from '@/components/PageHeader';
-import { ConnectionTile } from '@/components/ConnectionTile';
-import InteractionComposerSheet, { InteractionKind } from '@/components/InteractionComposerSheet';
-import { ConnectionQuickActionsSheet } from '@/components/ConnectionQuickActionsSheet';
-import { QuiltGrid } from '@/components/ui';
-import { Heading, Body } from '@/components/ui';
-import { getTileVariant, getTileSize } from '@/utils/tileVariant';
+import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
+import Colors from "@/constants/Colors";
+import { Contact, NewInteraction } from "@/db/schema";
+import {
+  getDueContactsGrouped,
+  GroupedDueContacts,
+  isBirthdayToday,
+  getContactCount,
+  snoozeContact,
+  createInteraction,
+} from "@/services/contactService";
+import EmptyContactsState from "@/components/EmptyContactsState";
+import CelebrationStatus from "@/components/CelebrationStatus";
+import { PageHeader } from "@/components/PageHeader";
+import { ConnectionTile } from "@/components/ConnectionTile";
+import InteractionComposerSheet, {
+  InteractionKind,
+} from "@/components/InteractionComposerSheet";
+import { ConnectionQuickActionsSheet } from "@/components/ConnectionQuickActionsSheet";
+import { QuiltGrid } from "@/components/ui";
+import { Heading, Body } from "@/components/ui";
+import { getTileSize } from "@/utils/tileVariant";
+
+const GENERIC_DEVICE_NAME_TOKENS = new Set([
+  "android",
+  "device",
+  "galaxy",
+  "google",
+  "iphone",
+  "ipad",
+  "ipod",
+  "moto",
+  "my",
+  "oneplus",
+  "phone",
+  "pixel",
+  "redmi",
+  "samsung",
+  "tablet",
+  "the",
+  "this",
+  "xiaomi",
+]);
+
+const extractFirstNameFromDeviceName = (
+  deviceName?: string | null,
+): string | null => {
+  if (!deviceName) return null;
+
+  const normalized = deviceName.trim();
+  if (!normalized) return null;
+
+  const possessiveMatch = normalized.match(/^(.+?)['’]s\b/);
+  const ownerChunk = possessiveMatch ? possessiveMatch[1] : normalized;
+  const firstToken = ownerChunk.split(/\s+/)[0]?.replace(/[^A-Za-z-]/g, "");
+
+  if (!firstToken) return null;
+  if (GENERIC_DEVICE_NAME_TOKENS.has(firstToken.toLowerCase())) return null;
+
+  return firstToken;
+};
+
+const alternatingTileVariants = ["primary", "secondary", "accent"] as const;
 
 export default function HomeScreen() {
-  type InteractionType = NewInteraction['type'];
+  type InteractionType = NewInteraction["type"];
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const [groupedContacts, setGroupedContacts] = useState<GroupedDueContacts>({ birthdays: [], reconnect: [] });
+  const [groupedContacts, setGroupedContacts] = useState<GroupedDueContacts>({
+    birthdays: [],
+    reconnect: [],
+  });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [completionCount, setCompletionCount] = useState(0);
-  const [totalContactCount, setTotalContactCount] = useState<number | null>(null);
+  const [totalContactCount, setTotalContactCount] = useState<number | null>(
+    null,
+  );
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showComposer, setShowComposer] = useState(false);
@@ -45,7 +101,7 @@ export default function HomeScreen() {
       setGroupedContacts(results);
       setTotalContactCount(getContactCount());
     } catch (e) {
-      console.warn('Failed to load contacts:', e);
+      console.warn("Failed to load contacts:", e);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -71,34 +127,41 @@ export default function HomeScreen() {
       friend: 3,
     };
 
-    return all.sort((a, b) => {
-      const aIsBirthday = isBirthdayToday(a);
-      const bIsBirthday = isBirthdayToday(b);
+    return all
+      .sort((a, b) => {
+        const aIsBirthday = isBirthdayToday(a);
+        const bIsBirthday = isBirthdayToday(b);
 
-      if (aIsBirthday && !bIsBirthday) return -1;
-      if (!aIsBirthday && bIsBirthday) return 1;
+        if (aIsBirthday && !bIsBirthday) return -1;
+        if (!aIsBirthday && bIsBirthday) return 1;
 
-      const aPriority = relationshipPriority[a.relationship?.toLowerCase() || ''] || 99;
-      const bPriority = relationshipPriority[b.relationship?.toLowerCase() || ''] || 99;
+        const aPriority =
+          relationshipPriority[a.relationship?.toLowerCase() || ""] || 99;
+        const bPriority =
+          relationshipPriority[b.relationship?.toLowerCase() || ""] || 99;
 
-      return aPriority - bPriority;
-    }).slice(0, 6); // Limit to 6 tiles
+        return aPriority - bPriority;
+      })
+      .slice(0, 6); // Limit to 6 tiles
   }, [groupedContacts]);
 
-  const handleContactPress = useCallback((contact: Contact) => {
-    router.push(`/contacts/${contact.id}`);
-  }, [router]);
+  const handleContactPress = useCallback(
+    (contact: Contact) => {
+      router.push(`/contacts/${contact.id}`);
+    },
+    [router],
+  );
 
   const handleAddConnection = useCallback(() => {
-    router.push('/contacts/add');
+    router.push("/contacts/add");
   }, [router]);
 
   const handleSeeAll = useCallback(() => {
-    router.push('/(tabs)/two');
+    router.push("/(tabs)/two");
   }, [router]);
 
   const handleAvatarPress = useCallback(() => {
-    router.push('/settings');
+    router.push("/settings");
   }, [router]);
 
   const onRefresh = useCallback(() => {
@@ -121,36 +184,55 @@ export default function HomeScreen() {
     setShowComposer(true);
   }, []);
 
-  const handleSnooze = useCallback(async (days: 1 | 3 | 7) => {
-    if (!selectedContact) return;
+  const handleSnooze = useCallback(
+    async (days: 1 | 3 | 7) => {
+      if (!selectedContact) return;
 
-    try {
-      const untilDate = Date.now() + days * 24 * 60 * 60 * 1000;
-      await snoozeContact(selectedContact.id, untilDate);
-      setShowQuickActions(false);
-      setSelectedContact(null);
-      loadContacts();
-    } catch (error) {
-      Alert.alert('Error', 'Unable to snooze this connection right now.');
-    }
-  }, [loadContacts, selectedContact]);
-
-  const handleComposerSubmit = useCallback(async ({ kind, type, note }: { kind: InteractionKind; type: InteractionType; note: string }) => {
-    if (!selectedContact) return;
-
-    try {
-      await createInteraction(selectedContact.id, type, note || undefined, kind);
-      if (kind === 'checkin') {
-        setCompletionCount((count) => count + 1);
+      try {
+        const untilDate = Date.now() + days * 24 * 60 * 60 * 1000;
+        await snoozeContact(selectedContact.id, untilDate);
+        setShowQuickActions(false);
+        setSelectedContact(null);
+        loadContacts();
+      } catch (error) {
+        Alert.alert("Error", "Unable to snooze this connection right now.");
       }
-      loadContacts();
-    } catch {
-      Alert.alert('Error', 'Failed to save this interaction.');
-    } finally {
-      setShowComposer(false);
-      setSelectedContact(null);
-    }
-  }, [loadContacts, selectedContact]);
+    },
+    [loadContacts, selectedContact],
+  );
+
+  const handleComposerSubmit = useCallback(
+    async ({
+      kind,
+      type,
+      note,
+    }: {
+      kind: InteractionKind;
+      type: InteractionType;
+      note: string;
+    }) => {
+      if (!selectedContact) return;
+
+      try {
+        await createInteraction(
+          selectedContact.id,
+          type,
+          note || undefined,
+          kind,
+        );
+        if (kind === "checkin") {
+          setCompletionCount((count) => count + 1);
+        }
+        loadContacts();
+      } catch {
+        Alert.alert("Error", "Failed to save this interaction.");
+      } finally {
+        setShowComposer(false);
+        setSelectedContact(null);
+      }
+    },
+    [loadContacts, selectedContact],
+  );
 
   const closeComposer = useCallback(() => {
     setShowComposer(false);
@@ -159,11 +241,16 @@ export default function HomeScreen() {
 
   const getGreeting = (): string => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
   };
   const greeting = getGreeting();
+  const userFirstName = useMemo(
+    () => extractFirstNameFromDeviceName(Constants.deviceName),
+    [],
+  );
+  const greetingName = userFirstName ?? "friend";
   const isNarrowLayout = width < 390;
 
   if (loading) {
@@ -177,13 +264,16 @@ export default function HomeScreen() {
   if (totalContactCount === 0) {
     return (
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
-        <View className="flex-1 px-6 pt-10">
+        <View className="flex-1 px-6 pt-14">
           <PageHeader
             title="Kindred"
-            subtitle={`${greeting}, friend`}
+            subtitle={`${greeting}, ${greetingName}.`}
             showBranding={false}
             rightElement={
-              <TouchableOpacity onPress={handleAvatarPress} className="relative">
+              <TouchableOpacity
+                onPress={handleAvatarPress}
+                className="relative"
+              >
                 <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
                   <View className="w-full h-full bg-primary items-center justify-center">
                     <Ionicons name="person" size={24} color="white" />
@@ -204,13 +294,16 @@ export default function HomeScreen() {
     return (
       <>
         <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
-          <View className="flex-1 px-6 pt-10">
+          <View className="flex-1 px-6 pt-14">
             <PageHeader
               title="Kindred"
-              subtitle={`${greeting}, friend`}
+              subtitle={`${greeting}, ${greetingName}`}
               showBranding={false}
               rightElement={
-                <TouchableOpacity onPress={handleAvatarPress} className="relative">
+                <TouchableOpacity
+                  onPress={handleAvatarPress}
+                  className="relative"
+                >
                   <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
                     <View className="w-full h-full bg-primary items-center justify-center">
                       <Ionicons name="person" size={24} color="white" />
@@ -248,7 +341,11 @@ export default function HomeScreen() {
       <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
+          contentContainerStyle={{
+            paddingHorizontal: 24,
+            paddingTop: 28,
+            paddingBottom: 140,
+          }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -256,10 +353,13 @@ export default function HomeScreen() {
         >
           <PageHeader
             title="Kindred"
-            subtitle={`${greeting}, friend`}
+            subtitle={`${greeting}, ${greetingName}`}
             showBranding={false}
             rightElement={
-              <TouchableOpacity onPress={handleAvatarPress} className="relative">
+              <TouchableOpacity
+                onPress={handleAvatarPress}
+                className="relative"
+              >
                 <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
                   <View className="w-full h-full bg-primary items-center justify-center">
                     <Ionicons name="person" size={24} color="white" />
@@ -270,29 +370,31 @@ export default function HomeScreen() {
           />
 
           {/* Connections Section */}
-          <View className="mb-6">
+          <View className="mt-5 mb-6">
             <View className="flex-row justify-between items-end mb-4">
               <View>
                 <Heading size={2}>Today's connections</Heading>
-                <Body size="sm" className="text-text-soft dark:text-slate-400">Nurturing your inner circle</Body>
+                <Body size="sm" className="text-text-soft dark:text-slate-400">
+                  Nurture your circle.
+                </Body>
               </View>
-              <Body
-                size="sm"
-                className="text-primary"
-                onPress={handleSeeAll}
-              >
+              <Body size="sm" className="text-primary" onPress={handleSeeAll}>
                 See all
               </Body>
             </View>
 
             <QuiltGrid columns={isNarrowLayout ? 1 : 2}>
-              {displayContacts.map((contact) => {
+              {displayContacts.map((contact, index) => {
                 const isBirthday = isBirthdayToday(contact);
                 return (
                   <ConnectionTile
                     key={contact.id}
                     contact={contact}
-                    variant={getTileVariant(contact, isBirthday)}
+                    variant={
+                      alternatingTileVariants[
+                        index % alternatingTileVariants.length
+                      ]
+                    }
                     size={getTileSize(contact)}
                     isBirthday={isBirthday}
                     onPress={() => handleContactPress(contact)}
@@ -307,7 +409,11 @@ export default function HomeScreen() {
               activeOpacity={0.85}
               className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white dark:bg-card-dark/90 flex-row items-center justify-center"
             >
-              <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
+              <Ionicons
+                name="add-circle-outline"
+                size={18}
+                color={Colors.primary}
+              />
               <Body size="sm" weight="medium" className="ml-2 text-primary">
                 Add a connection
               </Body>

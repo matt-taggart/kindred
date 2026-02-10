@@ -134,6 +134,7 @@ export default function CalendarScreen() {
         <PageHeader
           title="Calendar"
           subtitle="Your rhythm at a glance."
+          brandingToHeadingGapClassName="mb-4"
         />
 
         {/* Month Grid */}

@@ -90,7 +90,11 @@ function SettingsSection({
   return (
     <View className="mb-10">
       <View className="mb-4 px-4">
-        <Caption uppercase muted={false} className="mb-1 font-semibold tracking-[3px] text-primary/70">
+        <Caption
+          uppercase
+          muted={false}
+          className="mb-1 font-semibold tracking-[3px] text-primary/70"
+        >
           {title}
         </Caption>
         {description && (
@@ -201,20 +205,21 @@ export default function SettingsScreen() {
     <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: 16,
+          paddingBottom: 140,
+        }}
         showsVerticalScrollIndicator={false}
       >
-        <PageHeader
-          title="Preferences"
-          subtitle="Your peaceful space"
-        />
+        <PageHeader title="Preferences" brandingToHeadingGapClassName="mb-4" />
 
         {/* Content */}
         <View>
-          {/* Nurturing Preferences */}
+          {/* Notifications */}
           <SettingsSection
-            title="Nurturing Preferences"
-            description="Choose when Kindred gently nudges you"
+            title="Notifications"
+            description="Choose when Kindred gently nudges you."
           >
             <SettingsRow
               icon="notifications-outline"
@@ -334,7 +339,10 @@ export default function SettingsScreen() {
               </View>
             </View>
 
-            <Body size="lg" className="mb-2 text-center font-display font-semibold text-slate-900">
+            <Body
+              size="lg"
+              className="mb-2 text-center font-display font-semibold text-slate-900"
+            >
               Delete All Data?
             </Body>
             <Body size="sm" className="mb-4 text-center text-text-soft">

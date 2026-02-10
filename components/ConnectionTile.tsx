@@ -37,22 +37,22 @@ type ConnectionTileProps = {
 
 const variantStyles = {
   primary: {
-    bg: 'bg-white dark:bg-card-dark',
-    border: 'border-slate-200/90 dark:border-slate-700',
-    iconBg: 'bg-primary/12 dark:bg-primary/20',
+    bg: 'bg-primary/15 dark:bg-primary/20',
+    border: 'border-primary/25 dark:border-primary/30',
+    iconBg: 'bg-primary/30 dark:bg-primary/30',
     iconColor: Colors.primary,
   },
   secondary: {
-    bg: 'bg-white dark:bg-card-dark',
-    border: 'border-slate-200/90 dark:border-slate-700',
-    iconBg: 'bg-primary/12 dark:bg-primary/20',
-    iconColor: Colors.primary,
+    bg: 'bg-secondary/15 dark:bg-secondary/20',
+    border: 'border-secondary/25 dark:border-secondary/30',
+    iconBg: 'bg-secondary/30 dark:bg-secondary/30',
+    iconColor: Colors.secondary,
   },
   accent: {
-    bg: 'bg-white dark:bg-card-dark',
-    border: 'border-slate-200/90 dark:border-slate-700',
-    iconBg: 'bg-primary/12 dark:bg-primary/20',
-    iconColor: Colors.primary,
+    bg: 'bg-accent/40 dark:bg-accent/15',
+    border: 'border-accent/60 dark:border-accent/25',
+    iconBg: 'bg-accent/80 dark:bg-accent/25',
+    iconColor: '#d97706',
   },
 };
 

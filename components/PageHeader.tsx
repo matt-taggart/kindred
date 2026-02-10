@@ -1,8 +1,6 @@
 import React from 'react';
-import { View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Image, View } from 'react-native';
 import { Heading, Body, Caption } from './ui';
-import Colors from '@/constants/Colors';
 
 type PageHeaderProps = {
   title: string;
@@ -10,6 +8,7 @@ type PageHeaderProps = {
   rightElement?: React.ReactNode;
   leftElement?: React.ReactNode;
   showBranding?: boolean;
+  brandingToHeadingGapClassName?: string;
 };
 
 export function PageHeader({
@@ -18,13 +17,18 @@ export function PageHeader({
   rightElement,
   leftElement,
   showBranding = true,
+  brandingToHeadingGapClassName = 'mb-2',
 }: PageHeaderProps) {
   return (
     <View className="mb-4">
       {showBranding && (
-        <View className="flex-row items-center gap-2 mb-2">
+        <View className={`flex-row items-center gap-2 ${brandingToHeadingGapClassName}`}>
           <View className="w-8 h-8 items-center justify-center">
-            <Ionicons name="heart" size={16} color={Colors.primary} />
+            <Image
+              source={require('../assets/images/icon.png')}
+              className="w-7 h-7"
+              resizeMode="contain"
+            />
           </View>
           <Caption uppercase muted={false} className="text-primary/70 font-semibold tracking-[3px]">
             KINDRED
