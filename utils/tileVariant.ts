@@ -1,6 +1,6 @@
 import { Contact } from '@/db/schema';
 
-export type TileVariant = 'primary' | 'secondary' | 'accent' | 'neutral';
+export type TileVariant = 'primary' | 'secondary' | 'accent';
 export type TileSize = 'standard' | 'large';
 
 export function getTileVariant(contact: Contact, isBirthday?: boolean): TileVariant {
@@ -22,7 +22,7 @@ export function getTileVariant(contact: Contact, isBirthday?: boolean): TileVari
     default:
       if (overdueDays >= 7) return 'primary';
       if (overdueDays >= 1) return 'accent';
-      return 'neutral';
+      return 'primary';
   }
 }
 

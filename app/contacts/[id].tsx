@@ -325,7 +325,7 @@ export default function ContactDetailScreen() {
           />
 
           {/* Connect */}
-          <View className="mb-6">
+          <View className="mb-8">
             <Caption uppercase className="mb-3 tracking-wider">
               Connect
             </Caption>
@@ -349,12 +349,28 @@ export default function ContactDetailScreen() {
           </View>
 
           {/* Memories */}
-          <Caption uppercase className="mb-3 tracking-wider">
-            Memories
-          </Caption>
+          <View className="mb-2 flex-row items-center justify-between">
+            <Caption uppercase className="tracking-wider">
+              Memories
+            </Caption>
+            {interactions.length > 0 ? (
+              <TouchableOpacity
+                onPress={handleAddMemory}
+                activeOpacity={0.8}
+                className="flex-row items-center rounded-full bg-sage-light dark:bg-accent-dark-sage px-3 py-1.5"
+                accessibilityRole="button"
+                accessibilityLabel={`Add memory for ${contact.name}`}
+              >
+                <Ionicons name="add" size={14} color={Colors.primary} />
+                <Body size="sm" weight="medium" className="ml-1 text-primary">
+                  Add memory
+                </Body>
+              </TouchableOpacity>
+            ) : null}
+          </View>
           <SharedMomentsSection
             moments={mapInteractionsToMoments(interactions)}
-            title="Memories"
+            hideHeader
             onMomentPress={(moment) => {
               const interaction = interactions.find(i => i.id === moment.id);
               if (interaction) handleEditInteraction(interaction);

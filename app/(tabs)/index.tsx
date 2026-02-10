@@ -231,8 +231,8 @@ export default function HomeScreen() {
             <View className="mb-6">
               <View className="flex-row justify-between items-end mb-4">
                 <View>
-                  <Heading size={2}>Your connections</Heading>
-                  <Caption muted>Nurturing your inner circle</Caption>
+                  <Heading size={2}>Today's connections</Heading>
+                  <Body size="sm" className="text-text-soft dark:text-slate-400">Nurturing your inner circle</Body>
                 </View>
                 <Body
                   size="sm"
@@ -263,7 +263,7 @@ export default function HomeScreen() {
               <TouchableOpacity
                 onPress={handleAddConnection}
                 activeOpacity={0.85}
-                className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white/80 dark:bg-card-dark/90 flex-row items-center justify-center"
+                className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white dark:bg-card-dark/90 flex-row items-center justify-center"
               >
                 <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
                 <Body size="sm" weight="medium" className="ml-2 text-primary">

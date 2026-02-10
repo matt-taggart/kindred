@@ -20,6 +20,7 @@ type SharedMomentsSectionProps = {
   onViewAll?: () => void;
   onMomentPress?: (moment: Moment) => void;
   title?: string;
+  hideHeader?: boolean;
 };
 
 export function SharedMomentsSection({
@@ -27,24 +28,27 @@ export function SharedMomentsSection({
   onViewAll,
   onMomentPress,
   title = 'Shared moments',
+  hideHeader = false,
 }: SharedMomentsSectionProps) {
   if (moments.length === 0) {
     return null;
   }
 
   return (
-    <View className="mt-8">
+    <View className={hideHeader ? 'mt-0' : 'mt-8'}>
       {/* Header */}
-      <View className="flex-row items-center justify-between px-2 mb-4">
-        <Heading size={4} weight="semibold">{title}</Heading>
-        {onViewAll && (
-          <Pressable onPress={onViewAll}>
-            <Body size="sm" weight="medium" className="text-primary">
-              View all
-            </Body>
-          </Pressable>
-        )}
-      </View>
+      {hideHeader ? null : (
+        <View className="flex-row items-center justify-between px-2 mb-4">
+          <Heading size={4} weight="semibold">{title}</Heading>
+          {onViewAll && (
+            <Pressable onPress={onViewAll}>
+              <Body size="sm" weight="medium" className="text-primary">
+                View all
+              </Body>
+            </Pressable>
+          )}
+        </View>
+      )}
 
       {/* Moments list */}
       <View>

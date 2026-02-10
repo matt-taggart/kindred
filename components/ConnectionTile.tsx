@@ -28,7 +28,7 @@ type Contact = {
 
 type ConnectionTileProps = {
   contact: Contact;
-  variant?: 'primary' | 'secondary' | 'accent' | 'neutral';
+  variant?: 'primary' | 'secondary' | 'accent';
   size?: 'standard' | 'large';
   isBirthday?: boolean;
   onPress: () => void;
@@ -38,27 +38,21 @@ type ConnectionTileProps = {
 const variantStyles = {
   primary: {
     bg: 'bg-white dark:bg-card-dark',
-    border: 'border-primary/35 dark:border-primary/45',
-    iconBg: 'bg-primary/15 dark:bg-primary/20',
+    border: 'border-slate-200/90 dark:border-slate-700',
+    iconBg: 'bg-primary/12 dark:bg-primary/20',
     iconColor: Colors.primary,
   },
   secondary: {
     bg: 'bg-white dark:bg-card-dark',
-    border: 'border-secondary/40 dark:border-secondary/50',
-    iconBg: 'bg-secondary/20 dark:bg-secondary/30',
-    iconColor: Colors.secondary,
+    border: 'border-slate-200/90 dark:border-slate-700',
+    iconBg: 'bg-primary/12 dark:bg-primary/20',
+    iconColor: Colors.primary,
   },
   accent: {
     bg: 'bg-white dark:bg-card-dark',
-    border: 'border-accent/70 dark:border-accent/50',
-    iconBg: 'bg-accent/60 dark:bg-accent/20',
-    iconColor: '#F97316',
-  },
-  neutral: {
-    bg: 'bg-white dark:bg-card-dark',
-    border: 'border-slate-200 dark:border-slate-700',
-    iconBg: 'bg-slate-100 dark:bg-slate-700',
-    iconColor: '#9ca3af',
+    border: 'border-slate-200/90 dark:border-slate-700',
+    iconBg: 'bg-primary/12 dark:bg-primary/20',
+    iconColor: Colors.primary,
   },
 };
 
@@ -96,7 +90,7 @@ function getStatusText(contact: Contact, isBirthday?: boolean): string {
 
 export function ConnectionTile({
   contact,
-  variant = 'neutral',
+  variant = 'primary',
   size = 'standard',
   isBirthday = false,
   onPress,
@@ -167,7 +161,7 @@ export function ConnectionTile({
               hitSlop={8}
               accessibilityRole="button"
               accessibilityLabel={`Open quick actions for ${contact.name}`}
-              className="w-7 h-7 rounded-full bg-white/80 dark:bg-slate-700/80 items-center justify-center"
+              className="w-7 h-7 rounded-full bg-primary/12 dark:bg-primary/25 items-center justify-center"
             >
               <Ionicons name="ellipsis-horizontal" size={14} color={styles.iconColor} />
             </Pressable>

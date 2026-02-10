@@ -227,6 +227,16 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
     );
   }, [yearUnknown]);
 
+  const renderArrow = useCallback((direction: 'left' | 'right') => (
+    <View className="px-2 py-1">
+      <Ionicons
+        name={direction === 'left' ? 'chevron-back' : 'chevron-forward'}
+        size={20}
+        color="#9DBEBB"
+      />
+    </View>
+  ), []);
+
   return (
     <View>
       {/* Toggle Row */}
@@ -258,6 +268,8 @@ export default function BirthdayPicker({ value, onChange }: BirthdayPickerProps)
           firstDay={0}
           showSixWeeks={true}
           renderHeader={renderHeader}
+          renderArrow={renderArrow}
+          hideArrows={false}
         />
       </View>
 

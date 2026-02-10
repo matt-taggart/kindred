@@ -8,12 +8,17 @@ import {
   Pressable,
   Animated,
   Dimensions,
+  KeyboardAvoidingView,
+  InputAccessoryView,
+  Keyboard,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, NewInteraction } from '@/db/schema';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
+const NOTE_ACCESSORY_ID = 'composer-note-toolbar';
 
 type InteractionType = NewInteraction['type'];
 export type InteractionKind = NewInteraction['kind'];
@@ -96,7 +101,7 @@ export default function InteractionComposerSheet({
   if (!contact) return null;
 
   const helperText = kind === 'checkin'
-    ? 'This updates your next reminder.'
+    ? ''
     : 'This keeps reminder timing unchanged';
 
   return (
@@ -106,6 +111,10 @@ export default function InteractionComposerSheet({
       animationType="fade"
       onRequestClose={handleClose}
     >
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <Pressable className="flex-1 bg-black/30" onPress={handleClose}>
         <View className="flex-1 justify-end">
           <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
@@ -135,9 +144,11 @@ export default function InteractionComposerSheet({
                 {title}
               </Text>
 
-              <Text className="text-xs text-center text-slate-500 dark:text-slate-400 mb-6">
-                {helperText}
-              </Text>
+              {helperText ? (
+                <Text className="text-xs text-center text-slate-500 dark:text-slate-400 mb-6">
+                  {helperText}
+                </Text>
+              ) : null}
 
               <View className="mb-8">
                 <Text className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-6 text-center">
@@ -196,6 +207,7 @@ export default function InteractionComposerSheet({
                     placeholderTextColor="#D1D5DB"
                     textAlignVertical="top"
                     style={{ minHeight: 120 }}
+                    inputAccessoryViewID={Platform.OS === 'ios' ? NOTE_ACCESSORY_ID : undefined}
                   />
                 </View>
               </View>
@@ -203,6 +215,17 @@ export default function InteractionComposerSheet({
           </Animated.View>
         </View>
       </Pressable>
+      </KeyboardAvoidingView>
+
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID={NOTE_ACCESSORY_ID}>
+          <View className="flex-row justify-end items-center px-4 py-2 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+            <TouchableOpacity onPress={Keyboard.dismiss} activeOpacity={0.7}>
+              <Text className="text-base font-semibold text-primary">Done</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      )}
     </Modal>
   );
 }

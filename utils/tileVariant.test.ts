@@ -25,12 +25,12 @@ describe('tileVariant utilities', () => {
       expect(getTileVariant({ ...baseContact, relationship: 'friend' } as Contact)).toBe('accent');
     });
 
-    it('returns neutral for other relationships', () => {
-      expect(getTileVariant({ ...baseContact, relationship: 'colleague' } as Contact)).toBe('neutral');
+    it('returns primary for other relationships', () => {
+      expect(getTileVariant({ ...baseContact, relationship: 'colleague' } as Contact)).toBe('primary');
     });
 
-    it('returns neutral for null relationship', () => {
-      expect(getTileVariant({ ...baseContact, relationship: null } as Contact)).toBe('neutral');
+    it('returns primary for null relationship', () => {
+      expect(getTileVariant({ ...baseContact, relationship: null } as Contact)).toBe('primary');
     });
 
     it('returns secondary when isBirthday is true', () => {
