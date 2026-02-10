@@ -227,13 +227,13 @@ export default function HomeScreen() {
           />
 
           {/* Connections Section */}
-          <View className="mb-6">
-            <View className="flex-row justify-between items-end mb-4">
-              <View>
-                <Heading size={2}>Your connections</Heading>
-                <Caption muted>Nurturing your inner circle</Caption>
-              </View>
-              {hasContacts && (
+          {hasContacts ? (
+            <View className="mb-6">
+              <View className="flex-row justify-between items-end mb-4">
+                <View>
+                  <Heading size={2}>Your connections</Heading>
+                  <Caption muted>Nurturing your inner circle</Caption>
+                </View>
                 <Body
                   size="sm"
                   className="text-primary"
@@ -241,10 +241,8 @@ export default function HomeScreen() {
                 >
                   See all
                 </Body>
-              )}
-            </View>
+              </View>
 
-            {hasContacts ? (
               <QuiltGrid columns={isNarrowLayout ? 1 : 2}>
                 {displayContacts.map((contact) => {
                   const isBirthday = isBirthdayToday(contact);
@@ -261,26 +259,20 @@ export default function HomeScreen() {
                   );
                 })}
               </QuiltGrid>
-            ) : (
-              <CelebrationStatus completionCount={completionCount} />
-            )}
 
-            <TouchableOpacity
-              onPress={handleAddConnection}
-              activeOpacity={0.85}
-              className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white/80 dark:bg-card-dark/90 flex-row items-center justify-center"
-            >
-              <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
-              <Body size="sm" weight="medium" className="ml-2 text-primary">
-                Add a connection
-              </Body>
-            </TouchableOpacity>
-          </View>
-
-          {completionCount > 0 && (
-            <Body muted className="text-center mt-6">
-              {completionCount} {completionCount === 1 ? 'connection' : 'connections'} nurtured today
-            </Body>
+              <TouchableOpacity
+                onPress={handleAddConnection}
+                activeOpacity={0.85}
+                className="mt-4 rounded-2xl border border-dashed border-primary/35 dark:border-primary/40 px-4 py-3.5 bg-white/80 dark:bg-card-dark/90 flex-row items-center justify-center"
+              >
+                <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
+                <Body size="sm" weight="medium" className="ml-2 text-primary">
+                  Add a connection
+                </Body>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <CelebrationStatus completionCount={completionCount} />
           )}
         </ScrollView>
       </SafeAreaView>

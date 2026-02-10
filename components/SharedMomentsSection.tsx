@@ -19,12 +19,14 @@ type SharedMomentsSectionProps = {
   moments: Moment[];
   onViewAll?: () => void;
   onMomentPress?: (moment: Moment) => void;
+  title?: string;
 };
 
 export function SharedMomentsSection({
   moments,
   onViewAll,
   onMomentPress,
+  title = 'Shared moments',
 }: SharedMomentsSectionProps) {
   if (moments.length === 0) {
     return null;
@@ -34,7 +36,7 @@ export function SharedMomentsSection({
     <View className="mt-8">
       {/* Header */}
       <View className="flex-row items-center justify-between px-2 mb-4">
-        <Heading size={4} weight="semibold">Shared moments</Heading>
+        <Heading size={4} weight="semibold">{title}</Heading>
         {onViewAll && (
           <Pressable onPress={onViewAll}>
             <Body size="sm" weight="medium" className="text-primary">

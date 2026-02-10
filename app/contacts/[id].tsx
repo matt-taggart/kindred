@@ -324,19 +324,37 @@ export default function ContactDetailScreen() {
             isFavorite={contact.relationship?.toLowerCase().includes('partner') || contact.relationship?.toLowerCase().includes('spouse')}
           />
 
-          {/* Quick Actions Grid */}
+          {/* Connect */}
           <View className="mb-6">
+            <Caption uppercase className="mb-3 tracking-wider">
+              Connect
+            </Caption>
             <QuiltGrid>
               <QuickActionTile variant="call" onPress={handleCall} />
               <QuickActionTile variant="text" onPress={handleText} />
-              <QuickActionTile variant="checkin" onPress={handleLogCheckIn} />
-              <QuickActionTile variant="memory" onPress={handleAddMemory} />
             </QuiltGrid>
+            <TouchableOpacity
+              className="mt-3 w-full rounded-2xl bg-white dark:bg-card-dark border border-slate-100 dark:border-slate-800 px-4 py-3.5 flex-row items-center shadow-soft"
+              onPress={handleLogCheckIn}
+              activeOpacity={0.85}
+              accessibilityLabel="Mark as connected"
+            >
+              <View className="w-9 h-9 rounded-xl bg-sage-light dark:bg-accent-dark-sage items-center justify-center">
+                <Ionicons name="leaf-outline" size={18} color={Colors.primary} />
+              </View>
+              <Body weight="medium" className="ml-3 text-primary">
+                Mark as connected
+              </Body>
+            </TouchableOpacity>
           </View>
 
-          {/* Shared Moments */}
+          {/* Memories */}
+          <Caption uppercase className="mb-3 tracking-wider">
+            Memories
+          </Caption>
           <SharedMomentsSection
             moments={mapInteractionsToMoments(interactions)}
+            title="Memories"
             onMomentPress={(moment) => {
               const interaction = interactions.find(i => i.id === moment.id);
               if (interaction) handleEditInteraction(interaction);
@@ -351,10 +369,10 @@ export default function ContactDetailScreen() {
                   <Ionicons name="heart" size={32} color={Colors.primary} />
                 </View>
                 <Heading size={3} className="text-center mb-2">
-                  No shared moments yet
+                  No memories yet
                 </Heading>
                 <Body className="text-slate-500 dark:text-slate-400 text-center mb-6">
-                  Your shared moments will appear here.
+                  Capture a shared moment, preference, or detail to personalize future outreach.
                 </Body>
                 <TouchableOpacity
                   className="px-8 py-4 rounded-2xl bg-primary shadow-sm"
@@ -362,7 +380,7 @@ export default function ContactDetailScreen() {
                   activeOpacity={0.85}
                 >
                   <Body weight="medium" className="text-white">
-                    Add memory
+                    Add first memory
                   </Body>
                 </TouchableOpacity>
               </View>
