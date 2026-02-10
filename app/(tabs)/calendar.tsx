@@ -1,6 +1,6 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -8,26 +8,26 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { Calendar, DateData } from 'react-native-calendars';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { Calendar, DateData } from "react-native-calendars";
+import { Ionicons } from "@expo/vector-icons";
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { PageHeader } from '@/components/PageHeader';
-import { Body, Caption, Heading } from '@/components/ui';
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
+import { PageHeader } from "@/components/PageHeader";
+import { Body, Caption, Heading } from "@/components/ui";
 import {
   getCalendarData,
   getContactsByDate,
   getTodayDateKey,
   CalendarContact,
   CalendarData,
-} from '@/services/calendarService';
+} from "@/services/calendarService";
 
 export default function CalendarScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = colorScheme === "dark";
 
   const [calendarData, setCalendarData] = useState<CalendarData>({});
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateKey());
@@ -43,7 +43,7 @@ export default function CalendarScreen() {
       const contacts = getContactsByDate(selectedDate);
       setAgendaContacts(contacts);
     } catch (error) {
-      console.warn('Failed to load calendar data:', error);
+      console.warn("Failed to load calendar data:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -57,14 +57,11 @@ export default function CalendarScreen() {
     }, [loadData]),
   );
 
-  const handleDayPress = useCallback(
-    (day: DateData) => {
-      setSelectedDate(day.dateString);
-      const contacts = getContactsByDate(day.dateString);
-      setAgendaContacts(contacts);
-    },
-    [],
-  );
+  const handleDayPress = useCallback((day: DateData) => {
+    setSelectedDate(day.dateString);
+    const contacts = getContactsByDate(day.dateString);
+    setAgendaContacts(contacts);
+  }, []);
 
   const handleContactPress = useCallback(
     (contactId: string) => {
@@ -85,10 +82,19 @@ export default function CalendarScreen() {
     (acc, [date, data]) => {
       acc[date] = {
         marked: true,
-        dots: data.dots.map((dot, i) => ({ key: `dot-${i}`, color: dot.color })),
+        dots: data.dots.map((dot, i) => ({
+          key: `dot-${i}`,
+          color: dot.color,
+        })),
         selected: date === selectedDate,
-        selectedColor: date === selectedDate ? (isDark ? 'rgba(125, 157, 122, 0.2)' : 'rgba(125, 157, 122, 0.15)') : undefined,
-        selectedTextColor: date === selectedDate ? (isDark ? '#fff' : '#1e293b') : undefined,
+        selectedColor:
+          date === selectedDate
+            ? isDark
+              ? "rgba(125, 157, 122, 0.2)"
+              : "rgba(125, 157, 122, 0.15)"
+            : undefined,
+        selectedTextColor:
+          date === selectedDate ? (isDark ? "#fff" : "#1e293b") : undefined,
       };
       return acc;
     },
@@ -99,19 +105,21 @@ export default function CalendarScreen() {
   if (!markedDates[selectedDate]) {
     markedDates[selectedDate] = {
       selected: true,
-      selectedColor: isDark ? 'rgba(125, 157, 122, 0.2)' : 'rgba(125, 157, 122, 0.15)',
-      selectedTextColor: isDark ? '#fff' : '#1e293b',
+      selectedColor: isDark
+        ? "rgba(125, 157, 122, 0.2)"
+        : "rgba(125, 157, 122, 0.15)",
+      selectedTextColor: isDark ? "#fff" : "#1e293b",
     };
   }
 
   // Format selected date for display
   const formatSelectedDate = (dateString: string): string => {
-    const [year, month, day] = dateString.split('-').map(Number);
+    const [year, month, day] = dateString.split("-").map(Number);
     const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -127,8 +135,14 @@ export default function CalendarScreen() {
     <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: 16,
+          paddingBottom: 140,
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         showsVerticalScrollIndicator={false}
       >
         <PageHeader
@@ -144,20 +158,22 @@ export default function CalendarScreen() {
             markedDates={markedDates}
             onDayPress={handleDayPress}
             theme={{
-              backgroundColor: 'transparent',
-              calendarBackground: 'transparent',
-              textSectionTitleColor: isDark ? '#94a3b8' : '#64748b',
+              backgroundColor: "transparent",
+              calendarBackground: "transparent",
+              textSectionTitleColor: isDark ? "#94a3b8" : "#64748b",
               selectedDayBackgroundColor: Colors.primary,
-              selectedDayTextColor: '#ffffff',
+              selectedDayTextColor: "#ffffff",
               todayTextColor: Colors.primary,
-              todayBackgroundColor: isDark ? 'rgba(125, 157, 122, 0.1)' : 'rgba(125, 157, 122, 0.08)',
-              dayTextColor: isDark ? '#e2e8f0' : '#1e293b',
-              textDisabledColor: isDark ? '#475569' : '#cbd5e1',
-              monthTextColor: isDark ? '#f1f5f9' : '#1e293b',
+              todayBackgroundColor: isDark
+                ? "rgba(125, 157, 122, 0.1)"
+                : "rgba(125, 157, 122, 0.08)",
+              dayTextColor: isDark ? "#e2e8f0" : "#1e293b",
+              textDisabledColor: isDark ? "#475569" : "#cbd5e1",
+              monthTextColor: isDark ? "#f1f5f9" : "#1e293b",
               arrowColor: Colors.primary,
-              textDayFontFamily: 'Outfit_400Regular',
-              textMonthFontFamily: 'Quicksand_600SemiBold',
-              textDayHeaderFontFamily: 'Outfit_500Medium',
+              textDayFontFamily: "Outfit_400Regular",
+              textMonthFontFamily: "Quicksand_600SemiBold",
+              textDayHeaderFontFamily: "Outfit_500Medium",
               textDayFontSize: 15,
               textMonthFontSize: 18,
               textDayHeaderFontSize: 13,
@@ -169,15 +185,17 @@ export default function CalendarScreen() {
         <View>
           <View className="mb-4">
             <Heading size={3}>{formatSelectedDate(selectedDate)}</Heading>
-            {selectedDate === todayKey && (
-              <Caption muted>Today</Caption>
-            )}
+            {selectedDate === todayKey && <Caption muted>Today</Caption>}
           </View>
 
           {agendaContacts.length === 0 ? (
             <View className="items-center py-10">
               <View className="w-14 h-14 rounded-full bg-sage-light dark:bg-accent-dark-sage items-center justify-center mb-3">
-                <Ionicons name="sunny-outline" size={24} color={Colors.primary} />
+                <Ionicons
+                  name="sunny-outline"
+                  size={24}
+                  color={Colors.primary}
+                />
               </View>
               <Body muted>Nothing planned for this day</Body>
             </View>
@@ -189,16 +207,24 @@ export default function CalendarScreen() {
                   onPress={() => handleContactPress(contact.id)}
                   activeOpacity={0.7}
                   className="bg-white dark:bg-card-dark p-4 rounded-3xl flex-row items-center justify-between border border-slate-100 dark:border-slate-800 shadow-soft"
-                  style={{ marginBottom: index < agendaContacts.length - 1 ? 14 : 0 }}
+                  style={{
+                    marginBottom: index < agendaContacts.length - 1 ? 8 : 0,
+                  }}
                 >
                   <View className="flex-row items-center gap-4">
-                    <View className={`w-10 h-10 rounded-2xl items-center justify-center ${
-                      contact.isBirthday
-                        ? 'border border-accent-warm bg-soft-sand'
-                        : 'bg-primary/20'
-                    }`}>
+                    <View
+                      className={`w-10 h-10 rounded-2xl items-center justify-center ${
+                        contact.isBirthday
+                          ? "border border-accent-warm bg-soft-sand"
+                          : "bg-primary/20"
+                      }`}
+                    >
                       <Ionicons
-                        name={contact.isBirthday ? 'gift-outline' : 'notifications-outline'}
+                        name={
+                          contact.isBirthday
+                            ? "gift-outline"
+                            : "notifications-outline"
+                        }
                         size={18}
                         color={Colors.primary}
                       />
@@ -206,12 +232,18 @@ export default function CalendarScreen() {
                     <View>
                       <Body weight="medium">{contact.name}</Body>
                       <Caption muted>
-                        {contact.isBirthday ? 'Birthday' : 'Reminder'}
-                        {contact.relationship ? ` \u00b7 ${contact.relationship}` : ''}
+                        {contact.isBirthday ? "Birthday" : "Reminder"}
+                        {contact.relationship
+                          ? ` \u00b7 ${contact.relationship}`
+                          : ""}
                       </Caption>
                     </View>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={isDark ? '#475569' : '#94a3b8'} />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={16}
+                    color={isDark ? "#475569" : "#94a3b8"}
+                  />
                 </TouchableOpacity>
               ))}
             </View>
