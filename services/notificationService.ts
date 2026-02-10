@@ -5,6 +5,97 @@ import { Contact } from '@/db/schema';
 import { useUserStore, NotificationSettings } from '@/lib/userStore';
 
 const DAILY_REMINDER_PREFIX = 'daily-reminder-';
+const CONTACT_REMINDER_PREFIX = 'contact-reminder-';
+const MAX_NAMES_IN_DAILY_TITLE_IOS = 2;
+const MAX_NAMES_IN_DAILY_TITLE_ANDROID = 3;
+
+const getContactReminderIdentifier = (contactId: string): string =>
+  `${CONTACT_REMINDER_PREFIX}${contactId}`;
+
+const getDisplayName = (name: string | null | undefined): string => {
+  const trimmed = name?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : 'this connection';
+};
+
+const getMaxNamesInDailyTitle = (): number =>
+  Platform.OS === 'ios' ? MAX_NAMES_IN_DAILY_TITLE_IOS : MAX_NAMES_IN_DAILY_TITLE_ANDROID;
+
+const getDailyReminderTitleNames = (contactNames: string[]): string => {
+  const maxNamesInTitle = getMaxNamesInDailyTitle();
+
+  if (contactNames.length <= maxNamesInTitle) {
+    return contactNames.join(', ');
+  }
+
+  return `${contactNames.slice(0, maxNamesInTitle).join(', ')} and ${contactNames.length - maxNamesInTitle} more`;
+};
+
+const getContactReminderContent = (contactName: string): { title: string; body: string } => {
+  if (Platform.OS === 'ios') {
+    return {
+      title: `Reach out to ${contactName}`,
+      body: `Check in with ${contactName} today.`,
+    };
+  }
+
+  return {
+    title: `Reminder: Reach out to ${contactName}`,
+    body: `${contactName} is ready for a check-in.`,
+  };
+};
+
+const getDailyReminderContent = (
+  dueContactsCount: number,
+  contactNames: string[],
+): { title: string; body: string } => {
+  if (dueContactsCount === 1) {
+    const name = contactNames[0];
+    if (Platform.OS === 'ios') {
+      return {
+        title: `Reach out to ${name}`,
+        body: `Check in with ${name} today.`,
+      };
+    }
+
+    return {
+      title: `Reminder: Reach out to ${name}`,
+      body: `${name} is ready for a check-in.`,
+    };
+  }
+
+  const titleNames = getDailyReminderTitleNames(contactNames);
+  if (Platform.OS === 'ios') {
+    return {
+      title: `Reach out: ${titleNames}`,
+      body: `${dueContactsCount} connections are ready today.`,
+    };
+  }
+
+  return {
+    title: `Reminder: ${titleNames}`,
+    body: `You have ${dueContactsCount} connections ready today.`,
+  };
+};
+
+const getContactReminderNotifications = async (contactId: string) => {
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  const contactReminderIdentifier = getContactReminderIdentifier(contactId);
+
+  return scheduled.filter((item) => {
+    const data = item.content.data as { contactId?: string } | undefined;
+    return data?.contactId === contactId || item.identifier === contactReminderIdentifier;
+  });
+};
+
+export const cancelContactReminder = async (contactId: string): Promise<void> => {
+  const contactReminders = await getContactReminderNotifications(contactId);
+
+  if (contactReminders.length === 0) return;
+
+  await Promise.all(
+    contactReminders.map((item) => Notifications.cancelScheduledNotificationAsync(item.identifier)),
+  );
+};
 
 const ensurePermissions = async (): Promise<boolean> => {
   const current = await Notifications.getPermissionsAsync();
@@ -27,27 +118,24 @@ const ensureAndroidChannel = async () => {
 };
 
 export const scheduleReminder = async (contact: Contact): Promise<string | null> => {
-  if (!contact.nextContactDate) return null;
+  await cancelContactReminder(contact.id);
+
+  if (!contact.nextContactDate || contact.nextContactDate <= Date.now()) return null;
 
   const hasPermission = await ensurePermissions();
   if (!hasPermission) return null;
 
   await ensureAndroidChannel();
 
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-  const existing = scheduled.find(
-    (item) => (item.content.data as { contactId?: string } | undefined)?.contactId === contact.id,
-  );
-
-  if (existing) {
-    await Notifications.cancelScheduledNotificationAsync(existing.identifier);
-  }
+  const contactName = getDisplayName(contact.name);
+  const content = getContactReminderContent(contactName);
 
   const identifier = await Notifications.scheduleNotificationAsync({
+    identifier: getContactReminderIdentifier(contact.id),
     content: {
-      title: `It might be a good time to connect with ${contact.name}.`,
-      body: 'A gentle nudge from Kindred.',
-      data: { contactId: contact.id },
+      title: content.title,
+      body: content.body,
+      data: { type: 'contact-reminder', contactId: contact.id },
     },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: new Date(contact.nextContactDate) },
   });
@@ -84,15 +172,8 @@ export const scheduleDailyReminders = async (
   const notificationSettings = settings ?? useUserStore.getState().notificationSettings;
   const { frequency, reminderTimes } = notificationSettings;
 
-  const contactNames = dueContacts.map((c) => c.name);
-  const title =
-    dueContacts.length === 1
-      ? `It might be a good time to connect with ${contactNames[0]}.`
-      : `${dueContacts.length} connections are ready today`;
-  const body =
-    dueContacts.length === 1
-      ? 'A gentle nudge from Kindred.'
-      : contactNames.slice(0, 3).join(', ') + (dueContacts.length > 3 ? ` and ${dueContacts.length - 3} more` : '');
+  const contactNames = dueContacts.map((c) => getDisplayName(c.name));
+  const content = getDailyReminderContent(dueContacts.length, contactNames);
 
   const identifiers: string[] = [];
 
@@ -102,8 +183,8 @@ export const scheduleDailyReminders = async (
     const identifier = await Notifications.scheduleNotificationAsync({
       identifier: `${DAILY_REMINDER_PREFIX}${i}`,
       content: {
-        title,
-        body,
+        title: content.title,
+        body: content.body,
         data: { type: 'daily-reminder', contactIds: dueContacts.map((c) => c.id) },
       },
       trigger: {

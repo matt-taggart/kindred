@@ -26,21 +26,21 @@ export function PrimaryButton({
       disabled={isDisabled}
       className={[
         'bg-primary rounded-full py-4 px-6 flex-row items-center justify-center',
-        'shadow-lg shadow-primary/30',
+        'shadow-lg shadow-primary/25',
         'active:scale-[0.98]',
         fullWidth && 'w-full',
         isDisabled && 'opacity-50',
       ].filter(Boolean).join(' ')}
     >
       {loading ? (
-        <ActivityIndicator color="#1f2937" />
+        <ActivityIndicator color="#ffffff" />
       ) : (
         <View className="flex-row items-center gap-2">
-          <Text className="font-body font-bold text-slate-900 text-base">
+          <Text className="font-body font-bold text-white text-base">
             {label}
           </Text>
           {icon && (
-            <MaterialIcons name={icon} size={20} color="#1f2937" />
+            <MaterialIcons name={icon} size={20} color="#ffffff" />
           )}
         </View>
       )}

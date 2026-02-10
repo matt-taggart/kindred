@@ -65,7 +65,7 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
             ]}
           >
             <Pressable
-              className="bg-background-light dark:bg-slate-900 rounded-t-2xl px-6 pb-10 pt-3 shadow-2xl"
+              className="bg-surface-page dark:bg-slate-900 rounded-t-2xl px-6 pb-10 pt-3 shadow-2xl"
               onPress={(e) => e.stopPropagation?.()}
             >
               {/* Handle bar */}
@@ -76,7 +76,7 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
                 <Text className="text-3xl font-display text-brand-navy dark:text-slate-100">
                   Add a connection
                 </Text>
-                <Text className="text-sm text-text-soft mt-2 font-body text-center">
+                <Text className="text-sm text-text-muted mt-2 font-body text-center">
                   Who would you like to nurture today?
                 </Text>
               </View>
@@ -86,31 +86,31 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
                 <TouchableOpacity 
                   onPress={onImportContacts}
                   activeOpacity={0.9}
-                  className="w-full bg-white dark:bg-slate-800 p-5 rounded-xl flex-row items-center gap-4 shadow-soft border border-white dark:border-slate-700"
+                  className="w-full bg-surface-card dark:bg-slate-800 p-5 rounded-xl flex-row items-center gap-4 shadow-soft border border-stroke-soft dark:border-slate-700"
                 >
-                  <View className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <View className="w-12 h-12 rounded-2xl bg-sage-light flex items-center justify-center">
                     <Ionicons name="people-outline" size={24} color="#9DBEBB" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Import from contacts</Text>
-                    <Text className="text-xs text-text-soft">Sync with your address book</Text>
+                    <Text className="text-base font-semibold text-text-strong dark:text-slate-200">Import from contacts</Text>
+                    <Text className="text-xs text-text-muted">Sync with your address book</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={24} color="#cbd5e1" />
+                  <Ionicons name="chevron-forward" size={24} color="#B2BCC9" />
                 </TouchableOpacity>
 
                 <TouchableOpacity 
                   onPress={onAddManually}
                   activeOpacity={0.9}
-                  className="w-full bg-white dark:bg-slate-800 p-5 rounded-xl flex-row items-center gap-4 shadow-soft border border-white dark:border-slate-700"
+                  className="w-full bg-surface-card dark:bg-slate-800 p-5 rounded-xl flex-row items-center gap-4 shadow-soft border border-stroke-soft dark:border-slate-700"
                 >
-                  <View className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <View className="w-12 h-12 rounded-2xl bg-accent-soft border border-accent-border flex items-center justify-center">
                     <Ionicons name="person-add-outline" size={24} color="#9DBEBB" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-brand-navy dark:text-slate-200">Add manually</Text>
-                    <Text className="text-xs text-text-soft">Enter details from scratch</Text>
+                    <Text className="text-base font-semibold text-text-strong dark:text-slate-200">Add manually</Text>
+                    <Text className="text-xs text-text-muted">Enter details from scratch</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={24} color="#cbd5e1" />
+                  <Ionicons name="chevron-forward" size={24} color="#B2BCC9" />
                 </TouchableOpacity>
               </View>
 
@@ -119,7 +119,7 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
                 onPress={handleClose}
                 className="w-full mt-6 py-4 items-center"
               >
-                <Text className="text-slate-400 font-medium text-sm">Cancel</Text>
+                <Text className="text-text-muted font-medium text-sm">Cancel</Text>
               </TouchableOpacity>
               
               <View className="h-6" />
@@ -130,4 +130,3 @@ export default function AddConnectionSheet({ visible, onClose }: Props) {
     </Modal>
   );
 }
-

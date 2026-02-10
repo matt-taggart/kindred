@@ -16,7 +16,7 @@ const variantClasses: Record<QuiltCardVariant, string> = {
   primary: 'bg-primary/15 border-primary/20 dark:bg-primary/20',
   secondary: 'bg-secondary/15 border-secondary/20 dark:bg-secondary/20',
   accent: 'bg-accent/40 border-accent/60 dark:bg-accent/10',
-  neutral: 'bg-slate-100 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700',
+  neutral: 'bg-surface-card border-stroke-soft dark:bg-slate-800/50 dark:border-slate-700',
 };
 
 export function QuiltCard({

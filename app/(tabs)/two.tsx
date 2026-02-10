@@ -7,6 +7,7 @@ import {
   FlatList,
   RefreshControl,
   SafeAreaView,
+  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -20,10 +21,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { FilterPills, FilterOption } from "@/components/FilterPills";
 import { ConnectionCard } from "@/components/ConnectionCard";
 import { MomentCard, MomentSectionDivider } from '@/components';
-import { SectionHeader } from "@/components/SectionHeader";
 import {
   getContacts,
-  getFilterCounts,
   unarchiveContact,
 } from "@/services/contactService";
 import { getUpcomingMoments, UpcomingMoments, MomentContact } from '@/services/calendarService';
@@ -63,11 +62,16 @@ export default function ConnectionsScreen() {
   const loadContacts = useCallback(() => {
     try {
       const results = getContacts({ includeArchived: true });
-      const filterCounts = getFilterCounts();
       const upcomingMoments = getUpcomingMoments();
+      const activeCount = results.filter((c) => !c.isArchived).length;
+      const archivedCount = results.filter((c) => c.isArchived).length;
+      const dueCount =
+        upcomingMoments.thisWeek.length +
+        upcomingMoments.nextWeek.length +
+        upcomingMoments.laterThisSeason.length;
 
       setContacts(results);
-      setCounts(filterCounts);
+      setCounts({ all: activeCount, due: dueCount, archived: archivedCount });
       setMoments(upcomingMoments);
     } catch (error) {
       console.warn("Failed to load contacts:", error);
@@ -196,7 +200,13 @@ export default function ConnectionsScreen() {
     ({ item }: { item: ListItem }) => {
       switch (item.type) {
         case 'section-header':
-          return <SectionHeader title={item.title} />;
+          return (
+            <View className="mb-4 mt-1 items-center px-1">
+              <Text className="text-[12px] font-semibold uppercase tracking-[2px] text-text-muted dark:text-slate-400 text-center">
+                {item.title}
+              </Text>
+            </View>
+          );
 
         case 'connection-card':
           return (
@@ -227,32 +237,42 @@ export default function ConnectionsScreen() {
 
         case 'archived-row':
           return (
-            <ConnectionCard
-              contact={item.contact}
-              lastConnectedLabel={formatLastConnected(item.contact.lastContactedAt)}
-              nextReminderLabel="Archived"
-              isReady={false}
-              onPress={() => handleContactPress(item.contact.id)}
-            />
+            <View className="mb-4">
+              <ConnectionCard
+                contact={item.contact}
+                lastConnectedLabel={formatLastConnected(item.contact.lastContactedAt)}
+                nextReminderLabel="Archived"
+                isReady={false}
+                onPress={() => handleContactPress(item.contact.id)}
+              />
+              <TouchableOpacity
+                onPress={() => handleUnarchive(item.contact.id)}
+                className="mt-1 self-end flex-row items-center rounded-full border border-stroke-soft bg-surface-card px-3 py-1.5"
+                activeOpacity={0.8}
+              >
+                <Ionicons name="refresh-outline" size={13} color={Colors.primary} />
+                <Text className="ml-1 text-xs font-medium text-primary">Restore</Text>
+              </TouchableOpacity>
+            </View>
           );
 
         default:
           return null;
       }
     },
-    [handleContactPress]
+    [handleContactPress, handleUnarchive]
   );
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
+      <SafeAreaView className="flex-1 items-center justify-center bg-surface-page dark:bg-background-dark">
         <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+    <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
       <FlatList
         data={listData}
         keyExtractor={(item) => item.key}
@@ -263,7 +283,7 @@ export default function ConnectionsScreen() {
         contentContainerStyle={{
           paddingHorizontal: 24,
           paddingBottom: 164,
-          paddingTop: 18,
+          paddingTop: 16,
         }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -288,7 +308,7 @@ export default function ConnectionsScreen() {
           ) : undefined
         }
         ListHeaderComponent={
-          <View className="mb-5">
+          <View className="mb-4">
             <PageHeader
               title="Connections"
               subtitle={isSearching ? undefined : "Stay close to the people who matter most."}
@@ -299,21 +319,36 @@ export default function ConnectionsScreen() {
                     onPress={handleSearchPress}
                     accessibilityLabel={isSearching ? "Close search" : "Search connections"}
                     accessibilityRole="button"
-                    className="p-3.5 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
+                    className={`p-3.5 shadow-sm border rounded-full items-center justify-center ${
+                      isSearching
+                        ? "bg-sage-light border-primary/30 dark:bg-card-dark dark:border-primary/40"
+                        : "bg-surface-card border-stroke-soft dark:bg-card-dark dark:border-slate-800"
+                    }`}
                     activeOpacity={0.7}
                   >
-                    <Ionicons name={isSearching ? "close" : "search"} size={22} color="#7A879A" />
+                    <Ionicons name={isSearching ? "close" : "search"} size={22} color={Colors.textMuted} />
                   </TouchableOpacity>
                 ) : undefined
               }
             />
+            {!isSearching && counts.all > 0 && counts.archived > 0 && (
+              <View className="mb-4 flex-row gap-2">
+                <View className="flex-row items-center rounded-full border border-accent-border bg-accent-soft px-3 py-1.5">
+                  <Ionicons name="archive-outline" size={14} color={Colors.textMuted} />
+                  <Text className="ml-1.5 text-xs font-medium text-text-muted">
+                    Archived {counts.archived}
+                  </Text>
+                </View>
+              </View>
+            )}
             {isSearching && counts.all > 0 && (
               <View className="mb-5">
-                <View className="h-14 flex-row items-center bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl px-5">
+                <View className="h-14 flex-row items-center bg-surface-card dark:bg-card-dark border border-stroke-soft dark:border-slate-800 rounded-2xl px-4">
+                  <Ionicons name="search" size={18} color="#9AA3AF" />
                   <TextInput
-                    className="flex-1 h-full py-0 text-base leading-5 text-slate-900 dark:text-slate-100"
+                    className="flex-1 h-full ml-2 py-0 text-base leading-5 text-text-strong dark:text-slate-100"
                     placeholder="Search by name..."
-                    placeholderTextColor="#8A98AC"
+                    placeholderTextColor="#9AA3AF"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     autoFocus
@@ -321,6 +356,16 @@ export default function ConnectionsScreen() {
                     autoCorrect={false}
                     textAlignVertical="center"
                   />
+                  {searchQuery.length > 0 && (
+                    <TouchableOpacity
+                      onPress={() => setSearchQuery("")}
+                      accessibilityRole="button"
+                      accessibilityLabel="Clear search"
+                      className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-surface-soft"
+                    >
+                      <Ionicons name="close" size={14} color={Colors.textMuted} />
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             )}

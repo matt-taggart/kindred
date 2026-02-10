@@ -40,8 +40,8 @@ describe('RelationshipTypePicker', () => {
 
     // Selected pill should have bg-primary
     expect(familyPill.props.className).toContain('bg-primary');
-    // Unselected pill should have bg-white
-    expect(friendPill.props.className).toContain('bg-white');
+    // Unselected pill should use neutral surface styling
+    expect(friendPill.props.className).toContain('bg-surface-card');
   });
 
   it('calls onSelect with null when tapping already selected pill (deselection)', () => {
@@ -66,7 +66,7 @@ describe('RelationshipTypePicker', () => {
     const friendPill = getByTestId('relationship-pill-Friend');
 
     expect(mentorPill.props.className).toContain('bg-primary');
-    expect(otherPill.props.className).toContain('bg-white');
-    expect(friendPill.props.className).toContain('bg-white');
+    expect(otherPill.props.className).toContain('bg-surface-card');
+    expect(friendPill.props.className).toContain('bg-surface-card');
   });
 });

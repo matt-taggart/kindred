@@ -26,9 +26,9 @@ export default function TabLayout() {
             paddingTop: 16,
             backgroundColor: isDark
               ? "rgba(15, 23, 42, 0.8)"
-              : "rgba(255, 255, 255, 0.95)",
+              : "rgba(253, 251, 247, 0.96)",
             borderTopWidth: 1,
-            borderTopColor: isDark ? "#1e293b" : "#f1f5f9",
+            borderTopColor: isDark ? "#1e293b" : "#E9E3DA",
             elevation: 0,
             shadowOpacity: 0,
             position: "absolute",

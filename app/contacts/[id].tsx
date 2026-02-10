@@ -13,7 +13,7 @@ import { Body, Caption, Heading } from '@/components/ui';
 import type { Moment } from '@/components';
 import { QuiltGrid } from '@/components/ui/QuiltGrid';
 import { formatPhoneUrl } from '@/utils/phone';
-import { formatLastConnected } from '@/utils/timeFormatting';
+import { formatLastConnected, formatNextReminder, formatRhythmLabel } from '@/utils/timeFormatting';
 import Colors from '@/constants/Colors';
 
 const mapInteractionsToMoments = (interactions: Interaction[]): Moment[] => {
@@ -38,7 +38,7 @@ const mapInteractionsToMoments = (interactions: Interaction[]): Moment[] => {
     date: new Date(interaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     description: formatInteractionType(interaction.type),
     tag: interaction.kind === 'memory' ? 'Memory' : 'Connected',
-    iconBgColor: 'bg-emerald-50',
+    iconBgColor: 'bg-sage-light',
     icon: 'chatbubble-outline',
   }));
 };
@@ -187,7 +187,7 @@ export default function ContactDetailScreen() {
           ],
         );
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to save. Please try again.');
     }
   }, [contact, loadContactData]);
@@ -249,12 +249,21 @@ export default function ContactDetailScreen() {
     headerShown: false,
   }), [contact]);
   const archiveIconColor = colorScheme === 'dark' ? Colors.warningDark : Colors.warning;
+  const nextReminderLabel = contact?.nextContactDate
+    ? formatNextReminder(contact.nextContactDate)
+    : 'Not scheduled';
+  const cadenceLabel = contact ? formatRhythmLabel(contact.bucket) : '';
+  const reminderToneClassName = (
+    nextReminderLabel === 'Overdue' || nextReminderLabel === 'Today'
+  )
+    ? 'text-primary dark:text-primary'
+    : 'text-text-muted dark:text-slate-300';
 
   if (loading) {
     return (
       <>
         <Stack.Screen options={screenOptions} />
-        <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
+        <SafeAreaView className="flex-1 items-center justify-center bg-surface-page dark:bg-background-dark">
           <ActivityIndicator size="large" color={Colors.primary} />
         </SafeAreaView>
       </>
@@ -265,7 +274,7 @@ export default function ContactDetailScreen() {
     return (
       <>
         <Stack.Screen options={screenOptions} />
-        <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
+        <SafeAreaView className="flex-1 items-center justify-center bg-surface-page dark:bg-background-dark">
           <Body>Connection not found</Body>
         </SafeAreaView>
       </>
@@ -275,7 +284,7 @@ export default function ContactDetailScreen() {
   return (
     <>
       <Stack.Screen options={screenOptions} />
-      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+      <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: 48 }}
@@ -319,11 +328,33 @@ export default function ContactDetailScreen() {
           <ConnectionProfileSection
             avatarUri={contact.avatarUri}
             name={contact.name}
-            relationship={contact.relationship || 'Connection'}
+            relationship={contact.relationship || ''}
             lastConnected={formatLastConnected(contact.lastContactedAt)}
             birthday={contact.birthday}
             isFavorite={contact.relationship?.toLowerCase().includes('partner') || contact.relationship?.toLowerCase().includes('spouse')}
+            showRelationshipPill={false}
           />
+
+          <View className="mb-8 rounded-3xl border border-stroke-soft bg-surface-card p-4 shadow-soft">
+            <View className="flex-row items-start justify-between gap-4">
+              <View className="flex-1">
+                <Caption uppercase muted={false} className="tracking-wider text-text-muted/80">
+                  Reminder rhythm
+                </Caption>
+                <Body weight="medium" className="mt-1 text-text-strong dark:text-slate-100">
+                  {cadenceLabel}
+                </Body>
+              </View>
+              <View className="flex-1">
+                <Caption uppercase muted={false} className="tracking-wider text-text-muted/80">
+                  Next reminder
+                </Caption>
+                <Body weight="medium" className={`mt-1 ${reminderToneClassName}`}>
+                  {nextReminderLabel}
+                </Body>
+              </View>
+            </View>
+          </View>
 
           {/* Connect */}
           <View className="mb-8">
@@ -335,7 +366,7 @@ export default function ContactDetailScreen() {
               <QuickActionTile variant="text" onPress={handleText} />
             </QuiltGrid>
             <TouchableOpacity
-              className="mt-3 w-full rounded-2xl bg-white dark:bg-card-dark border border-slate-100 dark:border-slate-800 px-4 py-3.5 flex-row items-center shadow-soft"
+              className="mt-3 w-full rounded-2xl bg-surface-card dark:bg-card-dark border border-stroke-soft dark:border-slate-800 px-4 py-3.5 flex-row items-center shadow-soft"
               onPress={handleLogCheckIn}
               activeOpacity={0.85}
               accessibilityLabel="Mark as connected"
@@ -381,14 +412,14 @@ export default function ContactDetailScreen() {
           {/* Empty state when no moments */}
           {interactions.length === 0 && (
             <View className="mt-8">
-              <View className="items-center justify-center rounded-3xl bg-white dark:bg-card-dark border border-slate-100 dark:border-slate-800 p-8 shadow-soft">
+              <View className="items-center justify-center rounded-3xl bg-surface-card dark:bg-card-dark border border-stroke-soft dark:border-slate-800 p-8 shadow-soft">
                 <View className="w-16 h-16 rounded-full bg-sage-light dark:bg-accent-dark-sage items-center justify-center mb-4 border border-primary/10">
                   <Ionicons name="heart" size={32} color={Colors.primary} />
                 </View>
                 <Heading size={3} className="text-center mb-2">
                   No memories yet
                 </Heading>
-                <Body className="text-slate-500 dark:text-slate-400 text-center mb-6">
+                <Body className="text-text-muted dark:text-slate-400 text-center mb-6">
                   Capture a shared moment, preference, or detail to personalize future outreach.
                 </Body>
                 <TouchableOpacity

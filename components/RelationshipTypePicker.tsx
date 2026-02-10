@@ -49,12 +49,12 @@ export function RelationshipTypePicker({
               className={`px-4 py-2.5 rounded-full border ${
                 isSelected
                   ? 'bg-primary border-primary'
-                  : 'bg-white border-slate-200'
+                  : 'bg-surface-card border-stroke-soft'
               }`}
             >
               <Text
                 className={`font-body text-base ${
-                  isSelected ? 'text-white' : 'text-slate-600'
+                  isSelected ? 'text-white' : 'text-text-muted'
                 }`}
               >
                 {type}

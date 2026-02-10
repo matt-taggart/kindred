@@ -99,4 +99,15 @@ describe('ConnectionProfileSection', () => {
 
     expect(getByTestId('connection-profile-section')).toBeTruthy();
   });
+
+  it('does not render relationship pill when showRelationshipPill is false', () => {
+    const { queryByText } = render(
+      <ConnectionProfileSection
+        {...defaultProps}
+        showRelationshipPill={false}
+      />
+    );
+
+    expect(queryByText('Friend')).toBeNull();
+  });
 });

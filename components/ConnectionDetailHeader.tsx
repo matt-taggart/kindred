@@ -19,7 +19,7 @@ export function ConnectionDetailHeader({
           onPress={onBackPress}
           accessibilityLabel="Go back"
           accessibilityRole="button"
-          className="w-10 h-10 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
+          className="w-10 h-10 bg-surface-card dark:bg-card-dark shadow-sm border border-stroke-soft dark:border-slate-800 rounded-full items-center justify-center"
         >
           <Ionicons name="chevron-back" size={18} color={Colors.textSoft} />
         </TouchableOpacity>
@@ -28,7 +28,7 @@ export function ConnectionDetailHeader({
           onPress={onMorePress}
           accessibilityLabel="More options"
           accessibilityRole="button"
-          className="w-10 h-10 bg-white dark:bg-card-dark shadow-sm border border-slate-100 dark:border-slate-800 rounded-full items-center justify-center"
+          className="w-10 h-10 bg-white dark:bg-white shadow-sm border border-stroke-soft rounded-full items-center justify-center"
         >
           <Ionicons name="ellipsis-horizontal" size={18} color={Colors.textSoft} />
         </TouchableOpacity>

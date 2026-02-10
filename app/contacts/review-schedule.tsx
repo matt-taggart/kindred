@@ -293,14 +293,14 @@ export default function ReviewScheduleScreen() {
 
   if (distributedContacts.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-background-light items-center justify-center">
+      <SafeAreaView className="flex-1 bg-surface-page items-center justify-center">
         <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
+    <SafeAreaView className="flex-1 bg-surface-page">
       <View className="px-6 pt-2 pb-0">
         <PageHeader
           title="Review schedule"
@@ -309,7 +309,7 @@ export default function ReviewScheduleScreen() {
           leftElement={
             <TouchableOpacity
               onPress={() => router.back()}
-              className="h-10 w-10 items-center justify-center rounded-full bg-white border border-stone-200"
+              className="h-10 w-10 items-center justify-center rounded-full bg-surface-card border border-stroke-soft"
               activeOpacity={0.7}
             >
               <Ionicons name="chevron-back" size={20} color={Colors.brandNavy} />
@@ -341,14 +341,14 @@ export default function ReviewScheduleScreen() {
               </View>
             )}
 
-            <View className="border border-stone-200 bg-white p-5 shadow-sm mb-4" style={{ borderRadius: 16 }}>
+            <View className="border border-stroke-soft bg-surface-card p-5 shadow-sm mb-4" style={{ borderRadius: 16 }}>
               <Text className="text-xs font-semibold uppercase tracking-wider text-stone-400">
                 Schedule preview
               </Text>
-              <Text className="mt-1 text-lg font-semibold text-brand-navy">
+              <Text className="mt-1 text-lg font-semibold text-text-strong">
                 Kindred has spread out your reminders.
               </Text>
-              <Text className="mt-2 text-sm text-text-soft">
+              <Text className="mt-2 text-sm text-text-muted">
                 Your {distributedContacts.length}{" "}
                 connections have been distributed across {stats.totalDays} days.
               </Text>
@@ -367,7 +367,7 @@ export default function ReviewScheduleScreen() {
               return (
                 <View
                   key={contact.id}
-                  className="mb-2 border border-stone-200 bg-white"
+                  className="mb-2 border border-stroke-soft bg-surface-card"
                   style={{ borderRadius: 16 }}
                 >
                   <TouchableOpacity
@@ -377,10 +377,10 @@ export default function ReviewScheduleScreen() {
                   >
                     <View className="flex-row items-center justify-between">
                       <View className="flex-1">
-                        <Text className="text-base font-semibold text-brand-navy">
+                        <Text className="text-base font-semibold text-text-strong">
                           {contact.name}
                         </Text>
-                        <Text className="text-sm text-text-soft mt-0.5">
+                        <Text className="text-sm text-text-muted mt-0.5">
                           {bucketLabels[contact.bucket]}
                         </Text>
                       </View>
@@ -391,7 +391,7 @@ export default function ReviewScheduleScreen() {
                   </TouchableOpacity>
                   
                   <TouchableOpacity
-                    className="px-5 py-3 border-t border-stone-100 flex-row items-center justify-between"
+                    className="px-5 py-3 border-t border-stroke-soft flex-row items-center justify-between"
                     onPress={() => handleEdit(contact.id, "birthday")}
                     activeOpacity={0.7}
                   >
@@ -401,7 +401,7 @@ export default function ReviewScheduleScreen() {
                           <Text className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-1">
                             Birthday
                           </Text>
-                          <Text className="text-sm text-brand-navy">
+                          <Text className="text-sm text-text-strong">
                             🎂 {formatBirthdayDisplay(originalContact.birthday, { includeYear: true })}
                           </Text>
                         </View>
@@ -423,7 +423,7 @@ export default function ReviewScheduleScreen() {
         )}
       />
 
-      <View className="border-t border-stone-100 px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}>
+      <View className="border-t border-stroke-soft px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}>
         <TouchableOpacity
           className={`items-center rounded-full py-4 ${!saving ? "bg-primary" : "bg-stone-200"}`}
           onPress={handleImport}
@@ -441,7 +441,7 @@ export default function ReviewScheduleScreen() {
 
       {/* iOS Start Date Picker - Bottom Sheet */}
       {Platform.OS === "ios" && showDatePicker && editingState?.field === "startDate" && (
-        <View className="absolute bottom-0 left-0 right-0 border-t border-stone-100 bg-white px-4 pb-8 pt-4">
+        <View className="absolute bottom-0 left-0 right-0 border-t border-stroke-soft bg-surface-card px-4 pb-8 pt-4">
           <View className="mb-2 flex-row items-center justify-between">
             <TouchableOpacity
               onPress={() => {
@@ -453,7 +453,7 @@ export default function ReviewScheduleScreen() {
                 Cancel
               </Text>
             </TouchableOpacity>
-            <Text className="text-base font-bold text-brand-navy">
+            <Text className="text-base font-bold text-text-strong">
               {editingContactName
                 ? `${editingContactName}'s Start Date`
                 : "Adjust Start Date"}
@@ -479,7 +479,7 @@ export default function ReviewScheduleScreen() {
       {Platform.OS === "ios" && showDatePicker && editingState?.field === "birthday" && (
         <KeyboardAvoidingView
           behavior="padding"
-          className="absolute bottom-0 left-0 right-0 border-t border-stone-100 bg-white px-4 pb-8 pt-4"
+          className="absolute bottom-0 left-0 right-0 border-t border-stroke-soft bg-surface-card px-4 pb-8 pt-4"
         >
           <View className="mb-2 flex-row items-center justify-between">
             <TouchableOpacity
@@ -492,7 +492,7 @@ export default function ReviewScheduleScreen() {
                 Cancel
               </Text>
             </TouchableOpacity>
-            <Text className="text-base font-bold text-brand-navy">
+            <Text className="text-base font-bold text-text-strong">
               Set Birthday
             </Text>
             <TouchableOpacity onPress={handleConfirmBirthday}>
@@ -524,8 +524,8 @@ export default function ReviewScheduleScreen() {
       {/* Android Birthday Input */}
       {Platform.OS === "android" && showDatePicker && editingState?.field === "birthday" && (
         <View className="absolute bottom-0 left-0 right-0 top-0 bg-black/50 items-center justify-center p-4">
-          <View className="bg-white p-6 rounded-2xl w-full max-w-sm">
-            <Text className="text-lg font-bold text-brand-navy mb-4">Set Birthday</Text>
+          <View className="bg-surface-card p-6 rounded-2xl w-full max-w-sm border border-stroke-soft">
+            <Text className="text-lg font-bold text-text-strong mb-4">Set Birthday</Text>
             <BirthdayPicker
               value={birthdayInput}
               onChange={setBirthdayInput}

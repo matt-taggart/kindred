@@ -39,7 +39,7 @@ export function EmptyState({ icon, title, subtitle, actions = [] }: EmptyStatePr
             <TouchableOpacity
               key={action.label}
               onPress={action.onPress}
-              className="w-full bg-white dark:bg-card-dark py-4 px-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex-row items-center justify-between mb-3"
+              className="w-full bg-surface-card dark:bg-card-dark py-4 px-6 rounded-2xl shadow-sm border border-stroke-soft dark:border-gray-800 flex-row items-center justify-between mb-3"
               activeOpacity={0.85}
             >
               <View className="flex-row items-center">
@@ -48,7 +48,7 @@ export function EmptyState({ icon, title, subtitle, actions = [] }: EmptyStatePr
                 </View>
                 <Body weight="medium">{action.label}</Body>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#D1D1D6" />
+              <Ionicons name="chevron-forward" size={20} color="#B2BCC9" />
             </TouchableOpacity>
           ))}
         </View>

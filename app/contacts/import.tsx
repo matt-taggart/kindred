@@ -154,8 +154,8 @@ const ContactRow = ({
     <TouchableOpacity
       className={`mx-6 rounded-2xl p-4 flex-row items-start gap-4 ${
         selected
-          ? 'mb-3 bg-sage-50 border border-sage-200'
-          : 'mb-3 bg-white border border-stone-100'
+          ? 'mb-3 bg-sage-light border border-primary/25'
+          : 'mb-3 bg-surface-card border border-stroke-soft'
       }`}
       onPress={onToggle}
       activeOpacity={0.9}
@@ -183,19 +183,19 @@ const ContactRow = ({
       </View>
 
       <View className="flex-1">
-        <Text className="text-base font-medium text-brand-navy mb-0.5">
+        <Text className="text-base font-medium text-text-strong mb-0.5">
           {contact.name}
         </Text>
         <View className="flex-row items-center flex-wrap">
-          <Text className="text-sm text-stone-500">
+          <Text className="text-sm text-text-muted">
             {formatPhoneNumber(contact.phone)}
           </Text>
           {contact.birthday && (
             <>
-              <Text className="text-stone-300 mx-1.5">·</Text>
+              <Text className="text-text-muted/45 mx-1.5">·</Text>
               <View className="flex-row items-center gap-1">
                 <Ionicons name="calendar-outline" size={11} color={Colors.textSoft} />
-                <Text className="text-xs text-stone-500">
+                <Text className="text-xs text-text-muted">
                   {formatBirthdayDisplay(contact.birthday, { includeYear: false })}
                 </Text>
               </View>
@@ -206,9 +206,9 @@ const ContactRow = ({
         {selected && (
           <TouchableOpacity
             onPress={() => onFrequencyChange(frequency)}
-            className="mt-2 w-full flex-row items-center justify-between px-3 py-2.5 rounded-xl border border-stone-200 bg-white"
+            className="mt-2 w-full flex-row items-center justify-between px-3 py-2.5 rounded-xl border border-accent-border bg-accent-soft"
           >
-            <Text className="text-xs font-medium text-stone-500">
+            <Text className="text-xs font-medium text-text-muted">
               {bucketLabels[frequency]}
             </Text>
             <Ionicons name="chevron-down" size={12} color={Colors.primary} />
@@ -219,7 +219,7 @@ const ContactRow = ({
       <View className={selected ? 'mt-1' : ''}>
         <View
           className={`h-7 w-7 items-center justify-center rounded-full border ${
-            selected ? 'bg-primary border-primary' : 'border-stone-300'
+            selected ? 'bg-primary border-primary' : 'border-stroke-soft'
           }`}
         >
           {selected && <Ionicons name="checkmark" size={15} color="white" />}
@@ -524,7 +524,7 @@ export default function ImportContactsScreen() {
   }, [contacts, router, selected, contactFrequencies, customIntervals]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light">
+    <SafeAreaView className="flex-1 bg-surface-page">
       <View className="px-6 pt-2 pb-0">
         <PageHeader 
           title="Gather your connections" 
@@ -544,7 +544,7 @@ export default function ImportContactsScreen() {
       {loading ? (
         <View className="flex-1 items-center justify-center px-4">
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text className="mt-3 text-sm font-semibold text-text-soft">
+          <Text className="mt-3 text-sm font-semibold text-text-muted">
             Fetching contacts…
           </Text>
         </View>
@@ -566,15 +566,29 @@ export default function ImportContactsScreen() {
               <View className="px-6 pt-2 pb-3">
 
                 <TouchableOpacity
-                  className="w-full py-4 px-6 bg-sage-50 border border-stone-200 rounded-2xl flex-row items-center justify-center gap-2 mb-4 active:bg-stone-50"
+                  className="w-full py-4 px-6 bg-surface-card border border-stroke-soft rounded-2xl flex-row items-center justify-center gap-2 mb-4 active:bg-surface-soft"
                   onPress={contacts.length === 0 ? handleImportPress : handleAddMoreContacts}
                   activeOpacity={0.9}
                 >
                   <Ionicons name="person-add" size={20} color={Colors.primary} />
-                  <Text className="font-medium text-brand-navy text-base">
+                  <Text className="font-medium text-text-strong text-base">
                     Add more contacts
                   </Text>
                 </TouchableOpacity>
+
+                {contacts.length > 0 && (
+                  <View className="mb-3 flex-row items-center justify-between rounded-2xl border border-stroke-soft bg-surface-card px-4 py-3">
+                    <View className="flex-row items-center">
+                      <View className="h-7 w-7 items-center justify-center rounded-full bg-sage-light">
+                        <Ionicons name="checkmark-done-outline" size={14} color={Colors.primary} />
+                      </View>
+                      <Text className="ml-2 text-sm font-semibold text-text-strong">
+                        {selected.size} selected
+                      </Text>
+                    </View>
+                    <Text className="text-xs text-text-muted">Tap a card to toggle</Text>
+                  </View>
+                )}
 
                 {contacts.length > 0 && (
                   <View className="flex-row items-center justify-end px-2 mb-2">
@@ -583,10 +597,10 @@ export default function ImportContactsScreen() {
                     onPress={handleSelectAll}
                     activeOpacity={0.7}
                   >
-                    <Text className="font-medium text-stone-500 text-sm">Select all</Text>
+                    <Text className="font-medium text-text-muted text-sm">Select all</Text>
                     <View
                       className={`h-5 w-5 items-center justify-center rounded-full border ${
-                        selected.size === contacts.length ? 'bg-primary border-primary' : 'border-stone-300'
+                        selected.size === contacts.length ? 'bg-primary border-primary' : 'border-stroke-soft'
                       }`}
                     >
                       {selected.size === contacts.length && <Ionicons name="checkmark" size={12} color="white" />}
@@ -617,10 +631,10 @@ export default function ImportContactsScreen() {
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center px-6 py-14">
                 <Ionicons name="people-outline" size={80} color={Colors.primary} />
-                <Text className="text-2xl font-semibold text-brand-navy text-center leading-tight mb-2 mt-4 font-heading">
+                <Text className="text-2xl font-semibold text-text-strong text-center leading-tight mb-2 mt-4 font-heading">
                   {permissionDenied ? "Contacts access needed" : "Your connections will gather here"}
                 </Text>
-                <Text className="text-base text-center text-text-soft font-body max-w-[280px]">
+                <Text className="text-base text-center text-text-muted font-body max-w-[280px]">
                   {permissionDenied
                     ? "Enable contact access in Settings to import from your address book."
                     : "Tap “Add more contacts” above to choose who you’d like to bring into Kindred."}
@@ -639,10 +653,10 @@ export default function ImportContactsScreen() {
 
       <View className="absolute bottom-0 left-0 right-0">
         <View className="h-12" style={{ backgroundColor: 'transparent' }} />
-        <View className="border-t border-stone-100 px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}>
+        <View className="border-t border-stroke-soft px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}>
           <TouchableOpacity
             className={`w-full py-4 rounded-full items-center justify-center ${
-              selected.size > 0 ? 'bg-primary' : 'bg-sage-50 border border-stone-200'
+              selected.size > 0 ? 'bg-primary' : 'bg-surface-soft border border-stroke-soft'
             }`}
             style={selected.size > 0
               ? { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10, elevation: 4 }
@@ -652,7 +666,7 @@ export default function ImportContactsScreen() {
             activeOpacity={0.9}
             disabled={selected.size === 0}
           >
-            <Text className={`text-lg font-bold ${selected.size > 0 ? 'text-white' : 'text-stone-300'}`}>
+            <Text className={`text-lg font-bold ${selected.size > 0 ? 'text-white' : 'text-text-muted/50'}`}>
               Add selected ({selected.size})
             </Text>
           </TouchableOpacity>
@@ -665,7 +679,7 @@ export default function ImportContactsScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowFrequencySelector(false)}
       >
-        <SafeAreaView className="flex-1 bg-background-light">
+        <SafeAreaView className="flex-1 bg-surface-page">
           <View className="flex-1 px-6">
             <View className="items-center pt-3 pb-2">
               <View className="h-1 w-10 rounded-full bg-stone-300" />
@@ -678,11 +692,11 @@ export default function ImportContactsScreen() {
                 <Ionicons name="close" size={24} color={Colors.textSoft} />
               </TouchableOpacity>
             </View>
-            <Text className="mb-2 text-lg font-bold text-brand-navy">
+            <Text className="mb-2 text-lg font-bold text-text-strong">
               Reminder rhythm
             </Text>
             {editingContactId && (
-              <Text className="mb-4 text-base text-text-soft">
+              <Text className="mb-4 text-base text-text-muted">
                 How often would you like a gentle reminder to connect with{' '}
                 {contacts.find((c) => c.id === editingContactId)?.name}?
               </Text>
@@ -704,18 +718,18 @@ export default function ImportContactsScreen() {
                   <TouchableOpacity
                     className={`rounded-2xl border px-5 py-4 ${
                       isSelected
-                        ? 'border-primary bg-sage-50'
-                        : 'border-stone-200 bg-white'
+                        ? 'border-primary bg-sage-light'
+                        : 'border-stroke-soft bg-surface-card'
                     }`}
                     onPress={() => handleSelectFrequency(bucket)}
                     activeOpacity={0.7}
                   >
                     <View className="flex-row items-center justify-between">
                       <View className="flex-1">
-                        <Text className="text-base font-semibold text-brand-navy">
+                        <Text className="text-base font-semibold text-text-strong">
                           {bucketLabels[bucket]}
                         </Text>
-                        <Text className="mt-1 text-sm text-text-soft">
+                        <Text className="mt-1 text-sm text-text-muted">
                           {bucket === "custom"
                             ? isSelected &&
                               (derivedCustomDays ||
@@ -732,7 +746,7 @@ export default function ImportContactsScreen() {
                         className={`h-7 w-7 items-center justify-center rounded-full border ${
                           isSelected
                             ? "border-primary bg-primary"
-                            : 'border-stone-300'
+                            : 'border-stroke-soft'
                         }`}
                       >
                         {isSelected && <Ionicons name="checkmark" size={15} color="white" />}
@@ -741,32 +755,32 @@ export default function ImportContactsScreen() {
                   </TouchableOpacity>
 
                   {bucket === "custom" && isSelected && (
-                      <View className="mt-2 rounded-2xl border border-stone-200 bg-white px-5 pb-5 pt-3">
+                      <View className="mt-2 rounded-2xl border border-stroke-soft bg-surface-card px-5 pb-5 pt-3">
                         <View className="mt-2 flex-col gap-3">
                           <View>
-                            <Text className="mb-1 text-xs font-medium text-text-soft">
+                            <Text className="mb-1 text-xs font-medium text-text-muted">
                               Frequency
                             </Text>
-                            <View className="h-12 flex-row items-center rounded-xl border border-stone-200 bg-background-light px-3">
+                            <View className="h-12 flex-row items-center rounded-xl border border-stroke-soft bg-surface-page px-3">
                               <TextInput
                                 value={customValue}
                                 onChangeText={(text) =>
                                   setCustomValue(text.replace(/[^0-9]/g, ""))
                                 }
                                 keyboardType="number-pad"
-                                className="flex-1 text-base leading-5 text-brand-navy"
+                                className="flex-1 text-base leading-5 text-text-strong"
                                 placeholder="e.g., 30"
-                                placeholderTextColor="#94a3b8"
+                                placeholderTextColor="#9AA3AF"
                                 autoFocus
                                 style={{ marginTop: -2 }}
                               />
                             </View>
                           </View>
                           <View>
-                            <Text className="mb-1 text-xs font-medium text-text-soft">
+                            <Text className="mb-1 text-xs font-medium text-text-muted">
                               Unit
                             </Text>
-                            <View className="flex-row gap-1 rounded-xl bg-background-light p-1 border border-stone-200">
+                            <View className="flex-row gap-1 rounded-xl bg-surface-page p-1 border border-stroke-soft">
                               {(
                                 ["days", "weeks", "months"] as CustomUnit[]
                               ).map((unit) => (
@@ -774,7 +788,7 @@ export default function ImportContactsScreen() {
                                   key={unit}
                                   onPress={() => setCustomUnit(unit)}
                                   className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
-                                    customUnit === unit ? 'bg-white' : ''
+                                    customUnit === unit ? 'bg-surface-card' : ''
                                   }`}
                                   style={
                                     customUnit === unit
@@ -791,8 +805,8 @@ export default function ImportContactsScreen() {
                                   <Text
                                     className={`text-sm font-medium ${
                                       customUnit === unit
-                                        ? 'text-brand-navy'
-                                        : 'text-text-soft'
+                                        ? 'text-text-strong'
+                                        : 'text-text-muted'
                                     }`}
                                   >
                                     {unit.charAt(0).toUpperCase() +
@@ -827,7 +841,7 @@ export default function ImportContactsScreen() {
                 onPress={() => setShowFrequencySelector(false)}
                 activeOpacity={0.7}
               >
-                <Text className="font-semibold text-text-soft text-base">Cancel</Text>
+                <Text className="font-semibold text-text-muted text-base">Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>

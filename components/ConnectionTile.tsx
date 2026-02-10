@@ -49,10 +49,10 @@ const variantStyles = {
     iconColor: Colors.secondary,
   },
   accent: {
-    bg: 'bg-accent/40 dark:bg-accent/15',
-    border: 'border-accent/60 dark:border-accent/25',
-    iconBg: 'bg-accent/80 dark:bg-accent/25',
-    iconColor: '#d97706',
+    bg: 'bg-accent/30 dark:bg-accent/15',
+    border: 'border-accent/55 dark:border-accent/25',
+    iconBg: 'bg-accent/60 dark:bg-accent/25',
+    iconColor: '#8F6B56',
   },
 };
 
@@ -171,12 +171,12 @@ export function ConnectionTile({
 
       <View className={size === 'large' ? 'mt-4' : 'mt-3'}>
         <View className="flex-row items-center gap-1">
-          <Heading size={nameSize} className="text-brand-navy dark:text-slate-100">
+          <Heading size={nameSize} className="text-text-strong dark:text-slate-100">
             {contact.name}
           </Heading>
           {isBirthday && <Body>🎂</Body>}
         </View>
-        <Body size="sm" className="mt-1 text-slate-700 dark:text-slate-300">
+        <Body size="sm" className="mt-1 text-text-muted dark:text-slate-300">
           {statusText}
         </Body>
       </View>

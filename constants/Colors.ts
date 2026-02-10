@@ -1,6 +1,16 @@
 const primary = '#9DBEBB';
 const secondary = '#F4ACB7';
+const accent = '#FFE5D9';
 const brandNavy = '#2D3648';
+const surfacePage = '#FDFBF7';
+const surfaceCard = '#FFFFFF';
+const surfaceSoft = '#F7F3EC';
+const strokeSoft = '#E9E3DA';
+const textStrong = '#2D3648';
+const textMuted = '#5C635C';
+const accentSoft = '#FFF1EA';
+const accentBorder = '#F7D4C2';
+const infoMist = '#C7DCE8';
 
 // New design system colors
 const sageLight = '#E8EFEA';
@@ -27,8 +37,17 @@ export default {
   // Expose raw colors for non-Tailwind usage
   primary,
   secondary,
-  accent: '#FFE5D9',
+  accent,
   brandNavy,
+  surfacePage,
+  surfaceCard,
+  surfaceSoft,
+  strokeSoft,
+  textStrong,
+  textMuted,
+  accentSoft,
+  accentBorder,
+  infoMist,
   sageLight,
   offWhite,
   textSoft,

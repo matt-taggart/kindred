@@ -147,8 +147,8 @@ export default function AddConnectionRhythmScreen() {
             return (
               <View key={option.label}>
                 <TouchableOpacity
-                  className={`bg-white rounded-2xl border p-4 pl-6 ${
-                    active ? "border-primary bg-primary/5" : "border-slate-100"
+                  className={`bg-surface-card rounded-2xl border p-4 pl-6 ${
+                    active ? "border-primary bg-primary/5" : "border-stroke-soft"
                   }`}
                   onPress={() => {
                     setSelected(option);
@@ -161,10 +161,10 @@ export default function AddConnectionRhythmScreen() {
                 >
                   <View className="flex-row items-center justify-between">
                     <View className="flex-1">
-                      <Text className="text-lg font-semibold text-slate-800">
+                      <Text className="text-lg font-semibold text-text-strong">
                         {option.label}
                       </Text>
-                      <Text className="text-sm text-slate-500 mt-1">
+                      <Text className="text-sm text-text-muted mt-1">
                         {option.value === "custom" && derivedCustomDays
                           ? formatCustomSummary(derivedCustomDays)
                           : option.description}
@@ -181,13 +181,13 @@ export default function AddConnectionRhythmScreen() {
                 </TouchableOpacity>
 
                 {option.value === "custom" && isCustom && (
-                  <View className="bg-slate-50 rounded-xl p-4 mt-2">
+                  <View className="bg-surface-soft rounded-xl p-4 mt-2 border border-stroke-soft">
                     <View className="flex-col gap-3">
                       <View>
-                        <Text className="text-xs font-medium text-slate-500 mb-1">
+                        <Text className="text-xs font-medium text-text-muted mb-1">
                           Frequency
                         </Text>
-                        <View className="h-12 flex-row items-center rounded-xl border border-slate-200 bg-white px-3">
+                        <View className="h-12 flex-row items-center rounded-xl border border-stroke-soft bg-surface-card px-3">
                           <TextInput
                             value={customValue}
                             onChangeText={(text) =>
@@ -197,18 +197,18 @@ export default function AddConnectionRhythmScreen() {
                               })
                             }
                             keyboardType="number-pad"
-                            className="flex-1 text-base leading-5 text-slate-800"
+                            className="flex-1 text-base leading-5 text-text-strong"
                             placeholder="e.g., 30"
-                            placeholderTextColor="#94a3b8"
+                            placeholderTextColor="#9AA3AF"
                             style={{ marginTop: -2 }}
                           />
                         </View>
                       </View>
                       <View>
-                        <Text className="text-xs font-medium text-slate-500 mb-1">
+                        <Text className="text-xs font-medium text-text-muted mb-1">
                           Unit
                         </Text>
-                        <View className="flex-row gap-1 bg-white border border-slate-200 p-1 rounded-xl">
+                        <View className="flex-row gap-1 bg-surface-card border border-stroke-soft p-1 rounded-xl">
                           {(["days", "weeks", "months"] as CustomUnit[]).map(
                             (unit) => (
                               <TouchableOpacity
@@ -220,7 +220,7 @@ export default function AddConnectionRhythmScreen() {
                                   })
                                 }
                                 className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
-                                  customUnit === unit ? "bg-slate-100" : ""
+                                  customUnit === unit ? "bg-surface-soft" : ""
                                 }`}
                                 style={
                                   customUnit === unit
@@ -237,8 +237,8 @@ export default function AddConnectionRhythmScreen() {
                                 <Text
                                   className={`text-sm font-medium ${
                                     customUnit === unit
-                                      ? "text-slate-800"
-                                      : "text-slate-500"
+                                      ? "text-text-strong"
+                                      : "text-text-muted"
                                   }`}
                                 >
                                   {unit.charAt(0).toUpperCase() + unit.slice(1)}
@@ -257,7 +257,7 @@ export default function AddConnectionRhythmScreen() {
                     )}
 
                     {isCustomValid && derivedCustomDays && (
-                      <Text className="mt-3 text-sm text-slate-500">
+                      <Text className="mt-3 text-sm text-text-muted">
                         {"We'll remind you "}
                         <Text className="font-semibold text-primary">
                           {formatCustomSummary(derivedCustomDays)}

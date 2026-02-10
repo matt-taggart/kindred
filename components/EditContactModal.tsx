@@ -219,7 +219,7 @@ export default function EditContactModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+      <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
         <View className="flex-1 px-6 pb-4">
           <View className="py-4 flex-row items-center justify-between">
             <Pressable
@@ -234,7 +234,7 @@ export default function EditContactModal({
             <Heading
               size={3}
               weight="semibold"
-              className="text-brand-navy dark:text-white"
+              className="text-text-strong dark:text-white"
             >
               Connection settings
             </Heading>
@@ -248,11 +248,11 @@ export default function EditContactModal({
             <Heading
               size={2}
               weight="medium"
-              className="mb-1 text-brand-navy dark:text-white"
+              className="mb-1 text-text-strong dark:text-white"
             >
               {contact.name}
             </Heading>
-            <Body className="italic text-slate-600 dark:text-slate-300">
+            <Body className="italic text-text-muted dark:text-slate-300">
               Every relationship has its own rhythm.
             </Body>
           </View>
@@ -265,8 +265,8 @@ export default function EditContactModal({
             <View
               className={`p-4 rounded-3xl border mb-6 ${
                 isBirthdayExpanded
-                  ? "bg-card-light dark:bg-card-dark border-primary"
-                  : "bg-card-light dark:bg-card-dark border-slate-200 dark:border-slate-700"
+                  ? "bg-surface-card dark:bg-card-dark border-primary"
+                  : "bg-surface-card dark:bg-card-dark border-stroke-soft dark:border-slate-700"
               }`}
             >
               <View className="flex-row items-start justify-between mb-1">
@@ -282,7 +282,7 @@ export default function EditContactModal({
                     <Body
                       size="lg"
                       weight="medium"
-                      className="text-slate-800 dark:text-white"
+                      className="text-text-strong dark:text-white"
                     >
                       Birthday
                     </Body>
@@ -298,7 +298,7 @@ export default function EditContactModal({
                     <Body
                       size="sm"
                       weight="medium"
-                      className="text-slate-600 dark:text-slate-300"
+                      className="text-text-muted dark:text-slate-300"
                     >
                       Cancel
                     </Body>
@@ -322,7 +322,7 @@ export default function EditContactModal({
                     <BirthdayPicker value={birthday} onChange={setBirthday} />
                   </View>
                   <Caption
-                    className="mt-3 text-center text-slate-600 dark:text-slate-300"
+                    className="mt-3 text-center text-text-muted dark:text-slate-300"
                     muted={false}
                   >
                     {
@@ -347,7 +347,7 @@ export default function EditContactModal({
                   accessibilityLabel="Add birthday"
                   className="py-2 items-center"
                 >
-                  <View className="flex-row items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+                  <View className="flex-row items-center gap-2 bg-accent-soft border border-accent-border px-4 py-2 rounded-full">
                     <Ionicons name="add" size={18} color={Colors.primary} />
                     <Body size="sm" weight="medium" className="text-primary">
                       Add Birthday
@@ -379,8 +379,8 @@ export default function EditContactModal({
                       accessibilityState={{ selected: isSelected }}
                       className={`p-5 rounded-3xl border ${
                         isSelected
-                          ? "border-primary bg-card-light dark:bg-card-dark"
-                          : "border-slate-200 dark:border-slate-700 bg-card-light dark:bg-card-dark"
+                          ? "border-primary bg-surface-card dark:bg-card-dark"
+                          : "border-stroke-soft dark:border-slate-700 bg-surface-card dark:bg-card-dark"
                       } ${isCustomSelected ? "rounded-b-none" : ""}`}
                       style={({ pressed }) =>
                         pressed
@@ -405,13 +405,13 @@ export default function EditContactModal({
                           <Body
                             size="lg"
                             weight="medium"
-                            className="text-slate-800 dark:text-white"
+                            className="text-text-strong dark:text-white"
                           >
                             {bucketLabels[bucket]}
                           </Body>
                           <Body
                             size="sm"
-                            className="text-slate-600 dark:text-slate-300 mt-1"
+                            className="text-text-muted dark:text-slate-300 mt-1"
                           >
                             {bucket === "custom"
                               ? formatCustomSummary(
@@ -437,17 +437,17 @@ export default function EditContactModal({
                     </Pressable>
 
                     {isCustomSelected ? (
-                      <View className="bg-slate-50 dark:bg-slate-800 rounded-b-3xl border-2 border-t-0 border-primary px-5 pb-5 pt-3">
+                      <View className="bg-surface-soft dark:bg-slate-800 rounded-b-3xl border-2 border-t-0 border-primary px-5 pb-5 pt-3">
                         <View className="h-px bg-slate-200 dark:bg-slate-700 mb-3" />
                         <View className="gap-4">
                           <View>
                             <Caption
                               muted={false}
-                              className="text-slate-600 dark:text-slate-300 mb-2"
+                              className="text-text-muted dark:text-slate-300 mb-2"
                             >
                               Frequency
                             </Caption>
-                            <View className="h-12 flex-row items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3">
+                            <View className="h-12 flex-row items-center rounded-xl border border-stroke-soft dark:border-slate-700 bg-surface-card dark:bg-slate-900 px-3">
                               <TextInput
                                 testID="custom-frequency-input"
                                 value={customValue}
@@ -458,9 +458,9 @@ export default function EditContactModal({
                                   })
                                 }
                                 keyboardType="number-pad"
-                                className="flex-1 h-full py-0 text-base leading-5 text-slate-800 dark:text-white"
+                                className="flex-1 h-full py-0 text-base leading-5 text-text-strong dark:text-white"
                                 placeholder="e.g., 30"
-                                placeholderTextColor="#94a3b8"
+                                placeholderTextColor="#9AA3AF"
                                 textAlignVertical="center"
                                 accessibilityLabel="Custom rhythm frequency"
                               />
@@ -470,11 +470,11 @@ export default function EditContactModal({
                           <View>
                             <Caption
                               muted={false}
-                              className="text-slate-600 dark:text-slate-300 mb-2"
+                              className="text-text-muted dark:text-slate-300 mb-2"
                             >
                               Unit
                             </Caption>
-                            <View className="flex-row gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-1.5 rounded-lg">
+                            <View className="flex-row gap-1 bg-surface-card dark:bg-slate-900 border border-stroke-soft dark:border-slate-700 p-1.5 rounded-lg">
                               {(
                                 ["days", "weeks", "months"] as CustomUnit[]
                               ).map((unit) => (
@@ -502,8 +502,8 @@ export default function EditContactModal({
                                     weight="medium"
                                     className={
                                       customUnit === unit
-                                        ? "text-slate-800 dark:text-white"
-                                        : "text-slate-600 dark:text-slate-300"
+                                        ? "text-text-strong dark:text-white"
+                                        : "text-text-muted dark:text-slate-300"
                                     }
                                   >
                                     {unit.charAt(0).toUpperCase() +
@@ -528,7 +528,7 @@ export default function EditContactModal({
                         {isCustomValid && derivedCustomDays ? (
                           <Body
                             size="sm"
-                            className="mt-4 text-slate-600 dark:text-slate-300"
+                            className="mt-4 text-text-muted dark:text-slate-300"
                           >
                             {"We'll remind you "}
                             <Text className="font-semibold text-primary">
@@ -545,7 +545,7 @@ export default function EditContactModal({
             </View>
           </ScrollView>
 
-          <View className="mt-0 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <View className="mt-0 pt-4 border-t border-stroke-soft dark:border-slate-800">
             <Pressable
               testID="save-changes-button"
               onPress={handleSave}

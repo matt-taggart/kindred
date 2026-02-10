@@ -3,11 +3,12 @@ import { and, asc, count, desc, eq, gte, isNull, or } from 'drizzle-orm';
 import { getDb } from '../db/client';
 import { Contact, Interaction, NewContact, NewInteraction, contacts, interactions } from '../db/schema';
 import { useUserStore } from '../lib/userStore';
-import { getNextContactDate } from '../utils/scheduler';
-import { scheduleReminder } from './notificationService';
+import { DAY_IN_MS, bucketOffsets, getNextContactDate } from '../utils/scheduler';
+import { cancelContactReminder, scheduleReminder } from './notificationService';
 
 export const CONTACT_LIMIT = 5;
 export const RECENTLY_CONNECTED_DAYS = 14;
+const SNOOZE_CADENCE_MERGE_WINDOW_MS = DAY_IN_MS;
 
 export class LimitReachedError extends Error {
   constructor(message = 'Contact limit reached') {
@@ -63,6 +64,67 @@ const normalizeCustomInterval = (bucket: Contact['bucket'], customIntervalDays?:
   return customIntervalDays;
 };
 
+const getCadenceIntervalMs = (contact: Contact): number | null => {
+  if (contact.bucket === 'custom') {
+    if (!contact.customIntervalDays || contact.customIntervalDays < 1) {
+      return null;
+    }
+    return contact.customIntervalDays * DAY_IN_MS;
+  }
+
+  const days = bucketOffsets[contact.bucket];
+  if (!days) return null;
+  return days * DAY_IN_MS;
+};
+
+const getFirstCadenceDateOnOrAfter = (
+  baseDateMs: number,
+  targetDateMs: number,
+  intervalMs: number,
+): number => {
+  if (targetDateMs <= baseDateMs) {
+    return baseDateMs;
+  }
+
+  const elapsed = targetDateMs - baseDateMs;
+  const intervals = Math.ceil(elapsed / intervalMs);
+  return baseDateMs + intervals * intervalMs;
+};
+
+const resolveSnoozedNextContactDate = (
+  contact: Contact,
+  requestedUntilDate: number,
+  nowMs: number = Date.now(),
+): number => {
+  let resolvedDate = requestedUntilDate;
+
+  // Snooze should never pull a reminder earlier than an already-scheduled future reminder.
+  if (typeof contact.nextContactDate === 'number' && contact.nextContactDate > nowMs) {
+    resolvedDate = Math.max(resolvedDate, contact.nextContactDate);
+  }
+
+  if (typeof contact.nextContactDate !== 'number') {
+    return resolvedDate;
+  }
+
+  const intervalMs = getCadenceIntervalMs(contact);
+  if (!intervalMs) {
+    return resolvedDate;
+  }
+
+  const cadenceDate = getFirstCadenceDateOnOrAfter(
+    contact.nextContactDate,
+    resolvedDate,
+    intervalMs,
+  );
+
+  if (cadenceDate - resolvedDate <= SNOOZE_CADENCE_MERGE_WINDOW_MS) {
+    return cadenceDate;
+  }
+
+  return resolvedDate;
+};
+
 export const addContact = async (contact: InsertableContact): Promise<Contact> => {
   const db = getDb();
   const isPro = useUserStore.getState().isPro;
@@ -106,6 +168,12 @@ export const addContact = async (contact: InsertableContact): Promise<Contact> =
 
   if (!inserted) {
     throw new Error('Failed to insert contact');
+  }
+
+  try {
+    await scheduleReminder(inserted);
+  } catch (error) {
+    console.warn('Failed to schedule reminder', error);
   }
 
   return inserted;
@@ -261,6 +329,12 @@ export const archiveContact = async (contactId: Contact['id']): Promise<Contact>
     throw new Error('Failed to archive contact');
   }
 
+  try {
+    await cancelContactReminder(contactId);
+  } catch (error) {
+    console.warn('Failed to cancel reminder', error);
+  }
+
   return updated;
 };
 
@@ -292,6 +366,12 @@ export const unarchiveContact = async (contactId: Contact['id']): Promise<Contac
 
   if (!updated) {
     throw new Error('Failed to unarchive contact');
+  }
+
+  try {
+    await scheduleReminder(updated);
+  } catch (error) {
+    console.warn('Failed to schedule reminder', error);
   }
 
   return updated;
@@ -427,8 +507,10 @@ export const snoozeContact = async (
     throw new Error(`Contact not found: ${contactId}`);
   }
 
+  const resolvedUntilDate = resolveSnoozedNextContactDate(contact, untilDate);
+
   db.update(contacts)
-    .set({ nextContactDate: untilDate })
+    .set({ nextContactDate: resolvedUntilDate })
     .where(eq(contacts.id, contactId))
     .run();
 

@@ -10,6 +10,10 @@ jest.mock('../../lib/userStore', () => ({
   },
 }));
 
+jest.mock('../notificationService', () => ({
+  scheduleReminder: jest.fn().mockResolvedValue(undefined),
+}));
+
 import { getDb } from '../../db/client';
 import { addContact } from '../contactService';
 

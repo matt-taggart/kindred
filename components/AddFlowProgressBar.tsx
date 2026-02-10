@@ -30,7 +30,7 @@ export function AddFlowProgressBar({
             key={stepNumber}
             testID="progress-segment"
             className={`flex-1 h-1.5 rounded-full ${
-              isFilled ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'
+              isFilled ? 'bg-primary' : 'bg-stroke-soft dark:bg-slate-700'
             }`}
           />
         );

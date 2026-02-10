@@ -23,16 +23,18 @@ export function MomentCard({
   isResting = false,
   onPress,
 }: MomentCardProps) {
+  const iconColor = isUrgent ? '#8F6B56' : Colors.primary;
+
   // Build style variants
-  const cardBg = isResting ? 'bg-slate-50/50 dark:bg-slate-800/20' : 'bg-white dark:bg-slate-900/50';
+  const cardBg = isResting ? 'bg-surface-soft dark:bg-slate-800/20' : 'bg-surface-card dark:bg-slate-900/50';
   const borderStyle = isResting
-    ? 'border-dashed border-slate-200 dark:border-slate-800'
-    : 'border-slate-100 dark:border-slate-800/50';
+    ? 'border-dashed border-stroke-soft dark:border-slate-800'
+    : 'border-stroke-soft dark:border-slate-800/50';
 
   const avatarBg = isResting
     ? 'bg-slate-100 dark:bg-slate-800'
-    : isUrgent
-      ? 'bg-secondary/20'
+      : isUrgent
+        ? 'bg-accent-soft border border-accent-border'
       : 'bg-primary/20';
 
   // Build accessibility hint for testing
@@ -50,32 +52,32 @@ export function MomentCard({
     >
       <View className="flex-row items-center gap-4">
         <View className={`w-12 h-12 rounded-2xl ${avatarBg} items-center justify-center`}>
-          <Ionicons testID="moment-avatar-icon" name={avatarIcon} size={20} color={Colors.primary} style={isResting ? { opacity: 0.5 } : undefined} />
+          <Ionicons testID="moment-avatar-icon" name={avatarIcon} size={20} color={iconColor} style={isResting ? { opacity: 0.5 } : undefined} />
         </View>
         <View>
-          <Text className="font-bold text-base text-slate-800 dark:text-slate-100 font-display">
+          <Text className="font-bold text-base text-text-strong dark:text-slate-100 font-display">
             {contact.name}
           </Text>
-          <Text className="text-xs opacity-50 font-body">{rhythmLabel}</Text>
+          <Text className="text-xs text-text-muted/80 font-body">{rhythmLabel}</Text>
         </View>
       </View>
 
       <View className="items-end">
         {isUrgent ? (
-          <View className="bg-secondary/10 px-2 py-1 rounded-full">
-            <Text className="text-[10px] font-bold uppercase text-secondary tracking-tight">
+          <View className="bg-accent-soft border border-accent-border px-2 py-1 rounded-full">
+            <Text className="text-[10px] font-bold uppercase text-text-strong tracking-[0.7px]">
               {timeLabel}
             </Text>
           </View>
         ) : isResting ? (
           <View className="flex-col items-end">
-            <Text className="text-[10px] font-bold uppercase text-slate-400 tracking-tight mb-1">
+            <Text className="text-[10px] font-bold uppercase text-text-muted/75 tracking-tight mb-1">
               {timeLabel}
             </Text>
-            <View className="w-8 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
+            <View className="w-8 h-1 bg-stroke-soft dark:bg-slate-700 rounded-full" />
           </View>
         ) : (
-          <Text className="text-[10px] font-bold uppercase text-slate-400 tracking-tight">
+          <Text className="text-[10px] font-bold uppercase text-text-muted/75 tracking-tight">
             {timeLabel}
           </Text>
         )}

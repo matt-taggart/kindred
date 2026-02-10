@@ -33,16 +33,16 @@ export default function AddConnectionNameScreen() {
         showBackButton
       >
         {/* Name Input */}
-        <Text className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-2">
+        <Text className="text-xs font-medium uppercase tracking-wider text-text-muted mb-2">
           Name
         </Text>
-        <View className="bg-white rounded-2xl border border-slate-100 px-4 py-4">
+        <View className="bg-surface-card rounded-2xl border border-stroke-soft px-4 py-4">
           <TextInput
             value={name}
             onChangeText={setName}
             placeholder="Type a name..."
-            placeholderTextColor="#94a3b8"
-            className="text-xl text-slate-800 leading-6 pt-0 pb-0"
+            placeholderTextColor="#9AA3AF"
+            className="text-xl text-text-strong leading-6 pt-0 pb-0"
             autoCapitalize="words"
             returnKeyType="done"
           />
@@ -52,7 +52,7 @@ export default function AddConnectionNameScreen() {
         <View className="mb-8" />
 
         {/* Relationship Picker */}
-        <Text className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-2">
+        <Text className="text-xs font-medium uppercase tracking-wider text-text-muted mb-2">
           Relationship
         </Text>
         <RelationshipTypePicker

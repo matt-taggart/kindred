@@ -7,8 +7,8 @@ type MomentSectionDividerProps = {
 };
 
 export function MomentSectionDivider({ title, highlighted = false }: MomentSectionDividerProps) {
-  const lineColor = highlighted ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800';
-  const textColor = highlighted ? 'text-primary' : 'text-slate-400';
+  const lineColor = highlighted ? 'bg-primary/25' : 'bg-stroke-soft dark:bg-slate-800';
+  const textColor = highlighted ? 'text-primary' : 'text-text-muted';
 
   return (
     <View

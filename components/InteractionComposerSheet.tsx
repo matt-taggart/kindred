@@ -119,7 +119,7 @@ export default function InteractionComposerSheet({
         <View className="flex-1 justify-end">
           <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
             <Pressable
-              className="bg-background-light dark:bg-background-dark rounded-t-[40px] px-6 pb-12 pt-8"
+              className="bg-surface-page dark:bg-background-dark rounded-t-[40px] px-6 pb-12 pt-8"
               onPress={(event) => event.stopPropagation?.()}
             >
               <View className="mb-6 h-1.5 w-12 self-center rounded-full bg-slate-200 dark:bg-slate-800" />
@@ -134,24 +134,24 @@ export default function InteractionComposerSheet({
                 <TouchableOpacity
                   onPress={handleSubmit}
                   activeOpacity={0.85}
-                  className="px-4 py-1.5 rounded-full bg-sage-light dark:bg-accent-dark-sage"
+                  className="px-4 py-1.5 rounded-full bg-sage-light border border-primary/20 dark:bg-accent-dark-sage"
                 >
                   <Text className="font-medium text-primary">Save</Text>
                 </TouchableOpacity>
               </View>
 
-              <Text className="text-2xl font-light text-center text-slate-900 dark:text-white mb-4">
+              <Text className="text-2xl font-light text-center text-text-strong dark:text-white mb-4">
                 {title}
               </Text>
 
               {helperText ? (
-                <Text className="text-xs text-center text-slate-500 dark:text-slate-400 mb-6">
+                <Text className="text-xs text-center text-text-muted dark:text-slate-400 mb-6">
                   {helperText}
                 </Text>
               ) : null}
 
               <View className="mb-8">
-                <Text className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-6 text-center">
+                <Text className="text-xs uppercase tracking-widest text-text-muted/70 dark:text-slate-500 mb-6 text-center">
                   How did you connect?
                 </Text>
                 <View className="flex-row justify-between items-start">
@@ -178,7 +178,7 @@ export default function InteractionComposerSheet({
                           className={`text-sm ${
                             isSelected
                               ? 'font-semibold text-primary'
-                              : 'font-medium text-slate-500 dark:text-slate-400'
+                              : 'font-medium text-text-muted dark:text-slate-400'
                           }`}
                         >
                           {config.label}
@@ -190,21 +190,21 @@ export default function InteractionComposerSheet({
               </View>
 
               <View className="mb-4">
-                <Text className="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4 text-center">
+                <Text className="text-xs uppercase tracking-widest text-text-muted/70 dark:text-slate-500 mb-4 text-center">
                   Anything to remember?
                 </Text>
 
                 <View
                   className="min-h-[150px] border-2 border-dashed rounded-3xl p-4"
-                  style={{ borderColor: 'rgba(125, 157, 122, 0.3)' }}
+                  style={{ borderColor: 'rgba(247, 212, 194, 0.8)' }}
                 >
                   <TextInput
-                    className="bg-transparent text-lg leading-relaxed text-slate-700 dark:text-slate-300 p-0"
+                    className="bg-transparent text-lg leading-relaxed text-text-muted dark:text-slate-300 p-0"
                     multiline
                     placeholder={kind === 'checkin' ? 'How did it go?' : 'Capture a memory...'}
                     value={note}
                     onChangeText={setNote}
-                    placeholderTextColor="#D1D5DB"
+                    placeholderTextColor="#B2BCC9"
                     textAlignVertical="top"
                     style={{ minHeight: 120 }}
                     inputAccessoryViewID={Platform.OS === 'ios' ? NOTE_ACCESSORY_ID : undefined}

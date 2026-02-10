@@ -17,25 +17,25 @@ export function TextInput({
   const [isFocused, setIsFocused] = useState(false);
 
   const inputClasses = [
-    'bg-slate-50 dark:bg-slate-800/50',
-    'rounded-2xl py-5 px-6',
+    'bg-surface-card dark:bg-slate-800/50',
+    'rounded-2xl py-5 px-6 border',
     'text-xl font-medium',
-    'text-slate-900 dark:text-slate-100',
-    isFocused && !error && 'ring-2 ring-primary',
-    error && 'ring-2 ring-red-500',
+    'text-text-strong dark:text-slate-100',
+    isFocused && !error ? 'border-primary' : 'border-stroke-soft dark:border-slate-700',
+    error && 'border-red-500',
     className,
   ].filter(Boolean).join(' ');
 
   return (
     <View className={containerClassName}>
       {label && (
-        <Text className="text-sm font-medium text-slate-400 uppercase tracking-widest ml-1 mb-4">
+        <Text className="text-sm font-medium text-text-muted uppercase tracking-widest ml-1 mb-4">
           {label}
         </Text>
       )}
       <RNTextInput
         className={inputClasses}
-        placeholderTextColor="#cbd5e1"
+        placeholderTextColor="#9AA3AF"
         onFocus={(e) => {
           setIsFocused(true);
           props.onFocus?.(e);

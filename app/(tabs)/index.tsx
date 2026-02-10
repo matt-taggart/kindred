@@ -32,8 +32,7 @@ import InteractionComposerSheet, {
   InteractionKind,
 } from "@/components/InteractionComposerSheet";
 import { ConnectionQuickActionsSheet } from "@/components/ConnectionQuickActionsSheet";
-import { QuiltGrid } from "@/components/ui";
-import { Heading, Body } from "@/components/ui";
+import { QuiltGrid, Heading, Body } from "@/components/ui";
 import { getTileSize } from "@/utils/tileVariant";
 
 const GENERIC_DEVICE_NAME_TOKENS = new Set([
@@ -152,14 +151,6 @@ export default function HomeScreen() {
     [router],
   );
 
-  const handleAddConnection = useCallback(() => {
-    router.push("/contacts/add");
-  }, [router]);
-
-  const handleSeeAll = useCallback(() => {
-    router.push("/(tabs)/two");
-  }, [router]);
-
   const handleAvatarPress = useCallback(() => {
     router.push("/settings");
   }, [router]);
@@ -194,7 +185,7 @@ export default function HomeScreen() {
         setShowQuickActions(false);
         setSelectedContact(null);
         loadContacts();
-      } catch (error) {
+      } catch {
         Alert.alert("Error", "Unable to snooze this connection right now.");
       }
     },
@@ -253,9 +244,26 @@ export default function HomeScreen() {
   const greetingName = userFirstName ?? "friend";
   const isNarrowLayout = width < 390;
 
+  const renderHeaderRight = () => (
+    <View className="flex-row items-center">
+      <TouchableOpacity
+        onPress={handleAvatarPress}
+        className="relative"
+        accessibilityRole="button"
+        accessibilityLabel="Open preferences"
+      >
+        <View className="w-12 h-12 rounded-full overflow-hidden border border-stroke-soft bg-surface-card shadow-soft">
+          <View className="w-full h-full bg-primary items-center justify-center">
+            <Ionicons name="person" size={24} color="white" />
+          </View>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
+      <SafeAreaView className="flex-1 items-center justify-center bg-surface-page dark:bg-background-dark">
         <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
@@ -263,24 +271,13 @@ export default function HomeScreen() {
 
   if (totalContactCount === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+      <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
         <View className="flex-1 px-6 pt-14">
           <PageHeader
             title="Kindred"
             subtitle={`${greeting}, ${greetingName}.`}
             showBranding={false}
-            rightElement={
-              <TouchableOpacity
-                onPress={handleAvatarPress}
-                className="relative"
-              >
-                <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
-                  <View className="w-full h-full bg-primary items-center justify-center">
-                    <Ionicons name="person" size={24} color="white" />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            }
+            rightElement={renderHeaderRight()}
           />
           <EmptyContactsState />
         </View>
@@ -293,27 +290,16 @@ export default function HomeScreen() {
   if (!hasContacts) {
     return (
       <>
-        <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+        <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
           <View className="flex-1 px-6 pt-14">
             <PageHeader
               title="Kindred"
               subtitle={`${greeting}, ${greetingName}`}
               showBranding={false}
-              rightElement={
-                <TouchableOpacity
-                  onPress={handleAvatarPress}
-                  className="relative"
-                >
-                  <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
-                    <View className="w-full h-full bg-primary items-center justify-center">
-                      <Ionicons name="person" size={24} color="white" />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              }
+              rightElement={renderHeaderRight()}
             />
 
-            <View className="flex-1 justify-center pb-24">
+            <View className="flex-1 justify-center pb-20">
               <CelebrationStatus completionCount={completionCount} />
             </View>
           </View>
@@ -338,12 +324,12 @@ export default function HomeScreen() {
 
   return (
     <>
-      <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+      <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
             paddingHorizontal: 24,
-            paddingTop: 28,
+            paddingTop: 16,
             paddingBottom: 140,
           }}
           refreshControl={
@@ -355,32 +341,18 @@ export default function HomeScreen() {
             title="Kindred"
             subtitle={`${greeting}, ${greetingName}`}
             showBranding={false}
-            rightElement={
-              <TouchableOpacity
-                onPress={handleAvatarPress}
-                className="relative"
-              >
-                <View className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-soft">
-                  <View className="w-full h-full bg-primary items-center justify-center">
-                    <Ionicons name="person" size={24} color="white" />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            }
+            rightElement={renderHeaderRight()}
           />
 
           {/* Connections Section */}
-          <View className="mt-5 mb-6">
+          <View className="mt-4 mb-6">
             <View className="flex-row justify-between items-end mb-4">
               <View>
-                <Heading size={2}>Today's connections</Heading>
-                <Body size="sm" className="text-text-soft dark:text-slate-400">
+                <Heading size={2}>Today&apos;s connections</Heading>
+                <Body size="sm" className="text-text-muted dark:text-slate-400">
                   Nurture your circle.
                 </Body>
               </View>
-              <Body size="sm" className="text-primary" onPress={handleSeeAll}>
-                See all
-              </Body>
             </View>
 
             <QuiltGrid columns={isNarrowLayout ? 1 : 2}>

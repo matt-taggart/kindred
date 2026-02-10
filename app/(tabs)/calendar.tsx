@@ -125,14 +125,14 @@ export default function CalendarScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
+      <SafeAreaView className="flex-1 items-center justify-center bg-surface-page dark:bg-background-dark">
         <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+    <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -152,7 +152,7 @@ export default function CalendarScreen() {
         />
 
         {/* Month Grid */}
-        <View className="mb-6 rounded-3xl overflow-hidden bg-white dark:bg-card-dark border border-slate-100 dark:border-slate-800 shadow-soft">
+        <View className="mb-6 rounded-3xl overflow-hidden bg-surface-card dark:bg-card-dark border border-stroke-soft dark:border-slate-800 shadow-soft">
           <Calendar
             markingType="multi-dot"
             markedDates={markedDates}
@@ -183,9 +183,18 @@ export default function CalendarScreen() {
 
         {/* Agenda Section */}
         <View>
-          <View className="mb-4">
-            <Heading size={3}>{formatSelectedDate(selectedDate)}</Heading>
-            {selectedDate === todayKey && <Caption muted>Today</Caption>}
+          <View className="mb-4 flex-row items-end justify-between">
+            <View>
+              <Heading size={3}>{formatSelectedDate(selectedDate)}</Heading>
+              {selectedDate === todayKey && <Caption muted>Today</Caption>}
+            </View>
+            {agendaContacts.length > 0 && (
+              <View className="rounded-full border border-stroke-soft bg-surface-card px-3 py-1.5">
+                <Caption muted={false} className="text-text-muted">
+                  {agendaContacts.length} planned
+                </Caption>
+              </View>
+            )}
           </View>
 
           {agendaContacts.length === 0 ? (
@@ -206,16 +215,20 @@ export default function CalendarScreen() {
                   key={contact.id}
                   onPress={() => handleContactPress(contact.id)}
                   activeOpacity={0.7}
-                  className="bg-white dark:bg-card-dark p-4 rounded-3xl flex-row items-center justify-between border border-slate-100 dark:border-slate-800 shadow-soft"
+                  className="bg-surface-card dark:bg-card-dark p-4 rounded-3xl flex-row items-center justify-between border border-stroke-soft dark:border-slate-800 shadow-soft"
                   style={{
                     marginBottom: index < agendaContacts.length - 1 ? 8 : 0,
+                    borderLeftWidth: 3,
+                    borderLeftColor: contact.isBirthday
+                      ? Colors.accentBorder
+                      : Colors.primary,
                   }}
                 >
                   <View className="flex-row items-center gap-4">
                     <View
                       className={`w-10 h-10 rounded-2xl items-center justify-center ${
                         contact.isBirthday
-                          ? "border border-accent-warm bg-soft-sand"
+                          ? "border border-accent-border bg-accent-soft"
                           : "bg-primary/20"
                       }`}
                     >
@@ -230,7 +243,12 @@ export default function CalendarScreen() {
                       />
                     </View>
                     <View>
-                      <Body weight="medium">{contact.name}</Body>
+                      <Body
+                        weight="medium"
+                        className="text-text-strong dark:text-slate-100"
+                      >
+                        {contact.name}
+                      </Body>
                       <Caption muted>
                         {contact.isBirthday ? "Birthday" : "Reminder"}
                         {contact.relationship

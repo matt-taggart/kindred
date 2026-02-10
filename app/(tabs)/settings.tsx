@@ -38,9 +38,9 @@ function SettingsRow({
   showChevron = true,
 }: SettingsRowProps) {
   const isDestructive = variant === "destructive";
-  const iconBgColor = isDestructive ? "bg-rose-50" : "bg-sage-light";
+  const iconBgColor = isDestructive ? "bg-rose-soft" : "bg-sage-light";
   const iconColor = isDestructive ? "#F87171" : Colors.primary;
-  const textColor = isDestructive ? "text-red-300" : "text-slate-700";
+  const textColor = isDestructive ? "text-red-300" : "text-text-muted";
 
   const content = (
     <View className="flex-row items-center justify-between px-6 py-5">
@@ -56,7 +56,7 @@ function SettingsRow({
       </View>
       {rightElement ??
         (showChevron && (
-          <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+          <Ionicons name="chevron-forward" size={20} color="#B2BCC9" />
         ))}
     </View>
   );
@@ -73,7 +73,7 @@ function SettingsRow({
 }
 
 function SettingsDivider() {
-  return <View className="mx-6 border-t border-slate-100" />;
+  return <View className="mx-6 border-t border-stroke-soft" />;
 }
 
 type SettingsSectionProps = {
@@ -98,13 +98,13 @@ function SettingsSection({
           {title}
         </Caption>
         {description && (
-          <Body size="sm" className="text-text-soft/80">
+          <Body size="sm" className="text-text-muted/80">
             {description}
           </Body>
         )}
       </View>
       <View
-        className="overflow-hidden rounded-3xl border border-slate-50 bg-card-white"
+        className="overflow-hidden rounded-3xl border border-stroke-soft bg-surface-card"
         style={{
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 4 },
@@ -202,7 +202,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+    <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -323,7 +323,7 @@ export default function SettingsScreen() {
       >
         <View className="flex-1 items-center justify-center bg-black/50 px-6">
           <View
-            className="w-full rounded-3xl bg-card-white p-6"
+            className="w-full rounded-3xl bg-surface-card border border-stroke-soft p-6"
             style={{
               maxWidth: 360,
               shadowColor: "#000",
@@ -341,11 +341,11 @@ export default function SettingsScreen() {
 
             <Body
               size="lg"
-              className="mb-2 text-center font-display font-semibold text-slate-900"
+              className="mb-2 text-center font-display font-semibold text-text-strong"
             >
               Delete All Data?
             </Body>
-            <Body size="sm" className="mb-4 text-center text-text-soft">
+            <Body size="sm" className="mb-4 text-center text-text-muted">
               This will permanently delete all your contacts and interaction
               history. This action cannot be undone.
             </Body>
@@ -353,11 +353,11 @@ export default function SettingsScreen() {
             <Body size="sm" weight="medium" className="mb-2">
               Type DELETE to confirm:
             </Body>
-            <View className="mb-4 min-h-12 flex-row items-center rounded-inner-pill border border-slate-100 bg-off-white px-4">
+            <View className="mb-4 min-h-12 flex-row items-center rounded-inner-pill border border-stroke-soft bg-off-white px-4">
               <TextInput
-                className="flex-1 text-base leading-5 text-slate-700"
+                className="flex-1 text-base leading-5 text-text-muted"
                 style={{ fontFamily: "Outfit_400Regular", marginTop: -2 }}
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor="#9AA3AF"
                 value={deleteConfirmText}
                 onChangeText={setDeleteConfirmText}
                 placeholder="DELETE"
@@ -369,7 +369,7 @@ export default function SettingsScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className="flex-1 items-center rounded-inner-pill bg-slate-100 py-3"
+                className="flex-1 items-center rounded-inner-pill bg-surface-soft py-3"
                 onPress={() => {
                   setShowDeleteModal(false);
                   setDeleteConfirmText("");

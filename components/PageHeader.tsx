@@ -43,7 +43,7 @@ export function PageHeader({
               {leftElement}
             </View>
           )}
-          <Heading size={1} className="text-brand-navy dark:text-slate-100 flex-1">
+          <Heading size={1} className="text-text-strong dark:text-slate-100 flex-1">
             {title}
           </Heading>
         </View>
@@ -54,7 +54,7 @@ export function PageHeader({
         )}
       </View>
       {subtitle && (
-        <Body size="lg" className="text-slate-500 dark:text-slate-400">
+        <Body size="lg" className="text-text-muted dark:text-slate-400">
           {subtitle}
         </Body>
       )}

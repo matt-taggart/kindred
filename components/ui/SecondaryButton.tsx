@@ -25,21 +25,21 @@ export function SecondaryButton({
       onPress={onPress}
       disabled={isDisabled}
       className={[
-        'bg-slate-100 dark:bg-slate-800 rounded-full py-4 px-6 flex-row items-center justify-center',
+        'bg-surface-soft dark:bg-slate-800 rounded-full py-4 px-6 flex-row items-center justify-center border border-stroke-soft dark:border-slate-700',
         'active:scale-[0.98]',
         fullWidth && 'w-full',
         isDisabled && 'opacity-50',
       ].filter(Boolean).join(' ')}
     >
       {loading ? (
-        <ActivityIndicator color="#64748b" />
+        <ActivityIndicator color="#5C635C" />
       ) : (
         <View className="flex-row items-center gap-2">
-          <Text className="font-body font-semibold text-slate-500 dark:text-slate-400 text-base">
+          <Text className="font-body font-semibold text-text-muted dark:text-slate-300 text-base">
             {label}
           </Text>
           {icon && (
-            <MaterialIcons name={icon} size={20} color="#64748b" />
+            <MaterialIcons name={icon} size={20} color="#5C635C" />
           )}
         </View>
       )}

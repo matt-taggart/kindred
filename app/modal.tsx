@@ -63,7 +63,7 @@ export default function EditInteractionModal() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+    <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -80,7 +80,7 @@ export default function EditInteractionModal() {
             onPress={handleSave}
             activeOpacity={0.85}
             disabled={saving}
-            className="px-4 py-1.5 rounded-full bg-sage-light dark:bg-accent-dark-sage"
+            className="px-4 py-1.5 rounded-full bg-sage-light border border-primary/20 dark:bg-accent-dark-sage"
           >
             <Text className="font-medium text-primary">
               {saving ? 'Saving...' : 'Save'}
@@ -88,22 +88,22 @@ export default function EditInteractionModal() {
           </TouchableOpacity>
         </View>
 
-        <Text className="text-2xl font-light text-center text-slate-900 dark:text-white mb-8">
+        <Text className="text-2xl font-light text-center text-text-strong dark:text-white mb-8">
           Edit memory
         </Text>
 
         <View className="flex-1 min-h-[200px]">
           <View
             className="flex-1 border-2 border-dashed rounded-3xl p-4"
-            style={{ borderColor: 'rgba(125, 157, 122, 0.3)' }}
+            style={{ borderColor: 'rgba(247, 212, 194, 0.8)' }}
           >
             <TextInput
-              className="flex-1 bg-transparent text-lg leading-relaxed text-slate-700 dark:text-slate-300 p-0"
+              className="flex-1 bg-transparent text-lg leading-relaxed text-text-muted dark:text-slate-300 p-0"
               multiline
               placeholder="Update your note..."
               value={note}
               onChangeText={setNote}
-              placeholderTextColor="#D1D5DB"
+              placeholderTextColor="#B2BCC9"
               textAlignVertical="top"
               style={{ minHeight: 150 }}
               inputAccessoryViewID={Platform.OS === 'ios' ? NOTE_ACCESSORY_ID : undefined}

@@ -63,12 +63,12 @@ export function SharedMomentsSection({
             <Pressable
               key={moment.id}
               onPress={() => onMomentPress?.(moment)}
-              className="bg-white dark:bg-card-dark p-4 rounded-3xl flex-row items-center gap-4 border border-slate-100 dark:border-slate-800 shadow-soft mb-3"
+              className="bg-surface-card dark:bg-card-dark p-4 rounded-3xl flex-row items-center gap-4 border border-stroke-soft dark:border-slate-800 shadow-soft mb-3"
             >
               {/* Thumbnail */}
               <View
                 className={`w-16 h-16 rounded-2xl overflow-hidden shrink-0 items-center justify-center ${
-                  moment.iconBgColor ? 'bg-sage-light dark:bg-accent-dark-sage' : 'bg-slate-100 dark:bg-slate-800'
+                  moment.iconBgColor ? 'bg-sage-light dark:bg-accent-dark-sage' : 'bg-surface-soft dark:bg-slate-800'
                 } border border-primary/10`}
               >
                 {moment.imageUri ? (
@@ -83,12 +83,12 @@ export function SharedMomentsSection({
 
               {/* Content */}
               <View className="flex-1 min-w-0">
-                <Body weight="medium" numberOfLines={1} className="text-slate-900 dark:text-slate-100">
+                <Body weight="medium" numberOfLines={1} className="text-text-strong dark:text-slate-100">
                   {moment.title}
                 </Body>
                 {moment.tag ? (
-                  <View className="mt-1 self-start rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5">
-                    <Caption muted={false} className="text-[10px] text-slate-600 dark:text-slate-300">
+                  <View className="mt-1 self-start rounded-full bg-accent-soft border border-accent-border dark:bg-slate-800 px-2 py-0.5">
+                    <Caption muted={false} className="text-[10px] text-text-muted dark:text-slate-300">
                       {moment.tag}
                     </Caption>
                   </View>

@@ -41,7 +41,7 @@ export function AddFlowLayout({
   const iconColor = Colors.primary;
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+    <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
       {/* Progress Bar */}
       <AddFlowProgressBar currentStep={currentStep} totalSteps={3} />
 
@@ -60,7 +60,7 @@ export function AddFlowLayout({
               onPress={onBack}
               accessibilityLabel="Go back"
               accessibilityRole="button"
-              className="w-10 h-10 -ml-2 items-center justify-center rounded-full active:bg-slate-100"
+              className="w-10 h-10 -ml-2 items-center justify-center rounded-full active:bg-surface-soft dark:active:bg-slate-800"
             >
               <Ionicons name="chevron-back" size={24} color={iconColor} />
             </TouchableOpacity>
@@ -75,7 +75,7 @@ export function AddFlowLayout({
       </ScrollView>
 
       {/* Bottom Bar */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background-light dark:bg-background-dark px-6 pb-8 pt-4 border-t border-slate-100 dark:border-slate-800">
+      <View className="absolute bottom-0 left-0 right-0 bg-surface-page dark:bg-background-dark px-6 pb-8 pt-4 border-t border-stroke-soft dark:border-slate-800">
         <View className="flex-row justify-between items-center">
           {/* Skip/Back Button */}
           {onSkip ? (
@@ -84,7 +84,7 @@ export function AddFlowLayout({
               accessibilityLabel="Skip"
               accessibilityRole="button"
             >
-              <Text className="text-slate-500 dark:text-slate-400 font-medium text-base">
+              <Text className="text-text-muted dark:text-slate-400 font-medium text-base">
                 Skip
               </Text>
             </TouchableOpacity>
@@ -94,7 +94,7 @@ export function AddFlowLayout({
               accessibilityLabel="Back"
               accessibilityRole="button"
             >
-              <Text className="text-slate-500 dark:text-slate-400 font-medium text-base">
+              <Text className="text-text-muted dark:text-slate-400 font-medium text-base">
                 Back
               </Text>
             </TouchableOpacity>

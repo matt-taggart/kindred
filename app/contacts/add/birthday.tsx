@@ -103,7 +103,7 @@ export default function AddConnectionBirthdayScreen() {
         showBackButton
       >
         {/* Birthday Card */}
-        <View className="bg-white rounded-2xl border border-slate-100 p-4">
+        <View className="bg-surface-card rounded-2xl border border-stroke-soft p-4">
           {!showBirthdayPicker ? (
             <TouchableOpacity
               className="flex-row items-center py-2"
@@ -111,17 +111,17 @@ export default function AddConnectionBirthdayScreen() {
               activeOpacity={0.7}
               disabled={saving}
             >
-              <View className="w-10 h-10 rounded-full border border-accent-warm bg-soft-sand items-center justify-center mr-3">
+              <View className="w-10 h-10 rounded-full border border-accent-border bg-accent-soft items-center justify-center mr-3">
                 <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
               </View>
-              <Text className={birthday ? 'text-lg text-slate-800' : 'text-lg text-slate-400'}>
+              <Text className={birthday ? 'text-lg text-text-strong' : 'text-lg text-text-muted/60'}>
                 {birthday ? formatBirthdayDisplay(birthday) : 'Select a date...'}
               </Text>
             </TouchableOpacity>
           ) : (
             <View>
               <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-base font-semibold text-slate-800">Birthday</Text>
+                <Text className="text-base font-semibold text-text-strong">Birthday</Text>
                 <TouchableOpacity
                   onPress={() => setShowBirthdayPicker(false)}
                   activeOpacity={0.7}
@@ -139,7 +139,7 @@ export default function AddConnectionBirthdayScreen() {
         </View>
 
         {/* Start Date Card */}
-        <View className="bg-white rounded-2xl border border-slate-100 p-4 mt-4">
+        <View className="bg-surface-card rounded-2xl border border-stroke-soft p-4 mt-4">
           <TouchableOpacity
             className="flex-row items-center justify-between"
             onPress={() => setShowDatePicker(true)}
@@ -147,19 +147,19 @@ export default function AddConnectionBirthdayScreen() {
             disabled={saving}
           >
             <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center mr-3">
+              <View className="w-10 h-10 rounded-full bg-sage-light items-center justify-center mr-3">
                 <Ionicons name="time-outline" size={20} color={Colors.primary} />
               </View>
               <View>
-                <Text className="text-base font-semibold text-slate-800">Start Reminders</Text>
-                <Text className="text-sm text-slate-500">{getDateLabel(startDate.getTime())}</Text>
+                <Text className="text-base font-semibold text-text-strong">Start Reminders</Text>
+                <Text className="text-sm text-text-muted">{getDateLabel(startDate.getTime())}</Text>
               </View>
             </View>
             <Text className="text-sm font-medium text-primary">Edit</Text>
           </TouchableOpacity>
 
           {showDatePicker && Platform.OS === 'ios' && (
-            <View className="mt-4 pt-4 border-t border-slate-100">
+            <View className="mt-4 pt-4 border-t border-stroke-soft">
               <View className="flex-row justify-end mb-2">
                 <TouchableOpacity onPress={() => setShowDatePicker(false)}>
                   <Text className="text-sm font-medium text-primary">Done</Text>
@@ -192,7 +192,7 @@ export default function AddConnectionBirthdayScreen() {
         </View>
 
         {/* Skip hint */}
-        <Text className="text-sm text-slate-400 text-center mt-4">
+        <Text className="text-sm text-text-muted/70 text-center mt-4">
           You can always add this later
         </Text>
       </AddFlowLayout>

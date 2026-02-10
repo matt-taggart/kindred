@@ -39,10 +39,10 @@ export function FilterPills({ selected, counts, onSelect }: FilterPillsProps) {
             accessibilityLabel={`Filter by ${filterLabels[filter].toLowerCase()}, ${count} connections`}
             accessibilityState={{ selected: isActive }}
             activeOpacity={0.85}
-            className={`px-6 py-2.5 min-h-11 rounded-full ${
+            className={`px-6 py-2.5 min-h-11 rounded-full border ${
               isActive
-                ? 'bg-primary dark:bg-primary'
-                : 'bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800'
+                ? 'bg-primary border-primary/30 dark:bg-primary dark:border-primary/40'
+                : 'bg-surface-card dark:bg-card-dark border-stroke-soft dark:border-slate-800'
             }`}
           >
             <Body
@@ -51,7 +51,7 @@ export function FilterPills({ selected, counts, onSelect }: FilterPillsProps) {
               className={
                 isActive
                   ? 'text-white'
-                  : 'text-slate-700 dark:text-slate-300'
+                  : 'text-text-muted dark:text-slate-300'
               }
             >
               {filterLabels[filter]} · {count}
