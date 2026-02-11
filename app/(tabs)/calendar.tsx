@@ -183,18 +183,11 @@ export default function CalendarScreen() {
 
         {/* Agenda Section */}
         <View>
-          <View className="mb-4 flex-row items-end justify-between">
+          <View className="mb-4">
             <View>
               <Heading size={3}>{formatSelectedDate(selectedDate)}</Heading>
               {selectedDate === todayKey && <Caption muted>Today</Caption>}
             </View>
-            {agendaContacts.length > 0 && (
-              <View className="rounded-full border border-stroke-soft bg-surface-card px-3 py-1.5">
-                <Caption muted={false} className="text-text-muted">
-                  {agendaContacts.length} planned
-                </Caption>
-              </View>
-            )}
           </View>
 
           {agendaContacts.length === 0 ? (
