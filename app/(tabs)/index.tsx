@@ -241,7 +241,13 @@ export default function HomeScreen() {
     () => extractFirstNameFromDeviceName(Constants.deviceName),
     [],
   );
-  const greetingName = userFirstName ?? "friend";
+  const todayLabel = new Intl.DateTimeFormat(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
+  const greetingSubject = userFirstName ?? todayLabel;
+  const greetingSubtitle = `${greeting}, ${greetingSubject}.`;
   const isNarrowLayout = width < 390;
 
   const renderHeaderRight = () => (
@@ -275,8 +281,9 @@ export default function HomeScreen() {
         <View className="flex-1 px-6 pt-14">
           <PageHeader
             title="Kindred"
-            subtitle={`${greeting}, ${greetingName}.`}
+            subtitle={greetingSubtitle}
             showBranding={false}
+            titleToSubtitleGapClassName="mb-1"
             rightElement={renderHeaderRight()}
           />
           <EmptyContactsState />
@@ -294,8 +301,9 @@ export default function HomeScreen() {
           <View className="flex-1 px-6 pt-14">
             <PageHeader
               title="Kindred"
-              subtitle={`${greeting}, ${greetingName}`}
+              subtitle={greetingSubtitle}
               showBranding={false}
+              titleToSubtitleGapClassName="mb-1"
               rightElement={renderHeaderRight()}
             />
 
@@ -339,8 +347,9 @@ export default function HomeScreen() {
         >
           <PageHeader
             title="Kindred"
-            subtitle={`${greeting}, ${greetingName}`}
+            subtitle={greetingSubtitle}
             showBranding={false}
+            titleToSubtitleGapClassName="mb-1"
             rightElement={renderHeaderRight()}
           />
 
@@ -375,7 +384,6 @@ export default function HomeScreen() {
                 );
               })}
             </QuiltGrid>
-
           </View>
         </ScrollView>
       </SafeAreaView>

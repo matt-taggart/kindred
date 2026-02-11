@@ -1,20 +1,28 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { View, TouchableOpacity, Image } from 'react-native';
-import { Heading, Body } from './ui';
-import Colors from '@/constants/Colors';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { View, TouchableOpacity, Image } from "react-native";
+import { Heading, Body } from "./ui";
+import Colors from "@/constants/Colors";
 
 const EmptyIllustration = () => (
   <View className="relative mb-8 items-center justify-center">
     <Image
-      source={require('../assets/images/icon_filled_final.png')}
+      source={require("../assets/images/icon_filled_final.png")}
       style={{ width: 72, height: 72, opacity: 0.9 }}
       resizeMode="contain"
     />
   </View>
 );
 
-const ActionButton = ({ icon, label, onPress }: { icon: any; label: string; onPress: () => void }) => (
+const ActionButton = ({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: any;
+  label: string;
+  onPress: () => void;
+}) => (
   <TouchableOpacity
     onPress={onPress}
     className="w-full bg-surface-card dark:bg-card-dark py-4 px-6 rounded-2xl shadow-sm border border-stroke-soft dark:border-gray-800 flex-row items-center justify-between mb-3"
@@ -38,23 +46,23 @@ export default function EmptyContactsState() {
       <EmptyIllustration />
 
       <Heading size={1} className="text-center mb-4 leading-tight">
-        The people you care about{"\n"}will gather here.
+        The people you care about will gather here.
       </Heading>
 
       <Body muted className="text-center mb-10 max-w-[280px]">
-        Kindred helps you gently nurture the relationships that matter
+        Kindred helps you gently nurture the relationships that matter.
       </Body>
 
       <View className="w-full">
         <ActionButton
           icon="people-outline"
           label="Import from contacts"
-          onPress={() => router.push('/contacts/import')}
+          onPress={() => router.push("/contacts/import")}
         />
         <ActionButton
           icon="person-add-outline"
           label="Add manually"
-          onPress={() => router.push('/contacts/add')}
+          onPress={() => router.push("/contacts/add")}
         />
       </View>
     </View>

@@ -9,6 +9,7 @@ type PageHeaderProps = {
   leftElement?: React.ReactNode;
   showBranding?: boolean;
   brandingToHeadingGapClassName?: string;
+  titleToSubtitleGapClassName?: string;
 };
 
 export function PageHeader({
@@ -18,6 +19,7 @@ export function PageHeader({
   leftElement,
   showBranding = true,
   brandingToHeadingGapClassName = 'mb-2',
+  titleToSubtitleGapClassName = 'mb-2',
 }: PageHeaderProps) {
   return (
     <View className="mb-4">
@@ -36,7 +38,7 @@ export function PageHeader({
         </View>
       )}
       
-      <View className="flex-row justify-between items-center mb-2">
+      <View className={`flex-row justify-between items-center ${titleToSubtitleGapClassName}`}>
         <View className="flex-1 flex-row items-center gap-3">
           {leftElement && (
             <View>
