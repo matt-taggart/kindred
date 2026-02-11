@@ -1,15 +1,16 @@
 import React from "react";
-import { Platform, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Platform, View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { AddConnectionSheet } from "@/components";
 
+const TAB_ICON_SIZE = 22;
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const router = useRouter();
   const [isAddSheetVisible, setIsAddSheetVisible] = React.useState(false);
 
   const isDark = colorScheme === "dark";
@@ -36,12 +37,10 @@ export default function TabLayout() {
             left: 0,
             right: 0,
           },
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: "700",
-            marginTop: 5,
-            letterSpacing: 0.2,
-          },
+          tabBarLabel: ({ color, children }) => (
+            <Text style={[styles.tabLabel, { color }]}>{children}</Text>
+          ),
+          tabBarAllowFontScaling: false,
           headerShown: false,
         }}
       >
@@ -52,7 +51,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }) => (
               <Ionicons
                 name={focused ? "home" : "home-outline"}
-                size={26}
+                size={TAB_ICON_SIZE}
                 color={color}
               />
             ),
@@ -65,9 +64,33 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }) => (
               <Ionicons
                 name={focused ? "people" : "people-outline"}
-                size={26}
+                size={TAB_ICON_SIZE}
                 color={color}
               />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="add"
+          options={{
+            title: "",
+            tabBarLabel: () => null,
+            tabBarItemStyle: styles.centerTabItem,
+            tabBarButton: (props) => (
+              <TouchableOpacity
+                onPress={() => setIsAddSheetVisible(true)}
+                onLongPress={props.onLongPress ?? undefined}
+                activeOpacity={0.85}
+                accessibilityLabel={props.accessibilityLabel ?? "Add connection"}
+                accessibilityRole={props.accessibilityRole}
+                accessibilityState={props.accessibilityState}
+                testID={props.testID}
+                style={[props.style, styles.centerTabButton]}
+              >
+                <View style={styles.centerTabButtonInner}>
+                  <Ionicons name="person-add-outline" size={20} color="white" />
+                </View>
+              </TouchableOpacity>
             ),
           }}
         />
@@ -78,7 +101,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }) => (
               <Ionicons
                 name={focused ? "calendar" : "calendar-outline"}
-                size={26}
+                size={TAB_ICON_SIZE}
                 color={color}
               />
             ),
@@ -87,11 +110,11 @@ export default function TabLayout() {
         <Tabs.Screen
           name="settings"
           options={{
-            title: "Preferences",
+            title: "Settings",
             tabBarIcon: ({ color, focused }) => (
               <Ionicons
                 name={focused ? "settings" : "settings-outline"}
-                size={26}
+                size={TAB_ICON_SIZE}
                 color={color}
               />
             ),
@@ -103,34 +126,30 @@ export default function TabLayout() {
         visible={isAddSheetVisible}
         onClose={() => setIsAddSheetVisible(false)}
       />
-
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => setIsAddSheetVisible(true)}
-        style={styles.fab}
-      >
-        <Ionicons name="person-add-outline" size={26} color="white" />
-      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  fab: {
-    position: "absolute",
-    bottom: 120,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  tabLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    marginTop: 3,
+    letterSpacing: 0,
+  },
+  centerTabItem: {
+    width: 64,
+  },
+  centerTabButton: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  centerTabButtonInner: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: Colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-    zIndex: 100,
   },
 });

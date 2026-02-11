@@ -212,7 +212,7 @@ export default function SettingsScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <PageHeader title="Preferences" brandingToHeadingGapClassName="mb-4" />
+        <PageHeader title="Settings" brandingToHeadingGapClassName="mb-4" />
 
         {/* Content */}
         <View>
