@@ -10,6 +10,7 @@ type PageHeaderProps = {
   showBranding?: boolean;
   brandingToHeadingGapClassName?: string;
   titleToSubtitleGapClassName?: string;
+  subtitleSize?: 'sm' | 'base' | 'lg';
 };
 
 export function PageHeader({
@@ -20,6 +21,7 @@ export function PageHeader({
   showBranding = true,
   brandingToHeadingGapClassName = 'mb-2',
   titleToSubtitleGapClassName = 'mb-2',
+  subtitleSize = 'lg',
 }: PageHeaderProps) {
   return (
     <View className="mb-4">
@@ -56,7 +58,7 @@ export function PageHeader({
         )}
       </View>
       {subtitle && (
-        <Body size="lg" className="text-text-muted dark:text-slate-400">
+        <Body size={subtitleSize} className="text-text-muted dark:text-slate-400">
           {subtitle}
         </Body>
       )}

@@ -7,12 +7,10 @@ import {
   RefreshControl,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
 
-import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import Colors from "@/constants/Colors";
 import { Contact, NewInteraction } from "@/db/schema";
@@ -151,10 +149,6 @@ export default function HomeScreen() {
     [router],
   );
 
-  const handleAvatarPress = useCallback(() => {
-    router.push("/settings");
-  }, [router]);
-
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     loadContacts();
@@ -247,25 +241,8 @@ export default function HomeScreen() {
     day: "numeric",
   }).format(new Date());
   const greetingSubject = userFirstName ?? todayLabel;
-  const greetingSubtitle = `${greeting}, ${greetingSubject}.`;
+  const greetingSubtitle = `${greeting}, today is ${greetingSubject}.`;
   const isNarrowLayout = width < 390;
-
-  const renderHeaderRight = () => (
-    <View className="flex-row items-center">
-      <TouchableOpacity
-        onPress={handleAvatarPress}
-        className="relative"
-        accessibilityRole="button"
-        accessibilityLabel="Open preferences"
-      >
-        <View className="w-12 h-12 rounded-full overflow-hidden border border-stroke-soft bg-surface-card shadow-soft">
-          <View className="w-full h-full bg-primary items-center justify-center">
-            <Ionicons name="person" size={24} color="white" />
-          </View>
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
 
   if (loading) {
     return (
@@ -284,7 +261,7 @@ export default function HomeScreen() {
             subtitle={greetingSubtitle}
             showBranding={false}
             titleToSubtitleGapClassName="mb-1"
-            rightElement={renderHeaderRight()}
+            subtitleSize="base"
           />
           <EmptyContactsState />
         </View>
@@ -304,7 +281,7 @@ export default function HomeScreen() {
               subtitle={greetingSubtitle}
               showBranding={false}
               titleToSubtitleGapClassName="mb-1"
-              rightElement={renderHeaderRight()}
+              subtitleSize="base"
             />
 
             <View className="flex-1 justify-center pb-20">
@@ -350,7 +327,7 @@ export default function HomeScreen() {
             subtitle={greetingSubtitle}
             showBranding={false}
             titleToSubtitleGapClassName="mb-1"
-            rightElement={renderHeaderRight()}
+            subtitleSize="base"
           />
 
           {/* Connections Section */}
