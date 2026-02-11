@@ -50,7 +50,8 @@ export default function EmptyContactsState() {
       </Heading>
 
       <Body muted className="text-center mb-10 max-w-[280px]">
-        Kindred helps you gently nurture the relationships that matter.
+        Kindred helps you nurture the people who matter, so staying in touch
+        feels effortless.
       </Body>
 
       <View className="w-full">

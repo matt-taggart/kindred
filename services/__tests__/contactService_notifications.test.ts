@@ -13,11 +13,12 @@ jest.mock('../../lib/userStore', () => ({
 jest.mock('../notificationService', () => ({
   scheduleReminder: jest.fn().mockResolvedValue('notification-id'),
   cancelContactReminder: jest.fn().mockResolvedValue(undefined),
+  cancelAllReminders: jest.fn().mockResolvedValue(undefined),
 }));
 
 import { getDb } from '../../db/client';
-import { cancelContactReminder, scheduleReminder } from '../notificationService';
-import { addContact, archiveContact, snoozeContact, unarchiveContact } from '../contactService';
+import { cancelAllReminders, cancelContactReminder, scheduleReminder } from '../notificationService';
+import { addContact, archiveContact, resetDatabase, snoozeContact, unarchiveContact } from '../contactService';
 
 type MockDb = ReturnType<typeof createMockDb>['db'];
 
@@ -74,6 +75,9 @@ function createMockDb(seedContacts: Contact[] = []) {
           }),
         })),
       })),
+    })),
+    delete: jest.fn(() => ({
+      run: jest.fn(),
     })),
   };
 
@@ -189,5 +193,15 @@ describe('contactService notification integration', () => {
     const updated = await snoozeContact('contact-weekly-far', requestedSnoozeDate);
 
     expect(updated.nextContactDate).toBe(requestedSnoozeDate);
+  });
+
+  it('cancels all reminders when resetting the database', async () => {
+    const { db } = createMockDb([createContact({ id: 'contact-reset' })]);
+    (getDb as jest.Mock<MockDb>).mockReturnValue(db);
+
+    await resetDatabase();
+
+    expect(cancelAllReminders).toHaveBeenCalledTimes(1);
+    expect(db.delete).toHaveBeenCalledTimes(2);
   });
 });

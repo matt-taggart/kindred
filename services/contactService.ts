@@ -4,7 +4,7 @@ import { getDb } from '../db/client';
 import { Contact, Interaction, NewContact, NewInteraction, contacts, interactions } from '../db/schema';
 import { useUserStore } from '../lib/userStore';
 import { DAY_IN_MS, bucketOffsets, getNextContactDate } from '../utils/scheduler';
-import { cancelContactReminder, scheduleReminder } from './notificationService';
+import { cancelAllReminders, cancelContactReminder, scheduleReminder } from './notificationService';
 
 export const CONTACT_LIMIT = 5;
 export const RECENTLY_CONNECTED_DAYS = 14;
@@ -653,6 +653,7 @@ export const createInteraction = async (
 export const resetDatabase = async (): Promise<void> => {
   const db = getDb();
 
+  await cancelAllReminders();
   db.delete(interactions).run();
   db.delete(contacts).run();
 };
