@@ -1,4 +1,4 @@
-import { Modal, Pressable } from "react-native";
+import { Modal, Pressable, Platform } from "react-native";
 import {
   SafeAreaView,
   ScrollView,
@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import BirthdayPicker from "@/components/BirthdayPicker";
 import { hasYear, getMonthDay } from "@/utils/birthdayValidation";
 
@@ -109,6 +110,7 @@ const unitMultipliers: Record<CustomUnit, number> = {
 };
 
 const DEFAULT_CUSTOM_DAYS = 5;
+const MAX_START_DATE_YEARS = 5;
 
 const deriveCustomUnitAndValue = (
   days?: number | null,
@@ -149,6 +151,10 @@ export default function EditContactModal({
   );
   const [birthday, setBirthday] = useState<string>(contact.birthday || "");
   const [isBirthdayExpanded, setIsBirthdayExpanded] = useState(false);
+  const [startDateMs, setStartDateMs] = useState<number>(
+    contact.nextContactDate ?? Date.now(),
+  );
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -156,8 +162,16 @@ export default function EditContactModal({
       setCustomState(deriveCustomUnitAndValue(contact.customIntervalDays));
       setBirthday(contact.birthday || "");
       setIsBirthdayExpanded(false);
+      setStartDateMs(contact.nextContactDate ?? Date.now());
+      setShowStartDatePicker(false);
     }
-  }, [visible, contact.bucket, contact.customIntervalDays, contact.birthday]);
+  }, [
+    visible,
+    contact.bucket,
+    contact.customIntervalDays,
+    contact.birthday,
+    contact.nextContactDate,
+  ]);
 
   const derivedCustomDays = useMemo(() => {
     const numericValue = Number(customValue);
@@ -171,12 +185,34 @@ export default function EditContactModal({
     (derivedCustomDays !== null &&
       derivedCustomDays >= 1 &&
       derivedCustomDays <= 365);
+  const isCadenceChanged =
+    selectedBucket !== contact.bucket ||
+    (selectedBucket === "custom" &&
+      derivedCustomDays !== null &&
+      derivedCustomDays !== contact.customIntervalDays);
+  const maxStartDate = useMemo(() => {
+    const now = new Date();
+    return new Date(now.getFullYear() + MAX_START_DATE_YEARS, 11, 31);
+  }, []);
+  const startDateLabel = useMemo(
+    () =>
+      new Date(startDateMs).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+    [startDateMs],
+  );
+  const hasStartDateChanged =
+    startDateMs !== (contact.nextContactDate ?? startDateMs);
 
   const hasChanges =
     selectedBucket !== contact.bucket ||
     (isCustom && derivedCustomDays !== contact.customIntervalDays) ||
     (!isCustom && contact.bucket === "custom") ||
-    birthday !== (contact.birthday || "");
+    birthday !== (contact.birthday || "") ||
+    hasStartDateChanged;
 
   const saveDisabled = !isCustomValid || !hasChanges;
 
@@ -188,7 +224,7 @@ export default function EditContactModal({
         selectedBucket,
         customDays ?? null,
         birthday || null,
-        contact.nextContactDate ?? null,
+        startDateMs,
       );
     }
     onClose();
@@ -365,6 +401,81 @@ export default function EditContactModal({
               Reminder rhythm
             </Caption>
 
+            <View className="p-4 rounded-3xl border border-stroke-soft dark:border-slate-700 bg-surface-card dark:bg-card-dark mb-4">
+              <Pressable
+                onPress={() => setShowStartDatePicker((prev) => !prev)}
+                accessibilityRole="button"
+                accessibilityLabel="Edit start date"
+                className="flex-row items-center justify-between"
+              >
+                <View className="pr-3 flex-1">
+                  <Body
+                    size="lg"
+                    weight="medium"
+                    className="text-text-strong dark:text-white"
+                  >
+                    Starts on
+                  </Body>
+                  <Body
+                    size="sm"
+                    className="mt-1 text-text-muted dark:text-slate-300"
+                  >
+                    {isCadenceChanged
+                      ? "Rhythm changes default to today. Choose a different date if needed."
+                      : "Choose when this rhythm starts."}
+                  </Body>
+                </View>
+
+                <View className="items-end">
+                  <Body size="sm" weight="medium" className="text-primary">
+                    {startDateLabel}
+                  </Body>
+                  <Body
+                    testID="start-date-change-button"
+                    size="sm"
+                    className="mt-1 text-text-muted dark:text-slate-300"
+                  >
+                    Change date
+                  </Body>
+                </View>
+              </Pressable>
+
+              {showStartDatePicker ? (
+                <View
+                  testID="start-date-picker"
+                  className="mt-3 pt-3 border-t border-stroke-soft dark:border-slate-700"
+                >
+                  <DateTimePicker
+                    value={new Date(startDateMs)}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    maximumDate={maxStartDate}
+                    onChange={(event, selectedDate) => {
+                      if (Platform.OS === "android") {
+                        setShowStartDatePicker(false);
+                      }
+                      if (event.type === "dismissed" || !selectedDate) {
+                        return;
+                      }
+                      setStartDateMs(selectedDate.getTime());
+                    }}
+                  />
+                  {Platform.OS === "ios" ? (
+                    <Pressable
+                      onPress={() => setShowStartDatePicker(false)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Done editing start date"
+                      className="self-end mt-2 px-3 py-1.5 rounded-full bg-primary/10"
+                    >
+                      <Body size="sm" weight="medium" className="text-primary">
+                        Done
+                      </Body>
+                    </Pressable>
+                  ) : null}
+                </View>
+              ) : null}
+            </View>
+
             <View className="gap-3 mb-4" accessibilityRole="radiogroup">
               {EDITABLE_BUCKETS.map((bucket) => {
                 const isSelected = selectedBucket === bucket;
@@ -390,6 +501,10 @@ export default function EditContactModal({
                           : undefined
                       }
                       onPress={() => {
+                        if (bucket !== selectedBucket) {
+                          setStartDateMs(Date.now());
+                          setShowStartDatePicker(true);
+                        }
                         setSelectedBucket(bucket);
                         if (bucket === "custom") {
                           setCustomState(

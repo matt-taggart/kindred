@@ -557,11 +557,16 @@ export const updateContactCadence = async (
     newBucket,
     customIntervalDays !== undefined ? customIntervalDays : contact.customIntervalDays,
   );
-  
+  const cadenceChanged =
+    newBucket !== contact.bucket ||
+    (newBucket === 'custom' && normalizedCustomDays !== contact.customIntervalDays);
+
   const lastContactedAt = contact.lastContactedAt || Date.now();
-  const nextContactDate = overrideNextContactDate !== undefined 
-    ? overrideNextContactDate 
-    : getNextContactDate(newBucket, lastContactedAt, normalizedCustomDays);
+  const nextContactDate = overrideNextContactDate !== undefined
+    ? overrideNextContactDate
+    : cadenceChanged
+      ? Date.now()
+      : getNextContactDate(newBucket, lastContactedAt, normalizedCustomDays);
 
   db.update(contacts)
     .set({

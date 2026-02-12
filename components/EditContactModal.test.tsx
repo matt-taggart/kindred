@@ -12,6 +12,15 @@ jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker');
 jest.mock('@/components/BirthdayPicker', () => 'BirthdayPicker');
 
 describe('EditContactModal', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-02-12T12:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   const baseContact: Contact = {
     id: 'contact-1',
     name: 'Bill',
@@ -54,13 +63,14 @@ describe('EditContactModal', () => {
     );
 
     fireEvent.press(getByTestId('bucket-option-daily'));
+    expect(getByTestId('start-date-picker')).toBeTruthy();
 
     const saveButton = getByTestId('save-changes-button');
     expect(saveButton.props.accessibilityState.disabled).toBe(false);
 
     fireEvent.press(saveButton);
 
-    expect(onSave).toHaveBeenCalledWith('daily', null, null, baseContact.nextContactDate);
+    expect(onSave).toHaveBeenCalledWith('daily', null, null, Date.now());
     expect(onClose).toHaveBeenCalled();
   });
 
