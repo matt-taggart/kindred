@@ -103,7 +103,11 @@ export default function AddConnectionBirthdayScreen() {
         showBackButton
       >
         {/* Birthday Card */}
-        <View className="bg-surface-card rounded-2xl border border-stroke-soft p-4">
+        <View
+          className={`bg-surface-card rounded-2xl border border-stroke-soft ${
+            showBirthdayPicker ? 'px-4 pb-4 pt-5' : 'p-4'
+          }`}
+        >
           {!showBirthdayPicker ? (
             <TouchableOpacity
               className="flex-row items-center py-2"
@@ -120,7 +124,7 @@ export default function AddConnectionBirthdayScreen() {
             </TouchableOpacity>
           ) : (
             <View>
-              <View className="flex-row items-center justify-between mb-4">
+              <View className="flex-row items-center justify-between mb-4 pt-1">
                 <Text className="text-base font-semibold text-text-strong">Birthday</Text>
                 <TouchableOpacity
                   onPress={() => setShowBirthdayPicker(false)}

@@ -331,16 +331,6 @@ export default function ConnectionsScreen() {
                 ) : undefined
               }
             />
-            {!isSearching && counts.all > 0 && counts.archived > 0 && (
-              <View className="mb-4 flex-row gap-2">
-                <View className="flex-row items-center rounded-full border border-accent-border bg-accent-soft px-3 py-1.5">
-                  <Ionicons name="archive-outline" size={14} color={Colors.textMuted} />
-                  <Text className="ml-1.5 text-xs font-medium text-text-muted">
-                    Archived {counts.archived}
-                  </Text>
-                </View>
-              </View>
-            )}
             {isSearching && counts.all > 0 && (
               <View className="mb-5">
                 <View className="h-14 flex-row items-center bg-surface-card dark:bg-card-dark border border-stroke-soft dark:border-slate-800 rounded-2xl px-4">
