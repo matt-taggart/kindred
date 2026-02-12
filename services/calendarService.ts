@@ -1,5 +1,6 @@
 import { getContacts } from './contactService';
 import { Contact } from '../db/schema';
+import { DAY_IN_MS, bucketOffsets } from '../utils/scheduler';
 
 export type DayData = {
   marked: boolean;
@@ -67,15 +68,72 @@ const getBirthdayParts = (birthday: string): { month: number; day: number } | nu
   }
 };
 
+const getReminderIntervalMs = (contact: Contact): number | null => {
+  if (contact.bucket === 'custom') {
+    if (!contact.customIntervalDays || contact.customIntervalDays < 1) {
+      return null;
+    }
+    return contact.customIntervalDays * DAY_IN_MS;
+  }
+
+  const days = bucketOffsets[contact.bucket];
+  if (!days) return null;
+  return days * DAY_IN_MS;
+};
+
+const getReminderOccurrencesInRange = (
+  contact: Contact,
+  rangeStartMs: number,
+  rangeEndMs: number,
+): number[] => {
+  if (typeof contact.nextContactDate !== 'number') {
+    return [];
+  }
+
+  if (rangeEndMs < rangeStartMs) {
+    return [];
+  }
+
+  const intervalMs = getReminderIntervalMs(contact);
+  if (!intervalMs) {
+    if (
+      contact.nextContactDate >= rangeStartMs &&
+      contact.nextContactDate <= rangeEndMs
+    ) {
+      return [contact.nextContactDate];
+    }
+    return [];
+  }
+
+  const occurrences: number[] = [];
+  let current = contact.nextContactDate;
+
+  if (current < rangeStartMs) {
+    const elapsed = rangeStartMs - current;
+    const intervals = Math.ceil(elapsed / intervalMs);
+    current += intervals * intervalMs;
+  }
+
+  while (current <= rangeEndMs) {
+    occurrences.push(current);
+    current += intervalMs;
+  }
+
+  return occurrences;
+};
+
 export const getCalendarData = (): CalendarData => {
   const contacts = getContacts({ includeArchived: false });
   const calendarData: CalendarData = {};
   const currentYear = new Date().getFullYear();
+  const rangeStartMs = new Date(currentYear - 1, 0, 1).getTime();
+  const rangeEndMs = new Date(currentYear + 1, 11, 31, 23, 59, 59, 999).getTime();
 
   contacts.forEach((contact) => {
-    // Handle regular contact dates
-    if (contact.nextContactDate) {
-      const dateKey = formatToDateKey(contact.nextContactDate);
+    // Handle recurring reminder dates
+    const reminderDates = getReminderOccurrencesInRange(contact, rangeStartMs, rangeEndMs);
+    reminderDates.forEach((dateMs) => {
+      const dateKey = formatToDateKey(dateMs);
 
       if (!calendarData[dateKey]) {
         calendarData[dateKey] = {
@@ -89,7 +147,7 @@ export const getCalendarData = (): CalendarData => {
         color: '#9CA986',
       });
       calendarData[dateKey].contactCount += 1;
-    }
+    });
 
     // Handle birthdays - project for last, current, and next year
     if (contact.birthday) {
@@ -129,6 +187,8 @@ export const getCalendarData = (): CalendarData => {
 export const getContactsByDate = (dateKey: string): CalendarContact[] => {
   const contacts = getContacts({ includeArchived: false });
   const [targetYear, targetMonth, targetDay] = dateKey.split('-').map(Number);
+  const targetDateStartMs = new Date(targetYear, targetMonth - 1, targetDay).getTime();
+  const targetDateEndMs = targetDateStartMs + DAY_IN_MS - 1;
 
   return (contacts
     .map((contact) => {
@@ -136,11 +196,8 @@ export const getContactsByDate = (dateKey: string): CalendarContact[] => {
       let isBirthday = false;
 
       // Check scheduled contact
-      if (contact.nextContactDate) {
-        const contactDateKey = formatToDateKey(contact.nextContactDate);
-        if (contactDateKey === dateKey) {
-          isTargetDate = true;
-        }
+      if (getReminderOccurrencesInRange(contact, targetDateStartMs, targetDateEndMs).length > 0) {
+        isTargetDate = true;
       }
 
       // Check birthday
@@ -170,15 +227,14 @@ export const getContactsByDate = (dateKey: string): CalendarContact[] => {
 
 export const getMonthsDueContacts = (year: number, month: number): number => {
   const contacts = getContacts({ includeArchived: false });
+  const monthStartMs = new Date(year, month, 1).getTime();
+  const monthEndMs = new Date(year, month + 1, 0, 23, 59, 59, 999).getTime();
 
   return contacts.filter((contact) => {
     let matches = false;
 
-    if (contact.nextContactDate) {
-      const contactDate = new Date(contact.nextContactDate);
-      if (contactDate.getFullYear() === year && contactDate.getMonth() === month) {
-        matches = true;
-      }
+    if (getReminderOccurrencesInRange(contact, monthStartMs, monthEndMs).length > 0) {
+      matches = true;
     }
 
     if (!matches && contact.birthday) {

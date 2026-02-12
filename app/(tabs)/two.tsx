@@ -305,6 +305,11 @@ export default function ConnectionsScreen() {
                 },
               ]}
             />
+          ) : filter === "due" && counts.due === 0 ? (
+            <EmptyState
+              icon="checkmark-circle-outline"
+              title="All Caught Up! Enjoy your day."
+            />
           ) : undefined
         }
         ListHeaderComponent={
