@@ -1,5 +1,5 @@
 import { Contact } from '@/db/schema';
-import { isBirthdayToday } from '../contactService';
+import { isBirthdayToday, isReminderDueTodayOrOverdue } from '../contactService';
 
 // Mock contact factory
 const createContact = (overrides: Partial<Contact> = {}): Contact => ({
@@ -39,6 +39,20 @@ describe('isBirthdayToday', () => {
     const today = new Date(2026, 0, 13); // Jan 13, 2026 (month is 0-indexed)
     const contact = createContact({ birthday: null });
     expect(isBirthdayToday(contact, today)).toBe(false);
+  });
+});
+
+describe('isReminderDueTodayOrOverdue', () => {
+  it('returns true for reminders later today', () => {
+    const now = new Date('2026-02-12T09:00:00.000Z');
+    const laterToday = new Date('2026-02-12T22:00:00.000Z').getTime();
+    expect(isReminderDueTodayOrOverdue(laterToday, now)).toBe(true);
+  });
+
+  it('returns false for reminders tomorrow', () => {
+    const now = new Date('2026-02-12T09:00:00.000Z');
+    const tomorrow = new Date('2026-02-13T09:00:00.000Z').getTime();
+    expect(isReminderDueTodayOrOverdue(tomorrow, now)).toBe(false);
   });
 });
 
@@ -360,6 +374,38 @@ describe('getFilterCounts', () => {
 
     expect(counts.due).toBe(1); // Only overdue contact
     expect(counts.all).toBe(2); // Both active contacts
+  });
+
+  it('due includes contacts with reminders later today', () => {
+    const now = new Date();
+    const laterToday = new Date(now);
+    laterToday.setHours(23, 59, 0, 0);
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(9, 0, 0, 0);
+
+    mockContacts.push(
+      createContact({
+        id: 'later-today',
+        name: 'Later Today',
+        isArchived: false,
+        nextContactDate: laterToday.getTime(),
+      })
+    );
+
+    mockContacts.push(
+      createContact({
+        id: 'tomorrow',
+        name: 'Tomorrow',
+        isArchived: false,
+        nextContactDate: tomorrow.getTime(),
+      })
+    );
+
+    const counts = getFilterCounts();
+
+    expect(counts.due).toBe(1);
+    expect(counts.all).toBe(2);
   });
 
   it('due includes birthday contacts', () => {

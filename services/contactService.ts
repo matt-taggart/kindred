@@ -55,6 +55,22 @@ const isSameDay = (date1: Date, date2: Date) => {
   );
 };
 
+const getStartOfTomorrow = (date: Date): number => {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate() + 1,
+  ).getTime();
+};
+
+export const isReminderDueTodayOrOverdue = (
+  nextContactDate: number | null | undefined,
+  today: Date = new Date(),
+): boolean => {
+  if (typeof nextContactDate !== 'number') return false;
+  return nextContactDate < getStartOfTomorrow(today);
+};
+
 const normalizeCustomInterval = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   if (bucket !== 'custom') return null;
   if (customIntervalDays === null || customIntervalDays === undefined) return null;
@@ -202,7 +218,6 @@ export const getContacts = (options: GetContactsOptions = {}): Contact[] => {
 export const getDueContacts = (): Contact[] => {
   const db = getDb();
   const now = new Date();
-  const nowMs = now.getTime();
 
   // Fetch all active contacts to check for birthdays and due dates in JS
   const allContacts: Contact[] = db
@@ -217,7 +232,7 @@ export const getDueContacts = (): Contact[] => {
         return false;
       }
 
-      const isDue = contact.nextContactDate !== null && contact.nextContactDate <= nowMs;
+      const isDue = isReminderDueTodayOrOverdue(contact.nextContactDate, now);
       const isBirthday = isBirthdayToday(contact, now);
       return isDue || isBirthday;
     })
@@ -241,7 +256,6 @@ export type GroupedDueContacts = {
 export const getDueContactsGrouped = (): GroupedDueContacts => {
   const db = getDb();
   const now = new Date();
-  const nowMs = now.getTime();
 
   const allContacts: Contact[] = db
     .select()
@@ -253,7 +267,7 @@ export const getDueContactsGrouped = (): GroupedDueContacts => {
     if (contact.lastContactedAt && isSameDay(new Date(contact.lastContactedAt), now)) {
       return false;
     }
-    const isDue = contact.nextContactDate !== null && contact.nextContactDate <= nowMs;
+    const isDue = isReminderDueTodayOrOverdue(contact.nextContactDate, now);
     const isBirthday = isBirthdayToday(contact, now);
     return isDue || isBirthday;
   });
@@ -745,7 +759,6 @@ export type FilterCounts = {
 export const getFilterCounts = (): FilterCounts => {
   const db = getDb();
   const now = new Date();
-  const nowMs = now.getTime();
 
   // Get all contacts
   const allContacts: Contact[] = db.select().from(contacts).all();
@@ -760,7 +773,7 @@ export const getFilterCounts = (): FilterCounts => {
     if (contact.lastContactedAt && isSameDay(new Date(contact.lastContactedAt), now)) {
       return false; // Exclude contacts contacted today
     }
-    const isDue = contact.nextContactDate !== null && contact.nextContactDate <= nowMs;
+    const isDue = isReminderDueTodayOrOverdue(contact.nextContactDate, now);
     const isBirthday = isBirthdayToday(contact, now);
     return isDue || isBirthday;
   }).length;

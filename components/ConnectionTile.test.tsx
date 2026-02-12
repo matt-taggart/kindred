@@ -88,7 +88,7 @@ describe('ConnectionTile', () => {
     const { getByText } = render(
       <ConnectionTile contact={baseContact} isBirthday onPress={mockOnPress} />
     );
-    expect(getByText('🎂')).toBeTruthy();
+    expect(getByText("It's Emma's birthday! 🎂")).toBeTruthy();
   });
 
   it('renders relationship icon', () => {

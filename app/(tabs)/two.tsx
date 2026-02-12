@@ -23,6 +23,7 @@ import { ConnectionCard } from "@/components/ConnectionCard";
 import { MomentCard, MomentSectionDivider } from '@/components';
 import {
   getContacts,
+  isReminderDueTodayOrOverdue,
   unarchiveContact,
 } from "@/services/contactService";
 import { getUpcomingMoments, UpcomingMoments, MomentContact } from '@/services/calendarService';
@@ -33,8 +34,7 @@ import {
 
 const isContactDue = (contact: Contact) => {
   if (contact.isArchived) return false;
-  if (!contact.nextContactDate) return false;
-  return contact.nextContactDate <= Date.now();
+  return isReminderDueTodayOrOverdue(contact.nextContactDate);
 };
 
 type ListItem =

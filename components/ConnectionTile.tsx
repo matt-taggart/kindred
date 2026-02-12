@@ -72,7 +72,7 @@ function getRelationshipIcon(relationship: string | null | undefined): keyof typ
 
 function getStatusText(contact: Contact, isBirthday?: boolean): string {
   if (isBirthday) {
-    return `It's ${contact.name}'s birthday!`;
+    return `It's ${contact.name}'s birthday! 🎂`;
   }
 
   const lastContacted = contact.lastContactedAt;
@@ -174,7 +174,6 @@ export function ConnectionTile({
           <Heading size={nameSize} className="text-text-strong dark:text-slate-100">
             {contact.name}
           </Heading>
-          {isBirthday && <Body>🎂</Body>}
         </View>
         <Body size="sm" className="mt-1 text-text-muted dark:text-slate-300">
           {statusText}

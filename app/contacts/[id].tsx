@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, Scroll
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction, NewInteraction } from '@/db/schema';
-import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact, createInteraction } from '@/services/contactService';
+import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact, createInteraction, isReminderDueTodayOrOverdue } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import InteractionComposerSheet, { InteractionKind } from '@/components/InteractionComposerSheet';
 import { ConnectionDetailHeader, ConnectionProfileSection, QuickActionTile, SharedMomentsSection } from '@/components';
@@ -149,7 +149,7 @@ export default function ContactDetailScreen() {
   const handleComposerSubmit = useCallback(async ({ kind, type, note }: { kind: InteractionKind; type: InteractionType; note: string }) => {
     if (!contact) return;
 
-    const isDueTodayOrOverdue = typeof contact.nextContactDate === 'number' && contact.nextContactDate <= Date.now();
+    const isDueTodayOrOverdue = isReminderDueTodayOrOverdue(contact.nextContactDate);
 
     try {
       await createInteraction(contact.id, type, note || undefined, kind);
