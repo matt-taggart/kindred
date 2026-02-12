@@ -6,13 +6,13 @@ import {
   Alert,
   FlatList,
   Platform,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import BirthdayPicker from "@/components/BirthdayPicker";
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
@@ -291,16 +291,27 @@ export default function ReviewScheduleScreen() {
     return distributedContacts.find((c) => c.id === editingState.id)?.name;
   }, [distributedContacts, editingState]);
 
+  const exceedsFreeLimit = !isPro && distributedContacts.length > availableSlots;
+  const hasNoFreeSlots = exceedsFreeLimit && availableSlots === 0;
+  const primaryCtaLabel = saving
+    ? "Importing…"
+    : hasNoFreeSlots
+      ? "Upgrade to Pro"
+      : "Looks good — import all";
+
   if (distributedContacts.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-surface-page items-center justify-center">
+      <SafeAreaView
+        edges={["top"]}
+        className="flex-1 bg-surface-page items-center justify-center"
+      >
         <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-page">
+    <SafeAreaView edges={["top"]} className="flex-1 bg-surface-page">
       <View className="px-6 pt-2 pb-0">
         <PageHeader
           title="Review schedule"
@@ -328,15 +339,15 @@ export default function ReviewScheduleScreen() {
         }}
         ListHeaderComponent={
           <View className="mb-4">
-            {!isPro && distributedContacts.length > availableSlots && (
+            {exceedsFreeLimit && (
               <View className="mb-4 border border-amber-100 bg-amber-50 p-5" style={{ borderRadius: 16 }}>
                 <Text className="text-base font-bold text-amber-800">
                   Free plan limit reached
                 </Text>
                 <Text className="mt-1 text-sm text-amber-800">
-                  Only the first {availableSlots} connection
-                  {availableSlots !== 1 ? "s" : ""} will be imported unless you
-                  upgrade.
+                  {hasNoFreeSlots
+                    ? "No contacts will be imported unless you upgrade."
+                    : `Only the first ${availableSlots} connection${availableSlots !== 1 ? "s" : ""} will be imported unless you upgrade.`}
                 </Text>
               </View>
             )}
@@ -423,7 +434,16 @@ export default function ReviewScheduleScreen() {
         )}
       />
 
-      <View className="border-t border-stroke-soft px-6 pb-10 pt-4" style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}>
+      <View
+        className="border-t border-stroke-soft px-6"
+        style={{
+          backgroundColor: "rgba(253,251,247,0.95)",
+          minHeight: 88,
+          paddingTop: 16,
+          paddingBottom: 10,
+          justifyContent: "flex-start",
+        }}
+      >
         <TouchableOpacity
           className={`items-center rounded-full py-4 ${!saving ? "bg-primary" : "bg-stone-200"}`}
           onPress={handleImport}
@@ -434,7 +454,7 @@ export default function ReviewScheduleScreen() {
           <Text
             className={`text-base font-bold ${!saving ? "text-white" : "text-stone-400"}`}
           >
-            {saving ? "Importing…" : "Looks good — import all"}
+            {primaryCtaLabel}
           </Text>
         </TouchableOpacity>
       </View>

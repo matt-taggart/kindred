@@ -52,6 +52,7 @@ describe('ReviewScheduleScreen - Import Limits', () => {
     (useLocalSearchParams as jest.Mock).mockReturnValue({
       contacts: JSON.stringify(mockContacts),
     });
+    (getAvailableSlots as jest.Mock).mockReturnValue(5);
     // Reset user store to default (Free user)
     (useUserStore as unknown as jest.Mock).mockImplementation((cb) =>
       cb({ isPro: false }),
@@ -108,5 +109,18 @@ describe('ReviewScheduleScreen - Import Limits', () => {
      await waitFor(() => {
          expect(getByText(/Only the first 5 connections? will be imported/i)).toBeTruthy();
      });
+  });
+
+  it("shows zero-slots warning copy and an upgrade CTA when no free slots remain", async () => {
+    (getAvailableSlots as jest.Mock).mockReturnValue(0);
+
+    const { getByText, queryByText } = render(<ReviewScheduleScreen />);
+
+    await waitFor(() => {
+      expect(getByText(/Free plan limit reached/i)).toBeTruthy();
+      expect(getByText(/No contacts will be imported unless you upgrade/i)).toBeTruthy();
+      expect(getByText(/Upgrade to Pro/i)).toBeTruthy();
+      expect(queryByText(/Looks good — import all/i)).toBeNull();
+    });
   });
 });
