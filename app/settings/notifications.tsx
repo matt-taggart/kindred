@@ -112,9 +112,13 @@ export default function NotificationSettingsScreen() {
             className="flex-row items-center"
           >
             <Ionicons name="chevron-back" size={24} color={Colors.primary} />
-            <Text className="text-primary font-heading font-semibold text-lg ml-1">Settings</Text>
+            <Text className="text-primary font-heading font-semibold text-lg ml-1">
+              Settings
+            </Text>
           </Pressable>
-          <Text className="text-lg font-bold font-heading text-text-strong">Reminders</Text>
+          <Text className="text-lg font-bold font-heading text-text-strong">
+            Reminders
+          </Text>
           {/* Spacer for centering */}
           <View className="w-20" />
         </View>
@@ -200,9 +204,9 @@ export default function NotificationSettingsScreen() {
           {/* Preview Section */}
           <View className="rounded-[32px] bg-info-mist/35 p-7 border border-info-mist overflow-hidden relative">
             <View className="absolute -right-4 -top-4 opacity-[0.05]">
-               <Ionicons name="heart" size={120} color={Colors.primary} />
+              <Ionicons name="heart" size={120} color={Colors.primary} />
             </View>
-            
+
             <View className="relative z-10">
               <View className="flex-row items-center gap-2 mb-3">
                 <Ionicons
@@ -210,7 +214,9 @@ export default function NotificationSettingsScreen() {
                   size={18}
                   color={Colors.textMuted}
                 />
-                <Text className="text-xs font-bold font-heading text-text-muted uppercase tracking-wider">Gentle Preview</Text>
+                <Text className="text-xs font-bold font-heading text-text-muted uppercase tracking-wider">
+                  Preview
+                </Text>
               </View>
               <Text className="font-display-italic text-[17px] text-text-strong leading-relaxed">
                 &quot;{previewText}&quot;
@@ -221,11 +227,13 @@ export default function NotificationSettingsScreen() {
 
         {/* Footer with Save Button */}
         <View className="absolute bottom-0 left-0 right-0 p-6 bg-surface-page/80">
-          <Pressable 
+          <Pressable
             onPress={() => router.back()}
             className="w-full bg-primary py-5 rounded-full items-center justify-center shadow-lg shadow-primary/20"
           >
-            <Text className="text-white font-bold text-lg font-heading">Save Rhythm</Text>
+            <Text className="text-white font-bold text-lg font-heading">
+              Save Rhythm
+            </Text>
           </Pressable>
           <View className="h-1.5 w-32 bg-stroke-soft rounded-full self-center mt-4 mb-2" />
         </View>
@@ -243,7 +251,9 @@ export default function NotificationSettingsScreen() {
                 {timeLabels[editingIndex]}
               </Text>
               <Pressable onPress={handleTimeConfirm}>
-                <Text className="text-base font-semibold font-heading text-primary">Done</Text>
+                <Text className="text-base font-semibold font-heading text-primary">
+                  Done
+                </Text>
               </Pressable>
             </View>
             <DateTimePicker
