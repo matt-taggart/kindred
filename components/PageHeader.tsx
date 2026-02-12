@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, View } from 'react-native';
+import { Image, View, useColorScheme } from 'react-native';
 import { Heading, Body, Caption } from './ui';
 
 type PageHeaderProps = {
@@ -23,15 +23,22 @@ export function PageHeader({
   titleToSubtitleGapClassName = 'mb-2',
   subtitleSize = 'lg',
 }: PageHeaderProps) {
+  const colorScheme = useColorScheme();
+  const brandingSource =
+    colorScheme === 'dark'
+      ? require('../assets/images/quilt-mark-dark.png')
+      : require('../assets/images/quilt-mark-light.png');
+
   return (
     <View className="mb-4">
       {showBranding && (
-        <View className={`flex-row items-center gap-2 ${brandingToHeadingGapClassName}`}>
-          <View className="w-8 h-8 items-center justify-center">
+        <View className={`flex-row items-center gap-1.5 ${brandingToHeadingGapClassName}`}>
+          <View className="w-4 h-4 items-center justify-center">
             <Image
-              source={require('../assets/images/icon.png')}
-              className="w-7 h-7"
+              source={brandingSource}
+              className="w-3.5 h-3.5"
               resizeMode="contain"
+              accessibilityLabel="Kindred logo"
             />
           </View>
           <Caption uppercase muted={false} className="text-primary/70 font-semibold tracking-[3px]">
