@@ -1,8 +1,9 @@
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import ImportContactsScreen from '../import';
 import * as Contacts from 'expo-contacts';
 import { useRouter } from 'expo-router';
+import { getContacts } from '@/services/contactService';
 
 // Mock dependencies
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -20,8 +21,12 @@ jest.mock('expo-contacts', () => ({
   requestPermissionsAsync: jest.fn(),
   getPermissionsAsync: jest.fn(),
   PermissionStatus: { GRANTED: 'granted' },
-  Fields: { PhoneNumbers: 'phoneNumbers', Image: 'image' },
+  Fields: { PhoneNumbers: 'phoneNumbers', Image: 'image', Birthday: 'birthday' },
   SortTypes: { FirstName: 'firstName' },
+}));
+
+jest.mock('@/services/contactService', () => ({
+  getContacts: jest.fn(),
 }));
 
 jest.mock('@/components/EnhancedPaywallModal', () => ({
@@ -52,32 +57,37 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     (Contacts.getPermissionsAsync as jest.Mock).mockResolvedValue({
       status: 'granted',
     });
+    (getContacts as jest.Mock).mockReturnValue([]);
   });
 
   it('displays the "Custom" option in the frequency selection modal', async () => {
-    const { getByText, getAllByText } = render(<ImportContactsScreen />);
+    const { getByText } = render(<ImportContactsScreen />);
 
     // Wait for contacts to load
     await waitFor(() => {
       expect(getByText('John Doe')).toBeTruthy();
     });
 
+    // Select contact first so frequency control is shown
+    fireEvent.press(getByText('John Doe'));
+
     // Open frequency modal for the first contact
-    // Assuming the default badge says "Every week"
-    fireEvent.press(getAllByText('Every week')[0]); 
+    fireEvent.press(getByText('Weekly rhythm'));
 
     // Check if "Custom rhythm" option is available in the modal
     expect(getByText('Custom rhythm')).toBeTruthy();
   });
 
   it('shows frequency and unit inputs when "Custom" is selected', async () => {
-    const { getByText, getAllByText, getByPlaceholderText } = render(<ImportContactsScreen />);
+    const { getByText, getByPlaceholderText } = render(<ImportContactsScreen />);
     await waitFor(() => {
       expect(getByText('John Doe')).toBeTruthy();
     });
 
+    fireEvent.press(getByText('John Doe'));
+
     // Open modal
-    fireEvent.press(getAllByText('Every week')[0]);
+    fireEvent.press(getByText('Weekly rhythm'));
 
     // Select "Custom"
     fireEvent.press(getByText('Custom rhythm'));
@@ -90,13 +100,15 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
   });
 
   it('calculates custom interval based on unit and saves it', async () => {
-    const { getByText, getAllByText, getByPlaceholderText, queryByText } = render(<ImportContactsScreen />);
+    const { getByText, getByPlaceholderText, queryByText } = render(<ImportContactsScreen />);
     await waitFor(() => {
       expect(getByText('John Doe')).toBeTruthy();
     });
 
+    fireEvent.press(getByText('John Doe'));
+
     // Open modal
-    fireEvent.press(getAllByText('Every week')[0]);
+    fireEvent.press(getByText('Weekly rhythm'));
 
     // Select "Custom"
     fireEvent.press(getByText('Custom rhythm'));
@@ -114,7 +126,7 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
   });
 
   it('passes the custom bucket and interval to the review screen upon navigation', async () => {
-    const { getByText, getAllByText, getByPlaceholderText } = render(<ImportContactsScreen />);
+    const { getByText, getByPlaceholderText } = render(<ImportContactsScreen />);
     await waitFor(() => {
       expect(getByText('John Doe')).toBeTruthy();
     });
@@ -123,13 +135,13 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     fireEvent.press(getByText('John Doe'));
 
     // Set custom frequency
-    fireEvent.press(getAllByText('Every week')[0]);
+    fireEvent.press(getByText('Weekly rhythm'));
     fireEvent.press(getByText('Custom rhythm'));
     fireEvent.changeText(getByPlaceholderText('e.g., 30'), '45');
     fireEvent.press(getByText('Save Changes'));
 
-    // Click "Import and Review"
-    fireEvent.press(getByText(/Import and Review/));
+    // Click primary CTA
+    fireEvent.press(getByText(/Add selected/));
 
     // Verify router push arguments
     expect(mockRouter.push).toHaveBeenCalledWith({
@@ -146,6 +158,25 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
       id: '1',
       bucket: 'custom',
       customIntervalDays: 45,
+    });
+  });
+
+  it('filters out contacts that are already imported', async () => {
+    (getContacts as jest.Mock).mockReturnValue([
+      {
+        id: 'existing-1',
+        name: 'John Doe',
+        phone: '1234567890',
+        isArchived: false,
+      },
+    ]);
+
+    const { queryByText, getByText } = render(<ImportContactsScreen />);
+
+    await waitFor(() => {
+      expect(queryByText('John Doe')).toBeNull();
+      expect(getByText(/Duplicates skipped/i)).toBeTruthy();
+      expect(getByText(/already in Kindred/i)).toBeTruthy();
     });
   });
 });

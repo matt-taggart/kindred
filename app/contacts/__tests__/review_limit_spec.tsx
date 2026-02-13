@@ -20,6 +20,7 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@/services/contactService', () => ({
   addContact: jest.fn(),
+  getContacts: jest.fn(),
   getAvailableSlots: jest.fn(),
   CONTACT_LIMIT: 5,
 }));

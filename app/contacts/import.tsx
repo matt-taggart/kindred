@@ -20,7 +20,8 @@ import {
 
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import { PageHeader } from "@/components/PageHeader";
-import { formatPhoneNumber } from "@/utils/phone";
+import { getContacts } from "@/services/contactService";
+import { buildContactDedupKey, formatPhoneNumber } from "@/utils/phone";
 import { formatBirthdayDisplay } from "@/utils/formatters";
 import Colors from "@/constants/Colors";
 
@@ -82,6 +83,11 @@ type ImportableContact = {
   phone: string;
   avatarUri?: string;
   birthday?: string;  // Format: "YYYY-MM-DD" or "MM-DD"
+};
+
+type DuplicateSummary = {
+  alreadyImported: number;
+  duplicateInAddressBook: number;
 };
 
 const getName = (contact: any) => {
@@ -245,6 +251,10 @@ export default function ImportContactsScreen() {
   const [customIntervals, setCustomIntervals] = useState<
     Record<string, number>
   >({});
+  const [duplicateSummary, setDuplicateSummary] = useState<DuplicateSummary>({
+    alreadyImported: 0,
+    duplicateInAddressBook: 0,
+  });
   const [customValue, setCustomValue] = useState("");
   const [customUnit, setCustomUnit] = useState<CustomUnit>("days");
 
@@ -278,10 +288,42 @@ export default function ImportContactsScreen() {
         .map(toImportable)
         .filter((item): item is ImportableContact => Boolean(item));
 
-      setContacts(withPhones);
+      const existingDedupKeys = new Set(
+        getContacts()
+          .map((contact) => buildContactDedupKey(contact.name, contact.phone))
+          .filter((key): key is string => Boolean(key)),
+      );
+
+      const seenAddressBookDedupKeys = new Set<string>();
+      let alreadyImported = 0;
+      let duplicateInAddressBook = 0;
+
+      const deduped = withPhones.filter((contact) => {
+        const dedupKey = buildContactDedupKey(contact.name, contact.phone);
+        if (!dedupKey) return true;
+
+        if (existingDedupKeys.has(dedupKey)) {
+          alreadyImported += 1;
+          return false;
+        }
+
+        if (seenAddressBookDedupKeys.has(dedupKey)) {
+          duplicateInAddressBook += 1;
+          return false;
+        }
+
+        seenAddressBookDedupKeys.add(dedupKey);
+        return true;
+      });
+
+      setDuplicateSummary({
+        alreadyImported,
+        duplicateInAddressBook,
+      });
+      setContacts(deduped);
       setSelected(new Set());
 
-      const initialFrequencies = withPhones.reduce(
+      const initialFrequencies = deduped.reduce(
         (acc, contact) => {
           acc[contact.id] = "weekly";
           return acc;
@@ -306,6 +348,7 @@ export default function ImportContactsScreen() {
 
       if (permission.status !== Contacts.PermissionStatus.GRANTED) {
         setPermissionDenied(true);
+        setDuplicateSummary({ alreadyImported: 0, duplicateInAddressBook: 0 });
         setContacts([]);
         setSelected(new Set());
 
@@ -523,6 +566,17 @@ export default function ImportContactsScreen() {
     });
   }, [contacts, router, selected, contactFrequencies, customIntervals]);
 
+  const duplicatesFilteredCount =
+    duplicateSummary.alreadyImported + duplicateSummary.duplicateInAddressBook;
+  const duplicateSummaryParts = [
+    duplicateSummary.alreadyImported > 0
+      ? `${duplicateSummary.alreadyImported} already in Kindred`
+      : null,
+    duplicateSummary.duplicateInAddressBook > 0
+      ? `${duplicateSummary.duplicateInAddressBook} repeated in your address book`
+      : null,
+  ].filter((part): part is string => Boolean(part));
+
   return (
     <SafeAreaView className="flex-1 bg-surface-page">
       <View className="px-6 pt-2 pb-0">
@@ -575,6 +629,17 @@ export default function ImportContactsScreen() {
                     Add more contacts
                   </Text>
                 </TouchableOpacity>
+
+                {duplicatesFilteredCount > 0 && (
+                  <View className="rounded-2xl border border-blue-200 bg-blue-50 p-4 mb-4">
+                    <Text className="text-sm font-semibold text-blue-700">
+                      Duplicates skipped
+                    </Text>
+                    <Text className="mt-1 text-sm text-blue-700">
+                      {duplicateSummaryParts.join(", ")}. They won't be imported again.
+                    </Text>
+                  </View>
+                )}
 
                 {contacts.length > 0 && (
                   <View className="mb-3 flex-row items-center justify-between rounded-2xl border border-stroke-soft bg-surface-card px-4 py-3">

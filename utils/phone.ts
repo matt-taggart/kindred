@@ -140,3 +140,37 @@ export function getPhoneNumberCountry(
 
   return undefined;
 }
+
+/**
+ * Returns a normalized phone value suitable for equality checks.
+ */
+export function normalizePhoneForComparison(
+  phone: string | undefined | null,
+  defaultCountry: CountryCode = 'US'
+): string {
+  const urlReady = formatPhoneUrl(phone, defaultCountry);
+  const digitsOnly = urlReady.replace(/[^\d]/g, '');
+  const fallbackDigits = (phone ?? '').replace(/[^\d]/g, '');
+  const normalizedDigits = digitsOnly || fallbackDigits;
+
+  // Normalize common US variants (+1XXXXXXXXXX vs XXXXXXXXXX).
+  if (normalizedDigits.length === 11 && normalizedDigits.startsWith('1')) {
+    return normalizedDigits.slice(1);
+  }
+
+  return normalizedDigits;
+}
+
+/**
+ * Combines normalized name + phone into a stable de-duplication key.
+ */
+export function buildContactDedupKey(
+  name: string | undefined | null,
+  phone: string | undefined | null
+): string | null {
+  const phoneKey = normalizePhoneForComparison(phone);
+  if (!phoneKey) return null;
+
+  const normalizedName = (name ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+  return `${normalizedName}|${phoneKey}`;
+}

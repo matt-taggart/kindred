@@ -23,6 +23,7 @@ import Colors from "@/constants/Colors";
 import {
   CONTACT_LIMIT,
   addContact,
+  getContacts,
   getAvailableSlots,
 } from "@/services/contactService";
 import { useUserStore } from "@/lib/userStore";
@@ -35,6 +36,7 @@ import {
   groupByDate,
 } from "@/utils/scheduler";
 import { formatBirthdayDisplay } from "@/utils/formatters";
+import { buildContactDedupKey } from "@/utils/phone";
 
 type ContactToImport = {
   id: string;
@@ -52,6 +54,11 @@ type ContactToImport = {
     | "custom";
   customIntervalDays?: number | null;
   birthday?: string;
+};
+
+type ImportContactsResult = {
+  importedCount: number;
+  duplicateCount: number;
 };
 
 const bucketLabels: Record<string, string> = {
@@ -216,11 +223,24 @@ export default function ReviewScheduleScreen() {
   }, [editingState, selectedDate]);
 
   const importContacts = useCallback(
-    async (contactsToImport: DistributionResult[]) => {
+    async (contactsToImport: DistributionResult[]): Promise<ImportContactsResult> => {
+      const existingDedupKeys = new Set(
+        getContacts()
+          .map((contact) => buildContactDedupKey(contact.name, contact.phone))
+          .filter((key): key is string => Boolean(key)),
+      );
+
       let importedCount = 0;
+      let duplicateCount = 0;
       for (const distributed of contactsToImport) {
         const original = contactsData.find((c) => c.id === distributed.id);
         if (!original) continue;
+
+        const dedupKey = buildContactDedupKey(original.name, original.phone);
+        if (dedupKey && existingDedupKeys.has(dedupKey)) {
+          duplicateCount++;
+          continue;
+        }
 
         await addContact({
           name: original.name,
@@ -231,9 +251,13 @@ export default function ReviewScheduleScreen() {
           nextContactDate: distributed.nextContactDate,
           birthday: original.birthday ?? null,
         });
+
+        if (dedupKey) {
+          existingDedupKeys.add(dedupKey);
+        }
         importedCount++;
       }
-      return importedCount;
+      return { importedCount, duplicateCount };
     },
     [contactsData],
   );
@@ -252,8 +276,19 @@ export default function ReviewScheduleScreen() {
         return;
       }
 
-      await importContacts(distributedContacts);
-      router.replace("/");
+      const { importedCount, duplicateCount } = await importContacts(distributedContacts);
+
+      if (duplicateCount > 0) {
+        Alert.alert(
+          "Import Complete",
+          importedCount > 0
+            ? `${importedCount} connection${importedCount !== 1 ? "s" : ""} imported successfully. ${duplicateCount} duplicate${duplicateCount !== 1 ? "s were" : " was"} skipped.`
+            : `${duplicateCount} duplicate connection${duplicateCount !== 1 ? "s were" : " was"} skipped. No new connections were imported.`,
+          [{ text: "OK", onPress: () => router.replace("/") }],
+        );
+      } else {
+        router.replace("/");
+      }
     } catch (error) {
       Alert.alert(
         "Error",
@@ -269,12 +304,27 @@ export default function ReviewScheduleScreen() {
 
     try {
       const contactsToImport = distributedContacts.slice(0, availableSlots);
-      const importedCount = await importContacts(contactsToImport);
-      const skippedCount = distributedContacts.length - importedCount;
+      const { importedCount, duplicateCount } = await importContacts(contactsToImport);
+      const limitSkippedCount = Math.max(0, distributedContacts.length - contactsToImport.length);
+
+      const details = [
+        `${importedCount} connection${importedCount !== 1 ? "s" : ""} imported successfully.`,
+      ];
+
+      if (duplicateCount > 0) {
+        details.push(
+          `${duplicateCount} duplicate connection${duplicateCount !== 1 ? "s were" : " was"} skipped.`,
+        );
+      }
+      if (limitSkippedCount > 0) {
+        details.push(
+          `${limitSkippedCount} skipped (limit reached).`,
+        );
+      }
 
       Alert.alert(
         "Import Complete",
-        `${importedCount} connection${importedCount !== 1 ? "s" : ""} imported successfully.${skippedCount > 0 ? ` ${skippedCount} skipped (limit reached).` : ""}`,
+        details.join(" "),
         [{ text: "OK", onPress: () => router.replace("/") }],
       );
     } catch (error) {
