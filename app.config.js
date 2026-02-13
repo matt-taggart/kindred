@@ -1,3 +1,5 @@
+const revenueCatApiKey = process.env.REVENUECAT_API_KEY || '';
+
 export default {
   expo: {
     name: "kindred",
@@ -34,7 +36,7 @@ export default {
     },
     plugins: ["expo-router", "expo-font"],
     extra: {
-      revenueCatApiKey: "appl_PAOFbQRiwDKaykwfgMgpXQLAatc",
+      revenueCatApiKey: revenueCatApiKey,
       router: {},
       eas: {
         projectId: "0224db90-2483-46ad-973f-036d6f15446f",
