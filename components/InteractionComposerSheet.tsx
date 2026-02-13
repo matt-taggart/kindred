@@ -8,10 +8,10 @@ import {
   Pressable,
   Animated,
   Dimensions,
-  KeyboardAvoidingView,
   InputAccessoryView,
   Keyboard,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -19,6 +19,7 @@ import { Contact, NewInteraction } from '@/db/schema';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const NOTE_ACCESSORY_ID = 'composer-note-toolbar';
+const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
 
 type InteractionType = NewInteraction['type'];
 export type InteractionKind = NewInteraction['kind'];
@@ -111,20 +112,17 @@ export default function InteractionComposerSheet({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
       <Pressable className="flex-1 bg-black/30" onPress={handleClose}>
         <View className="flex-1 justify-end">
           <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
             <Pressable
-              className="bg-surface-page dark:bg-background-dark rounded-t-[40px] px-6 pb-12 pt-8"
+              className="bg-surface-page dark:bg-background-dark rounded-t-[40px] pt-8"
+              style={{ maxHeight: SHEET_MAX_HEIGHT }}
               onPress={(event) => event.stopPropagation?.()}
             >
               <View className="mb-6 h-1.5 w-12 self-center rounded-full bg-slate-200 dark:bg-slate-800" />
 
-              <View className="flex-row items-center justify-between mb-6">
+              <View className="px-6 flex-row items-center justify-between mb-6">
                 <TouchableOpacity onPress={handleClose} activeOpacity={0.7} className="p-2 -ml-2">
                   <Ionicons name="close" size={24} color="#9CA3AF" />
                 </TouchableOpacity>
@@ -140,82 +138,90 @@ export default function InteractionComposerSheet({
                 </TouchableOpacity>
               </View>
 
-              <Text className="text-2xl font-light text-center text-text-strong dark:text-white mb-4">
-                {title}
-              </Text>
-
-              {helperText ? (
-                <Text className="text-xs text-center text-text-muted dark:text-slate-400 mb-6">
-                  {helperText}
+              <ScrollView
+                bounces={false}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+                contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 48 }}
+              >
+                <Text className="text-2xl font-light text-center text-text-strong dark:text-white mb-4">
+                  {title}
                 </Text>
-              ) : null}
 
-              <View className="mb-8">
-                <Text className="text-xs uppercase tracking-widest text-text-muted/70 dark:text-slate-500 mb-6 text-center">
-                  How did you connect?
-                </Text>
-                <View className="flex-row justify-between items-start">
-                  {CONNECTION_TYPES.map((config) => {
-                    const isSelected = type === config.type;
-                    return (
-                      <TouchableOpacity
-                        key={config.type}
-                        onPress={() => setType(config.type)}
-                        className="flex-col items-center gap-3"
-                        activeOpacity={0.7}
-                      >
-                        <View
-                          className={`w-16 h-16 rounded-full items-center justify-center ${
-                            isSelected
-                              ? 'bg-primary/10 dark:bg-primary/20'
-                              : 'bg-sage-light dark:bg-accent-dark-sage'
-                          }`}
-                          style={isSelected ? { borderWidth: 2, borderColor: '#7D9D7A' } : undefined}
+                {helperText ? (
+                  <Text className="text-xs text-center text-text-muted dark:text-slate-400 mb-6">
+                    {helperText}
+                  </Text>
+                ) : null}
+
+                <View className="mb-8">
+                  <Text className="text-xs uppercase tracking-widest text-text-muted/70 dark:text-slate-500 mb-6 text-center">
+                    How did you connect?
+                  </Text>
+                  <View className="flex-row justify-between items-start">
+                    {CONNECTION_TYPES.map((config) => {
+                      const isSelected = type === config.type;
+                      return (
+                        <TouchableOpacity
+                          key={config.type}
+                          onPress={() => setType(config.type)}
+                          className="flex-col items-center gap-3"
+                          activeOpacity={0.7}
                         >
-                          <Ionicons name={config.icon} size={24} color="#7D9D7A" />
-                        </View>
-                        <Text
-                          className={`text-sm ${
-                            isSelected
-                              ? 'font-semibold text-primary'
-                              : 'font-medium text-text-muted dark:text-slate-400'
-                          }`}
-                        >
-                          {config.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                          <View
+                            className={`w-16 h-16 rounded-full items-center justify-center ${
+                              isSelected
+                                ? 'bg-primary/10 dark:bg-primary/20'
+                                : 'bg-sage-light dark:bg-accent-dark-sage'
+                            }`}
+                            style={isSelected ? { borderWidth: 2, borderColor: '#7D9D7A' } : undefined}
+                          >
+                            <Ionicons name={config.icon} size={24} color="#7D9D7A" />
+                          </View>
+                          <Text
+                            className={`text-sm ${
+                              isSelected
+                                ? 'font-semibold text-primary'
+                                : 'font-medium text-text-muted dark:text-slate-400'
+                            }`}
+                          >
+                            {config.label}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 </View>
-              </View>
 
-              <View className="mb-4">
-                <Text className="text-xs uppercase tracking-widest text-text-muted/70 dark:text-slate-500 mb-4 text-center">
-                  Anything to remember?
-                </Text>
+                <View className="mb-4">
+                  <Text className="text-xs uppercase tracking-widest text-text-muted/70 dark:text-slate-500 mb-4 text-center">
+                    Anything to remember?
+                  </Text>
 
-                <View
-                  className="min-h-[150px] border-2 border-dashed rounded-3xl p-4"
-                  style={{ borderColor: 'rgba(247, 212, 194, 0.8)' }}
-                >
-                  <TextInput
-                    className="bg-transparent text-lg leading-relaxed text-text-muted dark:text-slate-300 p-0"
-                    multiline
-                    placeholder={kind === 'checkin' ? 'How did it go?' : 'Capture a memory...'}
-                    value={note}
-                    onChangeText={setNote}
-                    placeholderTextColor="#B2BCC9"
-                    textAlignVertical="top"
-                    style={{ minHeight: 120 }}
-                    inputAccessoryViewID={Platform.OS === 'ios' ? NOTE_ACCESSORY_ID : undefined}
-                  />
+                  <View
+                    className="min-h-[150px] border-2 border-dashed rounded-3xl p-4"
+                    style={{ borderColor: 'rgba(247, 212, 194, 0.8)' }}
+                  >
+                    <TextInput
+                      className="bg-transparent text-lg leading-relaxed text-text-muted dark:text-slate-300 p-0"
+                      multiline
+                      placeholder={kind === 'checkin' ? 'How did it go?' : 'Capture a memory...'}
+                      value={note}
+                      onChangeText={setNote}
+                      placeholderTextColor="#B2BCC9"
+                      textAlignVertical="top"
+                      style={{ minHeight: 120 }}
+                      inputAccessoryViewID={Platform.OS === 'ios' ? NOTE_ACCESSORY_ID : undefined}
+                    />
+                  </View>
                 </View>
-              </View>
+              </ScrollView>
             </Pressable>
           </Animated.View>
         </View>
       </Pressable>
-      </KeyboardAvoidingView>
 
       {Platform.OS === 'ios' && (
         <InputAccessoryView nativeID={NOTE_ACCESSORY_ID}>

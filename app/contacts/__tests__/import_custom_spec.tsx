@@ -179,4 +179,32 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
       expect(getByText(/already in Kindred/i)).toBeTruthy();
     });
   });
+
+  it('normalizes imported avatar paths before navigating to review', async () => {
+    (Contacts.getContactsAsync as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          id: '1',
+          name: 'John Doe',
+          phoneNumbers: [{ number: '1234567890' }],
+          imageAvailable: true,
+          image: { uri: '/var/mobile/avatar.png' },
+        },
+      ],
+    });
+
+    const { getByText } = render(<ImportContactsScreen />);
+
+    await waitFor(() => {
+      expect(getByText('John Doe')).toBeTruthy();
+    });
+
+    fireEvent.press(getByText('John Doe'));
+    fireEvent.press(getByText(/Add selected/));
+
+    const pushedParams = mockRouter.push.mock.calls[0][0];
+    const parsedContacts = JSON.parse(pushedParams.params.contacts);
+
+    expect(parsedContacts[0].avatarUri).toBe('file:///var/mobile/avatar.png');
+  });
 });

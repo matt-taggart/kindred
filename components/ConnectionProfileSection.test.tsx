@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import { ConnectionProfileSection } from './ConnectionProfileSection';
 
 describe('ConnectionProfileSection', () => {
@@ -40,6 +40,19 @@ describe('ConnectionProfileSection', () => {
     expect(getByTestId('profile-avatar')).toBeTruthy();
     expect(getByLabelText("Maya Chen's profile photo")).toBeTruthy();
     expect(queryByTestId('profile-initials')).toBeNull();
+  });
+
+  it('falls back to initials when avatar image fails to load', () => {
+    const { getByTestId, queryByTestId } = render(
+      <ConnectionProfileSection
+        {...defaultProps}
+        avatarUri="ph://not-renderable-avatar"
+      />
+    );
+
+    fireEvent(getByTestId('profile-avatar'), 'error');
+    expect(getByTestId('profile-initials')).toBeTruthy();
+    expect(queryByTestId('profile-avatar')).toBeNull();
   });
 
   it('renders last connected text when provided', () => {

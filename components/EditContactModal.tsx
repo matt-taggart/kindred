@@ -1,13 +1,16 @@
-import { Modal, Pressable, Platform } from "react-native";
 import {
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   Text,
   TextInput,
   View,
-  Alert,
 } from "react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import BirthdayPicker from "@/components/BirthdayPicker";
@@ -143,6 +146,7 @@ export default function EditContactModal({
   onSave,
   onArchive,
 }: EditContactModalProps) {
+  const scrollViewRef = useRef<ScrollView>(null);
   const [selectedBucket, setSelectedBucket] = useState<Contact["bucket"]>(
     contact.bucket,
   );
@@ -256,7 +260,12 @@ export default function EditContactModal({
       onRequestClose={onClose}
     >
       <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
-        <View className="flex-1 px-6 pb-4">
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 12 : 0}
+        >
+          <View className="flex-1 px-6 pb-4">
           <View className="py-4 flex-row items-center justify-between">
             <Pressable
               onPress={onClose}
@@ -294,9 +303,12 @@ export default function EditContactModal({
           </View>
 
           <ScrollView
+            ref={scrollViewRef}
             className="flex-1"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 8 }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           >
             <View
               className={`p-4 rounded-3xl border mb-6 ${
@@ -572,6 +584,13 @@ export default function EditContactModal({
                                     customValue: text.replace(/[^0-9]/g, ""),
                                   })
                                 }
+                                onFocus={() => {
+                                  requestAnimationFrame(() => {
+                                    scrollViewRef.current?.scrollToEnd({
+                                      animated: true,
+                                    });
+                                  });
+                                }}
                                 keyboardType="number-pad"
                                 className="flex-1 h-full py-0 text-base leading-5 text-text-strong dark:text-white"
                                 placeholder="e.g., 30"
@@ -725,7 +744,8 @@ export default function EditContactModal({
               </Pressable>
             ) : null}
           </View>
-        </View>
+          </View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </Modal>
   );

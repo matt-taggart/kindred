@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Body, Heading } from './ui';
 import Colors from '@/constants/Colors';
 import { formatBirthdayDisplay } from '@/utils/formatters';
+import { normalizeAvatarUri } from '@/utils/avatar';
 
 interface ConnectionProfileSectionProps {
   avatarUri: string | null;
@@ -91,6 +92,13 @@ export function ConnectionProfileSection({
   const birthdayLabel = birthday ? formatBirthdayDisplay(birthday) : null;
   const relationshipPill = getRelationshipPillStyles(relationship);
   const shouldShowRelationshipPill = showRelationshipPill && relationship.trim().length > 0;
+  const normalizedAvatarUri = normalizeAvatarUri(avatarUri);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+  const showAvatarImage = Boolean(normalizedAvatarUri) && !avatarLoadFailed;
+
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [normalizedAvatarUri]);
 
   return (
     <View className="items-center pt-4 pb-6" testID="connection-profile-section">
@@ -109,12 +117,13 @@ export function ConnectionProfileSection({
 
       {/* Avatar wrapper with ring */}
       <View className={`w-32 h-32 rounded-full border-[3px] p-1.5 ${ringColor}`}>
-        {avatarUri ? (
+        {showAvatarImage ? (
           <Image
-            source={{ uri: avatarUri }}
+            source={{ uri: normalizedAvatarUri }}
             className="w-full h-full rounded-full"
             accessibilityLabel={`${name}'s profile photo`}
             testID="profile-avatar"
+            onError={() => setAvatarLoadFailed(true)}
           />
         ) : (
           <View

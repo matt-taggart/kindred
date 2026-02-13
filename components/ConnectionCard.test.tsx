@@ -115,4 +115,34 @@ describe('ConnectionCard', () => {
     fireEvent.press(getByTestId('connection-card'));
     expect(mockOnPress).toHaveBeenCalledTimes(1);
   });
+
+  it('renders avatar image when avatarUri is provided', () => {
+    const { getByTestId } = render(
+      <ConnectionCard
+        contact={{ ...baseContact, avatarUri: 'https://example.com/avatar.jpg' }}
+        lastConnectedLabel="Connected yesterday"
+        nextReminderLabel="Tomorrow"
+        isReady={false}
+        onPress={mockOnPress}
+      />
+    );
+
+    expect(getByTestId('connection-card-avatar-image')).toBeTruthy();
+  });
+
+  it('falls back to icon when avatar image fails to load', () => {
+    const { getByTestId, queryByTestId } = render(
+      <ConnectionCard
+        contact={{ ...baseContact, avatarUri: 'ph://not-renderable-avatar' }}
+        lastConnectedLabel="Connected yesterday"
+        nextReminderLabel="Tomorrow"
+        isReady={false}
+        onPress={mockOnPress}
+      />
+    );
+
+    fireEvent(getByTestId('connection-card-avatar-image'), 'error');
+    expect(getByTestId('connection-card-avatar-fallback')).toBeTruthy();
+    expect(queryByTestId('connection-card-avatar-image')).toBeNull();
+  });
 });

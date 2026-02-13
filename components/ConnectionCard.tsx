@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Contact } from '@/db/schema';
 import { formatRhythmLabel } from '@/utils/timeFormatting';
+import { normalizeAvatarUri } from '@/utils/avatar';
 
 type ConnectionCardProps = {
   contact: Contact;
@@ -20,6 +21,13 @@ export function ConnectionCard({
   onPress,
 }: ConnectionCardProps) {
   const rhythmLabel = formatRhythmLabel(contact.bucket);
+  const normalizedAvatarUri = normalizeAvatarUri(contact.avatarUri);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+  const showAvatarImage = Boolean(normalizedAvatarUri) && !avatarLoadFailed;
+
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [normalizedAvatarUri]);
 
   return (
     <TouchableOpacity
@@ -32,13 +40,20 @@ export function ConnectionCard({
     >
       {/* Avatar */}
       <View className="w-12 h-12 rounded-full bg-surface-soft border border-primary/10 dark:bg-slate-800 items-center justify-center mr-3.5 overflow-hidden">
-        {contact.avatarUri ? (
+        {showAvatarImage ? (
           <Image
-            source={{ uri: contact.avatarUri }}
+            source={{ uri: normalizedAvatarUri }}
             className="w-12 h-12 rounded-full"
+            testID="connection-card-avatar-image"
+            onError={() => setAvatarLoadFailed(true)}
           />
         ) : (
-          <Ionicons name="person" size={24} color="#9AA3AF" />
+          <Ionicons
+            testID="connection-card-avatar-fallback"
+            name="person"
+            size={24}
+            color="#9AA3AF"
+          />
         )}
       </View>
 

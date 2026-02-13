@@ -1,5 +1,6 @@
 # Task 
-Please review the functionality for reminder push notifications. I would like to make sure that the push notification clearly displays the person's name that we're tring to contact. I believe it's a generic message, but not 100% sure. 
+Please review the enter reminder frequency option the contact details modal. When I start typing a number, for example the number of weeks, the keyboard hides the other options. Please evaluate, debug and fix 
+
 
 
 

@@ -23,6 +23,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { getContacts } from "@/services/contactService";
 import { buildContactDedupKey, formatPhoneNumber } from "@/utils/phone";
 import { formatBirthdayDisplay } from "@/utils/formatters";
+import { normalizeAvatarUri } from "@/utils/avatar";
 import Colors from "@/constants/Colors";
 
 type Bucket = "daily" | "weekly" | "monthly" | "yearly" | "custom";
@@ -122,7 +123,7 @@ const toImportable = (contact: Contacts.Contact & { id: string }): ImportableCon
     name: getName(contact),
     phone: phoneNumber.number.trim(),
     avatarUri: contact.imageAvailable
-      ? (contact.image?.uri ?? undefined)
+      ? normalizeAvatarUri(contact.image?.uri ?? undefined)
       : undefined,
     birthday,
   };
@@ -155,6 +156,13 @@ const ContactRow = ({
     () => contact.name.charAt(0).toUpperCase(),
     [contact.name],
   );
+  const normalizedAvatarUri = normalizeAvatarUri(contact.avatarUri);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+  const showAvatarImage = Boolean(normalizedAvatarUri) && !avatarLoadFailed;
+
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [normalizedAvatarUri]);
 
   return (
     <TouchableOpacity
@@ -171,12 +179,13 @@ const ContactRow = ({
         className={`h-12 w-12 items-center justify-center rounded-full ${
           selected ? 'border-2 border-white overflow-hidden' : ''
         }`}
-        style={!contact.avatarUri ? { backgroundColor: getAvatarColor(initial).bg } : undefined}
+        style={!showAvatarImage ? { backgroundColor: getAvatarColor(initial).bg } : undefined}
       >
-        {contact.avatarUri ? (
+        {showAvatarImage ? (
           <Image
-            source={{ uri: contact.avatarUri }}
+            source={{ uri: normalizedAvatarUri }}
             className="h-12 w-12 rounded-full"
+            onError={() => setAvatarLoadFailed(true)}
           />
         ) : (
           <Text

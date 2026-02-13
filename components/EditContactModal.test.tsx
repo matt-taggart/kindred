@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 
 import EditContactModal from './EditContactModal';
 import type { Contact } from '@/db/schema';
@@ -104,5 +105,29 @@ describe('EditContactModal', () => {
     fireEvent.press(getByLabelText('Add birthday'));
 
     expect(getByLabelText('Cancel birthday editing')).toBeTruthy();
+  });
+
+  it('uses keyboard-aware scroll behavior for custom rhythm editing', () => {
+    const { getByTestId, UNSAFE_getByType } = render(
+      <EditContactModal
+        visible
+        contact={baseContact}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />,
+    );
+
+    fireEvent.press(getByTestId('bucket-option-custom'));
+
+    const scrollView = UNSAFE_getByType(ScrollView);
+    expect(scrollView.props.keyboardShouldPersistTaps).toBe('handled');
+    expect(scrollView.props.keyboardDismissMode).toBe(
+      Platform.OS === 'ios' ? 'interactive' : 'on-drag',
+    );
+
+    const keyboardAvoidingView = UNSAFE_getByType(KeyboardAvoidingView);
+    expect(keyboardAvoidingView.props.behavior).toBe(
+      Platform.OS === 'ios' ? 'padding' : undefined,
+    );
   });
 });
