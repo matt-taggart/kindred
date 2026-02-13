@@ -1,8 +1,8 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import ReviewScheduleScreen from '../review-schedule';
 import { useUserStore } from '@/lib/userStore';
-import { getAvailableSlots } from '@/services/contactService';
+import { addContact, getAvailableSlots, getContacts } from '@/services/contactService';
 import { useLocalSearchParams } from 'expo-router';
 
 // Mock dependencies
@@ -54,6 +54,8 @@ describe('ReviewScheduleScreen - Import Limits', () => {
       contacts: JSON.stringify(mockContacts),
     });
     (getAvailableSlots as jest.Mock).mockReturnValue(5);
+    (getContacts as jest.Mock).mockReturnValue([]);
+    (addContact as jest.Mock).mockResolvedValue({});
     // Reset user store to default (Free user)
     (useUserStore as unknown as jest.Mock).mockImplementation((cb) =>
       cb({ isPro: false }),
@@ -122,6 +124,33 @@ describe('ReviewScheduleScreen - Import Limits', () => {
       expect(getByText(/No contacts will be imported unless you upgrade/i)).toBeTruthy();
       expect(getByText(/Upgrade to Pro/i)).toBeTruthy();
       expect(queryByText(/Looks good — import all/i)).toBeNull();
+    });
+  });
+
+  it("automatically imports after upgrading from the paywall without restarting", async () => {
+    mockStore({ isPro: false });
+    (getAvailableSlots as jest.Mock).mockReturnValue(5);
+    (getContacts as jest.Mock).mockReturnValue([]);
+
+    const screen = render(<ReviewScheduleScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Looks good — import all/i)).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByText(/Looks good — import all/i));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Free plan limit reached/i)).toBeTruthy();
+    });
+
+    mockStore({ isPro: true });
+    (getAvailableSlots as jest.Mock).mockReturnValue(Infinity);
+    screen.rerender(<ReviewScheduleScreen />);
+
+    await waitFor(() => {
+      expect(addContact).toHaveBeenCalled();
+      expect(mockRouter.replace).toHaveBeenCalledWith('/');
     });
   });
 });

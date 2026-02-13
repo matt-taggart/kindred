@@ -84,6 +84,7 @@ export default function ReviewScheduleScreen() {
   const [contactsData, setContactsData] = useState<ContactToImport[]>([]);
   const [saving, setSaving] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [pendingImportAfterUpgrade, setPendingImportAfterUpgrade] = useState(false);
   
   const [editingState, setEditingState] = useState<{
     id: string;
@@ -271,12 +272,14 @@ export default function ReviewScheduleScreen() {
       setAvailableSlots(slots);
 
       if (!isPro && distributedContacts.length > slots) {
+        setPendingImportAfterUpgrade(true);
         setShowPaywall(true);
         setSaving(false);
         return;
       }
 
       const { importedCount, duplicateCount } = await importContacts(distributedContacts);
+      setPendingImportAfterUpgrade(false);
 
       if (duplicateCount > 0) {
         Alert.alert(
@@ -294,12 +297,14 @@ export default function ReviewScheduleScreen() {
         "Error",
         error instanceof Error ? error.message : "Failed to import contacts.",
       );
+      setPendingImportAfterUpgrade(false);
       setSaving(false);
     }
   }, [distributedContacts, router, saving, isPro, importContacts]);
 
   const handlePartialImport = useCallback(async () => {
     setShowPaywall(false);
+    setPendingImportAfterUpgrade(false);
     setSaving(true);
 
     try {
@@ -335,6 +340,16 @@ export default function ReviewScheduleScreen() {
       setSaving(false);
     }
   }, [distributedContacts, availableSlots, importContacts, router]);
+
+  useEffect(() => {
+    if (!pendingImportAfterUpgrade || !isPro || saving) {
+      return;
+    }
+
+    setShowPaywall(false);
+    setPendingImportAfterUpgrade(false);
+    void handleImport();
+  }, [pendingImportAfterUpgrade, isPro, saving, handleImport]);
 
   const editingContactName = useMemo(() => {
     if (!editingState) return null;

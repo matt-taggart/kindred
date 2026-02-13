@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { Modal, TouchableOpacity, View, Text } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { Alert, Modal, TouchableOpacity, View, Text } from 'react-native';
 
 import { useUserStore } from '@/lib/userStore';
-import { hasProEntitlement } from '@/services/iapService';
+import { hasProEntitlement, IAPService } from '@/services/iapService';
 import { extractCustomerInfoFromPaywallEvent, PaywallCustomerInfoEvent } from '@/services/paywallEvent';
 
 type PaywallModalProps = {
@@ -17,14 +17,66 @@ type PaywallModalProps = {
 
 export const EnhancedPaywallModal = ({ visible, onClose, importContext }: PaywallModalProps) => {
   const { isPro, setIsPro } = useUserStore();
-  const handlePurchaseEvent = (event: PaywallCustomerInfoEvent) => {
+  const pendingPurchaseSuccessMessageRef = useRef(false);
+  const hasShownPurchaseSuccessMessageRef = useRef(false);
+
+  const showPurchaseSuccessMessage = useCallback(() => {
+    if (hasShownPurchaseSuccessMessageRef.current) {
+      return;
+    }
+
+    hasShownPurchaseSuccessMessageRef.current = true;
+    Alert.alert(
+      'Welcome to Kindred Pro',
+      'Your subscription is active. Pro features are now unlocked.',
+    );
+  }, []);
+
+  const syncProStatus = useCallback(async (): Promise<boolean> => {
+    try {
+      const nextIsPro = await IAPService.checkCurrentPurchase();
+      if (nextIsPro) {
+        setIsPro(true);
+      }
+      return nextIsPro;
+    } catch (error) {
+      console.error('Failed to refresh purchase status', error);
+      return false;
+    }
+  }, [setIsPro]);
+
+  const handlePurchaseCompleted = async (event: PaywallCustomerInfoEvent) => {
+    pendingPurchaseSuccessMessageRef.current = true;
+    hasShownPurchaseSuccessMessageRef.current = false;
+
     const customerInfo = extractCustomerInfoFromPaywallEvent(event);
-    const nextIsPro = hasProEntitlement(customerInfo);
+    const hasEntitlementFromEvent = hasProEntitlement(customerInfo);
+    const nextIsPro = hasEntitlementFromEvent || await syncProStatus();
+    setIsPro(nextIsPro);
+
+    if (nextIsPro) {
+      showPurchaseSuccessMessage();
+      pendingPurchaseSuccessMessageRef.current = false;
+      onClose();
+    }
+  };
+
+  const handleRestoreCompleted = async (event: PaywallCustomerInfoEvent) => {
+    const customerInfo = extractCustomerInfoFromPaywallEvent(event);
+    const hasEntitlementFromEvent = hasProEntitlement(customerInfo);
+    const nextIsPro = hasEntitlementFromEvent || await syncProStatus();
     setIsPro(nextIsPro);
     if (nextIsPro) {
       onClose();
     }
   };
+
+  const handleDismiss = useCallback(() => {
+    // In sandbox/TestFlight, entitlement updates can lag behind UI callbacks.
+    // Refreshing here prevents requiring an app restart to pick up Pro access.
+    void syncProStatus();
+    onClose();
+  }, [onClose, syncProStatus]);
 
   let RevenueCatUI;
   try {
@@ -36,9 +88,13 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
 
   useEffect(() => {
     if (isPro) {
+      if (pendingPurchaseSuccessMessageRef.current) {
+        showPurchaseSuccessMessage();
+        pendingPurchaseSuccessMessageRef.current = false;
+      }
       setTimeout(onClose, 500);
     }
-  }, [isPro, onClose]);
+  }, [isPro, onClose, showPurchaseSuccessMessage]);
 
   if (!visible) return null;
 
@@ -49,9 +105,9 @@ export const EnhancedPaywallModal = ({ visible, onClose, importContext }: Paywal
           {RevenueCatUI && (
             <RevenueCatUI.Paywall
               style={{ flex: 1 }}
-              onPurchaseCompleted={handlePurchaseEvent}
-              onRestoreCompleted={handlePurchaseEvent}
-              onDismiss={onClose}
+              onPurchaseCompleted={handlePurchaseCompleted}
+              onRestoreCompleted={handleRestoreCompleted}
+              onDismiss={handleDismiss}
             />
           )}
           {importContext && importContext.availableSlots > 0 && (
