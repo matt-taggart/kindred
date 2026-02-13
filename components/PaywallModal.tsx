@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { Modal, View } from 'react-native';
-import type { CustomerInfo } from 'react-native-purchases';
 
 import { useUserStore } from '@/lib/userStore';
+import { hasProEntitlement } from '@/services/iapService';
+import { extractCustomerInfoFromPaywallEvent, PaywallCustomerInfoEvent } from '@/services/paywallEvent';
 
 type PaywallModalProps = {
   visible: boolean;
@@ -11,6 +12,15 @@ type PaywallModalProps = {
 
 export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
   const { isPro, setIsPro } = useUserStore();
+  const handlePurchaseEvent = (event: PaywallCustomerInfoEvent) => {
+    const customerInfo = extractCustomerInfoFromPaywallEvent(event);
+    const nextIsPro = hasProEntitlement(customerInfo);
+    setIsPro(nextIsPro);
+    if (nextIsPro) {
+      onClose();
+    }
+  };
+
   let RevenueCatUI;
   try {
     const PurchasesUI = require('react-native-purchases-ui');
@@ -34,16 +44,8 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
           {RevenueCatUI && (
             <RevenueCatUI.Paywall
               style={{ flex: 1 }}
-              onPurchaseCompleted={(customerInfo: CustomerInfo) => {
-                const isPro = Boolean(customerInfo.entitlements.active['Kindred Pro']);
-                setIsPro(isPro);
-                if (isPro) onClose();
-              }}
-              onRestoreCompleted={(customerInfo: CustomerInfo) => {
-                const isPro = Boolean(customerInfo.entitlements.active['Kindred Pro']);
-                setIsPro(isPro);
-                if (isPro) onClose();
-              }}
+              onPurchaseCompleted={handlePurchaseEvent}
+              onRestoreCompleted={handlePurchaseEvent}
               onDismiss={onClose}
             />
           )}
@@ -52,5 +54,3 @@ export const PaywallModal = ({ visible, onClose }: PaywallModalProps) => {
     </Modal>
   );
 };
-
-

@@ -1,4 +1,10 @@
-const revenueCatApiKey = process.env.REVENUECAT_API_KEY || '';
+const revenueCatApiKey = process.env.REVENUECAT_API_KEY?.trim();
+
+if (!revenueCatApiKey && process.env.EAS_BUILD === 'true') {
+  throw new Error(
+    'Missing REVENUECAT_API_KEY for EAS build. Add it in EAS Secrets/Environment Variables for this profile.'
+  );
+}
 
 export default {
   expo: {
@@ -36,7 +42,7 @@ export default {
     },
     plugins: ["expo-router", "expo-font"],
     extra: {
-      revenueCatApiKey: revenueCatApiKey,
+      revenueCatApiKey: revenueCatApiKey ?? '',
       router: {},
       eas: {
         projectId: "0224db90-2483-46ad-973f-036d6f15446f",
