@@ -101,11 +101,11 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
   });
 
   it('uses keyboard-aware scroll behavior and auto-scrolls to custom form options', async () => {
-    const scrollToEndSpy = jest
-      .spyOn(ScrollView.prototype, 'scrollToEnd')
+    const scrollToSpy = jest
+      .spyOn(ScrollView.prototype, 'scrollTo')
       .mockImplementation(() => {});
 
-    const { getByText, UNSAFE_getAllByType } = render(<ImportContactsScreen />);
+    const { getByText, getByTestId, UNSAFE_getAllByType } = render(<ImportContactsScreen />);
     await waitFor(() => {
       expect(getByText('John Doe')).toBeTruthy();
     });
@@ -133,15 +133,19 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     );
 
     fireEvent.press(getByText('Custom rhythm'));
-
-    await waitFor(() => {
-      const lastCall = scrollToEndSpy.mock.calls.at(-1)?.[0] as
-        | { animated?: boolean }
-        | undefined;
-      expect(lastCall?.animated).toBe(true);
+    fireEvent(getByTestId('custom-rhythm-option'), 'layout', {
+      nativeEvent: { layout: { x: 0, y: 360, width: 300, height: 84 } },
     });
 
-    scrollToEndSpy.mockRestore();
+    await waitFor(() => {
+      const lastCall = scrollToSpy.mock.calls.at(-1)?.[0] as
+        | { y?: number; animated?: boolean }
+        | undefined;
+      expect(lastCall?.animated).toBe(true);
+      expect(lastCall?.y).toBe(352);
+    });
+
+    scrollToSpy.mockRestore();
   });
 
   it('calculates custom interval based on unit and saves it', async () => {

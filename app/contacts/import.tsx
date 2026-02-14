@@ -56,8 +56,8 @@ const unitMultipliers: Record<CustomUnit, number> = {
 };
 
 const DEFAULT_CUSTOM_DAYS = 5;
+const CUSTOM_OPTION_TOP_GUTTER = 8;
 const DEFAULT_FREQUENCY_MODAL_PADDING_BOTTOM = 140;
-const CUSTOM_FREQUENCY_MODAL_PADDING_BOTTOM = 460;
 
 const deriveCustomUnitAndValue = (
   days?: number | null,
@@ -272,6 +272,7 @@ export default function ImportContactsScreen() {
   const [customValue, setCustomValue] = useState("");
   const [customUnit, setCustomUnit] = useState<CustomUnit>("days");
   const frequencyScrollViewRef = useRef<ScrollView | null>(null);
+  const customOptionLayoutYRef = useRef<number | null>(null);
   const shouldScrollToCustomCadenceRef = useRef(false);
 
   const isCustomFrequencySelected = useMemo(() => {
@@ -280,16 +281,16 @@ export default function ImportContactsScreen() {
   }, [contactFrequencies, editingContactId]);
 
   const scrollToCustomFormOptions = useCallback((animated = true) => {
-    const scrollToBottom = () => {
-      frequencyScrollViewRef.current?.scrollToEnd({ animated });
-    };
-
-    requestAnimationFrame(scrollToBottom);
-    setTimeout(scrollToBottom, 40);
     setTimeout(() => {
+      const customOptionLayoutY = customOptionLayoutYRef.current;
+      if (customOptionLayoutY !== null) {
+        frequencyScrollViewRef.current?.scrollTo({
+          y: Math.max(customOptionLayoutY - CUSTOM_OPTION_TOP_GUTTER, 0),
+          animated,
+        });
+      }
       shouldScrollToCustomCadenceRef.current = false;
-      scrollToBottom();
-    }, 140);
+    }, 0);
   }, []);
 
   const derivedCustomDays = useMemo(() => {
@@ -496,6 +497,7 @@ export default function ImportContactsScreen() {
 
   const handleFrequencyChange = useCallback(
     (contactId: string) => {
+      customOptionLayoutYRef.current = null;
       shouldScrollToCustomCadenceRef.current = false;
       setEditingContactId(contactId);
       const existingDays = customIntervals[contactId];
@@ -847,9 +849,7 @@ export default function ImportContactsScreen() {
                 }}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
-                  paddingBottom: isCustomFrequencySelected
-                    ? CUSTOM_FREQUENCY_MODAL_PADDING_BOTTOM
-                    : DEFAULT_FREQUENCY_MODAL_PADDING_BOTTOM,
+                  paddingBottom: DEFAULT_FREQUENCY_MODAL_PADDING_BOTTOM,
                 }}
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode={
@@ -867,7 +867,21 @@ export default function ImportContactsScreen() {
                 ).map((bucket) => {
                   const isSelected = contactFrequencies[editingContactId || ""] === bucket;
                   return (
-                  <View key={bucket} className="mb-3">
+                  <View
+                    key={bucket}
+                    testID={bucket === "custom" ? "custom-rhythm-option" : undefined}
+                    onLayout={
+                      bucket === "custom"
+                        ? (event) => {
+                            customOptionLayoutYRef.current = event.nativeEvent.layout.y;
+                            if (shouldScrollToCustomCadenceRef.current) {
+                              scrollToCustomFormOptions();
+                            }
+                          }
+                        : undefined
+                    }
+                    className="mb-3"
+                  >
                     <TouchableOpacity
                       className={`rounded-2xl border px-5 py-4 ${
                         isSelected
