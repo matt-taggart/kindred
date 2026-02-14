@@ -8,8 +8,11 @@ import {
   AppState,
   FlatList,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Linking,
   Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
   Text,
@@ -53,6 +56,8 @@ const unitMultipliers: Record<CustomUnit, number> = {
 };
 
 const DEFAULT_CUSTOM_DAYS = 5;
+const DEFAULT_FREQUENCY_MODAL_PADDING_BOTTOM = 140;
+const CUSTOM_FREQUENCY_MODAL_PADDING_BOTTOM = 460;
 
 const deriveCustomUnitAndValue = (
   days?: number | null,
@@ -266,6 +271,26 @@ export default function ImportContactsScreen() {
   });
   const [customValue, setCustomValue] = useState("");
   const [customUnit, setCustomUnit] = useState<CustomUnit>("days");
+  const frequencyScrollViewRef = useRef<ScrollView | null>(null);
+  const shouldScrollToCustomCadenceRef = useRef(false);
+
+  const isCustomFrequencySelected = useMemo(() => {
+    if (!editingContactId) return false;
+    return contactFrequencies[editingContactId] === "custom";
+  }, [contactFrequencies, editingContactId]);
+
+  const scrollToCustomFormOptions = useCallback((animated = true) => {
+    const scrollToBottom = () => {
+      frequencyScrollViewRef.current?.scrollToEnd({ animated });
+    };
+
+    requestAnimationFrame(scrollToBottom);
+    setTimeout(scrollToBottom, 40);
+    setTimeout(() => {
+      shouldScrollToCustomCadenceRef.current = false;
+      scrollToBottom();
+    }, 140);
+  }, []);
 
   const derivedCustomDays = useMemo(() => {
     const numericValue = parseInt(customValue, 10);
@@ -400,6 +425,33 @@ export default function ImportContactsScreen() {
     initialize();
   }, [loadContacts, requestPermissionAndLoad, shouldAutoRequest]);
 
+  useEffect(() => {
+    if (!showFrequencySelector || !isCustomFrequencySelected) return;
+
+    shouldScrollToCustomCadenceRef.current = true;
+    scrollToCustomFormOptions();
+  }, [
+    isCustomFrequencySelected,
+    scrollToCustomFormOptions,
+    showFrequencySelector,
+  ]);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const subscription = Keyboard.addListener(showEvent, () => {
+      if (showFrequencySelector && isCustomFrequencySelected) {
+        scrollToCustomFormOptions();
+      }
+    });
+
+    return () => subscription.remove();
+  }, [
+    isCustomFrequencySelected,
+    scrollToCustomFormOptions,
+    showFrequencySelector,
+  ]);
+
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -444,6 +496,7 @@ export default function ImportContactsScreen() {
 
   const handleFrequencyChange = useCallback(
     (contactId: string) => {
+      shouldScrollToCustomCadenceRef.current = false;
       setEditingContactId(contactId);
       const existingDays = customIntervals[contactId];
       const { customUnit: u, customValue: v } =
@@ -465,6 +518,7 @@ export default function ImportContactsScreen() {
       }
 
       if (bucket === "custom") {
+        shouldScrollToCustomCadenceRef.current = true;
         const existingDays = editingContactId
           ? customIntervals[editingContactId]
           : undefined;
@@ -472,10 +526,13 @@ export default function ImportContactsScreen() {
           deriveCustomUnitAndValue(existingDays);
         setCustomUnit(u);
         setCustomValue(v);
+        scrollToCustomFormOptions();
         return;
       }
+
+      shouldScrollToCustomCadenceRef.current = false;
     },
-    [customIntervals, editingContactId],
+    [customIntervals, editingContactId, scrollToCustomFormOptions],
   );
 
   const handleSaveFrequencyChange = useCallback(() => {
@@ -754,171 +811,198 @@ export default function ImportContactsScreen() {
         onRequestClose={() => setShowFrequencySelector(false)}
       >
         <SafeAreaView className="flex-1 bg-surface-page">
-          <View className="flex-1 px-6">
-            <View className="items-center pt-3 pb-2">
-              <View className="h-1 w-10 rounded-full bg-stone-300" />
-            </View>
-            <View className="flex-row justify-end pb-2">
-              <TouchableOpacity
-                onPress={() => setShowFrequencySelector(false)}
-                className="p-2"
-              >
-                <Ionicons name="close" size={24} color={Colors.textSoft} />
-              </TouchableOpacity>
-            </View>
-            <Text className="mb-2 text-lg font-bold text-text-strong">
-              Reminder rhythm
-            </Text>
-            {editingContactId && (
-              <Text className="mb-4 text-base text-text-muted">
-                How often would you like a gentle reminder to connect with{' '}
-                {contacts.find((c) => c.id === editingContactId)?.name}?
+          <KeyboardAvoidingView
+            className="flex-1"
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 12 : 0}
+          >
+            <View className="flex-1 px-6">
+              <View className="items-center pt-3 pb-2">
+                <View className="h-1 w-10 rounded-full bg-stone-300" />
+              </View>
+              <View className="flex-row justify-end pb-2">
+                <TouchableOpacity
+                  onPress={() => setShowFrequencySelector(false)}
+                  className="p-2"
+                >
+                  <Ionicons name="close" size={24} color={Colors.textSoft} />
+                </TouchableOpacity>
+              </View>
+              <Text className="mb-2 text-lg font-bold text-text-strong">
+                Reminder rhythm
               </Text>
-            )}
+              {editingContactId && (
+                <Text className="mb-4 text-base text-text-muted">
+                  How often would you like a gentle reminder to connect with{' '}
+                  {contacts.find((c) => c.id === editingContactId)?.name}?
+                </Text>
+              )}
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-              {(
-                [
-                  "daily",
-                  "weekly",
-                  "monthly",
-                  "yearly",
-                  "custom",
-                ] as Bucket[]
-              ).map((bucket) => {
-                const isSelected = contactFrequencies[editingContactId || ""] === bucket;
-                return (
-                <View key={bucket} className="mb-3">
-                  <TouchableOpacity
-                    className={`rounded-2xl border px-5 py-4 ${
-                      isSelected
-                        ? 'border-primary bg-sage-light'
-                        : 'border-stroke-soft bg-surface-card'
-                    }`}
-                    onPress={() => handleSelectFrequency(bucket)}
-                    activeOpacity={0.7}
-                  >
-                    <View className="flex-row items-center justify-between">
-                      <View className="flex-1">
-                        <Text className="text-base font-semibold text-text-strong">
-                          {bucketLabels[bucket]}
-                        </Text>
-                        <Text className="mt-1 text-sm text-text-muted">
-                          {bucket === "custom"
-                            ? isSelected &&
-                              (derivedCustomDays ||
-                                customIntervals[editingContactId || ""])
-                              ? formatCustomSummary(
-                                  derivedCustomDays ||
-                                    customIntervals[editingContactId || ""],
-                                )
-                              : bucketDescriptions[bucket]
-                            : bucketDescriptions[bucket]}
-                        </Text>
+              <ScrollView
+                ref={frequencyScrollViewRef}
+                onContentSizeChange={() => {
+                  if (shouldScrollToCustomCadenceRef.current) {
+                    scrollToCustomFormOptions();
+                  }
+                }}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingBottom: isCustomFrequencySelected
+                    ? CUSTOM_FREQUENCY_MODAL_PADDING_BOTTOM
+                    : DEFAULT_FREQUENCY_MODAL_PADDING_BOTTOM,
+                }}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode={
+                  Platform.OS === "ios" ? "interactive" : "on-drag"
+                }
+              >
+                {(
+                  [
+                    "daily",
+                    "weekly",
+                    "monthly",
+                    "yearly",
+                    "custom",
+                  ] as Bucket[]
+                ).map((bucket) => {
+                  const isSelected = contactFrequencies[editingContactId || ""] === bucket;
+                  return (
+                  <View key={bucket} className="mb-3">
+                    <TouchableOpacity
+                      className={`rounded-2xl border px-5 py-4 ${
+                        isSelected
+                          ? 'border-primary bg-sage-light'
+                          : 'border-stroke-soft bg-surface-card'
+                      }`}
+                      onPress={() => handleSelectFrequency(bucket)}
+                      activeOpacity={0.7}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-1">
+                          <Text className="text-base font-semibold text-text-strong">
+                            {bucketLabels[bucket]}
+                          </Text>
+                          <Text className="mt-1 text-sm text-text-muted">
+                            {bucket === "custom"
+                              ? isSelected &&
+                                (derivedCustomDays ||
+                                  customIntervals[editingContactId || ""])
+                                ? formatCustomSummary(
+                                    derivedCustomDays ||
+                                      customIntervals[editingContactId || ""],
+                                  )
+                                : bucketDescriptions[bucket]
+                              : bucketDescriptions[bucket]}
+                          </Text>
+                        </View>
+                        <View
+                          className={`h-7 w-7 items-center justify-center rounded-full border ${
+                            isSelected
+                              ? "border-primary bg-primary"
+                              : 'border-stroke-soft'
+                          }`}
+                        >
+                          {isSelected && <Ionicons name="checkmark" size={15} color="white" />}
+                        </View>
                       </View>
-                      <View
-                        className={`h-7 w-7 items-center justify-center rounded-full border ${
-                          isSelected
-                            ? "border-primary bg-primary"
-                            : 'border-stroke-soft'
-                        }`}
-                      >
-                        {isSelected && <Ionicons name="checkmark" size={15} color="white" />}
-                      </View>
-                    </View>
-                  </TouchableOpacity>
+                    </TouchableOpacity>
 
-                  {bucket === "custom" && isSelected && (
-                      <View className="mt-2 rounded-2xl border border-stroke-soft bg-surface-card px-5 pb-5 pt-3">
-                        <View className="mt-2 flex-col gap-3">
-                          <View>
-                            <Text className="mb-1 text-xs font-medium text-text-muted">
-                              Frequency
-                            </Text>
-                            <View className="h-12 flex-row items-center rounded-xl border border-stroke-soft bg-surface-page px-3">
-                              <TextInput
-                                value={customValue}
-                                onChangeText={(text) =>
-                                  setCustomValue(text.replace(/[^0-9]/g, ""))
-                                }
-                                keyboardType="number-pad"
-                                className="flex-1 text-base leading-5 text-text-strong"
-                                placeholder="e.g., 30"
-                                placeholderTextColor="#9AA3AF"
-                                autoFocus
-                                style={{ marginTop: -2 }}
-                              />
-                            </View>
-                          </View>
-                          <View>
-                            <Text className="mb-1 text-xs font-medium text-text-muted">
-                              Unit
-                            </Text>
-                            <View className="flex-row gap-1 rounded-xl bg-surface-page p-1 border border-stroke-soft">
-                              {(
-                                ["days", "weeks", "months"] as CustomUnit[]
-                              ).map((unit) => (
-                                <TouchableOpacity
-                                  key={unit}
-                                  onPress={() => setCustomUnit(unit)}
-                                  className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
-                                    customUnit === unit ? 'bg-surface-card' : ''
-                                  }`}
-                                  style={
-                                    customUnit === unit
-                                      ? {
-                                          shadowColor: "#000",
-                                          shadowOffset: { width: 0, height: 1 },
-                                          shadowOpacity: 0.05,
-                                          shadowRadius: 2,
-                                          elevation: 1,
-                                        }
-                                      : undefined
+                    {bucket === "custom" && isSelected && (
+                        <View
+                          testID="custom-cadence-form"
+                          className="mt-2 rounded-2xl border border-stroke-soft bg-surface-card px-5 pb-5 pt-3"
+                        >
+                          <View className="mt-2 flex-col gap-3">
+                            <View>
+                              <Text className="mb-1 text-xs font-medium text-text-muted">
+                                Frequency
+                              </Text>
+                              <View className="h-12 flex-row items-center rounded-xl border border-stroke-soft bg-surface-page px-3">
+                                <TextInput
+                                  value={customValue}
+                                  onChangeText={(text) =>
+                                    setCustomValue(text.replace(/[^0-9]/g, ""))
                                   }
-                                >
-                                  <Text
-                                    className={`text-sm font-medium ${
-                                      customUnit === unit
-                                        ? 'text-text-strong'
-                                        : 'text-text-muted'
+                                  onFocus={() => scrollToCustomFormOptions()}
+                                  keyboardType="number-pad"
+                                  className="flex-1 text-base leading-5 text-text-strong"
+                                  placeholder="e.g., 30"
+                                  placeholderTextColor="#9AA3AF"
+                                  autoFocus
+                                  style={{ marginTop: -2 }}
+                                />
+                              </View>
+                            </View>
+                            <View>
+                              <Text className="mb-1 text-xs font-medium text-text-muted">
+                                Unit
+                              </Text>
+                              <View className="flex-row gap-1 rounded-xl bg-surface-page p-1 border border-stroke-soft">
+                                {(
+                                  ["days", "weeks", "months"] as CustomUnit[]
+                                ).map((unit) => (
+                                  <TouchableOpacity
+                                    key={unit}
+                                    onPress={() => setCustomUnit(unit)}
+                                    className={`flex-1 items-center justify-center rounded-lg py-1.5 ${
+                                      customUnit === unit ? 'bg-surface-card' : ''
                                     }`}
+                                    style={
+                                      customUnit === unit
+                                        ? {
+                                            shadowColor: "#000",
+                                            shadowOffset: { width: 0, height: 1 },
+                                            shadowOpacity: 0.05,
+                                            shadowRadius: 2,
+                                            elevation: 1,
+                                          }
+                                        : undefined
+                                    }
                                   >
-                                    {unit.charAt(0).toUpperCase() +
-                                      unit.slice(1)}
-                                  </Text>
-                                </TouchableOpacity>
-                              ))}
+                                    <Text
+                                      className={`text-sm font-medium ${
+                                        customUnit === unit
+                                          ? 'text-text-strong'
+                                          : 'text-text-muted'
+                                      }`}
+                                    >
+                                      {unit.charAt(0).toUpperCase() +
+                                        unit.slice(1)}
+                                    </Text>
+                                  </TouchableOpacity>
+                                ))}
+                              </View>
                             </View>
                           </View>
                         </View>
-                      </View>
-                    )}
-                </View>
-                );
-              })}
-            </ScrollView>
+                      )}
+                  </View>
+                  );
+                })}
+              </ScrollView>
 
-            <View
-              className="absolute bottom-0 left-0 right-0 px-6 pb-10 pt-4"
-              style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}
-            >
-              <TouchableOpacity
-                className="items-center rounded-full bg-primary py-4"
-                onPress={handleSaveFrequencyChange}
-                activeOpacity={0.9}
-                style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10, elevation: 4 }}
+              <View
+                className="absolute bottom-0 left-0 right-0 px-6 pb-10 pt-4"
+                style={{ backgroundColor: 'rgba(253,251,247,0.95)' }}
               >
-                <Text className="font-bold text-white text-base">Save Changes</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="items-center rounded-full py-4 mt-2"
-                onPress={() => setShowFrequencySelector(false)}
-                activeOpacity={0.7}
-              >
-                <Text className="font-semibold text-text-muted text-base">Cancel</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  className="items-center rounded-full bg-primary py-4"
+                  onPress={handleSaveFrequencyChange}
+                  activeOpacity={0.9}
+                  style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10, elevation: 4 }}
+                >
+                  <Text className="font-bold text-white text-base">Save Changes</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="items-center rounded-full py-4 mt-2"
+                  onPress={() => setShowFrequencySelector(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text className="font-semibold text-text-muted text-base">Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
 

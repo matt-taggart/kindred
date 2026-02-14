@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import ImportContactsScreen from '../import';
 import * as Contacts from 'expo-contacts';
 import { useRouter } from 'expo-router';
@@ -97,6 +98,50 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     expect(getByText('Days')).toBeTruthy();
     expect(getByText('Weeks')).toBeTruthy();
     expect(getByText('Months')).toBeTruthy();
+  });
+
+  it('uses keyboard-aware scroll behavior and auto-scrolls to custom form options', async () => {
+    const scrollToEndSpy = jest
+      .spyOn(ScrollView.prototype, 'scrollToEnd')
+      .mockImplementation(() => {});
+
+    const { getByText, UNSAFE_getAllByType } = render(<ImportContactsScreen />);
+    await waitFor(() => {
+      expect(getByText('John Doe')).toBeTruthy();
+    });
+
+    fireEvent.press(getByText('John Doe'));
+    fireEvent.press(getByText('Weekly rhythm'));
+
+    const modalScrollView = UNSAFE_getAllByType(ScrollView).find(
+      (instance) => instance.props.keyboardShouldPersistTaps === 'handled',
+    );
+    expect(modalScrollView).toBeTruthy();
+    expect(modalScrollView?.props.keyboardDismissMode).toBe(
+      Platform.OS === 'ios' ? 'interactive' : 'on-drag',
+    );
+    fireEvent(modalScrollView!, 'contentSizeChange', 320, 1200);
+
+    const modalKeyboardAvoidingView = UNSAFE_getAllByType(KeyboardAvoidingView).find(
+      (instance) =>
+        instance.props.behavior === 'padding' ||
+        instance.props.behavior === 'height',
+    );
+    expect(modalKeyboardAvoidingView).toBeTruthy();
+    expect(modalKeyboardAvoidingView?.props.behavior).toBe(
+      Platform.OS === 'ios' ? 'padding' : 'height',
+    );
+
+    fireEvent.press(getByText('Custom rhythm'));
+
+    await waitFor(() => {
+      const lastCall = scrollToEndSpy.mock.calls.at(-1)?.[0] as
+        | { animated?: boolean }
+        | undefined;
+      expect(lastCall?.animated).toBe(true);
+    });
+
+    scrollToEndSpy.mockRestore();
   });
 
   it('calculates custom interval based on unit and saves it', async () => {
