@@ -61,7 +61,9 @@ export default function InteractionComposerSheet({
   const [note, setNote] = useState('');
   const [type, setType] = useState<InteractionType>('call');
   const [kind, setKind] = useState<InteractionKind>(initialKind);
+  const [sheetHeight, setSheetHeight] = useState(0);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const keyboardLiftAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
@@ -74,8 +76,55 @@ export default function InteractionComposerSheet({
       }).start();
     } else {
       slideAnim.setValue(SCREEN_HEIGHT);
+      keyboardLiftAnim.setValue(0);
     }
-  }, [initialKind, visible, slideAnim]);
+  }, [initialKind, visible, slideAnim, keyboardLiftAnim]);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const handleShow = (event: any) => {
+      const keyboardHeight = event?.endCoordinates?.height ?? 0;
+      const desiredLift = Platform.OS === 'ios'
+        ? keyboardHeight * 0.72
+        : keyboardHeight * 0.5;
+      const minTopGap = 20;
+      const maxAllowedLift = sheetHeight > 0
+        ? Math.max(SCREEN_HEIGHT - sheetHeight - minTopGap, 0)
+        : desiredLift;
+      const shift = -Math.min(desiredLift, maxAllowedLift);
+      const duration = typeof event?.duration === 'number' ? event.duration : 220;
+
+      Animated.timing(keyboardLiftAnim, {
+        toValue: shift,
+        duration,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const handleHide = (event: any) => {
+      const duration = typeof event?.duration === 'number' ? event.duration : 220;
+      Animated.timing(keyboardLiftAnim, {
+        toValue: 0,
+        duration,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const showSub = Keyboard.addListener(showEvent, handleShow);
+    const hideSub = Keyboard.addListener(hideEvent, handleHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [keyboardLiftAnim, sheetHeight]);
+
+  const translateY = useMemo(
+    () => Animated.add(slideAnim, keyboardLiftAnim),
+    [keyboardLiftAnim, slideAnim],
+  );
 
   const reset = useCallback(() => {
     setNote('');
@@ -114,10 +163,11 @@ export default function InteractionComposerSheet({
     >
       <Pressable className="flex-1 bg-black/30" onPress={handleClose}>
         <View className="flex-1 justify-end">
-          <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
+          <Animated.View style={{ transform: [{ translateY }] }}>
             <Pressable
               className="bg-surface-page dark:bg-background-dark rounded-t-[40px] pt-8"
               style={{ maxHeight: SHEET_MAX_HEIGHT }}
+              onLayout={(event) => setSheetHeight(event.nativeEvent.layout.height)}
               onPress={(event) => event.stopPropagation?.()}
             >
               <View className="mb-6 h-1.5 w-12 self-center rounded-full bg-slate-200 dark:bg-slate-800" />
@@ -143,7 +193,7 @@ export default function InteractionComposerSheet({
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-                automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+                automaticallyAdjustKeyboardInsets={false}
                 contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 48 }}
               >
                 <Text className="text-2xl font-light text-center text-text-strong dark:text-white mb-4">
