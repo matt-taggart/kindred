@@ -130,4 +130,29 @@ describe('EditContactModal', () => {
       Platform.OS === 'ios' ? 'padding' : undefined,
     );
   });
+
+  it('keeps start date picker closed and scrolls to bottom when custom rhythm is selected', () => {
+    const scrollToEndSpy = jest
+      .spyOn(ScrollView.prototype, 'scrollToEnd')
+      .mockImplementation(jest.fn());
+    const { getByTestId, queryByTestId } = render(
+      <EditContactModal
+        visible
+        contact={baseContact}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+      />,
+    );
+
+    fireEvent.press(getByTestId('bucket-option-custom'));
+    jest.runAllTimers();
+
+    const lastCall = scrollToEndSpy.mock.calls.at(-1)?.[0] as
+      | { animated?: boolean }
+      | undefined;
+    expect(lastCall?.animated).toBe(true);
+    expect(queryByTestId('start-date-picker')).toBeNull();
+
+    scrollToEndSpy.mockRestore();
+  });
 });

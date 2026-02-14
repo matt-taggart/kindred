@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import BirthdayPicker from "@/components/BirthdayPicker";
@@ -147,6 +147,7 @@ export default function EditContactModal({
   onArchive,
 }: EditContactModalProps) {
   const scrollViewRef = useRef<ScrollView>(null);
+  const shouldScrollToCustomOptionRef = useRef(false);
   const [selectedBucket, setSelectedBucket] = useState<Contact["bucket"]>(
     contact.bucket,
   );
@@ -219,6 +220,13 @@ export default function EditContactModal({
     hasStartDateChanged;
 
   const saveDisabled = !isCustomValid || !hasChanges;
+
+  const scrollToCustomOption = useCallback((animated = true) => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated });
+      shouldScrollToCustomOptionRef.current = false;
+    }, 0);
+  }, []);
 
   const handleSave = () => {
     if (!isCustomValid) return;
@@ -305,6 +313,11 @@ export default function EditContactModal({
           <ScrollView
             ref={scrollViewRef}
             className="flex-1"
+            onContentSizeChange={() => {
+              if (shouldScrollToCustomOptionRef.current) {
+                scrollToCustomOption();
+              }
+            }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 8 }}
             keyboardShouldPersistTaps="handled"
@@ -515,8 +528,17 @@ export default function EditContactModal({
                       onPress={() => {
                         if (bucket !== selectedBucket) {
                           setStartDateMs(Date.now());
-                          setShowStartDatePicker(true);
                         }
+
+                        if (bucket === "custom") {
+                          setShowStartDatePicker(false);
+                          shouldScrollToCustomOptionRef.current = true;
+                          scrollToCustomOption();
+                        } else if (bucket !== selectedBucket) {
+                          setShowStartDatePicker(true);
+                          shouldScrollToCustomOptionRef.current = false;
+                        }
+
                         setSelectedBucket(bucket);
                         if (bucket === "custom") {
                           setCustomState(
@@ -585,11 +607,8 @@ export default function EditContactModal({
                                   })
                                 }
                                 onFocus={() => {
-                                  requestAnimationFrame(() => {
-                                    scrollViewRef.current?.scrollToEnd({
-                                      animated: true,
-                                    });
-                                  });
+                                  shouldScrollToCustomOptionRef.current = true;
+                                  scrollToCustomOption();
                                 }}
                                 keyboardType="number-pad"
                                 className="flex-1 h-full py-0 text-base leading-5 text-text-strong dark:text-white"

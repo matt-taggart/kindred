@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import ImportContactsScreen from '../import';
 import * as Contacts from 'expo-contacts';
 import { useRouter } from 'expo-router';
@@ -21,6 +21,7 @@ jest.mock('expo-contacts', () => ({
   getContactsAsync: jest.fn(),
   requestPermissionsAsync: jest.fn(),
   getPermissionsAsync: jest.fn(),
+  presentAccessPickerAsync: jest.fn(),
   PermissionStatus: { GRANTED: 'granted' },
   Fields: { PhoneNumbers: 'phoneNumbers', Image: 'image', Birthday: 'birthday' },
   SortTypes: { FirstName: 'firstName' },
@@ -57,7 +58,9 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
     });
     (Contacts.getPermissionsAsync as jest.Mock).mockResolvedValue({
       status: 'granted',
+      accessPrivileges: 'all',
     });
+    (Contacts.presentAccessPickerAsync as jest.Mock).mockResolvedValue([]);
     (getContacts as jest.Mock).mockReturnValue([]);
   });
 
@@ -226,6 +229,47 @@ describe('ImportContactsScreen - Custom Frequency Feature', () => {
       expect(queryByText('John Doe')).toBeNull();
       expect(getByText(/Duplicates skipped/i)).toBeTruthy();
       expect(getByText(/already in Kindred/i)).toBeTruthy();
+    });
+  });
+
+  it('shows settings guidance when iOS contacts access is limited', async () => {
+    if (Platform.OS !== 'ios') return;
+
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    (Contacts.getPermissionsAsync as jest.Mock).mockResolvedValue({
+      status: 'granted',
+      accessPrivileges: 'limited',
+    });
+
+    const { getByText } = render(<ImportContactsScreen />);
+
+    await waitFor(() => {
+      expect(getByText('John Doe')).toBeTruthy();
+    });
+
+    fireEvent.press(getByText('Add more contacts'));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalled();
+      expect(Contacts.getContactsAsync).toHaveBeenCalledTimes(2);
+    });
+
+    alertSpy.mockRestore();
+  });
+
+  it('requests permission from add more contacts when access is not granted', async () => {
+    (Contacts.getPermissionsAsync as jest.Mock).mockResolvedValue({
+      status: 'undetermined',
+      accessPrivileges: 'none',
+    });
+
+    const { getByText } = render(<ImportContactsScreen />);
+
+    fireEvent.press(getByText('Add more contacts'));
+
+    await waitFor(() => {
+      expect(Contacts.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+      expect(Contacts.getContactsAsync).toHaveBeenCalledTimes(1);
     });
   });
 

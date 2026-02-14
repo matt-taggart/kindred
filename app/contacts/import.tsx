@@ -589,25 +589,37 @@ export default function ImportContactsScreen() {
     [contacts],
   );
 
-  const handleImportPress = useCallback(async () => {
-    await requestPermissionAndLoad();
-  }, [requestPermissionAndLoad]);
+  const handleAddMoreContacts = useCallback(async () => {
+    const permission = await Contacts.getPermissionsAsync();
 
-  const handleAddMoreContacts = useCallback(() => {
-    Alert.alert(
-      "Add More Contacts",
-      "To share more contacts with Kindred, update your contact access in Settings.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Open Settings",
-          onPress: async () => {
-            await Linking.openSettings();
+    if (permission.status !== Contacts.PermissionStatus.GRANTED) {
+      await requestPermissionAndLoad();
+      return;
+    }
+
+    const hasLimitedAccess =
+      Platform.OS === "ios" && permission.accessPrivileges === "limited";
+
+    if (hasLimitedAccess) {
+      Alert.alert(
+        "Limited contacts access",
+        "Kindred currently has access to selected contacts only. To add more contacts, update access in Settings.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Open Settings",
+            onPress: async () => {
+              await Linking.openSettings();
+            },
           },
-        },
-      ],
-    );
-  }, []);
+        ],
+      );
+      await loadContacts();
+      return;
+    }
+
+    await loadContacts();
+  }, [loadContacts, requestPermissionAndLoad]);
 
   const handleSave = useCallback(() => {
     if (selected.size === 0) {
@@ -689,7 +701,7 @@ export default function ImportContactsScreen() {
 
                 <TouchableOpacity
                   className="w-full py-4 px-6 bg-surface-card border border-stroke-soft rounded-2xl flex-row items-center justify-center gap-2 mb-4 active:bg-surface-soft"
-                  onPress={contacts.length === 0 ? handleImportPress : handleAddMoreContacts}
+                  onPress={handleAddMoreContacts}
                   activeOpacity={0.9}
                 >
                   <Ionicons name="person-add" size={20} color={Colors.primary} />
