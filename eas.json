@@ -13,6 +13,7 @@
       }
     },
     "preview": {
+      "autoIncrement": true,
       "distribution": "store",
       "channel": "staging"
     },
@@ -22,6 +23,7 @@
     }
   },
   "submit": {
+    "preview": {},
     "production": {}
   }
 }

@@ -1,5 +1,7 @@
 # Guide: Concurrent Development and TestFlight Builds
 
+For release versioning/build/submit/OTA commands, use `RELEASE_FLOW.md` as the source of truth.
+
 To run both the **Development Build** and **TestFlight Build** on the same device, you must use different **Bundle Identifiers**. This prevents Apple from seeing them as the same app and overwriting one with the other.
 
 ## Recommendation

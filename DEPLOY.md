@@ -2,6 +2,9 @@
 
 ## 1. iOS App Build & Deployment
 
+Canonical iOS release instructions now live in `RELEASE_FLOW.md`.
+Use that file for all build, submit, OTA, and versioning commands.
+
 ### Prerequisites
 - Apple Developer Account ($99/year)
 - App Store Connect access
@@ -11,8 +14,8 @@
 The project is configured for Expo.
 
 1.  **Update App Configuration**:
-    - Ensure `app.json` has the correct `bundleIdentifier` (currently matches `scheme: "myapp"` but should likely be `com.kindred.app` or similar).
-    - Update `ios.buildNumber` and `version` in `app.json` before each release.
+    - Ensure `app.config.js` has the correct `bundleIdentifier`.
+    - Versioning and build numbers are managed with EAS remote app versions (`eas build:version:*`), not manual `app.json` edits.
 
 2.  **Icons and Splash Screens**:
     - Verify assets in `./assets/images/` (icon.png, splash.png, etc.) match App Store requirements.
@@ -21,11 +24,9 @@ The project is configured for Expo.
 1.  **Install EAS CLI**: `npm install -g eas-cli`
 2.  **Login**: `eas login`
 3.  **Configure Project**: `eas build:configure`
-4.  **Build for App Store**:
-    ```bash
-    eas build --platform ios --profile production
-    ```
-    This will create an IPA file and optionally upload it to TestFlight if configured.
+4.  **Run lane-specific commands from `RELEASE_FLOW.md`**:
+    - `preview` + `staging` for beta/TestFlight lane
+    - `production` + `production` for production lane
 
 ### Build Process (Local)
 1.  **Prebuild**: `npx expo prebuild` (generates `ios` directory)
@@ -89,4 +90,3 @@ The app uses a local SQLite database (`kindred.db`) via `expo-sqlite` and `drizz
 - **No remote database deployment is required** for the core app data.
 - Data lives on the user's device.
 - Migrations are handled in `db/migrations.ts` (ensure this runs on app startup).
-

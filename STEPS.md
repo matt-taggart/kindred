@@ -2,6 +2,8 @@
 
 This guide outlines the steps to take your Expo app from local development to TestFlight and the App Store, including RevenueCat integration.
 
+For day-to-day release commands (versioning, build, submit, OTA for both `preview/staging` and `production/production`), use `RELEASE_FLOW.md`.
+
 ## 0. Generate the App Store Connect API Key
 Both Expo and RevenueCat need a "Master Key" to talk to Apple on your behalf.
 
@@ -45,26 +47,23 @@ Store your Apple credentials in Expo so you don't have to provide 2FA codes duri
 3. Follow the prompts to upload your **App Store Connect API Key** (the `.p8` file, Key ID, and Issuer ID).
 
 ## 4. Build and Submit to TestFlight
-Now you are ready to upload the actual app binary.
+Now you are ready to upload app binaries.
 
-### Step A: Generate the Build
-Run this command to create a production-ready `.ipa` file on Expo's servers:
-```bash
-eas build --platform ios --profile production
-```
+Use `RELEASE_FLOW.md` to choose the correct lane:
+- `preview` profile + `staging` channel for beta/TestFlight lane.
+- `production` profile + `production` channel for production lane.
 
-### Step B: Submit to Apple
-Once the build is finished, upload it:
-```bash
-eas submit --platform ios --profile production
-```
-- Select the latest build ID.
-- Expo will push the file to App Store Connect.
+That document includes exact commands for:
+- `eas build:version:get`
+- `eas build:version:set`
+- `eas build`
+- `eas submit`
+- `eas update`
 
 ## 5. Enable TestFlight Testing
 1. Go to **App Store Connect** > **TestFlight**.
 2. Wait for the build to finish "Processing" (10–30 mins).
-3. **Missing Compliance**: If prompted, click it and select "No" for encryption (this is already handled in your `app.json` but may need a one-time confirmation).
+3. **Missing Compliance**: If prompted, click it and select "No" for encryption (this is already handled in `app.config.js` via `ITSAppUsesNonExemptEncryption: false`, but Apple may still require one-time confirmation).
 4. **Add Testers**:
    - On the left, click **Internal Testing** > **+**.
    - Create a group called "Internal".
@@ -79,4 +78,3 @@ eas submit --platform ios --profile production
   - Use the **same RevenueCat API Key** for both development and production. RevenueCat automatically detects the environment.
   - Development builds use the **Apple Sandbox** environment automatically. You do NOT need a separate test store configuration.
   - To test purchases on a physical device, create a **Sandbox Tester** account in App Store Connect (Users and Access > Sandbox Testers).
-
