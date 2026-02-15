@@ -11,6 +11,12 @@ export default {
     name: "kindred",
     slug: "kindred",
     version: "1.0.0",
+    updates: {
+      url: "https://u.expo.dev/0224db90-2483-46ad-973f-036d6f15446f",
+    },
+    runtimeVersion: {
+      policy: "appVersion",
+    },
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "myapp",
