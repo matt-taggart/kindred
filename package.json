@@ -10,6 +10,8 @@
     "dev:client": "expo start --dev-client --host lan",
     "build:dev:ios": "eas build --profile development --platform ios",
     "build:dev:android": "eas build --profile development --platform android",
+    "update:testflight": "eas update --branch staging",
+    "update:production": "eas update --branch production",
     "test": "jest --watchAll",
     "seed": "tsx scripts/seed.ts",
     "lint": "expo lint"
