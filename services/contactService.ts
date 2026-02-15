@@ -215,6 +215,18 @@ export const getContacts = (options: GetContactsOptions = {}): Contact[] => {
   return query.orderBy(asc(isNull(contacts.nextContactDate)), asc(contacts.nextContactDate)).all();
 };
 
+export const rescheduleAllActiveContactReminders = async (): Promise<void> => {
+  const activeContacts = getContacts({ includeArchived: false });
+
+  for (const contact of activeContacts) {
+    try {
+      await scheduleReminder(contact);
+    } catch (error) {
+      console.warn('Failed to schedule reminder', error);
+    }
+  }
+};
+
 export const getDueContacts = (): Contact[] => {
   const db = getDb();
   const now = new Date();

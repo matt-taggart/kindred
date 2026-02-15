@@ -120,7 +120,7 @@ const ensureAndroidChannel = async () => {
 export const scheduleReminder = async (contact: Contact): Promise<string | null> => {
   await cancelContactReminder(contact.id);
 
-  if (!contact.nextContactDate || contact.nextContactDate <= Date.now()) return null;
+  if (!contact.nextContactDate) return null;
 
   const hasPermission = await ensurePermissions();
   if (!hasPermission) return null;
@@ -129,6 +129,8 @@ export const scheduleReminder = async (contact: Contact): Promise<string | null>
 
   const contactName = getDisplayName(contact.name);
   const content = getContactReminderContent(contactName);
+  const notificationSettings = useUserStore.getState().notificationSettings;
+  const triggerDate = resolveReminderTriggerDate(contact.nextContactDate, notificationSettings);
 
   const identifier = await Notifications.scheduleNotificationAsync({
     identifier: getContactReminderIdentifier(contact.id),
@@ -137,7 +139,7 @@ export const scheduleReminder = async (contact: Contact): Promise<string | null>
       body: content.body,
       data: { type: 'contact-reminder', contactId: contact.id },
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: new Date(contact.nextContactDate) },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerDate },
   });
 
   return identifier;
@@ -146,6 +148,66 @@ export const scheduleReminder = async (contact: Contact): Promise<string | null>
 const parseTimeString = (timeStr: string): { hour: number; minute: number } => {
   const [hours, minutes] = timeStr.split(':').map(Number);
   return { hour: hours, minute: minutes };
+};
+
+const getValidReminderTimes = (
+  notificationSettings: NotificationSettings,
+): Array<{ hour: number; minute: number }> => {
+  const parsed = notificationSettings.reminderTimes
+    .slice(0, notificationSettings.frequency)
+    .map(parseTimeString)
+    .filter(({ hour, minute }) =>
+      Number.isInteger(hour)
+      && Number.isInteger(minute)
+      && hour >= 0
+      && hour <= 23
+      && minute >= 0
+      && minute <= 59
+    )
+    .sort((a, b) => (a.hour * 60 + a.minute) - (b.hour * 60 + b.minute));
+
+  if (parsed.length > 0) {
+    return parsed;
+  }
+
+  return [{ hour: 9, minute: 0 }];
+};
+
+const resolveReminderTriggerDate = (
+  nextContactDateMs: number,
+  notificationSettings: NotificationSettings,
+  nowMs: number = Date.now(),
+): Date => {
+  const reminderTimes = getValidReminderTimes(notificationSettings);
+  const now = new Date(nowMs);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const dueDate = new Date(nextContactDateMs);
+  const dueDayStart = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+
+  const startDay = dueDayStart.getTime() > todayStart.getTime()
+    ? dueDayStart
+    : todayStart;
+
+  let dayOffset = 0;
+  while (dayOffset < 366) {
+    const candidateDay = new Date(startDay);
+    candidateDay.setDate(candidateDay.getDate() + dayOffset);
+
+    for (const reminderTime of reminderTimes) {
+      const candidate = new Date(candidateDay);
+      candidate.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
+
+      if (candidate.getTime() > nowMs) {
+        return candidate;
+      }
+    }
+
+    dayOffset += 1;
+  }
+
+  const fallback = new Date(nowMs + 60_000);
+  return fallback;
 };
 
 const cancelDailyReminders = async () => {

@@ -3,6 +3,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   Platform,
   Pressable,
   SafeAreaView,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 
 import { NotificationFrequency, useUserStore } from "@/lib/userStore";
+import { rescheduleAllActiveContactReminders } from "@/services/contactService";
 import Colors from "@/constants/Colors";
 
 const frequencyOptions: { value: NotificationFrequency; label: string }[] = [
@@ -52,6 +54,7 @@ export default function NotificationSettingsScreen() {
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [tempTime, setTempTime] = useState<Date | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const handleFrequencyChange = (newFrequency: NotificationFrequency) => {
     setNotificationFrequency(newFrequency);
@@ -84,6 +87,25 @@ export default function NotificationSettingsScreen() {
   const handleTimeCancel = () => {
     setEditingIndex(null);
     setTempTime(null);
+  };
+
+  const handleSave = async () => {
+    if (saving) return;
+
+    setSaving(true);
+    try {
+      await rescheduleAllActiveContactReminders();
+      router.back();
+    } catch (error) {
+      Alert.alert(
+        "Couldn’t update reminders",
+        error instanceof Error
+          ? error.message
+          : "Please try saving your reminder rhythm again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const previewText = (() => {
@@ -228,11 +250,12 @@ export default function NotificationSettingsScreen() {
         {/* Footer with Save Button */}
         <View className="absolute bottom-0 left-0 right-0 p-6 bg-surface-page/80">
           <Pressable
-            onPress={() => router.back()}
+            onPress={handleSave}
+            disabled={saving}
             className="w-full bg-primary py-5 rounded-full items-center justify-center shadow-lg shadow-primary/20"
           >
             <Text className="text-white font-bold text-lg font-heading">
-              Save Rhythm
+              {saving ? "Saving…" : "Save Rhythm"}
             </Text>
           </Pressable>
           <View className="h-1.5 w-32 bg-stroke-soft rounded-full self-center mt-4 mb-2" />

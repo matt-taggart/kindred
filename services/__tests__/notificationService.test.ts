@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import type { Contact } from '@/db/schema';
+import { useUserStore } from '@/lib/userStore';
 import { cancelContactReminder, scheduleDailyReminders, scheduleReminder } from '../notificationService';
 
 const createContact = (overrides: Partial<Contact> = {}): Contact => ({
@@ -39,8 +40,14 @@ const getExpectedContactReminderCopy = (name: string) => (
 describe('notificationService contact reminders', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-02-10T12:00:00.000Z'));
+    jest.setSystemTime(new Date(2026, 1, 10, 15, 0, 0, 0));
     jest.clearAllMocks();
+    useUserStore.setState({
+      notificationSettings: {
+        frequency: 1,
+        reminderTimes: ['09:00', '14:00', '19:00'],
+      },
+    });
   });
 
   afterEach(() => {
@@ -70,7 +77,7 @@ describe('notificationService contact reminders', () => {
     );
   });
 
-  it('does not schedule when nextContactDate is in the past', async () => {
+  it('schedules overdue contacts for the next available reminder time', async () => {
     (Notifications.getAllScheduledNotificationsAsync as jest.Mock).mockResolvedValue([
       createScheduledNotification('old-1', { contactId: 'contact-1' }),
     ]);
@@ -79,9 +86,46 @@ describe('notificationService contact reminders', () => {
       createContact({ nextContactDate: Date.now() - 60 * 1000 }),
     );
 
-    expect(result).toBeNull();
+    expect(result).toBe('mock-notification-id');
     expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('old-1');
-    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+    const trigger = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0].trigger;
+    expect(trigger.type).toBe('date');
+    expect(trigger.date.getHours()).toBe(9);
+    expect(trigger.date.getMinutes()).toBe(0);
+  });
+
+  it('schedules same-day notifications at the next configured slot', async () => {
+    useUserStore.setState({
+      notificationSettings: {
+        frequency: 3,
+        reminderTimes: ['09:00', '14:00', '19:00'],
+      },
+    });
+
+    await scheduleReminder(createContact({ nextContactDate: Date.now() }));
+
+    const trigger = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0].trigger;
+    expect(trigger.type).toBe('date');
+    expect(trigger.date.getHours()).toBe(19);
+    expect(trigger.date.getMinutes()).toBe(0);
+  });
+
+  it('schedules future contacts on the configured reminder day', async () => {
+    useUserStore.setState({
+      notificationSettings: {
+        frequency: 1,
+        reminderTimes: ['09:00', '14:00', '19:00'],
+      },
+    });
+
+    const tomorrowAtThreePm = new Date(2026, 1, 11, 15, 0, 0, 0).getTime();
+    await scheduleReminder(createContact({ nextContactDate: tomorrowAtThreePm }));
+
+    const trigger = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0].trigger;
+    expect(trigger.type).toBe('date');
+    expect(trigger.date.getDate()).toBe(11);
+    expect(trigger.date.getHours()).toBe(9);
+    expect(trigger.date.getMinutes()).toBe(0);
   });
 
   it('cancelContactReminder removes both data-matched and identifier-matched reminders', async () => {
