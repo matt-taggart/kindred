@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -126,6 +127,9 @@ export default function SettingsScreen() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const appVersion = Constants.nativeAppVersion ?? Constants.expoConfig?.version ?? "Unknown";
+  const buildVersion = Constants.nativeBuildVersion;
+  const versionLabel = buildVersion ? `Version ${appVersion} (${buildVersion})` : `Version ${appVersion}`;
 
   const handleNotifications = () => {
     router.push("/settings/notifications");
@@ -304,7 +308,7 @@ export default function SettingsScreen() {
 
           {/* Version Footer */}
           <Caption muted className="mt-2 text-center text-text-soft/40">
-            Version 2.4.0
+            {versionLabel}
           </Caption>
         </View>
       </ScrollView>

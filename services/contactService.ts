@@ -4,7 +4,12 @@ import { getDb } from '../db/client';
 import { Contact, Interaction, NewContact, NewInteraction, contacts, interactions } from '../db/schema';
 import { useUserStore } from '../lib/userStore';
 import { DAY_IN_MS, bucketOffsets, getNextContactDate } from '../utils/scheduler';
-import { cancelAllReminders, cancelContactReminder, scheduleReminder } from './notificationService';
+import {
+  cancelAllReminders,
+  cancelContactReminder,
+  rescheduleContactReminders,
+  scheduleReminder,
+} from './notificationService';
 
 export const CONTACT_LIMIT = 5;
 export const RECENTLY_CONNECTED_DAYS = 14;
@@ -217,14 +222,7 @@ export const getContacts = (options: GetContactsOptions = {}): Contact[] => {
 
 export const rescheduleAllActiveContactReminders = async (): Promise<void> => {
   const activeContacts = getContacts({ includeArchived: false });
-
-  for (const contact of activeContacts) {
-    try {
-      await scheduleReminder(contact);
-    } catch (error) {
-      console.warn('Failed to schedule reminder', error);
-    }
-  }
+  await rescheduleContactReminders(activeContacts);
 };
 
 export const getDueContacts = (): Contact[] => {

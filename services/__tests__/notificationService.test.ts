@@ -128,6 +128,24 @@ describe('notificationService contact reminders', () => {
     expect(trigger.date.getMinutes()).toBe(0);
   });
 
+  it('schedules birthday contacts for today even when cadence date is in the future', async () => {
+    useUserStore.setState({
+      notificationSettings: {
+        frequency: 3,
+        reminderTimes: ['09:00', '14:00', '19:00'],
+      },
+    });
+
+    const inTenDays = new Date(2026, 1, 20, 10, 0, 0, 0).getTime();
+    await scheduleReminder(createContact({ birthday: '1990-02-10', nextContactDate: inTenDays }));
+
+    const trigger = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0].trigger;
+    expect(trigger.type).toBe('date');
+    expect(trigger.date.getDate()).toBe(10);
+    expect(trigger.date.getHours()).toBe(19);
+    expect(trigger.date.getMinutes()).toBe(0);
+  });
+
   it('cancelContactReminder removes both data-matched and identifier-matched reminders', async () => {
     (Notifications.getAllScheduledNotificationsAsync as jest.Mock).mockResolvedValue([
       createScheduledNotification('legacy-one', { contactId: 'contact-1' }),

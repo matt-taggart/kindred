@@ -12,6 +12,33 @@ const MAX_NAMES_IN_DAILY_TITLE_ANDROID = 3;
 const getContactReminderIdentifier = (contactId: string): string =>
   `${CONTACT_REMINDER_PREFIX}${contactId}`;
 
+const isBirthdayToday = (
+  birthday: string | null | undefined,
+  today: Date = new Date(),
+): boolean => {
+  if (!birthday) return false;
+
+  const parts = birthday.split('-');
+  let month: number;
+  let day: number;
+
+  if (parts.length === 3) {
+    month = parseInt(parts[1], 10);
+    day = parseInt(parts[2], 10);
+  } else if (parts.length === 2) {
+    month = parseInt(parts[0], 10);
+    day = parseInt(parts[1], 10);
+  } else {
+    return false;
+  }
+
+  if (!Number.isInteger(month) || !Number.isInteger(day)) {
+    return false;
+  }
+
+  return month === today.getMonth() + 1 && day === today.getDate();
+};
+
 const getDisplayName = (name: string | null | undefined): string => {
   const trimmed = name?.trim();
   return trimmed && trimmed.length > 0 ? trimmed : 'this connection';
@@ -127,22 +154,8 @@ export const scheduleReminder = async (contact: Contact): Promise<string | null>
 
   await ensureAndroidChannel();
 
-  const contactName = getDisplayName(contact.name);
-  const content = getContactReminderContent(contactName);
   const notificationSettings = useUserStore.getState().notificationSettings;
-  const triggerDate = resolveReminderTriggerDate(contact.nextContactDate, notificationSettings);
-
-  const identifier = await Notifications.scheduleNotificationAsync({
-    identifier: getContactReminderIdentifier(contact.id),
-    content: {
-      title: content.title,
-      body: content.body,
-      data: { type: 'contact-reminder', contactId: contact.id },
-    },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerDate },
-  });
-
-  return identifier;
+  return scheduleContactReminder(contact, notificationSettings);
 };
 
 const parseTimeString = (timeStr: string): { hour: number; minute: number } => {
@@ -173,11 +186,18 @@ const getValidReminderTimes = (
   return [{ hour: 9, minute: 0 }];
 };
 
+type ResolveReminderTriggerDateOptions = {
+  nowMs?: number;
+  allowTodayOverride?: boolean;
+};
+
 const resolveReminderTriggerDate = (
   nextContactDateMs: number,
   notificationSettings: NotificationSettings,
-  nowMs: number = Date.now(),
+  options: ResolveReminderTriggerDateOptions = {},
 ): Date => {
+  const nowMs = options.nowMs ?? Date.now();
+  const allowTodayOverride = options.allowTodayOverride ?? false;
   const reminderTimes = getValidReminderTimes(notificationSettings);
   const now = new Date(nowMs);
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -185,9 +205,11 @@ const resolveReminderTriggerDate = (
   const dueDate = new Date(nextContactDateMs);
   const dueDayStart = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
 
-  const startDay = dueDayStart.getTime() > todayStart.getTime()
-    ? dueDayStart
-    : todayStart;
+  const startDay = allowTodayOverride
+    ? todayStart
+    : dueDayStart.getTime() > todayStart.getTime()
+      ? dueDayStart
+      : todayStart;
 
   let dayOffset = 0;
   while (dayOffset < 366) {
@@ -208,6 +230,73 @@ const resolveReminderTriggerDate = (
 
   const fallback = new Date(nowMs + 60_000);
   return fallback;
+};
+
+const scheduleContactReminder = async (
+  contact: Contact,
+  notificationSettings: NotificationSettings,
+  nowMs: number = Date.now(),
+): Promise<string | null> => {
+  if (!contact.nextContactDate) return null;
+
+  const today = new Date(nowMs);
+  const contactName = getDisplayName(contact.name);
+  const content = getContactReminderContent(contactName);
+  const triggerDate = resolveReminderTriggerDate(contact.nextContactDate, notificationSettings, {
+    nowMs,
+    allowTodayOverride: isBirthdayToday(contact.birthday, today),
+  });
+
+  return Notifications.scheduleNotificationAsync({
+    identifier: getContactReminderIdentifier(contact.id),
+    content: {
+      title: content.title,
+      body: content.body,
+      data: { type: 'contact-reminder', contactId: contact.id },
+    },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerDate },
+  });
+};
+
+const getAllContactReminderNotificationIdentifiers = async (): Promise<string[]> => {
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+
+  const identifiers = scheduled
+    .filter((item) => {
+      if (item.identifier.startsWith(CONTACT_REMINDER_PREFIX)) return true;
+
+      const data = item.content.data as { type?: string; contactId?: string } | undefined;
+      return data?.type === 'contact-reminder' || typeof data?.contactId === 'string';
+    })
+    .map((item) => item.identifier);
+
+  return [...new Set(identifiers)];
+};
+
+export const rescheduleContactReminders = async (
+  contacts: Contact[],
+  settings?: NotificationSettings,
+): Promise<void> => {
+  const hasPermission = await ensurePermissions();
+  if (!hasPermission) return;
+
+  await ensureAndroidChannel();
+
+  const existingReminderIdentifiers = await getAllContactReminderNotificationIdentifiers();
+  if (existingReminderIdentifiers.length > 0) {
+    await Promise.all(
+      existingReminderIdentifiers.map((identifier) =>
+        Notifications.cancelScheduledNotificationAsync(identifier),
+      ),
+    );
+  }
+
+  const notificationSettings = settings ?? useUserStore.getState().notificationSettings;
+  const nowMs = Date.now();
+
+  await Promise.all(
+    contacts.map((contact) => scheduleContactReminder(contact, notificationSettings, nowMs)),
+  );
 };
 
 const cancelDailyReminders = async () => {
