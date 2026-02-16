@@ -83,8 +83,8 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const brandingSource =
     colorScheme === "dark"
-      ? require("../assets/images/quilt-mark-dark.png")
-      : require("../assets/images/quilt-mark-light.png");
+      ? require("@/assets/images/quilt-mark-dark.png")
+      : require("@/assets/images/quilt-mark-light.png");
 
   const logoElement = (
     <View className="w-6 h-6 items-center justify-center">
