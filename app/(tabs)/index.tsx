@@ -87,10 +87,10 @@ export default function HomeScreen() {
       : require("@/assets/images/quilt-mark-light.png");
 
   const logoElement = (
-    <View className="w-12 h-12 items-center justify-center">
+    <View className="w-10 h-10 items-center justify-center">
       <Image
         source={brandingSource}
-        className="w-10 h-10"
+        className="w-8 h-8"
         resizeMode="contain"
         accessibilityLabel="Kindred logo"
       />
