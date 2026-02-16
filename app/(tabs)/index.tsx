@@ -259,7 +259,6 @@ export default function HomeScreen() {
           <PageHeader
             title="Kindred"
             subtitle={greetingSubtitle}
-            showBranding={false}
             titleToSubtitleGapClassName="mb-1"
             subtitleSize="base"
           />
@@ -279,7 +278,6 @@ export default function HomeScreen() {
             <PageHeader
               title="Kindred"
               subtitle={greetingSubtitle}
-              showBranding={false}
               titleToSubtitleGapClassName="mb-1"
               subtitleSize="base"
             />
@@ -325,7 +323,6 @@ export default function HomeScreen() {
           <PageHeader
             title="Kindred"
             subtitle={greetingSubtitle}
-            showBranding={false}
             titleToSubtitleGapClassName="mb-1"
             subtitleSize="base"
           />
