@@ -4,9 +4,11 @@ import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   RefreshControl,
   SafeAreaView,
   ScrollView,
+  useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -78,6 +80,23 @@ export default function HomeScreen() {
   type InteractionType = NewInteraction["type"];
   const router = useRouter();
   const { width } = useWindowDimensions();
+  const colorScheme = useColorScheme();
+  const brandingSource =
+    colorScheme === "dark"
+      ? require("../assets/images/quilt-mark-dark.png")
+      : require("../assets/images/quilt-mark-light.png");
+
+  const logoElement = (
+    <View className="w-6 h-6 items-center justify-center">
+      <Image
+        source={brandingSource}
+        className="w-5 h-5"
+        resizeMode="contain"
+        accessibilityLabel="Kindred logo"
+      />
+    </View>
+  );
+
   const [groupedContacts, setGroupedContacts] = useState<GroupedDueContacts>({
     birthdays: [],
     reconnect: [],
@@ -259,6 +278,8 @@ export default function HomeScreen() {
           <PageHeader
             title="Kindred"
             subtitle={greetingSubtitle}
+            showBranding={false}
+            leftElement={logoElement}
             titleToSubtitleGapClassName="mb-1"
             subtitleSize="base"
           />
@@ -278,6 +299,8 @@ export default function HomeScreen() {
             <PageHeader
               title="Kindred"
               subtitle={greetingSubtitle}
+              showBranding={false}
+              leftElement={logoElement}
               titleToSubtitleGapClassName="mb-1"
               subtitleSize="base"
             />
@@ -323,6 +346,8 @@ export default function HomeScreen() {
           <PageHeader
             title="Kindred"
             subtitle={greetingSubtitle}
+            showBranding={false}
+            leftElement={logoElement}
             titleToSubtitleGapClassName="mb-1"
             subtitleSize="base"
           />
