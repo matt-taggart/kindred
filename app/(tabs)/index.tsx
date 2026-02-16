@@ -20,6 +20,7 @@ import {
   getDueContactsGrouped,
   GroupedDueContacts,
   isBirthdayToday,
+  isReminderOverdue,
   getContactCount,
   snoozeContact,
   createInteraction,
@@ -366,6 +367,7 @@ export default function HomeScreen() {
             <QuiltGrid columns={isNarrowLayout ? 1 : 2}>
               {displayContacts.map((contact, index) => {
                 const isBirthday = isBirthdayToday(contact);
+                const isOverdue = isReminderOverdue(contact.nextContactDate);
                 return (
                   <ConnectionTile
                     key={contact.id}
@@ -377,6 +379,7 @@ export default function HomeScreen() {
                     }
                     size={getTileSize(contact)}
                     isBirthday={isBirthday}
+                    isOverdue={isOverdue}
                     onPress={() => handleContactPress(contact)}
                     onOpenActions={() => handleOpenActions(contact)}
                   />

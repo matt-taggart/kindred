@@ -31,6 +31,7 @@ type ConnectionTileProps = {
   variant?: 'primary' | 'secondary' | 'accent';
   size?: 'standard' | 'large';
   isBirthday?: boolean;
+  isOverdue?: boolean;
   onPress: () => void;
   onOpenActions?: () => void;
 };
@@ -93,6 +94,7 @@ export function ConnectionTile({
   variant = 'primary',
   size = 'standard',
   isBirthday = false,
+  isOverdue = false,
   onPress,
   onOpenActions,
 }: ConnectionTileProps) {
@@ -178,6 +180,11 @@ export function ConnectionTile({
         <Body size="sm" className="mt-1 text-text-muted dark:text-slate-300">
           {statusText}
         </Body>
+        {isOverdue && (
+          <Body size="sm" className="mt-1 text-secondary dark:text-secondary font-semibold">
+            Overdue
+          </Body>
+        )}
       </View>
     </TouchableOpacity>
   );

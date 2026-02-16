@@ -106,13 +106,7 @@ export function ConnectionCard({
           </View>
         </View>
 
-        {/* Overdue indicator */}
-        {isOverdue && (
-          <Text className="text-[11px] text-secondary mt-2 font-body leading-4">
-            Overdue
-          </Text>
-        )}
-      </View>
+        </View>
 
       {/* Chevron */}
       <Ionicons name="chevron-forward" size={20} color="#9AA3AF" />
