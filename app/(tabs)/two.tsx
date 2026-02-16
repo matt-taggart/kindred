@@ -20,13 +20,13 @@ import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { FilterPills, FilterOption } from "@/components/FilterPills";
 import { ConnectionCard } from "@/components/ConnectionCard";
-import { MomentCard, MomentSectionDivider } from '@/components';
+
 import {
   getContacts,
   isReminderDueTodayOrOverdue,
   unarchiveContact,
 } from "@/services/contactService";
-import { getUpcomingMoments, UpcomingMoments, MomentContact } from '@/services/calendarService';
+
 import {
   formatLastConnected,
   formatNextReminder,
@@ -39,19 +39,12 @@ const isContactDue = (contact: Contact) => {
 
 type ListItem =
   | { type: 'section-header'; title: string; key: string }
-  | { type: 'moment-divider'; title: string; highlighted: boolean; key: string }
-  | { type: 'moment-card'; moment: MomentContact; key: string }
   | { type: 'connection-card'; contact: Contact; key: string }
   | { type: 'archived-row'; contact: Contact; key: string };
 
 export default function ConnectionsScreen() {
   const router = useRouter();
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [moments, setMoments] = useState<UpcomingMoments>({
-    thisWeek: [],
-    nextWeek: [],
-    laterThisSeason: [],
-  });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<FilterOption>("all");
@@ -62,17 +55,12 @@ export default function ConnectionsScreen() {
   const loadContacts = useCallback(() => {
     try {
       const results = getContacts({ includeArchived: true });
-      const upcomingMoments = getUpcomingMoments();
       const activeCount = results.filter((c) => !c.isArchived).length;
       const archivedCount = results.filter((c) => c.isArchived).length;
-      const dueCount =
-        upcomingMoments.thisWeek.length +
-        upcomingMoments.nextWeek.length +
-        upcomingMoments.laterThisSeason.length;
+      const dueCount = results.filter((c) => !c.isArchived && isContactDue(c)).length;
 
       setContacts(results);
       setCounts({ all: activeCount, due: dueCount, archived: archivedCount });
-      setMoments(upcomingMoments);
     } catch (error) {
       console.warn("Failed to load contacts:", error);
     } finally {
@@ -94,9 +82,6 @@ export default function ConnectionsScreen() {
     const matchesSearch = (contact: Contact) =>
       !searchQuery || contact.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesMomentSearch = (moment: MomentContact) =>
-      !searchQuery || moment.contact.name.toLowerCase().includes(searchQuery.toLowerCase());
-
     if (filter === "archived") {
       const archivedContacts = contacts.filter((c) => c.isArchived && matchesSearch(c));
       archivedContacts.forEach((contact) => {
@@ -106,29 +91,15 @@ export default function ConnectionsScreen() {
     }
 
     if (filter === "due") {
-      // Time-grouped moment cards
-      const thisWeek = moments.thisWeek.filter(matchesMomentSearch);
-      const nextWeek = moments.nextWeek.filter(matchesMomentSearch);
-      const laterThisSeason = moments.laterThisSeason.filter(matchesMomentSearch);
+      // Show only overdue and today's reminders (Connections to Nurture)
+      const dueContacts = contacts.filter(
+        (c) => !c.isArchived && isContactDue(c) && matchesSearch(c)
+      );
 
-      if (thisWeek.length > 0) {
-        items.push({ type: 'moment-divider', title: 'This Week', highlighted: true, key: 'divider-this-week' });
-        thisWeek.forEach((moment) => {
-          items.push({ type: 'moment-card', moment, key: `moment-${moment.contact.id}` });
-        });
-      }
-
-      if (nextWeek.length > 0) {
-        items.push({ type: 'moment-divider', title: 'Next Week', highlighted: false, key: 'divider-next-week' });
-        nextWeek.forEach((moment) => {
-          items.push({ type: 'moment-card', moment, key: `moment-${moment.contact.id}` });
-        });
-      }
-
-      if (laterThisSeason.length > 0) {
-        items.push({ type: 'moment-divider', title: 'Later This Season', highlighted: false, key: 'divider-later' });
-        laterThisSeason.forEach((moment) => {
-          items.push({ type: 'moment-card', moment, key: `moment-${moment.contact.id}` });
+      if (dueContacts.length > 0) {
+        items.push({ type: 'section-header', title: 'Connections to nurture', key: 'header-due' });
+        dueContacts.forEach((contact) => {
+          items.push({ type: 'connection-card', contact, key: `card-${contact.id}` });
         });
       }
 
@@ -160,7 +131,7 @@ export default function ConnectionsScreen() {
     }
 
     return items;
-  }, [contacts, moments, filter, searchQuery]);
+  }, [contacts, filter, searchQuery]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -216,22 +187,6 @@ export default function ConnectionsScreen() {
               nextReminderLabel={formatNextReminder(item.contact.nextContactDate)}
               isReady={isContactDue(item.contact)}
               onPress={() => handleContactPress(item.contact.id)}
-            />
-          );
-
-        case 'moment-divider':
-          return <MomentSectionDivider title={item.title} highlighted={item.highlighted} />;
-
-        case 'moment-card':
-          return (
-            <MomentCard
-              contact={item.moment.contact}
-              avatarIcon={item.moment.avatarIcon as keyof typeof Ionicons.glyphMap}
-              rhythmLabel={item.moment.rhythmLabel}
-              timeLabel={item.moment.timeLabel}
-              isUrgent={item.moment.isUrgent}
-              isResting={item.moment.isResting}
-              onPress={() => handleContactPress(item.moment.contact.id)}
             />
           );
 
