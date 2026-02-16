@@ -68,7 +68,7 @@ describe('notificationService contact reminders', () => {
     expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenNthCalledWith(2, 'old-2');
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
       expect.objectContaining({
-        identifier: 'contact-reminder-contact-1',
+        identifier: expect.stringMatching(/^contact-reminder-contact-1/),
         content: expect.objectContaining({
           ...getExpectedContactReminderCopy('Ada'),
           data: { type: 'contact-reminder', contactId: 'contact-1' },
@@ -94,7 +94,7 @@ describe('notificationService contact reminders', () => {
     expect(trigger.date.getMinutes()).toBe(0);
   });
 
-  it('schedules same-day notifications at the next configured slot', async () => {
+  it('schedules the configured number of upcoming notifications for due contacts', async () => {
     useUserStore.setState({
       notificationSettings: {
         frequency: 3,
@@ -104,10 +104,27 @@ describe('notificationService contact reminders', () => {
 
     await scheduleReminder(createContact({ nextContactDate: Date.now() }));
 
-    const trigger = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0].trigger;
-    expect(trigger.type).toBe('date');
-    expect(trigger.date.getHours()).toBe(19);
-    expect(trigger.date.getMinutes()).toBe(0);
+    const calls = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls;
+    expect(calls).toHaveLength(3);
+
+    const firstTrigger = calls[0][0].trigger;
+    const secondTrigger = calls[1][0].trigger;
+    const thirdTrigger = calls[2][0].trigger;
+
+    expect(firstTrigger.type).toBe('date');
+    expect(firstTrigger.date.getDate()).toBe(10);
+    expect(firstTrigger.date.getHours()).toBe(19);
+    expect(firstTrigger.date.getMinutes()).toBe(0);
+
+    expect(secondTrigger.type).toBe('date');
+    expect(secondTrigger.date.getDate()).toBe(11);
+    expect(secondTrigger.date.getHours()).toBe(9);
+    expect(secondTrigger.date.getMinutes()).toBe(0);
+
+    expect(thirdTrigger.type).toBe('date');
+    expect(thirdTrigger.date.getDate()).toBe(11);
+    expect(thirdTrigger.date.getHours()).toBe(14);
+    expect(thirdTrigger.date.getMinutes()).toBe(0);
   });
 
   it('schedules future contacts on the configured reminder day', async () => {
@@ -139,11 +156,53 @@ describe('notificationService contact reminders', () => {
     const inTenDays = new Date(2026, 1, 20, 10, 0, 0, 0).getTime();
     await scheduleReminder(createContact({ birthday: '1990-02-10', nextContactDate: inTenDays }));
 
-    const trigger = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0].trigger;
-    expect(trigger.type).toBe('date');
-    expect(trigger.date.getDate()).toBe(10);
-    expect(trigger.date.getHours()).toBe(19);
-    expect(trigger.date.getMinutes()).toBe(0);
+    const calls = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls;
+    expect(calls).toHaveLength(3);
+
+    const firstTrigger = calls[0][0].trigger;
+    const secondTrigger = calls[1][0].trigger;
+    const thirdTrigger = calls[2][0].trigger;
+
+    expect(firstTrigger.type).toBe('date');
+    expect(firstTrigger.date.getDate()).toBe(10);
+    expect(firstTrigger.date.getHours()).toBe(19);
+    expect(firstTrigger.date.getMinutes()).toBe(0);
+
+    expect(secondTrigger.type).toBe('date');
+    expect(secondTrigger.date.getDate()).toBe(11);
+    expect(secondTrigger.date.getHours()).toBe(9);
+    expect(secondTrigger.date.getMinutes()).toBe(0);
+
+    expect(thirdTrigger.type).toBe('date');
+    expect(thirdTrigger.date.getDate()).toBe(11);
+    expect(thirdTrigger.date.getHours()).toBe(14);
+    expect(thirdTrigger.date.getMinutes()).toBe(0);
+  });
+
+  it('schedules all configured reminder times on a future due date', async () => {
+    useUserStore.setState({
+      notificationSettings: {
+        frequency: 3,
+        reminderTimes: ['09:00', '14:00', '19:00'],
+      },
+    });
+
+    const tomorrowAtThreePm = new Date(2026, 1, 11, 15, 0, 0, 0).getTime();
+    await scheduleReminder(createContact({ nextContactDate: tomorrowAtThreePm }));
+
+    const calls = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls;
+    expect(calls).toHaveLength(3);
+
+    const triggers = calls.map((call) => call[0].trigger);
+    const identifiers = calls.map((call) => call[0].identifier);
+
+    expect(triggers[0].date.getDate()).toBe(11);
+    expect(triggers[0].date.getHours()).toBe(9);
+    expect(triggers[1].date.getDate()).toBe(11);
+    expect(triggers[1].date.getHours()).toBe(14);
+    expect(triggers[2].date.getDate()).toBe(11);
+    expect(triggers[2].date.getHours()).toBe(19);
+    expect(new Set(identifiers).size).toBe(3);
   });
 
   it('cancelContactReminder removes both data-matched and identifier-matched reminders', async () => {

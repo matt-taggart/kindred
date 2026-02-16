@@ -9,8 +9,10 @@ const CONTACT_REMINDER_PREFIX = 'contact-reminder-';
 const MAX_NAMES_IN_DAILY_TITLE_IOS = 2;
 const MAX_NAMES_IN_DAILY_TITLE_ANDROID = 3;
 
-const getContactReminderIdentifier = (contactId: string): string =>
-  `${CONTACT_REMINDER_PREFIX}${contactId}`;
+const getContactReminderIdentifier = (contactId: string, suffix?: string): string =>
+  suffix
+    ? `${CONTACT_REMINDER_PREFIX}${contactId}-${suffix}`
+    : `${CONTACT_REMINDER_PREFIX}${contactId}`;
 
 const isBirthdayToday = (
   birthday: string | null | undefined,
@@ -106,11 +108,11 @@ const getDailyReminderContent = (
 
 const getContactReminderNotifications = async (contactId: string) => {
   const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-  const contactReminderIdentifier = getContactReminderIdentifier(contactId);
+  const contactReminderIdentifierPrefix = `${CONTACT_REMINDER_PREFIX}${contactId}`;
 
   return scheduled.filter((item) => {
     const data = item.content.data as { contactId?: string } | undefined;
-    return data?.contactId === contactId || item.identifier === contactReminderIdentifier;
+    return data?.contactId === contactId || item.identifier.startsWith(contactReminderIdentifierPrefix);
   });
 };
 
@@ -191,11 +193,11 @@ type ResolveReminderTriggerDateOptions = {
   allowTodayOverride?: boolean;
 };
 
-const resolveReminderTriggerDate = (
+const resolveReminderTriggerDates = (
   nextContactDateMs: number,
   notificationSettings: NotificationSettings,
   options: ResolveReminderTriggerDateOptions = {},
-): Date => {
+): Date[] => {
   const nowMs = options.nowMs ?? Date.now();
   const allowTodayOverride = options.allowTodayOverride ?? false;
   const reminderTimes = getValidReminderTimes(notificationSettings);
@@ -211,6 +213,7 @@ const resolveReminderTriggerDate = (
       ? dueDayStart
       : todayStart;
 
+  const triggerDates: Date[] = [];
   let dayOffset = 0;
   while (dayOffset < 366) {
     const candidateDay = new Date(startDay);
@@ -221,15 +224,28 @@ const resolveReminderTriggerDate = (
       candidate.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
 
       if (candidate.getTime() > nowMs) {
-        return candidate;
+        triggerDates.push(candidate);
+
+        if (triggerDates.length >= reminderTimes.length) {
+          return triggerDates;
+        }
       }
     }
 
     dayOffset += 1;
   }
 
-  const fallback = new Date(nowMs + 60_000);
-  return fallback;
+  return [new Date(nowMs + 60_000)];
+};
+
+const formatReminderIdentifierSuffix = (date: Date, slotIndex: number): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+
+  return `${year}${month}${day}-${hours}${minutes}-${slotIndex}`;
 };
 
 const scheduleContactReminder = async (
@@ -242,20 +258,35 @@ const scheduleContactReminder = async (
   const today = new Date(nowMs);
   const contactName = getDisplayName(contact.name);
   const content = getContactReminderContent(contactName);
-  const triggerDate = resolveReminderTriggerDate(contact.nextContactDate, notificationSettings, {
+  const triggerDates = resolveReminderTriggerDates(contact.nextContactDate, notificationSettings, {
     nowMs,
     allowTodayOverride: isBirthdayToday(contact.birthday, today),
   });
 
-  return Notifications.scheduleNotificationAsync({
-    identifier: getContactReminderIdentifier(contact.id),
-    content: {
-      title: content.title,
-      body: content.body,
-      data: { type: 'contact-reminder', contactId: contact.id },
-    },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerDate },
-  });
+  let firstScheduledIdentifier: string | null = null;
+
+  for (const [slotIndex, triggerDate] of triggerDates.entries()) {
+    const identifier = getContactReminderIdentifier(
+      contact.id,
+      formatReminderIdentifierSuffix(triggerDate, slotIndex),
+    );
+
+    const scheduledIdentifier = await Notifications.scheduleNotificationAsync({
+      identifier,
+      content: {
+        title: content.title,
+        body: content.body,
+        data: { type: 'contact-reminder', contactId: contact.id },
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerDate },
+    });
+
+    if (!firstScheduledIdentifier) {
+      firstScheduledIdentifier = scheduledIdentifier;
+    }
+  }
+
+  return firstScheduledIdentifier;
 };
 
 const getAllContactReminderNotificationIdentifiers = async (): Promise<string[]> => {

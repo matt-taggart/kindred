@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, Scroll
 import { Ionicons } from '@expo/vector-icons';
 
 import { Contact, Interaction, NewInteraction } from '@/db/schema';
-import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact, createInteraction, isReminderDueTodayOrOverdue } from '@/services/contactService';
+import { getContacts, getInteractionHistory, updateContact, updateContactCadence, archiveContact, unarchiveContact, createInteraction, deleteInteraction, isReminderDueTodayOrOverdue } from '@/services/contactService';
 import EditContactModal from '@/components/EditContactModal';
 import InteractionComposerSheet, { InteractionKind } from '@/components/InteractionComposerSheet';
 import { ConnectionDetailHeader, ConnectionProfileSection, QuickActionTile, SharedMomentsSection } from '@/components';
@@ -56,6 +56,7 @@ export default function ContactDetailScreen() {
   const [unarchiving, setUnarchiving] = useState(false);
   const [showComposer, setShowComposer] = useState(false);
   const [composerKind, setComposerKind] = useState<InteractionKind>('checkin');
+  const [deletingInteractionId, setDeletingInteractionId] = useState<string | null>(null);
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -135,6 +136,58 @@ export default function ContactDetailScreen() {
   const handleEditContact = useCallback(() => {
     setShowEditModal(true);
   }, []);
+
+  const handleDeleteMemory = useCallback(
+    (interaction: Interaction) => {
+      if (deletingInteractionId) return;
+
+      Alert.alert(
+        'Delete memory?',
+        "This can't be undone.",
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                setDeletingInteractionId(interaction.id);
+                await deleteInteraction(interaction.id);
+                setInteractions((current) => current.filter((item) => item.id !== interaction.id));
+              } catch {
+                Alert.alert('Error', 'Failed to delete memory. Please try again.');
+              } finally {
+                setDeletingInteractionId(null);
+              }
+            },
+          },
+        ],
+      );
+    },
+    [deletingInteractionId],
+  );
+
+  const handleOpenMemoryActions = useCallback(
+    (interaction: Interaction) => {
+      Alert.alert(
+        'Memory options',
+        undefined,
+        [
+          {
+            text: 'Edit memory',
+            onPress: () => handleEditInteraction(interaction),
+          },
+          {
+            text: 'Delete memory',
+            style: 'destructive',
+            onPress: () => handleDeleteMemory(interaction),
+          },
+          { text: 'Cancel', style: 'cancel' },
+        ],
+      );
+    },
+    [handleDeleteMemory, handleEditInteraction],
+  );
 
   const handleAddMemory = useCallback(() => {
     setComposerKind('memory');
@@ -258,6 +311,14 @@ export default function ContactDetailScreen() {
   )
     ? 'text-primary dark:text-primary'
     : 'text-text-muted dark:text-slate-300';
+  const memoryInteractions = useMemo(
+    () => interactions.filter((interaction) => interaction.kind === 'memory'),
+    [interactions],
+  );
+  const memoryMoments = useMemo(
+    () => mapInteractionsToMoments(memoryInteractions),
+    [memoryInteractions],
+  );
 
   if (loading) {
     return (
@@ -385,7 +446,7 @@ export default function ContactDetailScreen() {
             <Caption uppercase className="tracking-wider">
               Memories
             </Caption>
-            {interactions.length > 0 ? (
+            {memoryInteractions.length > 0 ? (
               <TouchableOpacity
                 onPress={handleAddMemory}
                 activeOpacity={0.8}
@@ -401,16 +462,24 @@ export default function ContactDetailScreen() {
             ) : null}
           </View>
           <SharedMomentsSection
-            moments={mapInteractionsToMoments(interactions)}
+            moments={memoryMoments}
             hideHeader
             onMomentPress={(moment) => {
-              const interaction = interactions.find(i => i.id === moment.id);
+              const interaction = memoryInteractions.find(i => i.id === moment.id);
               if (interaction) handleEditInteraction(interaction);
+            }}
+            onMomentLongPress={(moment) => {
+              const interaction = memoryInteractions.find((item) => item.id === moment.id);
+              if (interaction) handleOpenMemoryActions(interaction);
+            }}
+            onMomentOptionsPress={(moment) => {
+              const interaction = memoryInteractions.find((item) => item.id === moment.id);
+              if (interaction) handleOpenMemoryActions(interaction);
             }}
           />
 
           {/* Empty state when no moments */}
-          {interactions.length === 0 && (
+          {memoryInteractions.length === 0 && (
             <View className="mt-8">
               <View className="items-center justify-center rounded-3xl bg-surface-card dark:bg-card-dark border border-stroke-soft dark:border-slate-800 p-8 shadow-soft">
                 <View className="w-16 h-16 rounded-full bg-sage-light dark:bg-accent-dark-sage items-center justify-center mb-4 border border-primary/10">

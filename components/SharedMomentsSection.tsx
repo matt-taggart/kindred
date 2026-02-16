@@ -19,6 +19,8 @@ type SharedMomentsSectionProps = {
   moments: Moment[];
   onViewAll?: () => void;
   onMomentPress?: (moment: Moment) => void;
+  onMomentLongPress?: (moment: Moment) => void;
+  onMomentOptionsPress?: (moment: Moment) => void;
   title?: string;
   hideHeader?: boolean;
 };
@@ -27,9 +29,13 @@ export function SharedMomentsSection({
   moments,
   onViewAll,
   onMomentPress,
+  onMomentLongPress,
+  onMomentOptionsPress,
   title = 'Shared moments',
   hideHeader = false,
 }: SharedMomentsSectionProps) {
+  const longPressedMomentRef = React.useRef<string | null>(null);
+
   if (moments.length === 0) {
     return null;
   }
@@ -62,7 +68,19 @@ export function SharedMomentsSection({
           return (
             <Pressable
               key={moment.id}
-              onPress={() => onMomentPress?.(moment)}
+              onPress={() => {
+                if (longPressedMomentRef.current === moment.id) {
+                  longPressedMomentRef.current = null;
+                  return;
+                }
+                onMomentPress?.(moment);
+              }}
+              onLongPress={() => {
+                longPressedMomentRef.current = moment.id;
+                onMomentLongPress?.(moment);
+              }}
+              delayLongPress={260}
+              accessibilityHint="Double tap to edit. Long press for more actions."
               className="bg-surface-card dark:bg-card-dark p-4 rounded-3xl flex-row items-center gap-4 border border-stroke-soft dark:border-slate-800 shadow-soft mb-3"
             >
               {/* Thumbnail */}
@@ -98,8 +116,21 @@ export function SharedMomentsSection({
                 </Caption>
               </View>
 
-              {/* Chevron */}
-              <Ionicons name="chevron-forward" size={20} color={Colors.textSoft} />
+              {onMomentOptionsPress ? (
+                <Pressable
+                  onPress={(event) => {
+                    event?.stopPropagation?.();
+                    onMomentOptionsPress(moment);
+                  }}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={`More actions for ${moment.title}`}
+                >
+                  <Ionicons name="ellipsis-horizontal" size={20} color={Colors.textSoft} />
+                </Pressable>
+              ) : (
+                <Ionicons name="chevron-forward" size={20} color={Colors.textSoft} />
+              )}
             </Pressable>
           );
         })}

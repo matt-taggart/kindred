@@ -83,4 +83,46 @@ describe('SharedMomentsSection', () => {
     expect(onMomentPress).toHaveBeenCalledTimes(1);
     expect(onMomentPress).toHaveBeenCalledWith(mockMoments[0]);
   });
+
+  it('calls onMomentLongPress when moment is held', () => {
+    const onMomentLongPress = jest.fn();
+    const { getByText } = render(
+      <SharedMomentsSection moments={mockMoments} onMomentLongPress={onMomentLongPress} />
+    );
+
+    fireEvent(getByText('Coffee at The Nook'), 'longPress');
+
+    expect(onMomentLongPress).toHaveBeenCalledTimes(1);
+    expect(onMomentLongPress).toHaveBeenCalledWith(mockMoments[0]);
+  });
+
+  it('does not call onMomentPress after long press', () => {
+    const onMomentPress = jest.fn();
+    const onMomentLongPress = jest.fn();
+    const { getByText } = render(
+      <SharedMomentsSection
+        moments={mockMoments}
+        onMomentPress={onMomentPress}
+        onMomentLongPress={onMomentLongPress}
+      />
+    );
+
+    fireEvent(getByText('Coffee at The Nook'), 'longPress');
+    fireEvent.press(getByText('Coffee at The Nook'));
+
+    expect(onMomentLongPress).toHaveBeenCalledTimes(1);
+    expect(onMomentPress).not.toHaveBeenCalled();
+  });
+
+  it('calls onMomentOptionsPress when overflow button is pressed', () => {
+    const onMomentOptionsPress = jest.fn();
+    const { getByLabelText } = render(
+      <SharedMomentsSection moments={mockMoments} onMomentOptionsPress={onMomentOptionsPress} />
+    );
+
+    fireEvent.press(getByLabelText('More actions for Coffee at The Nook'));
+
+    expect(onMomentOptionsPress).toHaveBeenCalledTimes(1);
+    expect(onMomentOptionsPress).toHaveBeenCalledWith(mockMoments[0]);
+  });
 });

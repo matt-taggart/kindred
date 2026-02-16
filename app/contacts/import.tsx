@@ -716,7 +716,7 @@ export default function ImportContactsScreen() {
                       Duplicates skipped
                     </Text>
                     <Text className="mt-1 text-sm text-blue-700">
-                      {duplicateSummaryParts.join(", ")}. They won't be imported again.
+                      {duplicateSummaryParts.join(", ")}. They won&apos;t be imported again.
                     </Text>
                   </View>
                 )}
