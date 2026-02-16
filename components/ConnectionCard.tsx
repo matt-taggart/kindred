@@ -10,6 +10,7 @@ type ConnectionCardProps = {
   lastConnectedLabel: string;
   nextReminderLabel: string;
   isReady: boolean;
+  isOverdue?: boolean;
   onPress: () => void;
 };
 
@@ -18,6 +19,7 @@ export function ConnectionCard({
   lastConnectedLabel,
   nextReminderLabel,
   isReady,
+  isOverdue = false,
   onPress,
 }: ConnectionCardProps) {
   const rhythmLabel = formatRhythmLabel(contact.bucket);
@@ -92,15 +94,24 @@ export function ConnectionCard({
             </Text>
             <Text
               className={`text-sm font-body leading-5 ${
-                isReady
-                  ? 'text-primary dark:text-primary'
-                  : 'text-text-muted dark:text-slate-200'
+                isOverdue
+                  ? 'text-secondary dark:text-secondary'
+                  : isReady
+                    ? 'text-primary dark:text-primary'
+                    : 'text-text-muted dark:text-slate-200'
               }`}
             >
               {nextReminderLabel}
             </Text>
           </View>
         </View>
+
+        {/* Overdue indicator */}
+        {isOverdue && (
+          <Text className="text-[11px] text-secondary mt-2 font-body leading-4">
+            Overdue
+          </Text>
+        )}
       </View>
 
       {/* Chevron */}

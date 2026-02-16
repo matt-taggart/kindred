@@ -145,4 +145,45 @@ describe('ConnectionCard', () => {
     expect(getByTestId('connection-card-avatar-fallback')).toBeTruthy();
     expect(queryByTestId('connection-card-avatar-image')).toBeNull();
   });
+
+  it('shows Overdue indicator when isOverdue is true', () => {
+    const { getByText } = render(
+      <ConnectionCard
+        contact={baseContact}
+        lastConnectedLabel="Connected yesterday"
+        nextReminderLabel="2 days ago"
+        isReady={true}
+        isOverdue={true}
+        onPress={mockOnPress}
+      />
+    );
+    expect(getByText('Overdue')).toBeTruthy();
+  });
+
+  it('hides Overdue indicator when isOverdue is false', () => {
+    const { queryByText } = render(
+      <ConnectionCard
+        contact={baseContact}
+        lastConnectedLabel="Connected yesterday"
+        nextReminderLabel="Today"
+        isReady={true}
+        isOverdue={false}
+        onPress={mockOnPress}
+      />
+    );
+    expect(queryByText('Overdue')).toBeNull();
+  });
+
+  it('hides Overdue indicator when isOverdue is not provided', () => {
+    const { queryByText } = render(
+      <ConnectionCard
+        contact={baseContact}
+        lastConnectedLabel="Connected yesterday"
+        nextReminderLabel="Today"
+        isReady={true}
+        onPress={mockOnPress}
+      />
+    );
+    expect(queryByText('Overdue')).toBeNull();
+  });
 });

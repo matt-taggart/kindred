@@ -24,6 +24,7 @@ import { ConnectionCard } from "@/components/ConnectionCard";
 import {
   getContacts,
   isReminderDueTodayOrOverdue,
+  isReminderOverdue,
   unarchiveContact,
 } from "@/services/contactService";
 
@@ -35,6 +36,11 @@ import {
 const isContactDue = (contact: Contact) => {
   if (contact.isArchived) return false;
   return isReminderDueTodayOrOverdue(contact.nextContactDate);
+};
+
+const isContactOverdue = (contact: Contact) => {
+  if (contact.isArchived) return false;
+  return isReminderOverdue(contact.nextContactDate);
 };
 
 type ListItem =
@@ -186,6 +192,7 @@ export default function ConnectionsScreen() {
               lastConnectedLabel={formatLastConnected(item.contact.lastContactedAt)}
               nextReminderLabel={formatNextReminder(item.contact.nextContactDate)}
               isReady={isContactDue(item.contact)}
+              isOverdue={isContactOverdue(item.contact)}
               onPress={() => handleContactPress(item.contact.id)}
             />
           );

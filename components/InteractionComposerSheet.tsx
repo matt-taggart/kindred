@@ -247,7 +247,7 @@ export default function InteractionComposerSheet({
 
                 <View className="mb-4">
                   <Text className="text-xs uppercase tracking-widest text-text-muted/70 dark:text-slate-500 mb-4 text-center">
-                    Anything to remember?
+                    Anything to remember? (optional)
                   </Text>
 
                   <View

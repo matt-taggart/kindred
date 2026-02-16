@@ -76,6 +76,19 @@ export const isReminderDueTodayOrOverdue = (
   return nextContactDate < getStartOfTomorrow(today);
 };
 
+export const isReminderOverdue = (
+  nextContactDate: number | null | undefined,
+  today: Date = new Date(),
+): boolean => {
+  if (typeof nextContactDate !== 'number') return false;
+  const startOfToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  ).getTime();
+  return nextContactDate < startOfToday;
+};
+
 const normalizeCustomInterval = (bucket: Contact['bucket'], customIntervalDays?: number | null) => {
   if (bucket !== 'custom') return null;
   if (customIntervalDays === null || customIntervalDays === undefined) return null;
