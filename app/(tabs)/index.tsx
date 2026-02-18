@@ -111,6 +111,7 @@ export default function HomeScreen() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showComposer, setShowComposer] = useState(false);
+  const [composerKind, setComposerKind] = useState<InteractionKind>("checkin");
 
   const loadContacts = useCallback(() => {
     try {
@@ -185,6 +186,7 @@ export default function HomeScreen() {
   }, []);
 
   const handleLogCheckIn = useCallback(() => {
+    setComposerKind("checkin");
     setShowQuickActions(false);
     setShowComposer(true);
   }, []);
@@ -217,10 +219,11 @@ export default function HomeScreen() {
       note: string;
     }) => {
       if (!selectedContact) return;
+      const activeContact = selectedContact;
 
       try {
         await createInteraction(
-          selectedContact.id,
+          activeContact.id,
           type,
           note || undefined,
           kind,
@@ -229,11 +232,28 @@ export default function HomeScreen() {
           setCompletionCount((count) => count + 1);
         }
         loadContacts();
-      } catch {
-        Alert.alert("Error", "Failed to save this interaction.");
-      } finally {
         setShowComposer(false);
         setSelectedContact(null);
+
+        if (kind === "checkin") {
+          Alert.alert(
+            "Add a memory?",
+            `Would you like to add a memory for ${activeContact.name}?`,
+            [
+              { text: "Not now", style: "cancel" },
+              {
+                text: "Add memory",
+                onPress: () => {
+                  setSelectedContact(activeContact);
+                  setComposerKind("memory");
+                  setShowComposer(true);
+                },
+              },
+            ],
+          );
+        }
+      } catch {
+        Alert.alert("Error", "Failed to save this interaction.");
       }
     },
     [loadContacts, selectedContact],
@@ -323,7 +343,7 @@ export default function HomeScreen() {
           contact={selectedContact}
           onClose={closeComposer}
           onSubmit={handleComposerSubmit}
-          initialKind="checkin"
+          initialKind={composerKind}
         />
       </>
     );
@@ -401,7 +421,7 @@ export default function HomeScreen() {
         contact={selectedContact}
         onClose={closeComposer}
         onSubmit={handleComposerSubmit}
-        initialKind="checkin"
+        initialKind={composerKind}
       />
     </>
   );
