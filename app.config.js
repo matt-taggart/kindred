@@ -33,6 +33,8 @@ export default {
       buildNumber: "1",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
+        NSContactsUsageDescription:
+          "Kindred imports your contacts to help you set reminders for staying in touch with friends and family. Your contacts remain on your device and are never uploaded to our servers.",
       },
     },
     android: {

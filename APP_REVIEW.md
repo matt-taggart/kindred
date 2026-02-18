@@ -1,5 +1,20 @@
 # iOS App Store Review Submission - Kindred
 
+## App Review Response (Feb 2026)
+
+### Answers to Apple's Questions:
+
+1. **Does your app upload users' Contacts to your server?**
+   No. Kindred processes contacts locally on the device. Contacts are only read to display them for selection and are never transmitted to any external server.
+
+2. **Does your app store users' Contacts on your server?**
+   No. All contact data remains on the user's device. Kindred does not have any server-side storage for user contact information.
+
+3. **Will your app share users Contacts information to a third party?**
+   No. Contact information is never shared with any third parties. It is used solely within the app to help users set up relationship reminders.
+
+---
+
 ## a) List of Screenshots (3-10)
 
 Based on the core functionality and user flow, I recommend the following screenshots to highlight the app's value proposition:

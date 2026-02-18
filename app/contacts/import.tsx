@@ -698,6 +698,15 @@ export default function ImportContactsScreen() {
             )}
             ListHeaderComponent={
               <View className="px-6 pt-2 pb-3">
+                <View className="mb-4 rounded-2xl border border-sage-border bg-sage-light/50 p-4 flex-row items-start gap-3">
+                  <Ionicons name="shield-checkmark" size={20} color={Colors.primary} />
+                  <View className="flex-1">
+                    <Text className="text-sm font-medium text-text-strong">Your data stays private</Text>
+                    <Text className="text-xs text-text-muted mt-0.5">
+                      Contacts are imported to set up reminders. Nothing is stored on our servers.
+                    </Text>
+                  </View>
+                </View>
 
                 <TouchableOpacity
                   className="w-full py-4 px-6 bg-surface-card border border-stroke-soft rounded-2xl flex-row items-center justify-center gap-2 mb-4 active:bg-surface-soft"
