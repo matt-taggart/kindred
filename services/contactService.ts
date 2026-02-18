@@ -685,11 +685,19 @@ export const createInteraction = async (
   notes: string | undefined,
   kind: InteractionKind,
 ): Promise<Contact | Interaction> => {
+  const normalizedNotes = notes?.trim();
+
   if (kind === 'checkin') {
-    return updateInteraction(contactId, type, notes);
+    const updatedContact = await updateInteraction(contactId, type, undefined);
+
+    if (normalizedNotes) {
+      await addNoteOnly(contactId, normalizedNotes, type);
+    }
+
+    return updatedContact;
   }
 
-  return addNoteOnly(contactId, notes || '', type);
+  return addNoteOnly(contactId, normalizedNotes || '', type);
 };
 
 export const resetDatabase = async (): Promise<void> => {

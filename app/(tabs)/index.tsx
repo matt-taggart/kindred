@@ -220,12 +220,13 @@ export default function HomeScreen() {
     }) => {
       if (!selectedContact) return;
       const activeContact = selectedContact;
+      const normalizedNote = note.trim();
 
       try {
         await createInteraction(
           activeContact.id,
           type,
-          note || undefined,
+          normalizedNote || undefined,
           kind,
         );
         if (kind === "checkin") {
@@ -235,7 +236,7 @@ export default function HomeScreen() {
         setShowComposer(false);
         setSelectedContact(null);
 
-        if (kind === "checkin") {
+        if (kind === "checkin" && !normalizedNote) {
           Alert.alert(
             "Add a memory?",
             `Would you like to add a memory for ${activeContact.name}?`,

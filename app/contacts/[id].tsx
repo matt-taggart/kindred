@@ -203,13 +203,14 @@ export default function ContactDetailScreen() {
     if (!contact) return;
 
     const isDueTodayOrOverdue = isReminderDueTodayOrOverdue(contact.nextContactDate);
+    const normalizedNote = note.trim();
 
     try {
-      await createInteraction(contact.id, type, note || undefined, kind);
+      await createInteraction(contact.id, type, normalizedNote || undefined, kind);
       loadContactData();
       setShowComposer(false);
 
-      if (kind === 'checkin') {
+      if (kind === 'checkin' && !normalizedNote) {
         Alert.alert(
           'Add a memory?',
           `Would you like to add a memory for ${contact.name}?`,
