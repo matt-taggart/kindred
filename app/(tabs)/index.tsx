@@ -235,24 +235,6 @@ export default function HomeScreen() {
         loadContacts();
         setShowComposer(false);
         setSelectedContact(null);
-
-        if (kind === "checkin" && !normalizedNote) {
-          Alert.alert(
-            "Add a memory?",
-            `Would you like to add a memory for ${activeContact.name}?`,
-            [
-              { text: "Not now", style: "cancel" },
-              {
-                text: "Add memory",
-                onPress: () => {
-                  setSelectedContact(activeContact);
-                  setComposerKind("memory");
-                  setShowComposer(true);
-                },
-              },
-            ],
-          );
-        }
       } catch {
         Alert.alert("Error", "Failed to save this interaction.");
       }

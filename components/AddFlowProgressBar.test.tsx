@@ -23,8 +23,8 @@ describe('AddFlowProgressBar', () => {
 
     // Step 1: first segment filled, rest unfilled
     expect(segments[0].props.className).toContain('bg-primary');
-    expect(segments[1].props.className).toContain('bg-slate-200');
-    expect(segments[2].props.className).toContain('bg-slate-200');
+    expect(segments[1].props.className).toContain('bg-stroke-soft');
+    expect(segments[2].props.className).toContain('bg-stroke-soft');
   });
 
   it('shows filled segments for current and completed steps at step 2', () => {
@@ -34,7 +34,7 @@ describe('AddFlowProgressBar', () => {
     // Step 2: first two segments filled, last unfilled
     expect(segments[0].props.className).toContain('bg-primary');
     expect(segments[1].props.className).toContain('bg-primary');
-    expect(segments[2].props.className).toContain('bg-slate-200');
+    expect(segments[2].props.className).toContain('bg-stroke-soft');
   });
 
   it('shows all segments filled at step 3', () => {
@@ -56,8 +56,8 @@ describe('AddFlowProgressBar', () => {
     // Steps 1-2 filled, steps 3-4 unfilled
     expect(segments[0].props.className).toContain('bg-primary');
     expect(segments[1].props.className).toContain('bg-primary');
-    expect(segments[2].props.className).toContain('bg-slate-200');
-    expect(segments[3].props.className).toContain('bg-slate-200');
+    expect(segments[2].props.className).toContain('bg-stroke-soft');
+    expect(segments[3].props.className).toContain('bg-stroke-soft');
   });
 
   it('has accessible container', () => {

@@ -146,7 +146,7 @@ describe('ConnectionCard', () => {
     expect(queryByTestId('connection-card-avatar-image')).toBeNull();
   });
 
-  it('shows Overdue indicator when isOverdue is true', () => {
+  it('shows Overdue styling when isOverdue is true', () => {
     const { getByText } = render(
       <ConnectionCard
         contact={baseContact}
@@ -157,11 +157,11 @@ describe('ConnectionCard', () => {
         onPress={mockOnPress}
       />
     );
-    expect(getByText('Overdue')).toBeTruthy();
+    expect(getByText('2 days ago').props.className).toContain('text-secondary');
   });
 
-  it('hides Overdue indicator when isOverdue is false', () => {
-    const { queryByText } = render(
+  it('hides Overdue styling when isOverdue is false', () => {
+    const { getByText } = render(
       <ConnectionCard
         contact={baseContact}
         lastConnectedLabel="Connected yesterday"
@@ -171,7 +171,7 @@ describe('ConnectionCard', () => {
         onPress={mockOnPress}
       />
     );
-    expect(queryByText('Overdue')).toBeNull();
+    expect(getByText('Today').props.className).not.toContain('text-secondary');
   });
 
   it('hides Overdue indicator when isOverdue is not provided', () => {

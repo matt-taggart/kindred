@@ -210,22 +210,7 @@ export default function ContactDetailScreen() {
       loadContactData();
       setShowComposer(false);
 
-      if (kind === 'checkin' && !normalizedNote) {
-        Alert.alert(
-          'Add a memory?',
-          `Would you like to add a memory for ${contact.name}?`,
-          [
-            { text: 'Not now', style: 'cancel' },
-            {
-              text: 'Add memory',
-              onPress: () => {
-                setComposerKind('memory');
-                setShowComposer(true);
-              },
-            },
-          ],
-        );
-      } else if (isDueTodayOrOverdue) {
+      if (isDueTodayOrOverdue) {
         Alert.alert(
           'Mark as connected?',
           `${contact.name} is due for a check-in. Would you like to mark them as connected now?`,
