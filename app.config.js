@@ -1,4 +1,6 @@
 const revenueCatApiKey = process.env.REVENUECAT_API_KEY?.trim();
+const contactsPermissionMessage =
+  "Kindred uses your contacts so you can choose people (for example, close friends or family) and set reminders to check in. Kindred only reads selected names, phone numbers, and birthdays on your device and never uploads or shares your contacts.";
 
 if (!revenueCatApiKey && process.env.EAS_BUILD === 'true') {
   throw new Error(
@@ -33,8 +35,7 @@ export default {
       buildNumber: "1",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
-        NSContactsUsageDescription:
-          "Kindred imports your contacts to help you set reminders for staying in touch with friends and family. Your contacts remain on your device and are never uploaded to our servers.",
+        NSContactsUsageDescription: contactsPermissionMessage,
       },
     },
     android: {
@@ -48,7 +49,16 @@ export default {
       output: "static",
       favicon: "./assets/images/favicon.ico",
     },
-    plugins: ["expo-router", "expo-font"],
+    plugins: [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-contacts",
+        {
+          contactsPermission: contactsPermissionMessage,
+        },
+      ],
+    ],
     extra: {
       revenueCatApiKey: revenueCatApiKey ?? '',
       router: {},

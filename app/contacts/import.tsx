@@ -662,7 +662,7 @@ export default function ImportContactsScreen() {
       <View className="px-6 pt-2 pb-0">
         <PageHeader 
           title="Gather your connections" 
-          subtitle="The people you care about will gather here." 
+          subtitle="Import people you choose (like family or close friends) to set reminders to stay in touch." 
           showBranding={false}
           rightElement={
              <TouchableOpacity
@@ -679,7 +679,10 @@ export default function ImportContactsScreen() {
         <View className="flex-1 items-center justify-center px-4">
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text className="mt-3 text-sm font-semibold text-text-muted">
-            Fetching contacts…
+            Requesting access to your on-device contacts…
+          </Text>
+          <Text className="mt-1 text-xs text-text-muted text-center max-w-[280px]">
+            Kindred uses selected contacts to create reminder schedules and does not upload them.
           </Text>
         </View>
       ) : (
@@ -701,9 +704,9 @@ export default function ImportContactsScreen() {
                 <View className="mb-4 rounded-2xl border border-sage-border bg-sage-light/50 p-4 flex-row items-start gap-3">
                   <Ionicons name="shield-checkmark" size={20} color={Colors.primary} />
                   <View className="flex-1">
-                    <Text className="text-sm font-medium text-text-strong">Your data stays private</Text>
+                    <Text className="text-sm font-medium text-text-strong">How your contact data is used</Text>
                     <Text className="text-xs text-text-muted mt-0.5">
-                      Contacts are imported to set up reminders. Nothing is stored on our servers.
+                      Kindred reads names, phone numbers, and birthdays from contacts you select so you can set reminder cadences. Contact data stays on your device and is never uploaded or shared.
                     </Text>
                   </View>
                 </View>
