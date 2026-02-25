@@ -61,6 +61,7 @@ export default function InteractionComposerSheet({
   const [note, setNote] = useState('');
   const [type, setType] = useState<InteractionType>('call');
   const [kind, setKind] = useState<InteractionKind>(initialKind);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [sheetHeight, setSheetHeight] = useState(0);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const keyboardLiftAnim = useRef(new Animated.Value(0)).current;
@@ -77,6 +78,7 @@ export default function InteractionComposerSheet({
     } else {
       slideAnim.setValue(SCREEN_HEIGHT);
       keyboardLiftAnim.setValue(0);
+      setIsSubmitting(false);
     }
   }, [initialKind, visible, slideAnim, keyboardLiftAnim]);
 
@@ -137,10 +139,17 @@ export default function InteractionComposerSheet({
     onClose();
   }, [onClose, reset]);
 
-  const handleSubmit = useCallback(() => {
-    onSubmit({ kind, type, note: note.trim() });
-    reset();
-  }, [kind, type, note, onSubmit, reset]);
+  const handleSubmit = useCallback(async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit({ kind, type, note: note.trim() });
+      reset();
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [isSubmitting, kind, type, note, onSubmit, reset]);
 
   const title = useMemo(() => (
     kind === 'checkin'
@@ -181,10 +190,13 @@ export default function InteractionComposerSheet({
 
                 <TouchableOpacity
                   onPress={handleSubmit}
+                  disabled={isSubmitting}
                   activeOpacity={0.85}
                   className="px-4 py-1.5 rounded-full bg-sage-light border border-primary/20 dark:bg-accent-dark-sage"
                 >
-                  <Text className="font-medium text-primary">Save</Text>
+                  <Text className="font-medium text-primary">
+                    {isSubmitting ? 'Saving...' : 'Save'}
+                  </Text>
                 </TouchableOpacity>
               </View>
 

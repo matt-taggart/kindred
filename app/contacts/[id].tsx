@@ -211,26 +211,29 @@ export default function ContactDetailScreen() {
       setShowComposer(false);
 
       if (kind === 'memory' && isDueTodayOrOverdue) {
-        Alert.alert(
-          'Mark as connected?',
-          `${contact.name} is due for a check-in. Would you like to mark them as connected now?`,
-          [
-            { text: 'Not now', style: 'cancel' },
-            {
-              text: 'Mark as connected',
-              onPress: () => {
-                void (async () => {
-                  try {
-                    await createInteraction(contact.id, type, undefined, 'checkin');
-                    loadContactData();
-                  } catch {
-                    Alert.alert('Error', 'Failed to mark as connected. Please try again.');
-                  }
-                })();
+        setTimeout(() => {
+          Alert.alert(
+            'Mark as connected?',
+            `${contact.name} is due for a check-in. Would you like to mark them as connected now?`,
+            [
+              { text: 'Not now', style: 'cancel' },
+              {
+                text: 'Mark as connected',
+                onPress: () => {
+                  setShowComposer(false);
+                  void (async () => {
+                    try {
+                      await createInteraction(contact.id, type, undefined, 'checkin');
+                      loadContactData();
+                    } catch {
+                      Alert.alert('Error', 'Failed to mark as connected. Please try again.');
+                    }
+                  })();
+                },
               },
-            },
-          ],
-        );
+            ],
+          );
+        }, 0);
       }
     } catch {
       Alert.alert('Error', 'Failed to save. Please try again.');
