@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, Alert, Linking, RefreshControl, SafeAreaView, ScrollView, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -57,6 +57,7 @@ export default function ContactDetailScreen() {
   const [showComposer, setShowComposer] = useState(false);
   const [composerKind, setComposerKind] = useState<InteractionKind>('checkin');
   const [deletingInteractionId, setDeletingInteractionId] = useState<string | null>(null);
+  const composerReopenBlockedUntilRef = useRef(0);
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -190,11 +191,13 @@ export default function ContactDetailScreen() {
   );
 
   const handleAddMemory = useCallback(() => {
+    if (Date.now() < composerReopenBlockedUntilRef.current) return;
     setComposerKind('memory');
     setShowComposer(true);
   }, []);
 
   const handleLogCheckIn = useCallback(() => {
+    if (Date.now() < composerReopenBlockedUntilRef.current) return;
     setComposerKind('checkin');
     setShowComposer(true);
   }, []);
@@ -211,15 +214,23 @@ export default function ContactDetailScreen() {
       setShowComposer(false);
 
       if (kind === 'memory' && isDueTodayOrOverdue) {
+        composerReopenBlockedUntilRef.current = Date.now() + 800;
         setTimeout(() => {
           Alert.alert(
             'Mark as connected?',
             `${contact.name} is due for a check-in. Would you like to mark them as connected now?`,
             [
-              { text: 'Not now', style: 'cancel' },
+              {
+                text: 'Not now',
+                style: 'cancel',
+                onPress: () => {
+                  composerReopenBlockedUntilRef.current = Date.now() + 400;
+                },
+              },
               {
                 text: 'Mark as connected',
                 onPress: () => {
+                  composerReopenBlockedUntilRef.current = Date.now() + 800;
                   setShowComposer(false);
                   void (async () => {
                     try {
@@ -232,6 +243,7 @@ export default function ContactDetailScreen() {
                 },
               },
             ],
+            { cancelable: false },
           );
         }, 0);
       }
