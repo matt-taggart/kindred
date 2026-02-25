@@ -21,8 +21,9 @@ import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import * as Updates from 'expo-updates';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, View } from 'react-native';
 import '../global.css';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -64,6 +65,7 @@ export default function RootLayout() {
     PlayfairDisplay_500Medium_Italic,
   });
   const [dbReady, setDbReady] = useState(false);
+  const didCheckForUpdatesRef = useRef(false);
 
   useEffect(() => {
     if (error) throw error;
@@ -103,6 +105,58 @@ export default function RootLayout() {
       cancelled = true;
     };
   }, [loaded]);
+
+  useEffect(() => {
+    if (!loaded || !dbReady || didCheckForUpdatesRef.current || __DEV__) return;
+    didCheckForUpdatesRef.current = true;
+
+    let cancelled = false;
+    let checkTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const applyFetchedUpdate = async () => {
+      try {
+        await Updates.fetchUpdateAsync();
+        if (!cancelled) {
+          await Updates.reloadAsync();
+        }
+      } catch (error) {
+        console.warn('Failed to fetch/reload update:', error);
+      }
+    };
+
+    const checkForUpdates = async () => {
+      try {
+        const update = await Updates.checkForUpdateAsync();
+        if (!update.isAvailable || cancelled) return;
+
+        Alert.alert(
+          'Update available',
+          'A new version is ready. Update now?',
+          [
+            { text: 'Later', style: 'cancel' },
+            {
+              text: 'Update',
+              onPress: () => {
+                void applyFetchedUpdate();
+              },
+            },
+          ],
+        );
+      } catch (error) {
+        console.warn('Update check failed:', error);
+      }
+    };
+
+    // Wait until after splash/initial mount settles so the alert is visible.
+    checkTimer = setTimeout(() => {
+      void checkForUpdates();
+    }, 600);
+
+    return () => {
+      cancelled = true;
+      if (checkTimer) clearTimeout(checkTimer);
+    };
+  }, [loaded, dbReady]);
 
   if (!loaded || !dbReady) {
     return <View style={{ flex: 1, backgroundColor: '#F9FBFA' }} />;
