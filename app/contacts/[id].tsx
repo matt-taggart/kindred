@@ -57,7 +57,7 @@ export default function ContactDetailScreen() {
   const [showComposer, setShowComposer] = useState(false);
   const [composerKind, setComposerKind] = useState<InteractionKind>('checkin');
   const [deletingInteractionId, setDeletingInteractionId] = useState<string | null>(null);
-  const composerReopenBlockedUntilRef = useRef(0);
+  const isMarkConnectedPromptOpenRef = useRef(false);
 
   const loadContactData = useCallback(() => {
     if (!id) return;
@@ -191,13 +191,13 @@ export default function ContactDetailScreen() {
   );
 
   const handleAddMemory = useCallback(() => {
-    if (Date.now() < composerReopenBlockedUntilRef.current) return;
+    if (isMarkConnectedPromptOpenRef.current) return;
     setComposerKind('memory');
     setShowComposer(true);
   }, []);
 
   const handleLogCheckIn = useCallback(() => {
-    if (Date.now() < composerReopenBlockedUntilRef.current) return;
+    if (isMarkConnectedPromptOpenRef.current) return;
     setComposerKind('checkin');
     setShowComposer(true);
   }, []);
@@ -214,8 +214,8 @@ export default function ContactDetailScreen() {
       setShowComposer(false);
 
       if (kind === 'memory' && isDueTodayOrOverdue) {
-        composerReopenBlockedUntilRef.current = Date.now() + 800;
         setTimeout(() => {
+          isMarkConnectedPromptOpenRef.current = true;
           Alert.alert(
             'Mark as connected?',
             `${contact.name} is due for a check-in. Would you like to mark them as connected now?`,
@@ -224,13 +224,12 @@ export default function ContactDetailScreen() {
                 text: 'Not now',
                 style: 'cancel',
                 onPress: () => {
-                  composerReopenBlockedUntilRef.current = Date.now() + 400;
+                  isMarkConnectedPromptOpenRef.current = false;
                 },
               },
               {
                 text: 'Mark as connected',
                 onPress: () => {
-                  composerReopenBlockedUntilRef.current = Date.now() + 800;
                   setShowComposer(false);
                   void (async () => {
                     try {
@@ -238,6 +237,8 @@ export default function ContactDetailScreen() {
                       loadContactData();
                     } catch {
                       Alert.alert('Error', 'Failed to mark as connected. Please try again.');
+                    } finally {
+                      isMarkConnectedPromptOpenRef.current = false;
                     }
                   })();
                 },
