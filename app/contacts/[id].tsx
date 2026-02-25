@@ -210,7 +210,7 @@ export default function ContactDetailScreen() {
       loadContactData();
       setShowComposer(false);
 
-      if (isDueTodayOrOverdue) {
+      if (kind === 'memory' && isDueTodayOrOverdue) {
         Alert.alert(
           'Mark as connected?',
           `${contact.name} is due for a check-in. Would you like to mark them as connected now?`,
@@ -219,8 +219,14 @@ export default function ContactDetailScreen() {
             {
               text: 'Mark as connected',
               onPress: () => {
-                setComposerKind('checkin');
-                setShowComposer(true);
+                void (async () => {
+                  try {
+                    await createInteraction(contact.id, type, undefined, 'checkin');
+                    loadContactData();
+                  } catch {
+                    Alert.alert('Error', 'Failed to mark as connected. Please try again.');
+                  }
+                })();
               },
             },
           ],
