@@ -20,6 +20,7 @@ import { Body, Caption } from "@/components/ui";
 import Colors from "@/constants/Colors";
 import { useUserStore } from "@/lib/userStore";
 import { resetDatabase } from "@/services/contactService";
+import { IAPService } from "@/services/iapService";
 import { cancelAllReminders } from "@/services/notificationService";
 
 type SettingsRowProps = {
@@ -209,8 +210,19 @@ export default function SettingsScreen() {
 
   const handleCopySupportId = async () => {
     try {
-      const customerInfo = await Purchases.getCustomerInfo();
-      const appUserId = customerInfo.originalAppUserId;
+      let appUserId = "";
+
+      try {
+        appUserId = (await Purchases.getAppUserID())?.trim() ?? "";
+      } catch {
+        await IAPService.initialize();
+        appUserId = (await Purchases.getAppUserID())?.trim() ?? "";
+      }
+
+      if (!appUserId) {
+        const customerInfo = await Purchases.getCustomerInfo();
+        appUserId = customerInfo.originalAppUserId?.trim() ?? "";
+      }
 
       if (appUserId) {
         try {
