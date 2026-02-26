@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import Purchases from "react-native-purchases";
 import {
   Alert,
   Modal,
@@ -12,7 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import * as Clipboard from "expo-clipboard";
 
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import { PageHeader } from "@/components/PageHeader";
@@ -200,6 +200,7 @@ export default function SettingsScreen() {
       setDeleteConfirmText("");
       Alert.alert("Done", "All your data has been deleted.");
     } catch (error) {
+      console.error("Failed to delete all data:", error);
       Alert.alert("Error", "Failed to delete data. Please try again.");
     } finally {
       setIsDeleting(false);
@@ -208,14 +209,18 @@ export default function SettingsScreen() {
 
   const handleCopySupportId = async () => {
     try {
-      const PurchasesUI = require("react-native-purchases");
-      const Purchases = PurchasesUI.default || PurchasesUI;
       const customerInfo = await Purchases.getCustomerInfo();
       const appUserId = customerInfo.originalAppUserId;
-      
+
       if (appUserId) {
-        await Clipboard.setStringAsync(appUserId);
-        Alert.alert("Success", "Support ID copied to clipboard.");
+        try {
+          const Clipboard = await import("expo-clipboard");
+          await Clipboard.setStringAsync(appUserId);
+          Alert.alert("Success", "Support ID copied to clipboard.");
+        } catch (clipboardError) {
+          console.warn("Clipboard unavailable, showing support ID instead:", clipboardError);
+          Alert.alert("Support ID", appUserId);
+        }
       } else {
         Alert.alert("Error", "Could not find Support ID.");
       }
