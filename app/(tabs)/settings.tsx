@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import * as Clipboard from "expo-clipboard";
 
 import { EnhancedPaywallModal } from "@/components/EnhancedPaywallModal";
 import { PageHeader } from "@/components/PageHeader";
@@ -205,6 +206,25 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleCopySupportId = async () => {
+    try {
+      const PurchasesUI = require("react-native-purchases");
+      const Purchases = PurchasesUI.default || PurchasesUI;
+      const customerInfo = await Purchases.getCustomerInfo();
+      const appUserId = customerInfo.originalAppUserId;
+      
+      if (appUserId) {
+        await Clipboard.setStringAsync(appUserId);
+        Alert.alert("Success", "Support ID copied to clipboard.");
+      } else {
+        Alert.alert("Error", "Could not find Support ID.");
+      }
+    } catch (error) {
+      console.error("Failed to copy Support ID:", error);
+      Alert.alert("Error", "Failed to retrieve Support ID.");
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-surface-page dark:bg-background-dark">
       <ScrollView
@@ -234,6 +254,13 @@ export default function SettingsScreen() {
 
           {/* Support */}
           <SettingsSection title="Support">
+            <SettingsRow
+              icon="copy-outline"
+              label="Copy Support ID"
+              onPress={handleCopySupportId}
+              showChevron={false}
+            />
+            <SettingsDivider />
             {!isPro && (
               <>
                 <SettingsRow
