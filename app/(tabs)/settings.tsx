@@ -85,6 +85,16 @@ type SettingsSectionProps = {
   children: React.ReactNode;
 };
 
+const toErrorMessage = (error: unknown): string => {
+  if (!error) return "";
+  if (typeof error === "string") return error;
+  if (typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    return typeof message === "string" ? message : "";
+  }
+  return "";
+};
+
 function SettingsSection({
   title,
   description,
@@ -209,32 +219,54 @@ export default function SettingsScreen() {
   };
 
   const handleCopySupportId = async () => {
-    try {
-      let appUserId = "";
+    let appUserId = "";
+    let initializeErrorMessage = "";
 
-      try {
-        appUserId = (await Purchases.getAppUserID())?.trim() ?? "";
-      } catch {
-        await IAPService.initialize();
-        appUserId = (await Purchases.getAppUserID())?.trim() ?? "";
+    try {
+      let isConfigured = await Purchases.isConfigured();
+
+      if (!isConfigured) {
+        try {
+          await IAPService.initialize();
+          isConfigured = await Purchases.isConfigured();
+        } catch (initializeError) {
+          initializeErrorMessage = toErrorMessage(initializeError);
+          console.warn("RevenueCat unavailable while fetching Support ID:", initializeError);
+        }
+      }
+
+      if (isConfigured) {
+        try {
+          appUserId = (await Purchases.getAppUserID())?.trim() ?? "";
+        } catch (appUserIdError) {
+          console.warn("Failed to fetch Support ID via getAppUserID:", appUserIdError);
+        }
+
+        if (!appUserId) {
+          try {
+            const customerInfo = await Purchases.getCustomerInfo();
+            appUserId = customerInfo.originalAppUserId?.trim() ?? "";
+          } catch (customerInfoError) {
+            console.warn("Failed to fetch Support ID via getCustomerInfo:", customerInfoError);
+          }
+        }
       }
 
       if (!appUserId) {
-        const customerInfo = await Purchases.getCustomerInfo();
-        appUserId = customerInfo.originalAppUserId?.trim() ?? "";
+        const details = initializeErrorMessage.includes("Invalid API key")
+          ? "Support ID is unavailable in this build. Use a development/TestFlight build where RevenueCat is configured."
+          : "Could not find Support ID yet. Try restoring purchases, then try again.";
+        Alert.alert("Support ID unavailable", details);
+        return;
       }
 
-      if (appUserId) {
-        try {
-          const Clipboard = await import("expo-clipboard");
-          await Clipboard.setStringAsync(appUserId);
-          Alert.alert("Success", "Support ID copied to clipboard.");
-        } catch (clipboardError) {
-          console.warn("Clipboard unavailable, showing support ID instead:", clipboardError);
-          Alert.alert("Support ID", appUserId);
-        }
-      } else {
-        Alert.alert("Error", "Could not find Support ID.");
+      try {
+        const Clipboard = await import("expo-clipboard");
+        await Clipboard.setStringAsync(appUserId);
+        Alert.alert("Success", "Support ID copied to clipboard.");
+      } catch (clipboardError) {
+        console.warn("Clipboard unavailable, showing support ID instead:", clipboardError);
+        Alert.alert("Support ID", appUserId);
       }
     } catch (error) {
       console.error("Failed to copy Support ID:", error);
