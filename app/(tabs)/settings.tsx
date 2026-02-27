@@ -237,17 +237,17 @@ export default function SettingsScreen() {
 
       if (isConfigured) {
         try {
-          appUserId = (await Purchases.getAppUserID())?.trim() ?? "";
-        } catch (appUserIdError) {
-          console.warn("Failed to fetch Support ID via getAppUserID:", appUserIdError);
+          const customerInfo = await Purchases.getCustomerInfo();
+          appUserId = customerInfo.originalAppUserId?.trim() ?? "";
+        } catch (customerInfoError) {
+          console.warn("Failed to fetch Support ID via getCustomerInfo:", customerInfoError);
         }
-
+        
         if (!appUserId) {
           try {
-            const customerInfo = await Purchases.getCustomerInfo();
-            appUserId = customerInfo.originalAppUserId?.trim() ?? "";
-          } catch (customerInfoError) {
-            console.warn("Failed to fetch Support ID via getCustomerInfo:", customerInfoError);
+            appUserId = (await Purchases.getAppUserID())?.trim() ?? "";
+          } catch (appUserIdError) {
+            console.warn("Failed to fetch Support ID via getAppUserID:", appUserIdError);
           }
         }
       }
